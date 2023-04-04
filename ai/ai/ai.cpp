@@ -1,20 +1,58 @@
-// ai.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <chrono>
+#include <cmath>
+#include <Eigen/Dense>
+#include <vector>
+#include <thread>
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	const int numIterations = 100;
+	const int vectorSize = 1'000'000;
+
+	Eigen::VectorXd data = Eigen::VectorXd::Random(vectorSize);
+	Eigen::MatrixXd dataMatrix;
+	dataMatrix.resize(vectorSize, 1);
+	dataMatrix.row(0) = data;
+	std::vector<double> data_std(vectorSize);
+	for (int i = 0; i < vectorSize; ++i)
+	{
+		data_std[i] = data[i];
+	}
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+	for (int i = 0; i < numIterations; ++i)
+	{
+		for (int j = 0; j < vectorSize; ++j)
+		{
+			data_std[j] = std::sqrt(data_std[j]);
+		}
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+
+	Eigen::setNbThreads(std::thread::hardware_concurrency());
+
+
+	auto startEigen = std::chrono::high_resolution_clock::now();
+
+	for (int i = 0; i < numIterations; ++i)
+	{
+		Eigen::MatrixXd result = dataMatrix.array().sqrt();
+	}
+
+	auto endEigen = std::chrono::high_resolution_clock::now();
+
+
+	auto durationEigen = std::chrono::duration_cast<std::chrono::microseconds>(endEigen - startEigen);
+
+	std::cout << "Elapsed time std: " << duration.count() << " microseconds\n";
+	std::cout << "Elapsed time eigen: " << durationEigen.count() << " microseconds\n";
+
+
+    std::cin.get();
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
