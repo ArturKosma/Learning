@@ -5,7 +5,6 @@
 
 int main()
 {
-
 	// Typedef some names for easier usage.
 	using sampleType = dlib::matrix<double, 1, 1>;
 	using kernelType = dlib::linear_kernel<sampleType>;
