@@ -1,3 +1,3 @@
-Hello world!
+###Hello world!
 
-This is my readme, I'm not sure what I'm doing yet, but I will figure it out!
+This is my simple readme. I will figure it all out!
