@@ -399,3 +399,6 @@ FodyWeavers.xsd
 
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints/
+
+# Jupterlab Checkpoints
+.virtual_documents/
