@@ -104,6 +104,8 @@ class leqanimlib:
         self.delta_time = curr_time - self.prev_time
         if self.delta_time == 0:
             self.delta_time = self.frame_interval / 1000
+        if t == 0:
+            self.delta_time = 0
         elapsed_time = curr_time - self.start_time
         
         fps = 1 / self.delta_time if self.delta_time > 0 else float('inf')
@@ -128,8 +130,8 @@ class leqanimlib:
                 text.set_position((x[i], y[i]))
                 text.set_text(f'[{x[i]:.2f}, {y[i]:.2f}], {leqanimlib.dot.get_angle(u[i], v[i]):.0f}')
 
-        # User tick.
-        update_func(t)
+            # User tick.
+            update_func(t)
 
         self.prev_time = curr_time
 
