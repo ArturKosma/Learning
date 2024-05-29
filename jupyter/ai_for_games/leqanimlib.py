@@ -35,8 +35,9 @@ class leqanimlib:
             self.color = 'black'
             self.display_name = display_name
             self.transform_text = True
-            self.transform_text_pos = True
-            self.transform_text_angle = True
+            self.transform_text_pos = False
+            self.transform_text_angle = False
+            self.transform_text_velocity = False
 
         def update(self, delta_time):
             self.set_pos(self.pos + (self.vel * delta_time))
@@ -52,25 +53,42 @@ class leqanimlib:
 
         def display(self, ax, x, y, u, v):
 
-            text_pos = f'[{x:.2f}, {y:.2f}]'
-            text_angle = f'{leqmath.leqmath.dir_to_angle(u, v):.0f}'
+            text_pos = f'position: [{x:.2f}, {y:.2f}]'
+            text_angle = f'angle: {leqmath.leqmath.dir_to_angle(u, v):.0f}'
             text_display_name = f'{self.display_name}'
+            text_velocity = f'velocity: [{self.vel[0]:.2f}, {self.vel[1]:.2f}]'
 
-            if self.transform_text_pos == False:
-                text_pos = ''
-
-            if self.transform_text_angle == False:
-                text_angle = ''
-
+            # Create text if non-existent.
             if self.text is None:
-                self.text = ax.text(x, y, f'{text_pos}, {text_angle}', color=self.color)
+                self.text = ax.text(x, y, f'', color=self.color)
             else:
-                self.text.set_position((x, y))
-                self.text.set_text(f'{text_pos}, {text_angle}')
+                self.text.set_text(f'')
+            
+            # Position of the text.
+            self.text.set_position((x, y))
 
+            # Add all other texts if enabled.
+
+            if self.transform_text_pos == True:
+                current_text = self.text.get_text()
+                new_text = f'{text_pos}\n{current_text}'
+                self.text.set_text(new_text)
+
+            if self.transform_text_angle == True:
+                current_text = self.text.get_text()
+                new_text = f'{text_angle}\n{current_text}'
+                self.text.set_text(new_text)
+
+            if self.transform_text_velocity == True:
+                current_text = self.text.get_text()
+                new_text = f'{text_velocity}\n{current_text}'
+                self.text.set_text(new_text)
+
+            # If transform texts disabled, hide them.
             if self.transform_text == False:
                 self.text.set_text(f'')
 
+            # Add display name if it exists.
             if self.display_name:
                 current_text = self.text.get_text()
                 new_text = f'{text_display_name}\n{current_text}'
@@ -186,6 +204,9 @@ class leqanimlib:
         else:
             return np.array([]), np.array([]), np.array([]), np.array([])
 
+    def reset_time(self):
+        self.start_time = time.time()
+
     def internal_tick(self, t, update_func):
         
         # Debug.
@@ -206,13 +227,13 @@ class leqanimlib:
 
         # Update.
         if len(self.objects) > 0:
+
+            # User tick.
+            update_func(t)
             
             # Update each object.
             for object in self.objects:
                 object.update(self.delta_time)
-
-            # User tick.
-            update_func(t)
             
             # Display each object.
             x, y, u, v = self.get_objects_transforms()
