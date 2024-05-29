@@ -68,13 +68,13 @@ class leqanimlib:
                 self.text.set_position((x, y))
                 self.text.set_text(f'{text_pos}, {text_angle}')
 
+            if self.transform_text == False:
+                self.text.set_text(f'')
+
             if self.display_name:
                 current_text = self.text.get_text()
                 new_text = f'{text_display_name}\n{current_text}'
                 self.text.set_text(new_text)
-
-            if self.transform_text == False:
-                self.text.set_text(f'')
 
         def set_angle(self, angle):
             self.angle = angle
