@@ -38,8 +38,14 @@ class leqanimlib:
             self.transform_text_pos = False
             self.transform_text_angle = False
             self.transform_text_velocity = False
+            self.max_speed = float('inf')
+            self.ghost_enabled = False
 
         def update(self, delta_time):
+            current_speed = np.linalg.norm(self.vel)
+            if current_speed > self.max_speed:
+                self.vel /= current_speed
+                self.vel *= self.max_speed
             self.set_pos(self.pos + (self.vel * delta_time))
 
             if self.rotate_mode == leqanimlib.BaseObject.MovementMode.ROT_FOLLOW_VELOCITY:
@@ -93,6 +99,10 @@ class leqanimlib:
                 current_text = self.text.get_text()
                 new_text = f'{text_display_name}\n{current_text}'
                 self.text.set_text(new_text)
+
+            # Ghost trail.
+            if self.ghost_enabled == True:
+                ax.scatter(x, y, color=self.color, alpha=0.2)
 
         def set_angle(self, angle):
             self.angle = angle
@@ -156,15 +166,13 @@ class leqanimlib:
         
         # Anim params.
         self.total_frames = frame_num
-        self.frame_interval = frame_interval
 
         # Objects.
         self.objects = []
 
         # Time params.
-        self.start_time = time.time()
-        self.prev_time = time.time()
-        self.delta_time = 0
+        self.delta_time = frame_interval / 1000
+        self.time_elapsed = 0
 
         # Matplotlib setup.
         self.fig, self.ax = plt.subplots()
@@ -205,23 +213,15 @@ class leqanimlib:
             return np.array([]), np.array([]), np.array([]), np.array([])
 
     def reset_time(self):
-        self.start_time = time.time()
+        self.time_elapsed = 0
 
     def internal_tick(self, t, update_func):
         
-        # Debug.
-        curr_time = time.time()
-        self.delta_time = curr_time - self.prev_time
-        if self.delta_time == 0:
-            self.delta_time = self.frame_interval / 1000
-        if t == 0:
-            self.delta_time = 0
-        elapsed_time = curr_time - self.start_time
-        fps = 1 / self.delta_time if self.delta_time > 0 else float('inf')
+        # Count time.
+        self.time_elapsed += self.delta_time
 
         # Update text annotations.
-        self.texts["fps"].set_text(f"FPS: {fps:.0f}")
-        self.texts["elapsed_time"].set_text(f"Time Elapsed: {elapsed_time:.2f}s")
+        self.texts["elapsed_time"].set_text(f"Time Elapsed: {self.time_elapsed:.2f}s")
         self.texts["delta_time"].set_text(f"Delta Time: {self.delta_time:.3f}s")
         self.texts["frame"].set_text(f"Frame: {t}")
 
@@ -240,8 +240,6 @@ class leqanimlib:
             for i, obj in enumerate(self.objects):
                 obj.display(self.ax, x[i], y[i], u[i], v[i])
 
-        self.prev_time = curr_time
-
         return
 
     def draw(self, update_func):
@@ -251,7 +249,7 @@ class leqanimlib:
 
         # Update function.
         anim = matplotlib.animation.FuncAnimation(self.fig, lambda frame: self.internal_tick(frame, update_func), 
-                                                  frames=range(self.total_frames), interval=self.frame_interval)
+                                                  frames=range(self.total_frames), interval=self.delta_time * 1000)
         plt.close()
         plt.show()
 
