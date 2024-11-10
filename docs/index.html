@@ -2,9 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hello World</title>
+    <title>WebGL Example</title>
 </head>
 <body>
-    <h1>Hello World</h1>
+    <!-- Canvas for WebGL Rendering -->
+    <canvas id="webglCanvas" width="800" height="600"></canvas>
+
+    <script>
+        // Get the canvas and initialize WebGL context
+        const canvas = document.getElementById("webglCanvas");
+        const gl = canvas.getContext("webgl");
+
+        // Check if WebGL is available
+        if (!gl) {
+            console.log("WebGL not supported, falling back on experimental-webgl");
+            gl = canvas.getContext("experimental-webgl");
+        }
+        if (!gl) {
+            alert("Your browser does not support WebGL");
+        } else {
+            console.log("WebGL is initialized!");
+
+            // Set a clear color for the canvas (black)
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+    </script>
 </body>
 </html>
