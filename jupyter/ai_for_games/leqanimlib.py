@@ -8,6 +8,7 @@ import leqmath
 from enum import Enum
 import gc
 
+
 plt.rcParams["animation.html"] = "jshtml"
 plt.rcParams['figure.dpi'] = 150  
 plt
