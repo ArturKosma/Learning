@@ -1,0 +1,6 @@
+# ninja log v6
+16	135	7588427729444857	CMakeFiles/animFlex.dir/C_/_programming/Learning/animFlex/source/animFlex.cpp.o	3adc986420dd1c3a
+13	184	7588363001532794	CMakeFiles/animFlex.dir/C_/_programming/Learning/animFlex/source/third_party/glad.c.o	6037e13db76a25c5
+11	556	7588430652844632	CMakeFiles/animFlex.dir/C_/_programming/Learning/animFlex/source/AFWindow.cpp.o	bb92f7d27417897e
+556	1014	7588430658297716	animFlex.html	c2c60e4c1de68267
+1	554	7588363001407732	CMakeFiles/animFlex.dir/C_/_programming/Learning/animFlex/source/AFInput.cpp.o	70311de56549feed
