@@ -1,0 +1,15 @@
+# Ignore everything by default
+*
+
+# Allow .gitignore files (to ensure they are tracked)
+!.gitignore
+
+# Allow traversal into subdirectories
+!*/
+
+# Allow .cpp and .h files
+!*.cpp
+!*.h
+
+# Allow specific files
+!CMakeLists.txt

@@ -1,3 +1,0 @@
-C:/_programming/Learning/animFlex/cmake/build/CMakeFiles/animFlex.dir
-C:/_programming/Learning/animFlex/cmake/build/CMakeFiles/edit_cache.dir
-C:/_programming/Learning/animFlex/cmake/build/CMakeFiles/rebuild_cache.dir
