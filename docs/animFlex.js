@@ -859,6 +859,12 @@ async function createWasm() {
 }
 
 // === Body ===
+
+var ASM_CONSTS = {
+  96024: () => { return document.documentElement.clientWidth || window.innerWidth; },  
+ 96094: () => { return document.documentElement.clientHeight || window.innerHeight; }
+};
+
 // end include: preamble.js
 
 
@@ -942,6 +948,48 @@ async function createWasm() {
 
   var __abort_js = () =>
       abort('native code called abort()');
+
+  var readEmAsmArgsArray = [];
+  var readEmAsmArgs = (sigPtr, buf) => {
+      // Nobody should have mutated _readEmAsmArgsArray underneath us to be something else than an array.
+      assert(Array.isArray(readEmAsmArgsArray));
+      // The input buffer is allocated on the stack, so it must be stack-aligned.
+      assert(buf % 16 == 0);
+      readEmAsmArgsArray.length = 0;
+      var ch;
+      // Most arguments are i32s, so shift the buffer pointer so it is a plain
+      // index into HEAP32.
+      while (ch = HEAPU8[sigPtr++]) {
+        var chr = String.fromCharCode(ch);
+        var validChars = ['d', 'f', 'i', 'p'];
+        // In WASM_BIGINT mode we support passing i64 values as bigint.
+        validChars.push('j');
+        assert(validChars.includes(chr), `Invalid character ${ch}("${chr}") in readEmAsmArgs! Use only [${validChars}], and do not specify "v" for void return argument.`);
+        // Floats are always passed as doubles, so all types except for 'i'
+        // are 8 bytes and require alignment.
+        var wide = (ch != 105);
+        wide &= (ch != 112);
+        buf += wide && (buf % 8) ? 4 : 0;
+        readEmAsmArgsArray.push(
+          // Special case for pointers under wasm64 or CAN_ADDRESS_2GB mode.
+          ch == 112 ? HEAPU32[((buf)>>2)] :
+          ch == 106 ? HEAP64[((buf)>>3)] :
+          ch == 105 ?
+            HEAP32[((buf)>>2)] :
+            HEAPF64[((buf)>>3)]
+        );
+        buf += wide ? 8 : 4;
+      }
+      return readEmAsmArgsArray;
+    };
+  var runEmAsmFunction = (code, sigPtr, argbuf) => {
+      var args = readEmAsmArgs(sigPtr, argbuf);
+      assert(ASM_CONSTS.hasOwnProperty(code), `No EM_ASM constant found at address ${code}.  The loaded WebAssembly file is likely out of sync with the generated JavaScript.`);
+      return ASM_CONSTS[code](...args);
+    };
+  var _emscripten_asm_const_int = (code, sigPtr, argbuf) => {
+      return runEmAsmFunction(code, sigPtr, argbuf);
+    };
 
   var GLctx;
   
@@ -9429,26 +9477,13 @@ async function createWasm() {
   };
   var _glfwCreateWindow = (width, height, title, monitor, share) => GLFW.createWindow(width, height, title, monitor, share);
 
-  var _glfwGetFramebufferSize = (winid, width, height) => {
-      var ww = 0;
-      var wh = 0;
-  
-      var win = GLFW.WindowFromId(winid);
-      if (win) {
-        ww = win.framebufferWidth;
-        wh = win.framebufferHeight;
-      }
-  
-      if (width) {
-        HEAP32[((width)>>2)] = ww;
-      }
-  
-      if (height) {
-        HEAP32[((height)>>2)] = wh;
-      }
-    };
-
   var _glfwGetTime = () => GLFW.getTime() - GLFW.initialTime;
+
+  var _glfwGetWindowUserPointer = (winid) => {
+      var win = GLFW.WindowFromId(winid);
+      if (!win) return 0;
+      return win.userptr;
+    };
 
   
   
@@ -9507,9 +9542,25 @@ async function createWasm() {
 
   var _glfwPollEvents = () => {};
 
+  var _glfwSetFramebufferSizeCallback = (winid, cbfun) => {
+      var win = GLFW.WindowFromId(winid);
+      if (!win) return null;
+      var prevcbfun = win.framebufferSizeFunc;
+      win.framebufferSizeFunc = cbfun;
+      return prevcbfun;
+    };
+
   var _glfwSetKeyCallback = (winid, cbfun) => GLFW.setKeyCallback(winid, cbfun);
 
   var _glfwSetMouseButtonCallback = (winid, cbfun) => GLFW.setMouseButtonCallback(winid, cbfun);
+
+  var _glfwSetWindowSize = (winid, width, height) => GLFW.setWindowSize(winid, width, height);
+
+  var _glfwSetWindowUserPointer = (winid, ptr) => {
+      var win = GLFW.WindowFromId(winid);
+      if (!win) return;
+      win.userptr = ptr;
+    };
 
   var _glfwSwapBuffers = (winid) => GLFW.swapBuffers(winid);
 
@@ -9604,6 +9655,8 @@ function checkIncomingModuleAPI() {
 var wasmImports = {
   /** @export */
   _abort_js: __abort_js,
+  /** @export */
+  emscripten_asm_const_int: _emscripten_asm_const_int,
   /** @export */
   emscripten_glActiveTexture: _emscripten_glActiveTexture,
   /** @export */
@@ -10173,9 +10226,9 @@ var wasmImports = {
   /** @export */
   glfwCreateWindow: _glfwCreateWindow,
   /** @export */
-  glfwGetFramebufferSize: _glfwGetFramebufferSize,
-  /** @export */
   glfwGetTime: _glfwGetTime,
+  /** @export */
+  glfwGetWindowUserPointer: _glfwGetWindowUserPointer,
   /** @export */
   glfwInit: _glfwInit,
   /** @export */
@@ -10183,9 +10236,15 @@ var wasmImports = {
   /** @export */
   glfwPollEvents: _glfwPollEvents,
   /** @export */
+  glfwSetFramebufferSizeCallback: _glfwSetFramebufferSizeCallback,
+  /** @export */
   glfwSetKeyCallback: _glfwSetKeyCallback,
   /** @export */
   glfwSetMouseButtonCallback: _glfwSetMouseButtonCallback,
+  /** @export */
+  glfwSetWindowSize: _glfwSetWindowSize,
+  /** @export */
+  glfwSetWindowUserPointer: _glfwSetWindowUserPointer,
   /** @export */
   glfwSwapBuffers: _glfwSwapBuffers,
   /** @export */
@@ -10240,7 +10299,7 @@ var missingLibrarySymbols = [
   'readSockaddr',
   'writeSockaddr',
   'emscriptenLog',
-  'readEmAsmArgs',
+  'runMainThreadEmAsm',
   'getExecutableName',
   'listenOnce',
   'autoResumeAudioContext',
@@ -10402,6 +10461,8 @@ var unexportedSymbols = [
   'timers',
   'warnOnce',
   'readEmAsmArgsArray',
+  'readEmAsmArgs',
+  'runEmAsmFunction',
   'jstoi_q',
   'jstoi_s',
   'handleException',
