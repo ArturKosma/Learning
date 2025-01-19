@@ -17,16 +17,17 @@
             height: 100vh;
             overflow: hidden;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
         }
 
-        .emscripten_border 
-        {
-            height: 70vh;
+        .emscripten_border {
+            flex: 1;
+            height: 100%;
         }
 
         textarea.emscripten {
-            height: 30vh;
+            width: 20%;
+            height: 100%;
             background-color: black;
             color: white;
             font-family: Consolas;
