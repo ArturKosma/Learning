@@ -6,6 +6,8 @@ project(animFlex)
 # Various dependency directories variables.
 set(SRC_DIR ../source)
 set(GLAD_DIR ../../../glad/include)
+set(GLM_DIR ../../../glm/glm)
+set(STB_DIR ../../../stb)
 
 # Collect source files.
 file(GLOB_RECURSE SOURCES 
@@ -16,6 +18,8 @@ file(GLOB_RECURSE SOURCES
 # Include directories for headers.
 include_directories(
 	${GLAD_DIR}										# GLAD header.
+	${GLM_DIR}										# GLM header.
+	${STB_DIR}										# STB header.
 )
 
 # Specify output file and target properties.

@@ -1,7 +1,7 @@
 #pragma once
-#include "AFRenderer.h"
 
-#include <GLFW/glfw3.h>
+#include "AFRenderer.h"
+#include "AFModel.h"
 
 class AFWindow
 {
@@ -30,7 +30,9 @@ private:
 	void Tick_Internal(float deltaTime);
 
 	GLFWwindow* m_window = nullptr;
+
 	AFRenderer m_renderer = AFRenderer();
+	AFModel m_model = AFModel();
 
 	float m_deltaTime = 0.0f;
 	double m_previousTime = 0.0f;

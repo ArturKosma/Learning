@@ -20,3 +20,7 @@
 
 # Allow .bats
 !*.bat
+
+# Allow shaders
+!*.vert
+!*.frag

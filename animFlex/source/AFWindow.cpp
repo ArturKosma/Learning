@@ -56,7 +56,10 @@ AFWindow::AFWindow()
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
-	m_window = glfwCreateWindow(800, 600, "myFlexWindow", nullptr, nullptr);
+	const int initWidth = 800;
+	const int initHeight = 600;
+
+	m_window = glfwCreateWindow(initWidth, initHeight, "myFlexWindow", nullptr, nullptr);
 	if(!m_window)
 	{
 		printf("%s", "window not constructed correctly!\n");
@@ -68,16 +71,19 @@ AFWindow::AFWindow()
 	// Select a current OpenGL context.
 	glfwMakeContextCurrent(m_window);
 
-	// Load OpenGL function pointers.
-	if(!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
+	// Renderer init.
+	if(!m_renderer.Init(initWidth, initHeight))
 	{
-		printf("%s", "failed to initialize glad!\n");
-
-		glfwTerminate();
-		return;
+		printf("%s", "renderer init failed!\n");
 	}
 
-	// Store the class instance in the window's user pointer
+	// Temporary model.
+	m_model.Init();
+
+	// Upload temporary model.
+	m_renderer.UploadData(m_model.GetVertexData());
+
+	// Store the window pointer in the internals of GLFW to access in bindings.
 	glfwSetWindowUserPointer(m_window, this);
 
 	// Bind input events.
@@ -94,18 +100,13 @@ AFWindow::AFWindow()
 			}
 	});
 
-	// Make the window cover whole screen.
-	int width, height;
 #ifdef __EMSCRIPTEN__
 
-	/*width = EM_ASM_INT({
-	return document.documentElement.clientWidth || window.innerWidth;
-		}) - 200;
-	height = EM_ASM_INT({
-	return document.documentElement.clientHeight || window.innerHeight;
-		}) - 200;*/
+	// Emscripten resizes the window by html style properties.
 
 #else
+
+	// Make the window cover whole screen on desktop.
 
 	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 	if (!primaryMonitor)
@@ -124,8 +125,8 @@ AFWindow::AFWindow()
 		return;
 	}
 
-	width = videoMode->width;
-	height = videoMode->height;
+	const int width = videoMode->width;
+	const int height = videoMode->height;
 
 	glfwSetWindowSize(m_window, width, height);
 
@@ -145,7 +146,7 @@ void AFWindow::Tick_Internal(float deltaTime)
 {
 	//printf("%f\n", 1.0f / deltaTime);
 
-	m_renderer.TickRender(deltaTime);
+	m_renderer.Draw();
 }
 
 void AFWindow::Tick()
@@ -165,5 +166,5 @@ void AFWindow::Tick()
 void AFWindow::OnWindowResize(int newWidth, int newHeight)
 {
 	glfwSetWindowSize(m_window, newWidth, newHeight);
-	m_renderer.OnWindowResize(newWidth, newHeight);
+	m_renderer.SetSize(newWidth, newHeight);
 }

@@ -1,18 +1,81 @@
 #include "AFRenderer.h"
 
-#include <cmath>
-#include <GLFW/glfw3.h>
+#include <ostream>
 
-void AFRenderer::TickRender(float deltaTime)
+bool AFRenderer::Init(int width, int height)
 {
-	const double time = fmod(glfwGetTime(), 1.0);
-	glClearColor((float)time, (float)time, (float)time, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	// Load OpenGL function pointers.
+	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
+	{
+		printf("%s", "failed to initialize glad!\n");
+
+		glfwTerminate();
+		return false;
+	}
+
+	printf("%s\n", GetOpenGLVersion());
+
+	if(!m_framebuffer.Init(width, height))
+	{
+		return false;
+	}
+
+	if(!m_tex.LoadTexture("content/textures/crate.png"))
+	{
+		return false;
+	}
+
+	m_vertexBuffer.Init();
+
+	if(!m_shader.LoadShaders("shaders/basic.vert", "shaders/basic.frag"))
+	{
+		return false;
+	}
+
+	return true;
 }
 
-void AFRenderer::OnWindowResize(int newWidth, int newHeight)
+void AFRenderer::SetSize(int newWidth, int newHeight)
 {
+	m_framebuffer.Resize(newWidth, newHeight);
 	glViewport(0, 0, newWidth, newHeight);
+}
+
+void AFRenderer::UploadData(const AFMesh& newMesh)
+{
+	m_triangleCount = newMesh.vertices.size();
+	m_vertexBuffer.UploadData(newMesh);
+}
+
+void AFRenderer::Cleanup()
+{
+	m_shader.Cleanup();
+	m_tex.Cleanup();
+	m_vertexBuffer.Cleanup();
+	m_framebuffer.Cleanup();
+}
+
+const GLubyte* AFRenderer::GetOpenGLVersion()
+{
+	return glGetString(GL_VERSION);
+}
+
+void AFRenderer::Draw()
+{
+	m_framebuffer.Bind();
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_CULL_FACE);
+
+	m_shader.Use();
+	m_tex.Bind();
+	m_vertexBuffer.Bind();
+	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_triangleCount);
+	m_vertexBuffer.UnBind();
+	m_tex.UnBind();
+	m_framebuffer.UnBind();
+
+	m_framebuffer.DrawToScreen();
 }
 
 AFRenderer::AFRenderer()
