@@ -12,7 +12,11 @@
 !*.h
 !*.c
 
+# Allow html template
 !webassembly/template.html
 
-# Allow specific files
+# Allow CMakeLists
 !CMakeLists.txt
+
+# Allow .bats
+!*.bat
