@@ -10,7 +10,7 @@
 
 AFWindow& AFWindow::GetInstance()
 {
-	static AFWindow windowInstance;
+	static AFWindow windowInstance;;
 	return windowInstance;
 }
 
