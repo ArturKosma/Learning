@@ -7,6 +7,6 @@ public:
 	AFInput() = delete;
 	~AFInput() = delete;
 
-	static void OnKeyboardInput(struct GLFWwindow* InWindow, int InKey, int InScanCode, int InAction, int InMods);
-	static void OnCursorInput(struct GLFWwindow* InWindow, int InButton, int InAction, int InMods);
+	static void OnKeyboardInput(struct GLFWwindow* window, int key, int scanCode, int action, int mods);
+	static void OnCursorInput(struct GLFWwindow* window, int button, int action, int mods);
 };

@@ -1,4 +1,7 @@
 #pragma once
+#include "AFRenderer.h"
+
+#include <GLFW/glfw3.h>
 
 class AFWindow
 {
@@ -9,6 +12,8 @@ public:
 
 	void StartLoop();
 	void Tick();
+
+	void OnWindowResize(int newWidth, int newHeight);
 
 	bool ShouldShutdown();
 
@@ -22,10 +27,11 @@ private:
 	AFWindow();
 	~AFWindow();
 
-	void Tick_Internal(float InDeltaTime);
+	void Tick_Internal(float deltaTime);
 
-	bool m_WantsShutdown = false;
-	float m_DeltaTime = 0.0f;
-	double m_PreviousTime = 0.0f;
-	struct GLFWwindow* Window = nullptr;
+	GLFWwindow* m_window = nullptr;
+	AFRenderer m_renderer = AFRenderer();
+
+	float m_deltaTime = 0.0f;
+	double m_previousTime = 0.0f;
 };

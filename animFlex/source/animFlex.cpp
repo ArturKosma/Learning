@@ -1,5 +1,3 @@
-#include <cstdio>
-
 #include "AFWindow.h"
 
 int main()

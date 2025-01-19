@@ -1,15 +1,12 @@
 #include "AFWindow.h"
 #include "AFInput.h"
+#include "AFRenderer.h"
 
 #include <iostream>
-#include <cmath>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
-
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
 
 AFWindow& AFWindow::GetInstance()
 {
@@ -41,7 +38,7 @@ void AFWindow::StartLoop()
 
 bool AFWindow::ShouldShutdown()
 {
-	return glfwWindowShouldClose(Window);
+	return glfwWindowShouldClose(m_window);
 }
 
 AFWindow::AFWindow()
@@ -57,9 +54,10 @@ AFWindow::AFWindow()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
-	Window = glfwCreateWindow(800, 100, "myFlexWindow", nullptr, nullptr);
-	if(!Window)
+	m_window = glfwCreateWindow(800, 600, "myFlexWindow", nullptr, nullptr);
+	if(!m_window)
 	{
 		printf("%s", "window not constructed correctly!\n");
 
@@ -68,7 +66,7 @@ AFWindow::AFWindow()
 	}
 
 	// Select a current OpenGL context.
-	glfwMakeContextCurrent(Window);
+	glfwMakeContextCurrent(m_window);
 
 	// Load OpenGL function pointers.
 	if(!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
@@ -79,17 +77,61 @@ AFWindow::AFWindow()
 		return;
 	}
 
+	// Store the class instance in the window's user pointer
+	glfwSetWindowUserPointer(m_window, this);
+
 	// Bind input events.
-	glfwSetKeyCallback(Window, AFInput::OnKeyboardInput);
-	glfwSetMouseButtonCallback(Window, AFInput::OnCursorInput);
+	glfwSetKeyCallback(m_window, AFInput::OnKeyboardInput);
+	glfwSetMouseButtonCallback(m_window, AFInput::OnCursorInput);
 
-	// Set OpenGL viewport.
+	// Bind window resize.
+	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* InWindow, int InNewWidth, int InNewHeight)
+	{
+			AFWindow* windowInstance = static_cast<AFWindow*>(glfwGetWindowUserPointer(InWindow));
+			if(windowInstance)
+			{
+				windowInstance->OnWindowResize(InNewWidth, InNewHeight);
+			}
+	});
+
+	// Make the window cover whole screen.
 	int width, height;
-	glfwGetFramebufferSize(Window, &width, &height);
-	glViewport(0, 0, width, height);
+#ifdef __EMSCRIPTEN__
 
-	m_PreviousTime = glfwGetTime();
+	/*width = EM_ASM_INT({
+	return document.documentElement.clientWidth || window.innerWidth;
+		}) - 200;
+	height = EM_ASM_INT({
+	return document.documentElement.clientHeight || window.innerHeight;
+		}) - 200;*/
 
+#else
+
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+	if (!primaryMonitor)
+	{
+		printf("Failed to get the primary monitor!\n");
+		glfwTerminate();
+		return;
+	}
+
+	// Get the monitor's video mode (resolution, refresh rate, etc.).
+	const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
+	if (!videoMode)
+	{
+		printf("Failed to get video mode for the primary monitor!\n");
+		glfwTerminate();
+		return;
+	}
+
+	width = videoMode->width;
+	height = videoMode->height;
+
+	glfwSetWindowSize(m_window, width, height);
+
+#endif
+
+	m_previousTime = glfwGetTime();
 	printf("%s", "window constructed!\n");
 }
 
@@ -99,24 +141,29 @@ AFWindow::~AFWindow()
 	printf("%s", "window destructed!\n");
 }
 
-void AFWindow::Tick_Internal(float InDeltaTime)
+void AFWindow::Tick_Internal(float deltaTime)
 {
-	printf("%f\n", 1.0f / InDeltaTime);
-	const double time = fmod(glfwGetTime(), 1.0);
-	glClearColor((float)time, (float)time, (float)time, 1.0f);
+	//printf("%f\n", 1.0f / deltaTime);
+
+	m_renderer.TickRender(deltaTime);
 }
 
 void AFWindow::Tick()
 {
 	// Calculate delta time.
 	const double currentTime = glfwGetTime();
-	m_DeltaTime = currentTime - m_PreviousTime;
-	m_PreviousTime = currentTime;
+	m_deltaTime = currentTime - m_previousTime;
+	m_previousTime = currentTime;
 
 	// Internal tick, doing all the heavy work.
-	Tick_Internal(m_DeltaTime);
+	Tick_Internal(m_deltaTime);
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	glfwSwapBuffers(Window);
+	glfwSwapBuffers(m_window);
 	glfwPollEvents();
+}
+
+void AFWindow::OnWindowResize(int newWidth, int newHeight)
+{
+	glfwSetWindowSize(m_window, newWidth, newHeight);
+	m_renderer.OnWindowResize(newWidth, newHeight);
 }

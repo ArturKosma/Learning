@@ -1,30 +1,29 @@
 #include "AFInput.h"
 
 #include <iostream>
-#include <GLFW/glfw3.h>
 
-void AFInput::OnKeyboardInput(GLFWwindow* InWindow, int InKey, int InScanCode, int InAction, int InMods)
+void AFInput::OnKeyboardInput(GLFWwindow* window, int key, int scanCode, int action, int mods)
 {
-	if (!InWindow)
+	if (!window)
 	{
 		return;
 	}
 
-	if (InAction == GLFW_PRESS)
+	if (action == 1)
 	{
-		printf("%d\n", InKey);
+		printf("%d\n", key);
 	}
 }
 
-void AFInput::OnCursorInput(GLFWwindow* InWindow, int InButton, int InAction, int InMods)
+void AFInput::OnCursorInput(GLFWwindow* window, int button, int action, int mods)
 {
-	if (!InWindow)
+	if (!window)
 	{
 		return;
 	}
 
-	if (InAction == GLFW_PRESS)
+	if (action == 1)
 	{
-		printf("%d\n", InButton);
+		printf("%d\n", button);
 	}
 }
