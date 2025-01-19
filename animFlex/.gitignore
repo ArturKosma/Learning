@@ -12,5 +12,7 @@
 !*.h
 !*.c
 
+!webassembly/template.html
+
 # Allow specific files
 !CMakeLists.txt

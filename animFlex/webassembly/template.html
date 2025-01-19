@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Emscripten-Generated Code</title>
+    <style>
+        * 
+        {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body 
+        {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .emscripten_border 
+        {
+            height: 70vh;
+        }
+
+        textarea.emscripten {
+            height: 30vh;
+            background-color: black;
+            color: white;
+            font-family: Consolas;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="emscripten_border">
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    </div>
+    <textarea class="emscripten" id="output" rows="8"></textarea>
+
+    <script type='text/javascript'>
+        var Module = {
+            print: (function () {
+                var element = document.getElementById('output');
+                if (element) element.value = ''; // clear browser cache
+                return (...args) => {
+                    var text = args.join(' ');
+                    console.log(text);
+                    if (element) {
+                        element.value += text + "\n";
+                        element.scrollTop = element.scrollHeight; // focus on bottom
+                    }
+                };
+            })(),
+            canvas: (() => {
+                var canvas = document.getElementById('canvas');
+
+                canvas.addEventListener("webglcontextlost", (e) => {
+                    alert('WebGL context lost. You will need to reload the page.');
+                    e.preventDefault();
+                }, false);
+
+                return canvas;
+            })(),
+        };
+    </script>
+    <script>
+        Module.onRuntimeInitialized = function () {
+            console.log("Emscripten runtime initialized");
+            resizeCanvasToContainer(); // Safe to call the C++ function now
+        };
+
+        function resizeCanvasToContainer() {
+            const container = document.querySelector('.emscripten_border');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            Module._OnResizeCanvas(width, height); // Call the exported C++ function.
+        }
+
+        // Call this function on window resize
+        window.addEventListener('resize', resizeCanvasToContainer);
+    </script>
+    {{{ SCRIPT }}}
+</body>
+</html>
