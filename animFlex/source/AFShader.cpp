@@ -8,12 +8,14 @@ bool AFShader::LoadShaders(const std::string& vertexShaderFilename, const std::s
 	GLuint vertexShader = ReadShader(vertexShaderFilename, GL_VERTEX_SHADER);
 	if(!vertexShader)
 	{
+		printf("%s\n", "1");
 		return false;
 	}
 
 	GLuint fragmentShader = ReadShader(fragmentShaderFilename, GL_FRAGMENT_SHADER);
 	if(!fragmentShader)
 	{
+		printf("%s\n", "2");
 		return false;
 	}
 
@@ -98,7 +100,7 @@ GLuint AFShader::ReadShader(const std::string& shaderFilename, GLuint shaderType
 		glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
 
 		// Print the log.
-		std::cerr << "Shader compilation failed:\n" << shaderFilename << "\n" << infoLog << std::endl;
+		printf("%s: %s\n%s\n", "Shader compilation failed", shaderFilename.c_str(), infoLog.c_str());
 
 		// Clean up and return error
 		glDeleteShader(shader);

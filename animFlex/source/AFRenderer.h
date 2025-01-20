@@ -36,7 +36,9 @@ private:
 
 	void Draw();
 
-	AFShader m_shader = AFShader();
+	AFShader m_basicShader = AFShader();
+	AFShader m_changedShader = AFShader();
+
 	AFFramebuffer m_framebuffer = AFFramebuffer();
 	AFVertexBuffer m_vertexBuffer = AFVertexBuffer();
 	AFTexture m_tex = AFTexture();

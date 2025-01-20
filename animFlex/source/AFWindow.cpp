@@ -1,6 +1,7 @@
 #include "AFWindow.h"
 #include "AFInput.h"
 #include "AFRenderer.h"
+#include "AFGame.h"
 
 #include <iostream>
 
@@ -10,14 +11,14 @@
 
 AFWindow& AFWindow::GetInstance()
 {
-	static AFWindow windowInstance;;
+	static AFWindow windowInstance;
 	return windowInstance;
 }
 
 void AFWindow::StartLoop()
 {
 #ifdef __EMSCRIPTEN__
-	printf("Running on Emscripten!!!\n");
+	printf("Running on Emscripten.\n");
 
 	// Set the web main loop to run at requestAnimationFrame fps.
 	emscripten_set_main_loop_arg([](void* InWindowPtr)
@@ -131,6 +132,10 @@ AFWindow::AFWindow()
 	glfwSetWindowSize(m_window, width, height);
 
 #endif
+
+	// Create the game.
+	AFGame& game = AFGame::GetInstance();
+	game.Init();
 
 	m_previousTime = glfwGetTime();
 	printf("%s", "window constructed!\n");

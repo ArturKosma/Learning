@@ -2,6 +2,8 @@
 
 #include <ostream>
 
+#include "AFGame.h"
+
 bool AFRenderer::Init(int width, int height)
 {
 	// Load OpenGL function pointers.
@@ -27,7 +29,12 @@ bool AFRenderer::Init(int width, int height)
 
 	m_vertexBuffer.Init();
 
-	if(!m_shader.LoadShaders("content/shaders/basic.vert", "content/shaders/basic.frag"))
+	if(!m_basicShader.LoadShaders("content/shaders/basic.vert", "content/shaders/basic.frag"))
+	{
+		return false;
+	}
+
+	if (!m_changedShader.LoadShaders("content/shaders/changed.vert", "content/shaders/changed.frag"))
 	{
 		return false;
 	}
@@ -49,7 +56,9 @@ void AFRenderer::UploadData(const AFMesh& newMesh)
 
 void AFRenderer::Cleanup()
 {
-	m_shader.Cleanup();
+	m_basicShader.Cleanup();
+	m_changedShader.Cleanup();
+
 	m_tex.Cleanup();
 	m_vertexBuffer.Cleanup();
 	m_framebuffer.Cleanup();
@@ -71,12 +80,23 @@ const GLubyte* AFRenderer::GetOpenGLVersion()
 
 void AFRenderer::Draw()
 {
+	AFGame& game = AFGame::GetInstance();
+	const bool testState = game.GetTestState();
+
 	m_framebuffer.Bind();
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CULL_FACE);
 
-	m_shader.Use();
+	if(testState)
+	{
+		m_changedShader.Use();
+	}
+	else
+	{
+		m_basicShader.Use();
+	}
+	
 	m_tex.Bind();
 	m_vertexBuffer.Bind();
 	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_triangleCount);

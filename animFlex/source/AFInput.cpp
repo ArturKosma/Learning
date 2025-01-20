@@ -1,6 +1,8 @@
 #include "AFInput.h"
+#include "AFGame.h"
 
 #include <iostream>
+#include <GLFW/glfw3.h>
 
 void AFInput::OnKeyboardInput(GLFWwindow* window, int key, int scanCode, int action, int mods)
 {
@@ -9,9 +11,14 @@ void AFInput::OnKeyboardInput(GLFWwindow* window, int key, int scanCode, int act
 		return;
 	}
 
-	if (action == 1)
+	if (action == GLFW_PRESS)
 	{
-		printf("%d\n", key);
+		printf("Key pressed: %d\n", key);
+
+		if (key == GLFW_KEY_ESCAPE)
+		{
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+		}
 	}
 }
 
@@ -22,8 +29,6 @@ void AFInput::OnCursorInput(GLFWwindow* window, int button, int action, int mods
 		return;
 	}
 
-	if (action == 1)
-	{
-		printf("%d\n", button);
-	}
+	AFGame& game = AFGame::GetInstance();
+	game.OnInput(action == 1);
 }
