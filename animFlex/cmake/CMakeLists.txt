@@ -37,5 +37,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
 -s USE_GLFW=3 \
 -s FULL_ES3=1 \
 -s FORCE_FILESYSTEM \
+--preload-file ../../content \
 --shell-file=${CUSTOM_SHELL_FILE} \
 -s EXPORTED_RUNTIME_METHODS=['ccall']")

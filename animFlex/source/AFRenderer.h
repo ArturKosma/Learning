@@ -25,6 +25,8 @@ public:
 	void UploadData(const AFMesh& newMesh);
 	void Cleanup();
 
+	static void CheckGLErrors(const char* label);
+
 	const GLubyte* GetOpenGLVersion();
 
 private:

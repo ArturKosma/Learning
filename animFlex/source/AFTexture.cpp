@@ -9,6 +9,7 @@ bool AFTexture::LoadTexture(std::string textureFilename)
 
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* textureData = stbi_load(textureFilename.c_str(), &texWidth, &texHeight, &numberOfChannels, 0);
+
 	if(!textureData)
 	{
 		stbi_image_free(textureData);

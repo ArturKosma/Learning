@@ -27,7 +27,7 @@ bool AFRenderer::Init(int width, int height)
 
 	m_vertexBuffer.Init();
 
-	if(!m_shader.LoadShaders("shaders/basic.vert", "shaders/basic.frag"))
+	if(!m_shader.LoadShaders("content/shaders/basic.vert", "content/shaders/basic.frag"))
 	{
 		return false;
 	}
@@ -53,6 +53,15 @@ void AFRenderer::Cleanup()
 	m_tex.Cleanup();
 	m_vertexBuffer.Cleanup();
 	m_framebuffer.Cleanup();
+}
+
+void AFRenderer::CheckGLErrors(const char* label)
+{
+	GLenum error;
+	while ((error = glGetError()) != GL_NO_ERROR) 
+	{
+		printf("OpenGL Error: %u in %s", error, label);
+	}
 }
 
 const GLubyte* AFRenderer::GetOpenGLVersion()
