@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4m99a652.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpodt174tk.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -214,21 +214,21 @@ Module['FS_createPath']("/content", "textures", true, true);
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4m99a652.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpdzlmhulc.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpodt174tk.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwmt8i8wh.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpdzlmhulc.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpytvu6w4d.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwmt8i8wh.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp5844trwo.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpytvu6w4d.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp5844trwo.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -1057,6 +1057,9 @@ async function createWasm() {
 }
 
 // === Body ===
+
+function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) : null; if (url) window.open(url, '_blank'); }
+
 // end include: preamble.js
 
 
@@ -4163,6 +4166,8 @@ async function createWasm() {
         stringToUTF8(summerName, std_name, 17);
       }
     };
+
+  var _emscripten_err = (str) => err(UTF8ToString(str));
 
   var GLctx;
   
@@ -8273,6 +8278,7 @@ async function createWasm() {
       return 0;
     };
 
+
   function _fd_close(fd) {
   try {
   
@@ -8373,6 +8379,49 @@ async function createWasm() {
     return e.errno;
   }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   
   
@@ -10013,9 +10062,81 @@ async function createWasm() {
         return table[param];
       },
   };
+  var _glfwCreateStandardCursor = (shape) => {};
+
   var _glfwCreateWindow = (width, height, title, monitor, share) => GLFW.createWindow(width, height, title, monitor, share);
 
+  var _glfwGetClipboardString = (win) => {};
+
+  var _glfwGetCursorPos = (winid, x, y) => GLFW.getCursorPos(winid, x, y);
+
+  var _glfwGetFramebufferSize = (winid, width, height) => {
+      var ww = 0;
+      var wh = 0;
+  
+      var win = GLFW.WindowFromId(winid);
+      if (win) {
+        ww = win.framebufferWidth;
+        wh = win.framebufferHeight;
+      }
+  
+      if (width) {
+        HEAP32[((width)>>2)] = ww;
+      }
+  
+      if (height) {
+        HEAP32[((height)>>2)] = wh;
+      }
+    };
+
+  var _glfwGetInputMode = (winid, mode) => {
+      var win = GLFW.WindowFromId(winid);
+      if (!win) return;
+  
+      switch (mode) {
+        case 0x00033001: { // GLFW_CURSOR
+          if (Browser.pointerLock) {
+            win.inputModes[mode] = 0x00034003; // GLFW_CURSOR_DISABLED
+          } else {
+            win.inputModes[mode] = 0x00034001; // GLFW_CURSOR_NORMAL
+          }
+        }
+      }
+  
+      return win.inputModes[mode];
+    };
+
+  var _glfwGetJoystickAxes = (joy, count) => {
+      GLFW.refreshJoysticks();
+  
+      var state = GLFW.joys[joy];
+      if (!state || !state.axes) {
+        HEAP32[((count)>>2)] = 0;
+        return;
+      }
+  
+      HEAP32[((count)>>2)] = state.axesCount;
+      return state.axes;
+    };
+
+  var _glfwGetJoystickButtons = (joy, count) => {
+      GLFW.refreshJoysticks();
+  
+      var state = GLFW.joys[joy];
+      if (!state || !state.buttons) {
+        HEAP32[((count)>>2)] = 0;
+        return;
+      }
+  
+      HEAP32[((count)>>2)] = state.buttonsCount;
+      return state.buttons;
+    };
+
+  var _glfwGetKey = (winid, key) => GLFW.getKey(winid, key);
+
   var _glfwGetTime = () => GLFW.getTime() - GLFW.initialTime;
+
+  var _glfwGetWindowSize = (winid, width, height) => GLFW.getWindowSize(winid, width, height);
 
   var _glfwGetWindowUserPointer = (winid) => {
       var win = GLFW.WindowFromId(winid);
@@ -10080,6 +10201,30 @@ async function createWasm() {
 
   var _glfwPollEvents = () => {};
 
+  var _glfwSetCharCallback = (winid, cbfun) => GLFW.setCharCallback(winid, cbfun);
+
+  var _glfwSetClipboardString = (win, string) => {};
+
+  var _glfwSetCursor = (winid, cursor) => {};
+
+  var _glfwSetCursorEnterCallback = (winid, cbfun) => {
+      var win = GLFW.WindowFromId(winid);
+      if (!win) return null;
+      var prevcbfun = win.cursorEnterFunc;
+      win.cursorEnterFunc = cbfun;
+      return prevcbfun;
+    };
+
+  var _glfwSetCursorPos = (winid, x, y) => GLFW.setCursorPos(winid, x, y);
+
+  var _glfwSetCursorPosCallback = (winid, cbfun) => GLFW.setCursorPosCallback(winid, cbfun);
+
+  var _glfwSetErrorCallback = (cbfun) => {
+      var prevcbfun = GLFW.errorFunc;
+      GLFW.errorFunc = cbfun;
+      return prevcbfun;
+    };
+
   var _glfwSetFramebufferSizeCallback = (winid, cbfun) => {
       var win = GLFW.WindowFromId(winid);
       if (!win) return null;
@@ -10088,9 +10233,29 @@ async function createWasm() {
       return prevcbfun;
     };
 
+  var _glfwSetInputMode = (winid, mode, value) => {
+      GLFW.setInputMode(winid, mode, value);
+    };
+
   var _glfwSetKeyCallback = (winid, cbfun) => GLFW.setKeyCallback(winid, cbfun);
 
+  var _glfwSetMonitorCallback = (cbfun) => {
+      var prevcbfun = GLFW.monitorFunc;
+      GLFW.monitorFunc = cbfun;
+      return prevcbfun;
+    };
+
   var _glfwSetMouseButtonCallback = (winid, cbfun) => GLFW.setMouseButtonCallback(winid, cbfun);
+
+  var _glfwSetScrollCallback = (winid, cbfun) => GLFW.setScrollCallback(winid, cbfun);
+
+  var _glfwSetWindowFocusCallback = (winid, cbfun) => {
+      var win = GLFW.WindowFromId(winid);
+      if (!win) return null;
+      var prevcbfun = win.windowFocusFunc;
+      win.windowFocusFunc = cbfun;
+      return prevcbfun;
+    };
 
   var _glfwSetWindowShouldClose = (winid, value) => {
       var win = GLFW.WindowFromId(winid);
@@ -10279,6 +10444,8 @@ function checkIncomingModuleAPI() {
 }
 var wasmImports = {
   /** @export */
+  ImGui_ImplGlfw_EmscriptenOpenURL,
+  /** @export */
   __assert_fail: ___assert_fail,
   /** @export */
   __cxa_throw: ___cxa_throw,
@@ -10292,6 +10459,8 @@ var wasmImports = {
   _abort_js: __abort_js,
   /** @export */
   _tzset_js: __tzset_js,
+  /** @export */
+  emscripten_err: _emscripten_err,
   /** @export */
   emscripten_glActiveTexture: _emscripten_glActiveTexture,
   /** @export */
@@ -10857,6 +11026,8 @@ var wasmImports = {
   /** @export */
   environ_sizes_get: _environ_sizes_get,
   /** @export */
+  exit: _exit,
+  /** @export */
   fd_close: _fd_close,
   /** @export */
   fd_read: _fd_read,
@@ -10865,9 +11036,113 @@ var wasmImports = {
   /** @export */
   fd_write: _fd_write,
   /** @export */
+  glActiveTexture: _glActiveTexture,
+  /** @export */
+  glAttachShader: _glAttachShader,
+  /** @export */
+  glBindBuffer: _glBindBuffer,
+  /** @export */
+  glBindTexture: _glBindTexture,
+  /** @export */
+  glBindVertexArrayOES: _glBindVertexArrayOES,
+  /** @export */
+  glBlendEquation: _glBlendEquation,
+  /** @export */
+  glBlendEquationSeparate: _glBlendEquationSeparate,
+  /** @export */
+  glBlendFuncSeparate: _glBlendFuncSeparate,
+  /** @export */
+  glBufferData: _glBufferData,
+  /** @export */
+  glBufferSubData: _glBufferSubData,
+  /** @export */
+  glCompileShader: _glCompileShader,
+  /** @export */
+  glCreateProgram: _glCreateProgram,
+  /** @export */
+  glCreateShader: _glCreateShader,
+  /** @export */
+  glDeleteShader: _glDeleteShader,
+  /** @export */
+  glDeleteVertexArraysOES: _glDeleteVertexArraysOES,
+  /** @export */
+  glDetachShader: _glDetachShader,
+  /** @export */
+  glDisable: _glDisable,
+  /** @export */
+  glDrawElements: _glDrawElements,
+  /** @export */
+  glEnable: _glEnable,
+  /** @export */
+  glEnableVertexAttribArray: _glEnableVertexAttribArray,
+  /** @export */
+  glGenBuffers: _glGenBuffers,
+  /** @export */
+  glGenTextures: _glGenTextures,
+  /** @export */
+  glGenVertexArraysOES: _glGenVertexArraysOES,
+  /** @export */
+  glGetAttribLocation: _glGetAttribLocation,
+  /** @export */
+  glGetIntegerv: _glGetIntegerv,
+  /** @export */
+  glGetProgramInfoLog: _glGetProgramInfoLog,
+  /** @export */
+  glGetProgramiv: _glGetProgramiv,
+  /** @export */
+  glGetShaderInfoLog: _glGetShaderInfoLog,
+  /** @export */
+  glGetShaderiv: _glGetShaderiv,
+  /** @export */
+  glGetString: _glGetString,
+  /** @export */
+  glGetUniformLocation: _glGetUniformLocation,
+  /** @export */
+  glIsEnabled: _glIsEnabled,
+  /** @export */
+  glIsProgram: _glIsProgram,
+  /** @export */
+  glLinkProgram: _glLinkProgram,
+  /** @export */
+  glScissor: _glScissor,
+  /** @export */
+  glShaderSource: _glShaderSource,
+  /** @export */
+  glTexImage2D: _glTexImage2D,
+  /** @export */
+  glTexParameteri: _glTexParameteri,
+  /** @export */
+  glUniform1i: _glUniform1i,
+  /** @export */
+  glUniformMatrix4fv: _glUniformMatrix4fv,
+  /** @export */
+  glUseProgram: _glUseProgram,
+  /** @export */
+  glVertexAttribPointer: _glVertexAttribPointer,
+  /** @export */
+  glViewport: _glViewport,
+  /** @export */
+  glfwCreateStandardCursor: _glfwCreateStandardCursor,
+  /** @export */
   glfwCreateWindow: _glfwCreateWindow,
   /** @export */
+  glfwGetClipboardString: _glfwGetClipboardString,
+  /** @export */
+  glfwGetCursorPos: _glfwGetCursorPos,
+  /** @export */
+  glfwGetFramebufferSize: _glfwGetFramebufferSize,
+  /** @export */
+  glfwGetInputMode: _glfwGetInputMode,
+  /** @export */
+  glfwGetJoystickAxes: _glfwGetJoystickAxes,
+  /** @export */
+  glfwGetJoystickButtons: _glfwGetJoystickButtons,
+  /** @export */
+  glfwGetKey: _glfwGetKey,
+  /** @export */
   glfwGetTime: _glfwGetTime,
+  /** @export */
+  glfwGetWindowSize: _glfwGetWindowSize,
   /** @export */
   glfwGetWindowUserPointer: _glfwGetWindowUserPointer,
   /** @export */
@@ -10877,11 +11152,33 @@ var wasmImports = {
   /** @export */
   glfwPollEvents: _glfwPollEvents,
   /** @export */
+  glfwSetCharCallback: _glfwSetCharCallback,
+  /** @export */
+  glfwSetClipboardString: _glfwSetClipboardString,
+  /** @export */
+  glfwSetCursor: _glfwSetCursor,
+  /** @export */
+  glfwSetCursorEnterCallback: _glfwSetCursorEnterCallback,
+  /** @export */
+  glfwSetCursorPos: _glfwSetCursorPos,
+  /** @export */
+  glfwSetCursorPosCallback: _glfwSetCursorPosCallback,
+  /** @export */
+  glfwSetErrorCallback: _glfwSetErrorCallback,
+  /** @export */
   glfwSetFramebufferSizeCallback: _glfwSetFramebufferSizeCallback,
+  /** @export */
+  glfwSetInputMode: _glfwSetInputMode,
   /** @export */
   glfwSetKeyCallback: _glfwSetKeyCallback,
   /** @export */
+  glfwSetMonitorCallback: _glfwSetMonitorCallback,
+  /** @export */
   glfwSetMouseButtonCallback: _glfwSetMouseButtonCallback,
+  /** @export */
+  glfwSetScrollCallback: _glfwSetScrollCallback,
+  /** @export */
+  glfwSetWindowFocusCallback: _glfwSetWindowFocusCallback,
   /** @export */
   glfwSetWindowShouldClose: _glfwSetWindowShouldClose,
   /** @export */
