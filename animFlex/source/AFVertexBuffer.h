@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <glm/glm.hpp>
-#include <glad/glad.h>
+#include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
 class AFVertexBuffer
@@ -20,7 +20,7 @@ public:
 	void Bind();
 	void UnBind();
 
-	void Draw(GLuint mode, unsigned int start, unsigned int num);
+	void Draw(GLuint mode, unsigned int start, size_t num);
 	void Cleanup();
 
 private:

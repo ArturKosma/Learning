@@ -31,6 +31,9 @@ bool AFShader::LoadShaders(const std::string& vertexShaderFilename, const std::s
 		return false;
 	}
 
+	GLint uboIndex = glGetUniformBlockIndex(m_shaderProgram, "Matrices");
+	glUniformBlockBinding(m_shaderProgram, uboIndex, 0);
+
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 

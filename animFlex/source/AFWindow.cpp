@@ -73,7 +73,7 @@ AFWindow::AFWindow()
 	glfwMakeContextCurrent(m_window);
 
 	// Renderer init.
-	if(!m_renderer.Init(initWidth, initHeight))
+	if(!m_renderer.Init(initWidth, initHeight, m_window))
 	{
 		printf("%s", "renderer init failed!\n");
 	}
@@ -137,7 +137,7 @@ AFWindow::AFWindow()
 	AFGame& game = AFGame::GetInstance();
 	game.Init();
 
-	m_previousTime = glfwGetTime();
+	m_previousTime = static_cast<float>(glfwGetTime());
 	printf("%s", "window constructed!\n");
 }
 
@@ -157,7 +157,7 @@ void AFWindow::Tick_Internal(float deltaTime)
 void AFWindow::Tick()
 {
 	// Calculate delta time.
-	const double currentTime = glfwGetTime();
+	const float currentTime = static_cast<float>(glfwGetTime());
 	m_deltaTime = currentTime - m_previousTime;
 	m_previousTime = currentTime;
 

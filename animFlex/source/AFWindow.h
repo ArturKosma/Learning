@@ -35,5 +35,5 @@ private:
 	AFModel m_model = AFModel();
 
 	float m_deltaTime = 0.0f;
-	double m_previousTime = 0.0f;
+	float m_previousTime = 0.0f;
 };

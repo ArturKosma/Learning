@@ -40,9 +40,9 @@ void AFVertexBuffer::UnBind()
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::Draw(GLuint mode, unsigned int start, unsigned int num)
+void AFVertexBuffer::Draw(GLuint mode, unsigned int start, size_t num)
 {
-	glDrawArrays(mode, start, num);
+	glDrawArrays(mode, start, static_cast<GLsizei>(num));
 }
 
 void AFVertexBuffer::Cleanup()

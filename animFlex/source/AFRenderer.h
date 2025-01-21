@@ -12,6 +12,8 @@
 #include "AFVertexBuffer.h"
 #include "AFTexture.h"
 #include "AFShader.h"
+#include "AFUniformBuffer.h"
+#include "AFUserInterface.h"
 
 class AFRenderer
 {
@@ -19,7 +21,7 @@ class AFRenderer
 
 public:
 
-	bool Init(int width, int height);
+	bool Init(int width, int height, GLFWwindow* window);
 
 	void SetSize(int newWidth, int newHeight);
 	void UploadData(const AFMesh& newMesh);
@@ -42,6 +44,14 @@ private:
 	AFFramebuffer m_framebuffer = AFFramebuffer();
 	AFVertexBuffer m_vertexBuffer = AFVertexBuffer();
 	AFTexture m_tex = AFTexture();
+	AFUniformBuffer m_uniformBuffer = AFUniformBuffer();
+
+	AFRenderData m_renderData = AFRenderData();
+
+	AFUserInferface m_userInterface = AFUserInferface();
+
+	glm::mat4 m_viewMatrix = glm::mat4(1.0f);
+	glm::mat4 m_projectionMatrix = glm::mat4(1.0f);
 
 	int m_triangleCount = 0;
 };
