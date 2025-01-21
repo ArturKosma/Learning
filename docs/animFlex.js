@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpzqfvkqcl.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4m99a652.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -210,25 +210,25 @@ Module['FS_createPath']("/content", "textures", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/content/shaders/basic.frag", "start": 0, "end": 223}, {"filename": "/content/shaders/basic.vert", "start": 223, "end": 536}, {"filename": "/content/shaders/changed.frag", "start": 536, "end": 925}, {"filename": "/content/shaders/changed.vert", "start": 925, "end": 1284}, {"filename": "/content/textures/crate.png", "start": 1284, "end": 427586}], "remote_package_size": 427586});
+    loadPackage({"files": [{"filename": "/content/shaders/basic.frag", "start": 0, "end": 223}, {"filename": "/content/shaders/basic.vert", "start": 223, "end": 631}, {"filename": "/content/shaders/changed.frag", "start": 631, "end": 1020}, {"filename": "/content/shaders/changed.vert", "start": 1020, "end": 1475}, {"filename": "/content/textures/crate.png", "start": 1475, "end": 427777}], "remote_package_size": 427777});
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpzqfvkqcl.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp82vszszy.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4m99a652.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpdzlmhulc.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp82vszszy.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpoq8yj0kr.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpdzlmhulc.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpytvu6w4d.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpoq8yj0kr.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpytvu6w4d.js
 
 
 // Sometimes an existing Module object exists with properties
