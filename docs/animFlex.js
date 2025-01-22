@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpodt174tk.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpov9xu965.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -214,21 +214,21 @@ Module['FS_createPath']("/content", "textures", true, true);
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpodt174tk.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwmt8i8wh.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpov9xu965.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwb1x2248.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwmt8i8wh.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp5844trwo.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwb1x2248.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp2mu0p2i8.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp5844trwo.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp2mu0p2i8.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -4167,6 +4167,41 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
       }
     };
 
+  var _emscripten_get_now = () => performance.now();
+  
+  var _emscripten_date_now = () => Date.now();
+  
+  var nowIsMonotonic = 1;
+  
+  var checkWasiClock = (clock_id) => clock_id >= 0 && clock_id <= 3;
+  
+  var INT53_MAX = 9007199254740992;
+  
+  var INT53_MIN = -9007199254740992;
+  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
+  function _clock_time_get(clk_id, ignored_precision, ptime) {
+    ignored_precision = bigintToI53Checked(ignored_precision);
+  
+    
+      if (!checkWasiClock(clk_id)) {
+        return 28;
+      }
+      var now;
+      // all wasi clocks but realtime are monotonic
+      if (clk_id === 0) {
+        now = _emscripten_date_now();
+      } else if (nowIsMonotonic) {
+        now = _emscripten_get_now();
+      } else {
+        return 52;
+      }
+      // "now" is in ms, and wasi times are in ns.
+      var nsec = Math.round(now * 1000 * 1000);
+      HEAP64[((ptime)>>3)] = BigInt(nsec);
+      return 0;
+    ;
+  }
+
   var _emscripten_err = (str) => err(UTF8ToString(str));
 
   var GLctx;
@@ -8099,7 +8134,6 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   };
   
   
-  var _emscripten_get_now = () => performance.now();
   
   
     /**
@@ -8323,10 +8357,6 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   }
 
   
-  var INT53_MAX = 9007199254740992;
-  
-  var INT53_MIN = -9007199254740992;
-  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
   function _fd_seek(fd, offset, whence, newOffset) {
     offset = bigintToI53Checked(offset);
   
@@ -10460,6 +10490,8 @@ var wasmImports = {
   /** @export */
   _tzset_js: __tzset_js,
   /** @export */
+  clock_time_get: _clock_time_get,
+  /** @export */
   emscripten_err: _emscripten_err,
   /** @export */
   emscripten_glActiveTexture: _emscripten_glActiveTexture,
@@ -11321,7 +11353,6 @@ var missingLibrarySymbols = [
   'jsStackTrace',
   'getCallstack',
   'convertPCtoSourceLocation',
-  'checkWasiClock',
   'wasiRightsToMuslOFlags',
   'wasiOFlagsToMuslOFlags',
   'setImmediateWrapped',
@@ -11433,6 +11464,7 @@ var unexportedSymbols = [
   'UNWIND_CACHE',
   'ExitStatus',
   'getEnvStrings',
+  'checkWasiClock',
   'doReadv',
   'doWritev',
   'initRandomFill',
