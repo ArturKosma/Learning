@@ -22,6 +22,8 @@ public:
 	AFWindow(AFWindow&&) = delete;
 	AFWindow& operator=(AFWindow&&) = delete;
 
+	static float deltaTime;
+
 private:
 
 	AFWindow();
@@ -34,6 +36,5 @@ private:
 	AFRenderer m_renderer = AFRenderer();
 	AFModel m_model = AFModel();
 
-	float m_deltaTime = 0.0f;
 	float m_previousTime = 0.0f;
 };

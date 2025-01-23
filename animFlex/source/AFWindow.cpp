@@ -2,12 +2,15 @@
 #include "AFInput.h"
 #include "AFRenderer.h"
 #include "AFGame.h"
+#include "AFUtil.h"
 
 #include <iostream>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
+
+float AFWindow::deltaTime = 0.0f;
 
 AFWindow& AFWindow::GetInstance()
 {
@@ -90,6 +93,7 @@ AFWindow::AFWindow()
 	// Bind input events.
 	glfwSetKeyCallback(m_window, AFInput::OnKeyboardInput);
 	glfwSetMouseButtonCallback(m_window, AFInput::OnCursorInput);
+	glfwSetCursorPosCallback(m_window, AFInput::OnCursorUpdate);
 
 	// Bind window resize.
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* InWindow, int InNewWidth, int InNewHeight)
@@ -138,18 +142,17 @@ AFWindow::AFWindow()
 	game.Init();
 
 	m_previousTime = static_cast<float>(glfwGetTime());
-	printf("%s", "window constructed!\n");
 }
 
 AFWindow::~AFWindow()
 {
 	glfwTerminate();
-	printf("%s", "window destructed!\n");
 }
 
 void AFWindow::Tick_Internal(float deltaTime)
 {
-	//printf("%f\n", 1.0f / deltaTime);
+	AFGame& game = AFGame::GetInstance();
+	game.Tick(deltaTime);
 
 	m_renderer.Draw();
 }
@@ -158,11 +161,15 @@ void AFWindow::Tick()
 {
 	// Calculate delta time.
 	const float currentTime = static_cast<float>(glfwGetTime());
-	m_deltaTime = currentTime - m_previousTime;
+	deltaTime = currentTime - m_previousTime;
 	m_previousTime = currentTime;
 
+	AFUtil::deltaTime = deltaTime;
+
+	AFInput::Tick(m_window);
+
 	// Internal tick, doing all the heavy work.
-	Tick_Internal(m_deltaTime);
+	Tick_Internal(deltaTime);
 
 	glfwSwapBuffers(m_window);
 	glfwPollEvents();

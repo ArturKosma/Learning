@@ -6,9 +6,17 @@
 struct AFRenderData
 {
 	struct GLFWwindow* window = nullptr;
+
 	unsigned int width = 0;
 	unsigned int height = 0;
+
+	size_t vertexCount = 0;
 	size_t triangleCount = 0;
+
+	int fieldOfView = 90;
+
+	float gameDrawTime = -1.0f;
+	float uiDrawTime = -1.0f;
 };
 
 struct AFVertex

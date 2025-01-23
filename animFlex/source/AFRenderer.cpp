@@ -5,6 +5,7 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include "AFGame.h"
+#include "AFTimer.h"
 
 bool AFRenderer::Init(int width, int height, GLFWwindow* window)
 {
@@ -64,7 +65,8 @@ void AFRenderer::SetSize(int newWidth, int newHeight)
 
 void AFRenderer::UploadData(const AFMesh& newMesh)
 {
-	m_renderData.triangleCount = newMesh.vertices.size();
+	m_renderData.vertexCount = newMesh.vertices.size();
+	m_renderData.triangleCount = newMesh.vertices.size() / 3;
 	m_vertexBuffer.UploadData(newMesh);
 }
 
@@ -98,16 +100,16 @@ void AFRenderer::Draw()
 	AFGame& game = AFGame::GetInstance();
 	const bool testState = game.GetTestState();
 
+	AFTimer drawTimer;
+	drawTimer.Start();
+
 	m_framebuffer.Bind();
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CULL_FACE);
 
-	glm::vec3 cameraPosition = glm::vec3(0.4f, 0.3f, 1.0f);
-	glm::vec3 cameraLookAtPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 cameraUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	m_projectionMatrix = glm::perspective(glm::radians(90.0f), static_cast<float>(m_renderData.width) / static_cast<float>(m_renderData.height), 0.1f, 100.0f);
+	m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(m_renderData.fieldOfView)), 
+		static_cast<float>(m_renderData.width) / static_cast<float>(m_renderData.height), 0.1f, 100.0f);
 	glm::mat4 view = glm::mat4(1.0f);
 
 	const float t = static_cast<float>(glfwGetTime());
@@ -122,20 +124,26 @@ void AFRenderer::Draw()
 		m_basicShader.Use();
 		view = glm::rotate(glm::mat4(1.0f), -t, glm::vec3(0.0f, 0.0f, 1.0f));
 	}
-	m_viewMatrix = glm::lookAt(cameraPosition, cameraLookAtPosition, cameraUpVector) * view;
+	m_viewMatrix = game.GetCamera().GetViewMatrix() * view;
 	m_uniformBuffer.UploadUBOData(m_viewMatrix, m_projectionMatrix);
 	
 	m_tex.Bind();
 	m_vertexBuffer.Bind();
-	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_renderData.triangleCount);
+	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_renderData.vertexCount);
 	m_vertexBuffer.UnBind();
 	m_tex.UnBind();
 	m_framebuffer.UnBind();
 
 	m_framebuffer.DrawToScreen();
 
+	m_renderData.gameDrawTime = drawTimer.Stop();
+
+	drawTimer.Start();
+
 	m_userInterface.CreateFrame(m_renderData);
 	m_userInterface.Render();
+
+	m_renderData.uiDrawTime = drawTimer.Stop();
 }
 
 AFRenderer::AFRenderer()
