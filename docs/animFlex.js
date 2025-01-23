@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpov9xu965.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpijhx4q3_.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -214,21 +214,21 @@ Module['FS_createPath']("/content", "textures", true, true);
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpov9xu965.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwb1x2248.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpijhx4q3_.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpqujiuqh3.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwb1x2248.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp2mu0p2i8.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpqujiuqh3.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpihgl47mp.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp2mu0p2i8.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpihgl47mp.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -10231,6 +10231,8 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
 
   var _glfwPollEvents = () => {};
 
+  var _glfwRawMouseMotionSupported = () => 0;
+
   var _glfwSetCharCallback = (winid, cbfun) => GLFW.setCharCallback(winid, cbfun);
 
   var _glfwSetClipboardString = (win, string) => {};
@@ -11183,6 +11185,8 @@ var wasmImports = {
   glfwMakeContextCurrent: _glfwMakeContextCurrent,
   /** @export */
   glfwPollEvents: _glfwPollEvents,
+  /** @export */
+  glfwRawMouseMotionSupported: _glfwRawMouseMotionSupported,
   /** @export */
   glfwSetCharCallback: _glfwSetCharCallback,
   /** @export */
