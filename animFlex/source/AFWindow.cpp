@@ -23,7 +23,7 @@ void AFWindow::StartLoop()
 #ifdef __EMSCRIPTEN__
 	printf("Running on Emscripten.\n");
 
-	// Set the web main loop to run at requestAnimationFrame fps.
+	// Set the web main loop to run at requestAnimationFrame() fps.
 	emscripten_set_main_loop_arg([](void* InWindowPtr)
 		{
 			AFWindow* windowPtr = static_cast<AFWindow*>(InWindowPtr);

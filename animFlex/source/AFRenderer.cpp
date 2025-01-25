@@ -25,12 +25,14 @@ bool AFRenderer::Init(int width, int height, GLFWwindow* window)
 
 	printf("%s\n", GetOpenGLVersion());
 
+	//glFrontFace(GL_CCW);
+
 	if(!m_framebuffer.Init(width, height))
 	{
 		return false;
 	}
 
-	if(!m_tex.LoadTexture("content/textures/crate.png"))
+	if(!m_tex.LoadTexture("content/textures/crate2.png"))
 	{
 		return false;
 	}
@@ -108,11 +110,14 @@ void AFRenderer::Draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CULL_FACE);
 
-	m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(m_renderData.fieldOfView)), 
-		static_cast<float>(m_renderData.width) / static_cast<float>(m_renderData.height), 0.1f, 100.0f);
+	if (m_renderData.width > 0 && m_renderData.height > 0)
+	{
+		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(m_renderData.fieldOfView)),
+			static_cast<float>(m_renderData.width) / static_cast<float>(m_renderData.height), 0.1f, 100.0f);
+	}
 	glm::mat4 view = glm::mat4(1.0f);
 
-	const float t = static_cast<float>(glfwGetTime());
+	const float t = /*static_cast<float>(glfwGetTime())*/ 0.0f;
 	if(testState)
 	{
 		m_changedShader.Use();
