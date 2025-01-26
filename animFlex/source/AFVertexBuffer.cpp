@@ -1,4 +1,5 @@
 #include "AFVertexBuffer.h"
+#include "AFStructs.h"
 
 void AFVertexBuffer::Init()
 {
@@ -20,12 +21,12 @@ void AFVertexBuffer::Init()
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::UploadData(const AFMesh& vertexData)
+void AFVertexBuffer::UploadMesh(const AFMesh& newMesh)
 {
 	glBindVertexArray(m_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
 
-	glBufferData(GL_ARRAY_BUFFER, vertexData.vertices.size() * sizeof(AFVertex), &vertexData.vertices.at(0), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, newMesh.vertices.size() * sizeof(AFVertex), &newMesh.vertices.at(0), GL_DYNAMIC_DRAW);
 
 	glBindVertexArray(0);
 }
@@ -49,12 +50,4 @@ void AFVertexBuffer::Cleanup()
 {
 	glDeleteBuffers(1, &m_vertexVBO);
 	glDeleteVertexArrays(1, &m_VAO);
-}
-
-AFVertexBuffer::AFVertexBuffer()
-{
-}
-
-AFVertexBuffer::~AFVertexBuffer()
-{
 }

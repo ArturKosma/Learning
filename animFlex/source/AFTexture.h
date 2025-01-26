@@ -10,7 +10,8 @@ class AFTexture
 
 public:
 
-	bool LoadTexture(std::string textureFilename);
+	void SetTexture(const std::string& texturePath);
+	bool LoadTexture();
 
 	void Bind();
 	void UnBind();
@@ -19,8 +20,6 @@ public:
 
 private:
 
-	AFTexture();
-	~AFTexture();
-
+	std::string m_texturePath = {};
 	GLuint m_texture = 0;
 };

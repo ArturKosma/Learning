@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#include <glm/vec2.hpp>
 
 class AFFramebuffer
 {
@@ -9,6 +10,7 @@ public:
 
 	bool Init(int width, int height);
 	bool Resize(int newWidth, int newHeight);
+	glm::vec2 GetSize() const;
 
 	void Bind();
 	void UnBind();

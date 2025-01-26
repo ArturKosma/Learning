@@ -2,24 +2,24 @@
 
 #include <string>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 class AFShader
 {
-	friend class AFRenderer;
 
 public:
 
-	bool LoadShaders(const std::string& vertexShaderFilename, const std::string& fragmentShaderFilename);
+	void SetVertexShader(const std::string& inPath);
+	void SetFragmentShader(const std::string& inPath);
+
+	bool LoadShaders();
 	void Use();
 	void Cleanup();
 
 private:
 
-	AFShader();
-	~AFShader();
-
 	GLuint ReadShader(const std::string& shaderFilename, GLuint shaderType);
 
+	std::string m_vertexShaderPath = {};
+	std::string m_fragmentShaderPath = {};
 	GLuint m_shaderProgram = 0;
 };

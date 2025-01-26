@@ -1,55 +1,51 @@
 #include "AFGame.h"
 #include "AFInput.h"
-#include "AFUtil.h"
-
-#include <cmath>
-#include <cstdio>
-#include <string>
-#include <GLFW/glfw3.h>
+#include "AFTimerManager.h"
+#include "AFCameraManager.h"
 
 #include <glm/glm.hpp>
 
-AFGame& AFGame::GetInstance()
-{
-	static AFGame gameInstance;
-	return gameInstance;
-}
-
 void AFGame::Init()
 {
+	if (!m_scene.Init())
+	{
+		printf("%s\n", "Scene Init() failed.");
+		return;
+	}
+
+	AFCamera* initCamera = new AFCamera();
+	m_scene.AddActor(initCamera);
+
+	m_cameraManager = new AFCameraManager();
+	m_cameraManager->SetActiveCamera(initCamera);
 }
 
-void AFGame::Tick(float newDeltaTime)
+void AFGame::Tick(float deltaTime)
 {
-	m_camera.Tick(newDeltaTime);
+	for(AFActor* actor : m_scene.GetSceneData().sceneActors)
+	{
+		actor->Tick(deltaTime);
+	}
 }
 
-float AFGame::GetDeltaTime()
+AFCameraManager* AFGame::GetCameraManager() const
 {
-	return AFUtil::GetDeltaTime();
+	return m_cameraManager;
 }
 
-const AFCamera& AFGame::GetCamera() const
+const AFScene& AFGame::GetScene()
 {
-	return m_camera;
-}
-
-void AFGame::ToggleTestState()
-{
-	SetTestState(!m_testState);
-}
-
-bool AFGame::GetTestState() const
-{
-	return m_testState;
+	return m_scene;
 }
 
 AFGame::AFGame()
 {
+
 }
 
 AFGame::~AFGame()
 {
+
 }
 
 void AFGame::OnInput(int pressState)
@@ -66,8 +62,8 @@ void AFGame::OnCursorPosUpdate(double deltaX, double deltaY)
 	{
 		constexpr float cameraRotStrength = 5.0f;
 
-		m_camera.AddRotation(glm::vec3(static_cast<float>(deltaY) * GetDeltaTime() * cameraRotStrength,
-			static_cast<float>(deltaX) * GetDeltaTime() * cameraRotStrength, 0.0f));
+		m_camera.AddRotation(glm::vec3(static_cast<float>(deltaY) * AFTimerManager::GetDeltaTime() * cameraRotStrength,
+			static_cast<float>(deltaX) * AFTimerManager::GetDeltaTime() * cameraRotStrength, 0.0f));
 	}
 }
 
@@ -91,6 +87,11 @@ void AFGame::OnAxisInput(const std::map<unsigned int, float>& axisInputs)
 
 		m_camera.AddMovementInput(offsetToAdd);
 	}
+}
+
+void AFGame::OnScrollUpdate(double deltaX, double deltaY)
+{
+	m_camera.UpdateCameraSpeed(deltaY);
 }
 
 void AFGame::SetTestState(bool newTestState)

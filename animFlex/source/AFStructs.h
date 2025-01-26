@@ -1,32 +1,35 @@
 #pragma once
 
-struct AFRotator
+#include <vector>
+
+struct AFCameraProperties
 {
-	AFRotator()
-	{
+	int fieldOfView = 90;
+};
 
-	}
+struct AFSceneData
+{
+	std::vector<class AFActor*> sceneActors = std::vector<class AFActor*>();
+	int sceneTriangles = 0;
+};
 
-	AFRotator(const glm::vec3& eulerAngles)
-	{
-		pitch = eulerAngles.x;
-		yaw = eulerAngles.y;
-		roll = eulerAngles.z;
-	}
+struct AFAppData
+{
+	const class GLFWwindow* window = nullptr;
+	class AFCamera* activeCamera = nullptr;
+	int triangles = 0;
+	int width = 0;
+	int height = 0;
+};
 
-	AFRotator(float newPitch, float newYaw, float newRoll)
-	{
-		pitch = newPitch;
-		yaw = newYaw;
-		roll = newRoll;
-	}
+struct AFVertex
+{
+	glm::vec3 position;
+	glm::vec3 color;
+	glm::vec2 uv;
+};
 
-	glm::quat Quat() const
-	{
-		return glm::quat(glm::vec3(pitch, yaw, roll));
-	}
-
-	float pitch = 0.0f;
-	float yaw = 0.0f;
-	float roll = 0.0f;
+struct AFMesh
+{
+	std::vector<AFVertex> vertices;
 };

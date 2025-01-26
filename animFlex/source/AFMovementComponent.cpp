@@ -1,0 +1,69 @@
+#include "AFMovementComponent.h"
+#include "AFMath.h"
+
+#include <glm/ext/quaternion_trigonometric.hpp>
+
+#include "AFActor.h"
+#include "AFTimerManager.h"
+
+void AFMovementComponent::Tick(float deltaTime)
+{
+	AFActor* owner = GetOwner();
+	if(!owner)
+	{
+		return;
+	}
+
+	if (!m_accelerating)
+	{
+		const float speed = glm::length(m_velocity);
+		const float newSpeed = glm::max(speed - (m_deceleration * deltaTime), 0.0f);
+		m_velocity = AFMath::GetSafeNormal(m_velocity) * newSpeed;
+	}
+
+	owner->AddOffsetLocation(m_velocity * deltaTime);
+	m_accelerating = false;
+}
+
+void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
+{
+	AFActor* owner = GetOwner();
+	if (!owner)
+	{
+		return;
+	}
+
+	if (glm::length(movementInput) > std::numeric_limits<float>::epsilon())
+	{
+		m_accelerating = true;
+
+		m_velocity = m_velocity + (AFMath::GetSafeNormal(movementInput) * m_acceleration * AFTimerManager::GetDeltaTime());
+
+		if (glm::length(m_velocity) > m_maxSpeed)
+		{
+			m_velocity = glm::normalize(m_velocity) * m_maxSpeed;
+		}
+	}
+}
+
+void AFMovementComponent::AddControlRotation(const glm::vec3& eulerToAdd)
+{
+	AFActor* owner = GetOwner();
+	if (!owner)
+	{
+		return;
+	}
+
+	if (glm::length(eulerToAdd) <= std::numeric_limits<float>::epsilon())
+	{
+		return;
+	}
+
+	m_controlPitch = glm::clamp(m_controlPitch + eulerToAdd.x, -89.0f, 89.0f);
+	m_controlYaw += (eulerToAdd.y * -1.0f);
+
+	const glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	const glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	owner->SetRotation(glm::normalize(quatYaw * quatPitch));
+}

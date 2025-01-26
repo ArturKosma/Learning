@@ -46,6 +46,11 @@ bool AFFramebuffer::Resize(int newWidth, int newHeight)
 	return Init(newWidth, newHeight);
 }
 
+glm::vec2 AFFramebuffer::GetSize() const
+{
+	return { m_bufferWidth, m_bufferHeight };
+}
+
 void AFFramebuffer::Bind()
 {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_buffer);

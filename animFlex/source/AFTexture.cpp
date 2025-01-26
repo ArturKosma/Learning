@@ -3,12 +3,12 @@
 
 #include "AFTexture.h"
 
-bool AFTexture::LoadTexture(std::string textureFilename)
+bool AFTexture::LoadTexture()
 {
 	int texWidth, texHeight, numberOfChannels;
 
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char* textureData = stbi_load(textureFilename.c_str(), &texWidth, &texHeight, &numberOfChannels, 0);
+	unsigned char* textureData = stbi_load(m_texturePath.c_str(), &texWidth, &texHeight, &numberOfChannels, 0);
 
 	if(!textureData)
 	{
@@ -34,6 +34,11 @@ bool AFTexture::LoadTexture(std::string textureFilename)
 	return true;
 }
 
+void AFTexture::SetTexture(const std::string& texturePath)
+{
+	m_texturePath = texturePath;
+}
+
 void AFTexture::Bind()
 {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -47,14 +52,4 @@ void AFTexture::UnBind()
 void AFTexture::Cleanup()
 {
 	glDeleteTextures(1, &m_texture);
-}
-
-AFTexture::AFTexture()
-{
-
-}
-
-AFTexture::~AFTexture()
-{
-
 }

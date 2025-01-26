@@ -1,9 +1,6 @@
 #include "AFInput.h"
 #include "AFGame.h"
 
-#include <iostream>
-#include <map>
-
 #include <imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
 
@@ -12,7 +9,7 @@ double AFInput::cursorYPos = 0.0f;
 
 bool AFInput::mouseLock = false;
 
-void AFInput::OnKeyboardInput(GLFWwindow* window, int key, int scanCode, int action, int mods)
+void AFInput::OnKeyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods)
 {
 	if (!window)
 	{
@@ -38,7 +35,7 @@ void AFInput::OnKeyboardInput(GLFWwindow* window, int key, int scanCode, int act
 	}
 }
 
-void AFInput::OnCursorInput(GLFWwindow* window, int button, int action, int mods)
+void AFInput::OnMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (!window)
 	{
@@ -80,7 +77,21 @@ void AFInput::OnCursorInput(GLFWwindow* window, int button, int action, int mods
 	}
 }
 
-void AFInput::Tick(GLFWwindow* window)
+void AFInput::OnCursorPosCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (!window)
+	{
+		return;
+	}
+
+	if (mouseLock)
+	{
+		AFGame& game = AFGame::GetInstance();
+		game.OnScrollUpdate(xoffset, yoffset);
+	}
+}
+
+void AFInput::Tick()
 {
 	if(!window)
 	{
@@ -112,16 +123,16 @@ bool AFInput::GetMouseLock()
 	return mouseLock;
 }
 
-void AFInput::OnCursorUpdate(GLFWwindow* window, double cursorX, double cursorY)
+void AFInput::OnScrollCallback(GLFWwindow* window, double xcursor, double ycursor)
 {
 	if(!mouseLock)
 	{
-		ImGui_ImplGlfw_CursorPosCallback(window, cursorX, cursorY);
+		ImGui_ImplGlfw_CursorPosCallback(window, xcursor, ycursor);
 	}
 
 	AFGame& game = AFGame::GetInstance();
-	game.OnCursorPosUpdate((cursorXPos - cursorX) * -1.0f, cursorYPos - cursorY);
+	game.OnCursorPosUpdate((cursorXPos - xcursor) * -1.0f, cursorYPos - ycursor);
 
-	cursorXPos = cursorX;
-	cursorYPos = cursorY;
+	cursorXPos = xcursor;
+	cursorYPos = ycursor;
 }

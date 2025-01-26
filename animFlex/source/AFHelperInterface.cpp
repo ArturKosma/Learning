@@ -1,21 +1,28 @@
-#include "AFUserInterface.h"
-#include "AFWindow.h"
+#include "AFHelperInterface.h"
+#include "AFTimerManager.h"
+#include "AFCamera.h"
 
 #include <string>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-void AFUserInferface::Init(const AFRenderData& renderData)
+void AFHelperInferface::Init(const AFAppData& appData)
 {
 	IMGUI_CHECKVERSION();
 
 	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(renderData.window, true);
+	ImGui_ImplGlfw_InitForOpenGL(appData.window, true);
 	const char* glslVersion = "#version 300 es";
 	ImGui_ImplOpenGL3_Init(glslVersion);
 }
 
-void AFUserInferface::CreateFrame(AFRenderData& renderData)
+void AFHelperInferface::Draw(const AFAppData& appData)
+{
+	CreateFrame(appData);
+	Render();
+}
+
+void AFHelperInferface::CreateFrame(const AFAppData& appData)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -27,41 +34,18 @@ void AFUserInferface::CreateFrame(AFRenderData& renderData)
 
 	ImGui::Text("FPS:");
 	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(1.0f / AFWindow::deltaTime).c_str());
+	ImGui::Text("%s", std::to_string(1.0f / AFTimerManager::GetDeltaTime()).c_str());
 
 	ImGui::Separator();
-
-	ImGui::Text("Game Draw Time:");
-	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(renderData.gameDrawTime).c_str());
-	ImGui::SameLine();
-	ImGui::Text("ms");
-
-	ImGui::Text("UI Draw Time:");
-	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(renderData.uiDrawTime).c_str());
-	ImGui::SameLine();
-	ImGui::Text("ms");
-
-	ImGui::Separator();
-
-	ImGui::Text("Vertices:");
-	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(renderData.vertexCount).c_str());
 
 	ImGui::Text("Triangles:");
 	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(renderData.triangleCount).c_str());
+	ImGui::Text("%s", std::to_string(appData.triangles).c_str());
 
-	std::string windowDims = std::to_string(renderData.width) + "x" + std::to_string(renderData.height);
+	std::string windowDims = std::to_string(appData.width) + "x" + std::to_string(appData.height);
 	ImGui::Text("Window Dimensions:");
 	ImGui::SameLine();
 	ImGui::Text("%s", windowDims.c_str());
-
-	std::string imgWindowPos = std::to_string(static_cast<int>(ImGui::GetWindowPos().x)) + "/" + std::to_string(static_cast<int>(ImGui::GetWindowPos().y));
-	ImGui::Text("ImGui Window Position:");
-	ImGui::SameLine();
-	ImGui::Text("%s", imgWindowPos.c_str());
 
 	ImGui::Separator();
 
@@ -74,30 +58,20 @@ void AFUserInferface::CreateFrame(AFRenderData& renderData)
 		ImGui::PopStyleColor();
 	}
 
-	AFGame& game = AFGame::GetInstance();
-	if(ImGui::Button("Toggle Shader"))
-	{
-		game.ToggleTestState();
-	}
-	ImGui::SameLine();
-	if(!game.GetTestState())
-	{
-		ImGui::Text("Basic Shader");
-	}
-	else
-	{
-		ImGui::Text("Changed Shader");
-	}
-
 	ImGui::Separator();
+
+	const AFCamera& camera = *appData.activeCamera;
 
 	ImGui::Text("Field of View");
 	ImGui::SameLine();
-	ImGui::SliderInt("##FOV", &renderData.fieldOfView, 40, 150);
+	int tempFOV = camera.GetCameraProperties().fieldOfView;
+	if(ImGui::SliderInt("##FOV", &tempFOV, 40, 150))
+	{
+		
+	}
 
 	ImGui::Separator();
 
-	const AFCamera& camera = game.GetCamera();
 	ImGui::Text("Camera Pos:");
 	ImGui::SameLine();
 	const std::string& posStr = std::to_string(camera.GetPosition().x) + ", " + 
@@ -108,17 +82,21 @@ void AFUserInferface::CreateFrame(AFRenderData& renderData)
 	const std::string& rotStr = std::to_string(camera.GetRotationEuler().x) + ", " +
 		std::to_string(camera.GetRotationEuler().y) + ", " + std::to_string(camera.GetRotationEuler().z);
 	ImGui::Text("%s", rotStr.c_str());
+	ImGui::Text("Camera Speed:");
+	ImGui::SameLine();
+	const std::string& camspeed = std::to_string(camera.GetCameraSpeedMultiplier());
+	ImGui::Text("%s", camspeed.c_str());
 
 	ImGui::End();
 }
 
-void AFUserInferface::Render()
+void AFHelperInferface::Render()
 {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void AFUserInferface::Cleanup()
+void AFHelperInferface::Cleanup()
 {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();

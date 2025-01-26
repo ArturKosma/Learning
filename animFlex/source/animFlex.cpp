@@ -1,7 +1,7 @@
-#include "AFWindow.h"
+#include "AFApp.h"
 
 int main()
 {
-    AFWindow& window = AFWindow::GetInstance();
-	window.StartLoop();
+	AFApp& app = AFApp::GetInstance();
+	app.StartLoop();
 } 

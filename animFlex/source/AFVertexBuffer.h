@@ -7,6 +7,8 @@
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
+#include "AFStructs.h"
+
 class AFVertexBuffer
 {
 	friend class AFRenderer;
@@ -14,8 +16,7 @@ class AFVertexBuffer
 public:
 
 	void Init();
-
-	void UploadData(const AFMesh& vertexData);
+	void UploadMesh(const AFMesh& newMesh);
 
 	void Bind();
 	void UnBind();
@@ -24,9 +25,6 @@ public:
 	void Cleanup();
 
 private:
-
-	AFVertexBuffer();
-	~AFVertexBuffer();
 
 	GLuint m_VAO = 0;
 	GLuint m_vertexVBO = 0;

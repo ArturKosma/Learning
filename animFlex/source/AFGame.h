@@ -1,43 +1,32 @@
 #pragma once
+#include "AFScene.h"
 
 #include <map>
 
-#include "AFCamera.h"
-
 class AFGame
 {
-	friend class AFInput;
+	friend class AFApp;
 
 public:
 
 	void Init();
 	void Tick(float newDeltaTime);
 
-	static float GetDeltaTime();
+	class AFCameraManager* GetCameraManager() const;
 
-	static AFGame& GetInstance();
-	const AFCamera& GetCamera() const;
-
-	void ToggleTestState();
-	bool GetTestState() const;
-
-	AFGame(const AFGame&) = delete;
-	AFGame& operator=(const AFGame&) = delete;
-	AFGame(AFGame&&) = delete;
-	AFGame& operator=(AFGame&&) = delete;
+	const AFScene& GetScene();
 
 private:
 
 	AFGame();
 	~AFGame();
 
+	AFScene m_scene = AFScene();
+
 	void OnInput(int pressState);
 	void OnCursorPosUpdate(double deltaX, double deltaY);
 	void OnAxisInput(const std::map<unsigned int, float>& axisInputs);
+	void OnScrollUpdate(double deltaX, double deltaY);
 
-	void SetTestState(bool newTestState);
-
-	AFCamera m_camera = AFCamera();
-
-	bool m_testState = false;
+	class AFCameraManager* m_cameraManager = nullptr;
 };

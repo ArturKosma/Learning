@@ -1,8 +1,6 @@
 #include "AFWindow.h"
 #include "AFInput.h"
-#include "AFRenderer.h"
-#include "AFGame.h"
-#include "AFUtil.h"
+#include "AFStructs.h"
 
 #include <iostream>
 
@@ -10,48 +8,13 @@
 #include <emscripten/emscripten.h>
 #endif
 
-float AFWindow::deltaTime = 0.0f;
-
-AFWindow& AFWindow::GetInstance()
-{
-	static AFWindow windowInstance;
-	return windowInstance;
-}
-
-void AFWindow::StartLoop()
-{
-#ifdef __EMSCRIPTEN__
-	printf("Running on Emscripten.\n");
-
-	// Set the web main loop to run at requestAnimationFrame() fps.
-	emscripten_set_main_loop_arg([](void* InWindowPtr)
-		{
-			AFWindow* windowPtr = static_cast<AFWindow*>(InWindowPtr);
-			windowPtr->Tick();
-		}, this, 0, true);
-
-#else
-	printf("Not running on Emscripten.\n");
-
-	while(!ShouldShutdown())
-	{
-		Tick();
-	}
-#endif
-}
-
-bool AFWindow::ShouldShutdown()
-{
-	return glfwWindowShouldClose(m_window);
-}
-
-AFWindow::AFWindow()
+bool AFWindow::Init(int initWidth, int initHeight)
 {
 	if (!glfwInit())
 	{
 		printf("%s", "glfw not init correctly!\n");
 
-		return;
+		return false;
 	}
 
 	// Set OpenGL ES 3.0 context.
@@ -60,50 +23,36 @@ AFWindow::AFWindow()
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
-	const int initWidth = 800;
-	const int initHeight = 600;
-
 	m_window = glfwCreateWindow(initWidth, initHeight, "myFlexWindow", nullptr, nullptr);
-	if(!m_window)
+	if (!m_window)
 	{
 		printf("%s", "window not constructed correctly!\n");
 
 		glfwTerminate();
-		return;
+		return false;
 	}
 
 	// Select a current OpenGL context.
 	glfwMakeContextCurrent(m_window);
 
-	// Renderer init.
-	if(!m_renderer.Init(initWidth, initHeight, m_window))
-	{
-		printf("%s", "renderer init failed!\n");
-	}
-
-	// Temporary model.
-	m_model.Init();
-
-	// Upload temporary model.
-	m_renderer.UploadData(m_model.GetVertexData());
-
 	// Store the window pointer in the internals of GLFW to access in bindings.
 	glfwSetWindowUserPointer(m_window, this);
 
 	// Bind input events.
-	glfwSetKeyCallback(m_window, AFInput::OnKeyboardInput);
-	glfwSetMouseButtonCallback(m_window, AFInput::OnCursorInput);
-	glfwSetCursorPosCallback(m_window, AFInput::OnCursorUpdate);
+	glfwSetKeyCallback(m_window, AFInput::OnKeyCallback);
+	glfwSetMouseButtonCallback(m_window, AFInput::OnMouseButtonCallback);
+	glfwSetCursorPosCallback(m_window, AFInput::OnCursorPosCallback);
+	glfwSetScrollCallback(m_window, AFInput::OnScrollCallback);
 
 	// Bind window resize.
-	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* InWindow, int InNewWidth, int InNewHeight)
-	{
-			AFWindow* windowInstance = static_cast<AFWindow*>(glfwGetWindowUserPointer(InWindow));
-			if(windowInstance)
+	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int newWidth, int newHeight)
+		{
+			AFWindow* windowInstance = static_cast<AFWindow*>(glfwGetWindowUserPointer(window));
+			if (windowInstance)
 			{
-				windowInstance->OnWindowResize(InNewWidth, InNewHeight);
+				windowInstance->OnWindowResize(newWidth, newHeight);
 			}
-	});
+		});
 
 #ifdef __EMSCRIPTEN__
 
@@ -118,7 +67,7 @@ AFWindow::AFWindow()
 	{
 		printf("Failed to get the primary monitor!\n");
 		glfwTerminate();
-		return;
+		return false;
 	}
 
 	// Get the monitor's video mode (resolution, refresh rate, etc.).
@@ -127,7 +76,7 @@ AFWindow::AFWindow()
 	{
 		printf("Failed to get video mode for the primary monitor!\n");
 		glfwTerminate();
-		return;
+		return false;
 	}
 
 	const int width = videoMode->width;
@@ -137,11 +86,40 @@ AFWindow::AFWindow()
 
 #endif
 
-	// Create the game.
-	AFGame& game = AFGame::GetInstance();
-	game.Init();
+	return true;
+}
 
-	m_previousTime = static_cast<float>(glfwGetTime());
+GLFWwindow* AFWindow::GetGLFWWindow() const
+{
+	return m_window;
+}
+
+int AFWindow::GetWidth() const
+{
+	int width = 0;
+	int height = 0;
+	glfwGetWindowSize(m_window, &width, &height);
+
+	return width;
+}
+
+int AFWindow::GetHeight() const
+{
+	int width = 0;
+	int height = 0;
+	glfwGetWindowSize(m_window, &width, &height);
+
+	return height;
+}
+
+bool AFWindow::ShouldShutdown()
+{
+	return glfwWindowShouldClose(m_window);
+}
+
+AFWindow::AFWindow()
+{
+
 }
 
 AFWindow::~AFWindow()
@@ -149,34 +127,18 @@ AFWindow::~AFWindow()
 	glfwTerminate();
 }
 
-void AFWindow::Tick_Internal(float deltaTime)
+void AFWindow::SwapBuffers()
 {
-	AFGame& game = AFGame::GetInstance();
-	game.Tick(deltaTime);
-
-	m_renderer.Draw();
+	glfwSwapBuffers(m_window);
 }
 
-void AFWindow::Tick()
+void AFWindow::PollEvents()
 {
-	// Calculate delta time.
-	const float currentTime = static_cast<float>(glfwGetTime());
-	deltaTime = currentTime - m_previousTime;
-	m_previousTime = currentTime;
-
-	AFUtil::deltaTime = deltaTime;
-
-	AFInput::Tick(m_window);
-
-	// Internal tick, doing all the heavy work.
-	Tick_Internal(deltaTime);
-
-	glfwSwapBuffers(m_window);
 	glfwPollEvents();
 }
 
 void AFWindow::OnWindowResize(int newWidth, int newHeight)
 {
 	glfwSetWindowSize(m_window, newWidth, newHeight);
-	m_renderer.SetSize(newWidth, newHeight);
+	m_resizeCallback(newWidth, newHeight);
 }

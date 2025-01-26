@@ -1,19 +1,13 @@
 #include "AFRenderer.h"
+#include "AFGame.h"
+#include "AFTimerManager.h"
 
 #include <ostream>
+#include <GLFW/glfw3.h>
 #include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
 
-#include "AFGame.h"
-#include "AFTimer.h"
-
-bool AFRenderer::Init(int width, int height, GLFWwindow* window)
+bool AFRenderer::Init(int width, int height)
 {
-	m_renderData.window = window;
-
-	m_renderData.width = width;
-	m_renderData.height = height;
-
 	// Load OpenGL function pointers.
 	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -25,60 +19,29 @@ bool AFRenderer::Init(int width, int height, GLFWwindow* window)
 
 	printf("%s\n", GetOpenGLVersion());
 
-	//glFrontFace(GL_CCW);
-
+	// Init the frame buffer with initial information, tell it how to interpret textures, tell it to create depth buffer.
 	if(!m_framebuffer.Init(width, height))
 	{
 		return false;
 	}
 
-	if(!m_tex.LoadTexture("content/textures/crate2.png"))
-	{
-		return false;
-	}
+	// Load all render components.
+	// ...
 
-	m_vertexBuffer.Init();
-
-	if(!m_basicShader.LoadShaders("content/shaders/basic.vert", "content/shaders/basic.frag"))
-	{
-		return false;
-	}
-
-	if (!m_changedShader.LoadShaders("content/shaders/changed.vert", "content/shaders/changed.frag"))
-	{
-		return false;
-	}
-
+	// Set up the uniform buffer.
 	m_uniformBuffer.Init();
-
-	m_userInterface.Init(m_renderData);
 
 	return true;
 }
 
 void AFRenderer::SetSize(int newWidth, int newHeight)
 {
-	m_renderData.width = newWidth;
-	m_renderData.height = newHeight;
-
 	m_framebuffer.Resize(newWidth, newHeight);
 	glViewport(0, 0, newWidth, newHeight);
 }
 
-void AFRenderer::UploadData(const AFMesh& newMesh)
-{
-	m_renderData.vertexCount = newMesh.vertices.size();
-	m_renderData.triangleCount = newMesh.vertices.size() / 3;
-	m_vertexBuffer.UploadData(newMesh);
-}
-
 void AFRenderer::Cleanup()
 {
-	m_basicShader.Cleanup();
-	m_changedShader.Cleanup();
-
-	m_tex.Cleanup();
-	m_vertexBuffer.Cleanup();
 	m_framebuffer.Cleanup();
 	m_userInterface.Cleanup();
 }
@@ -97,57 +60,73 @@ const GLubyte* AFRenderer::GetOpenGLVersion()
 	return glGetString(GL_VERSION);
 }
 
-void AFRenderer::Draw()
+void AFRenderer::Draw(const AFSceneData& sceneData)
 {
 	AFGame& game = AFGame::GetInstance();
-	const bool testState = game.GetTestState();
 
-	AFTimer drawTimer;
+	// Start the timer to count how long does it take to draw stuff into the frame buffer.
+	AFTimerManager::AFTimer drawTimer;
 	drawTimer.Start();
 
+	// Enable drawing to the frame buffer.
 	m_framebuffer.Bind();
+
+	// Set the background colour.
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
+	// Clear colour and depth buffers.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Enable face culling to not render back of triangles.
 	glEnable(GL_CULL_FACE);
 
-	if (m_renderData.width > 0 && m_renderData.height > 0)
+	const glm::vec2& frameBufferSize = m_framebuffer.GetSize();
+	// Safely create the projection matrix given screen width/height and camera's FOV.
+	if (frameBufferSize.x > 0 && frameBufferSize.y > 0)
 	{
 		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(m_renderData.fieldOfView)),
-			static_cast<float>(m_renderData.width) / static_cast<float>(m_renderData.height), 0.1f, 100.0f);
+			static_cast<float>(frameBufferSize.x) / static_cast<float>(frameBufferSize.y), 0.1f, 100.0f);
 	}
-	glm::mat4 view = glm::mat4(1.0f);
 
-	const float t = /*static_cast<float>(glfwGetTime())*/ 0.0f;
-	if(testState)
-	{
-		m_changedShader.Use();
-		view = glm::rotate(glm::mat4(1.0f), t, glm::vec3(0.0f, 0.0f, 1.0f));
+	// Create the view matrix given camera's transform.
+	m_viewMatrix = game.GetCamera().GetViewMatrix();
 
-	}
-	else
-	{
-		m_basicShader.Use();
-		view = glm::rotate(glm::mat4(1.0f), -t, glm::vec3(0.0f, 0.0f, 1.0f));
-	}
-	m_viewMatrix = game.GetCamera().GetViewMatrix() * view;
+	// Upload the view and projection matrices into the uniform buffer, which will be used across shaders.
 	m_uniformBuffer.UploadUBOData(m_viewMatrix, m_projectionMatrix);
-	
+
+	// Per object draw.
+
+	// Tell the gpu which shader to use.
+	m_basicShader.Use();
+	// Bind texture object - it will be used during drawing of triangles to push the texture data to frag shader.
 	m_tex.Bind();
+	// Bind the vertex buffer which already contains information about vertices - their locations, color, uv mapping, etc. 
 	m_vertexBuffer.Bind();
+	// Draw the triangles.
 	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_renderData.vertexCount);
+	// Unbind the buffer with vertices.
 	m_vertexBuffer.UnBind();
+	// Unbind the texture object.
 	m_tex.UnBind();
+
+	// Unbind the frame buffer, we don't want to draw to it anymore.
 	m_framebuffer.UnBind();
 
+	// Draw all the contents of the frame buffer to the screen.
 	m_framebuffer.DrawToScreen();
 
+	// Check how long it took.
 	m_renderData.gameDrawTime = drawTimer.Stop();
 
+	// Start the timer for UI drawing.
 	drawTimer.Start();
 
+	// Create frame buffer for UI.
 	m_userInterface.CreateFrame(m_renderData);
+	// Draw the UI frame buffer.
 	m_userInterface.Render();
 
+	// Check how long it took.
 	m_renderData.uiDrawTime = drawTimer.Stop();
 }
 
