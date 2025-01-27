@@ -10,7 +10,7 @@ AFRenderComponent::~AFRenderComponent()
 
 int AFRenderComponent::GetTrianglesNum()
 {
-
+	return 0;
 }
 
 bool AFRenderComponent::Load()

@@ -2,19 +2,32 @@
 
 #include "AFInput.h"
 #include "AFStructs.h"
+#include "AFCameraManager.h"
 
 AFApp::AFApp()
 {
 	constexpr int initWidth = 800;
 	constexpr int initHeight = 600;
 
-	if(!m_window.Init(initWidth, initHeight))
+	if(!m_config.Init("config/config.ini"))
+	{
+		printf("%s\n", "Config Init() failed.");
+		return;
+	}
+
+	SetWindowCallbacks();
+
+	if (!m_window.Init(initWidth, initHeight))
 	{
 		printf("%s\n", "Window Init() failed.");
 		return;
 	}
 
-	SetWindowCallbacks();
+	if (!m_renderer.Init(initWidth, initHeight))
+	{
+		printf("%s\n", "Renderer Init() failed.");
+		return;
+	}
 
 	if (!m_game.Init())
 	{
@@ -22,9 +35,9 @@ AFApp::AFApp()
 		return;
 	}
 
-	if(!m_renderer.Init(initWidth, initHeight))
+	if(!m_helperInterface.Init(m_window))
 	{
-		printf("%s\n", "Renderer Init() failed.");
+		printf("%s\n", "Helper Interface Init() failed.");
 		return;
 	}
 
@@ -68,13 +81,14 @@ void AFApp::Tick()
 	// Calculate delta time.
 	AFTimerManager::GetInstance().DeltaCalc();
 
-	AFInput::Tick();
+	AFInput::GetInstance().Tick();
 	m_game.Tick(AFTimerManager::GetDeltaTime());
 	m_renderer.Draw(m_game.GetScene().GetSceneData());
 
 	AFAppData appData;
 	CollectAppData(appData);
-	m_helperInterface.Draw(appData);
+
+	m_helperInterface.Draw(appData, m_game.GetScene().GetSceneData());
 
 	m_window.SwapBuffers();
 	m_window.PollEvents();
@@ -83,8 +97,6 @@ void AFApp::Tick()
 void AFApp::CollectAppData(AFAppData& appData)
 {
 	appData.window = m_window.GetGLFWWindow();
-	appData.activeCamera = m_game.GetCameraManager().GetActiveCamera();
-	appData.triangles = m_scene.GetTotalNumTriangles();
 	appData.width = m_window.GetWidth();
 	appData.height = m_window.GetHeight();
 }

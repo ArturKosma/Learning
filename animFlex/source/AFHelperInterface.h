@@ -5,13 +5,13 @@ class AFHelperInferface
 {
 public:
 
-	void Init(const AFAppData& appData);
-	void Draw(const AFAppData& appData);
+	bool Init(const class AFWindow& window);
+	void Draw(const AFAppData& appData, const AFSceneData& sceneData);
 	void Cleanup();
 
 private:
 
-	void CreateFrame(const AFAppData& appData);
+	bool CreateFrame(const AFAppData& appData, const AFSceneData& sceneData);
 	void Render();
 
 	bool m_checkBox_testState = false;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <glm/glm.hpp>
 
 struct AFCameraProperties
 {
@@ -11,13 +12,13 @@ struct AFSceneData
 {
 	std::vector<class AFActor*> sceneActors = std::vector<class AFActor*>();
 	int sceneTriangles = 0;
+	class AFCamera* activeCamera = nullptr;
+	int triangles = 0;
 };
 
 struct AFAppData
 {
-	const class GLFWwindow* window = nullptr;
-	class AFCamera* activeCamera = nullptr;
-	int triangles = 0;
+	struct GLFWwindow* window = nullptr;
 	int width = 0;
 	int height = 0;
 };

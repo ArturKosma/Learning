@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AFConfig.h"
 #include "AFWindow.h"
 #include "AFRenderer.h"
 #include "AFGame.h"
@@ -33,4 +34,5 @@ private:
 	AFRenderer m_renderer = AFRenderer();
 	AFGame m_game = AFGame();
 	AFHelperInferface m_helperInterface = AFHelperInferface();
+	AFConfig m_config = AFConfig();
 };

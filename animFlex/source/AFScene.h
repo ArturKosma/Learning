@@ -15,7 +15,7 @@ public:
 
 private:
 
-	void Init();
+	bool Init();
 	void CreateDefaultSceneActors();
 
 	AFScene();

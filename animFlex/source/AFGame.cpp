@@ -5,12 +5,12 @@
 
 #include <glm/glm.hpp>
 
-void AFGame::Init()
+bool AFGame::Init()
 {
 	if (!m_scene.Init())
 	{
 		printf("%s\n", "Scene Init() failed.");
-		return;
+		return false;
 	}
 
 	AFCamera* initCamera = new AFCamera();
@@ -18,6 +18,8 @@ void AFGame::Init()
 
 	m_cameraManager = new AFCameraManager();
 	m_cameraManager->SetActiveCamera(initCamera);
+
+	return true;
 }
 
 void AFGame::Tick(float deltaTime)
@@ -48,28 +50,20 @@ AFGame::~AFGame()
 
 }
 
-void AFGame::OnInput(int pressState)
-{
-	/*if(pressState == 1)
-	{
-		SetTestState(!m_testState);
-	}*/
-}
-
 void AFGame::OnCursorPosUpdate(double deltaX, double deltaY)
 {
-	if(AFInput::GetMouseLock())
+	/*if(AFInput::GetMouseLock())
 	{
 		constexpr float cameraRotStrength = 5.0f;
 
 		m_camera.AddRotation(glm::vec3(static_cast<float>(deltaY) * AFTimerManager::GetDeltaTime() * cameraRotStrength,
 			static_cast<float>(deltaX) * AFTimerManager::GetDeltaTime() * cameraRotStrength, 0.0f));
-	}
+	}*/
 }
 
 void AFGame::OnAxisInput(const std::map<unsigned int, float>& axisInputs)
 {
-	if (AFInput::GetMouseLock())
+	/*if (AFInput::GetMouseLock())
 	{
 		const float forwardBackward = axisInputs.at(0);
 		const float leftRight = axisInputs.at(1);
@@ -86,15 +80,10 @@ void AFGame::OnAxisInput(const std::map<unsigned int, float>& axisInputs)
 			(up * upDown);
 
 		m_camera.AddMovementInput(offsetToAdd);
-	}
+	}*/
 }
 
 void AFGame::OnScrollUpdate(double deltaX, double deltaY)
 {
-	m_camera.UpdateCameraSpeed(deltaY);
-}
-
-void AFGame::SetTestState(bool newTestState)
-{
-	m_testState = newTestState;
+	//m_camera.UpdateCameraSpeed(deltaY);
 }

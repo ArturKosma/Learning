@@ -28,12 +28,14 @@ const AFSceneData& AFScene::GetSceneData() const
 	return m_sceneData;
 }
 
-void AFScene::Init()
+bool AFScene::Init()
 {
 	// Reserve some space for the scene.
 	m_sceneData.sceneActors.reserve(20);
 
 	CreateDefaultSceneActors();
+
+	return true;
 }
 
 void AFScene::CreateDefaultSceneActors()

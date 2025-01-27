@@ -7,22 +7,24 @@ class AFInput
 
 public:
 
-	AFInput() = delete;
-	~AFInput() = delete;
+	static AFInput& GetInstance();
 
-	static bool GetMouseLock();
+	bool GetMouseLock();
 
 private:
 
-	static void Tick();
+	AFInput();
+	~AFInput();
 
-	static void OnKeyCallback(struct GLFWwindow* window, int key, int scanCode, int action, int mods);
-	static void OnMouseButtonCallback(struct GLFWwindow* window, int button, int action, int mods);
-	static void OnCursorPosCallback(struct GLFWwindow* window, double xoffset, double yoffset);
-	static void OnScrollCallback(struct GLFWwindow* window, double xcursor, double ycursor);
+	void Tick();
 
-	static double cursorXPos;
-	static double cursorYPos;
+	void OnKeyCallback(struct GLFWwindow* window, int key, int scanCode, int action, int mods);
+	void OnMouseButtonCallback(struct GLFWwindow* window, int button, int action, int mods);
+	void OnCursorPosCallback(struct GLFWwindow* window, double xoffset, double yoffset);
+	void OnScrollCallback(struct GLFWwindow* window, double xscroll, double yscroll);
 
-	static bool mouseLock;
+	double m_cursorXPos = 0.0f;
+	double m_cursorYPos = 0.0f;
+
+	bool m_mouseLock = false;
 };

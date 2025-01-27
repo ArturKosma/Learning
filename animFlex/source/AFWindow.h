@@ -7,11 +7,13 @@ class AFWindow
 {
 	friend class AFApp;
 
+public:
+
+	GLFWwindow* GetGLFWWindow() const;
+
 private:
 
 	bool Init(int initWidth, int initHeight);
-
-	GLFWwindow* GetGLFWWindow() const;
 
 	int GetWidth() const;
 	int GetHeight() const;

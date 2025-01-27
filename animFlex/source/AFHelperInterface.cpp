@@ -6,23 +6,27 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-void AFHelperInferface::Init(const AFAppData& appData)
+#include "AFWindow.h"
+
+bool AFHelperInferface::Init(const class AFWindow& window)
 {
 	IMGUI_CHECKVERSION();
 
 	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(appData.window, true);
+	ImGui_ImplGlfw_InitForOpenGL(window.GetGLFWWindow(), true);
 	const char* glslVersion = "#version 300 es";
 	ImGui_ImplOpenGL3_Init(glslVersion);
+
+	return true;
 }
 
-void AFHelperInferface::Draw(const AFAppData& appData)
+void AFHelperInferface::Draw(const AFAppData& appData, const AFSceneData& sceneData)
 {
-	CreateFrame(appData);
+	CreateFrame(appData, sceneData);
 	Render();
 }
 
-void AFHelperInferface::CreateFrame(const AFAppData& appData)
+bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData& sceneData)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -40,7 +44,7 @@ void AFHelperInferface::CreateFrame(const AFAppData& appData)
 
 	ImGui::Text("Triangles:");
 	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(appData.triangles).c_str());
+	ImGui::Text("%s", std::to_string(sceneData.triangles).c_str());
 
 	std::string windowDims = std::to_string(appData.width) + "x" + std::to_string(appData.height);
 	ImGui::Text("Window Dimensions:");
@@ -60,11 +64,16 @@ void AFHelperInferface::CreateFrame(const AFAppData& appData)
 
 	ImGui::Separator();
 
-	const AFCamera& camera = *appData.activeCamera;
+	const AFCamera* const camera = sceneData.activeCamera;
+	if(!camera)
+	{
+		ImGui::End();
+		return false;
+	}
 
 	ImGui::Text("Field of View");
 	ImGui::SameLine();
-	int tempFOV = camera.GetCameraProperties().fieldOfView;
+	int tempFOV = camera->GetCameraComponent()->GetCameraProperties().fieldOfView;
 	if(ImGui::SliderInt("##FOV", &tempFOV, 40, 150))
 	{
 		
@@ -74,20 +83,22 @@ void AFHelperInferface::CreateFrame(const AFAppData& appData)
 
 	ImGui::Text("Camera Pos:");
 	ImGui::SameLine();
-	const std::string& posStr = std::to_string(camera.GetPosition().x) + ", " + 
-		std::to_string(camera.GetPosition().y) + ", " + std::to_string(camera.GetPosition().z);
+	const std::string& posStr = std::to_string(camera->GetLocation().x) + ", " +
+		std::to_string(camera->GetLocation().y) + ", " + std::to_string(camera->GetLocation().z);
 	ImGui::Text("%s", posStr.c_str());
 	ImGui::Text("Camera Rot:");
 	ImGui::SameLine();
-	const std::string& rotStr = std::to_string(camera.GetRotationEuler().x) + ", " +
-		std::to_string(camera.GetRotationEuler().y) + ", " + std::to_string(camera.GetRotationEuler().z);
+	const std::string& rotStr = std::to_string(camera->GetRotation().x) + ", " +
+		std::to_string(camera->GetRotation().y) + ", " + std::to_string(camera->GetRotation().z);
 	ImGui::Text("%s", rotStr.c_str());
 	ImGui::Text("Camera Speed:");
-	ImGui::SameLine();
+	/*ImGui::SameLine();
 	const std::string& camspeed = std::to_string(camera.GetCameraSpeedMultiplier());
-	ImGui::Text("%s", camspeed.c_str());
+	ImGui::Text("%s", camspeed.c_str());*/
 
 	ImGui::End();
+
+	return true;
 }
 
 void AFHelperInferface::Render()

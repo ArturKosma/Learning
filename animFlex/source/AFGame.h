@@ -9,7 +9,7 @@ class AFGame
 
 public:
 
-	void Init();
+	bool Init();
 	void Tick(float newDeltaTime);
 
 	class AFCameraManager* GetCameraManager() const;
@@ -23,7 +23,6 @@ private:
 
 	AFScene m_scene = AFScene();
 
-	void OnInput(int pressState);
 	void OnCursorPosUpdate(double deltaX, double deltaY);
 	void OnAxisInput(const std::map<unsigned int, float>& axisInputs);
 	void OnScrollUpdate(double deltaX, double deltaY);

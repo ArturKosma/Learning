@@ -3,6 +3,7 @@
 #include "AFStructs.h"
 
 #include <iostream>
+#include <glad/glad.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -38,11 +39,32 @@ bool AFWindow::Init(int initWidth, int initHeight)
 	// Store the window pointer in the internals of GLFW to access in bindings.
 	glfwSetWindowUserPointer(m_window, this);
 
+	// Load OpenGL function pointers.
+	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
+	{
+		printf("%s\n", "failed to initialize glad!");
+
+		glfwTerminate();
+		return false;
+	}
+
 	// Bind input events.
-	glfwSetKeyCallback(m_window, AFInput::OnKeyCallback);
-	glfwSetMouseButtonCallback(m_window, AFInput::OnMouseButtonCallback);
-	glfwSetCursorPosCallback(m_window, AFInput::OnCursorPosCallback);
-	glfwSetScrollCallback(m_window, AFInput::OnScrollCallback);
+	glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
+	{
+		AFInput::GetInstance().OnKeyCallback(window, key, scanCode, action, mods);
+	});
+	glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods)
+	{
+		AFInput::GetInstance().OnMouseButtonCallback(window, button, action, mods);
+	});
+	glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xoffset, double yoffset)
+	{
+		AFInput::GetInstance().OnCursorPosCallback(window, xoffset, yoffset);
+	});
+	glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xcursor, double ycursor)
+	{
+		AFInput::GetInstance().OnScrollCallback(window, xcursor, ycursor);
+	});
 
 	// Bind window resize.
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int newWidth, int newHeight)
