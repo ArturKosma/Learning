@@ -23,7 +23,7 @@ void AFStaticMeshComponent::Draw() const
 
 int AFStaticMeshComponent::GetTrianglesNum()
 {
-	return m_mesh.vertices.size() / 3;
+	return static_cast<int>(m_mesh.vertices.size() / 3);
 }
 
 bool AFStaticMeshComponent::Load()

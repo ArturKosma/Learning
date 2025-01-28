@@ -13,7 +13,6 @@ struct AFSceneData
 	std::vector<class AFActor*> sceneActors = std::vector<class AFActor*>();
 	int sceneTriangles = 0;
 	class AFCamera* activeCamera = nullptr;
-	int triangles = 0;
 };
 
 struct AFAppData

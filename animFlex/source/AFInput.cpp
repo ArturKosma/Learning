@@ -1,11 +1,10 @@
 #include "AFInput.h"
-
-#include <cstdio>
-#include <imgui_impl_glfw.h>
-#include <GLFW/glfw3.h>
-
 #include "AFConfig.h"
 #include "AFUtility.h"
+
+#include <algorithm>
+#include <imgui_impl_glfw.h>
+#include <GLFW/glfw3.h>
 
 void AFInput::OnKeyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods)
 {
@@ -15,7 +14,7 @@ void AFInput::OnKeyCallback(GLFWwindow* window, int key, int scanCode, int actio
 	}
 
 	// Update the state of all pressed/released keys.
-	m_keystate.insert_or_assign(key, action);
+	m_keystate.insert_or_assign(key, static_cast<float>(std::clamp(action, 0, 1)));
 
 	// See if the key is configured.
 	const AFConfig::FAFConfigMappings& configMappings = AFConfig::GetInstance().GetConfigMappings();
@@ -61,7 +60,7 @@ void AFInput::OnMouseButtonCallback(GLFWwindow* window, int button, int action, 
 	}
 
 	// Update the state of all pressed/released keys.
-	m_keystate.insert_or_assign(button, action);
+	m_keystate.insert_or_assign(button, static_cast<float>(action));
 
 	// See if the button is configured.
 	const AFConfig::FAFConfigMappings& configMappings = AFConfig::GetInstance().GetConfigMappings();
@@ -85,15 +84,40 @@ void AFInput::OnMouseButtonCallback(GLFWwindow* window, int button, int action, 
 	}
 }
 
-void AFInput::OnCursorPosCallback(GLFWwindow* window, double xoffset, double yoffset)
+void AFInput::OnCursorPosCallback(GLFWwindow* window, double posX, double posY)
 {
-	/*if (!m_mouseLock)
+	if(!window)
 	{
-		ImGui_ImplGlfw_CursorPosCallback(window, xoffset, yoffset);
-	}*/
+		return;
+	}
 
-	m_cursorXPos = xoffset;
-	m_cursorYPos = yoffset;
+	const float deltaX = static_cast<float>(posX - m_cursorXPos);
+	const float deltaY = static_cast<float>(posY - m_cursorYPos);
+
+	if(deltaX > 0.0f)
+	{
+		m_keystate.insert_or_assign(1001, deltaX);
+		m_keystate.insert_or_assign(1002, 0.0f);
+	}
+	else if(deltaX < 0.0f)
+	{
+		m_keystate.insert_or_assign(1001, 0.0f);
+		m_keystate.insert_or_assign(1002, abs(deltaX));
+	}
+
+	if (deltaY > 0.0f)
+	{
+		m_keystate.insert_or_assign(1003, deltaY);
+		m_keystate.insert_or_assign(1004, 0.0f);
+	}
+	else if (deltaY < 0.0f)
+	{
+		m_keystate.insert_or_assign(1003, 0.0f);
+		m_keystate.insert_or_assign(1004, abs(deltaY));
+	}
+
+	m_cursorXPos = posX;
+	m_cursorYPos = posY;
 }
 
 void AFInput::Tick()
@@ -105,33 +129,24 @@ void AFInput::Tick()
 			continue;
 		}
 
-		// Find the state of key1 in the axis binding
 		auto foundKeystate1 = m_keystate.find(boundAxis.keyToValue1.first);
-		if(foundKeystate1 == m_keystate.end())
-		{
-			continue;
-		}
-		const bool isPressed1 = foundKeystate1->second;
+		const float state1 = foundKeystate1->second * boundAxis.keyToValue1.second;
 
 		auto foundKeystate2 = m_keystate.find(boundAxis.keyToValue2.first);
-		if (foundKeystate2 == m_keystate.end())
-		{
-			continue;
-		}
-		const bool isPressed2 = foundKeystate2->second;
+		const float state2 = foundKeystate2->second * boundAxis.keyToValue2.second;
 
-		// If both keys or none of them is pressed, send 0.0f.
-		if((isPressed1 && isPressed2) || (!isPressed1 && !isPressed2))
-		{
-			boundAxis.fun(0.0f);
-			continue;
-		}
-
-		const float value = isPressed1 ? boundAxis.keyToValue1.second : (isPressed2 ? boundAxis.keyToValue2.second : 0.0f);
+		const float value = state1 + state2;
 
 		// Call the bound axis with proper value based on keymap.
 		boundAxis.fun(value);
 	}
+
+	// Clear state of inputs that are faked.
+
+	m_keystate.insert_or_assign(1001, 0.0f); // Mouse turn right.
+	m_keystate.insert_or_assign(1002, 0.0f); // Mouse turn left.
+	m_keystate.insert_or_assign(1003, 0.0f); // Mouse tilt up.
+	m_keystate.insert_or_assign(1004, 0.0f); // Mouse tilt down.
 }
 
 AFInput& AFInput::GetInstance()
@@ -142,10 +157,10 @@ AFInput& AFInput::GetInstance()
 
 void AFInput::BindAction(const std::string& actionName, const std::function<void()>& actionFunction, EAFKeyAction keyAction)
 {
-	auto foundMapping = m_boundActionMappings.find(actionName);
+	auto foundMapping = GetInstance().m_boundActionMappings.find(actionName);
 
 	// Modify existing mapping.
-	if(foundMapping != m_boundActionMappings.end())
+	if(foundMapping != GetInstance().m_boundActionMappings.end())
 	{
 		FAFBoundAction foundActionFuctions = foundMapping->second;
 		if(keyAction == EAFKeyAction::Pressed)
@@ -156,7 +171,7 @@ void AFInput::BindAction(const std::string& actionName, const std::function<void
 		{
 			foundActionFuctions.onReleased = actionFunction;
 		}
-		m_boundActionMappings.insert_or_assign(actionName, foundActionFuctions);
+		GetInstance().m_boundActionMappings.insert_or_assign(actionName, foundActionFuctions);
 	}
 	// Add completely new mapping.
 	else
@@ -170,7 +185,7 @@ void AFInput::BindAction(const std::string& actionName, const std::function<void
 		{
 			newActionFuctions.onReleased = actionFunction;
 		}
-		m_boundActionMappings.insert_or_assign(actionName, newActionFuctions);
+		GetInstance().m_boundActionMappings.insert_or_assign(actionName, newActionFuctions);
 	}
 }
 
@@ -189,7 +204,7 @@ void AFInput::BindAxis(const std::string& axis, const std::function<void(float)>
 	boundAxis.keyToValue1 = foundAxis->second.keyToValue1;
 	boundAxis.keyToValue2 = foundAxis->second.keyToValue2;
 
-	m_boundAxisMappings.insert_or_assign(axis, boundAxis);
+	GetInstance().m_boundAxisMappings.insert_or_assign(axis, boundAxis);
 }
 
 void AFInput::Init()
@@ -197,12 +212,8 @@ void AFInput::Init()
 	// Register all configurable keys into keystate map.
 	for(const auto& [action, key] : AFUtility::GetConfigurableKeys())
 	{
-		m_keystate.insert_or_assign(key, 0);
+		GetInstance().m_keystate.insert_or_assign(key, 0.0f);
 	}
-
-	//BindAction("FreeViewMode", []{printf("freeview mode pressed\n"); }, EAFKeyAction::Pressed);
-	//BindAction("FreeViewMode", []{printf("freeview mode released\n"); }, EAFKeyAction::Released);
-	//BindAxis("FreeView_UpDown", [](float axis) {printf("%f\n", axis); });
 }
 
 AFInput::AFInput()

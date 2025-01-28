@@ -1,5 +1,6 @@
 #include "AFGame.h"
 #include "AFCamera.h"
+#include "AFInput.h"
 
 bool AFGame::Init()
 {
@@ -12,6 +13,8 @@ bool AFGame::Init()
 	AFCamera* initCamera = new AFCamera();
 	m_scene.AddActor(initCamera);
 	m_scene.SetActiveCamera(initCamera);
+
+	BindInputs();
 
 	return true;
 }
@@ -27,6 +30,51 @@ void AFGame::Tick(float deltaTime)
 const AFScene& AFGame::GetScene()
 {
 	return m_scene;
+}
+
+void AFGame::BindInputs()
+{
+	AFInput::BindAction("FreeViewMode", [this] {Input_FreeViewMode_Pressed(); }, EAFKeyAction::Pressed);
+	AFInput::BindAction("FreeViewMode", [this] {Input_FreeViewMode_Released(); }, EAFKeyAction::Released);
+
+	AFInput::BindAxis("FreeView_CameraYaw", [this](float deltaX) {Input_FreeView_CameraYaw(deltaX); });
+	AFInput::BindAxis("FreeView_CameraPitch", [this](float deltaY) {Input_FreeView_CameraPitch(deltaY); });
+
+	AFInput::BindAxis("FreeView_ForwardBackward", [this](float axis) {Input_FreeView_ForwardBackward(axis); });
+	AFInput::BindAxis("FreeView_RightLeft", [this](float axis) {Input_FreeView_RightLeft(axis); });
+	AFInput::BindAxis("FreeView_UpDown", [this](float axis) {Input_FreeView_UpDown(axis); });
+}
+
+void AFGame::Input_FreeViewMode_Pressed()
+{
+	m_freeViewMode = true;
+}
+
+void AFGame::Input_FreeViewMode_Released()
+{
+	m_freeViewMode = false;
+}
+
+void AFGame::Input_FreeView_CameraYaw(float deltaX)
+{
+	//printf("%f\n", deltaX);
+}
+
+void AFGame::Input_FreeView_CameraPitch(float deltaY)
+{
+}
+
+void AFGame::Input_FreeView_ForwardBackward(float axis)
+{
+	
+}
+
+void AFGame::Input_FreeView_RightLeft(float axis)
+{
+}
+
+void AFGame::Input_FreeView_UpDown(float axis)
+{
 }
 
 AFGame::AFGame()

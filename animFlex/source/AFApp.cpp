@@ -14,7 +14,7 @@ AFApp::AFApp()
 		return;
 	}
 
-	AFInput::GetInstance().Init();
+	AFInput::Init();
 
 	SetWindowCallbacks();
 
@@ -51,7 +51,7 @@ AFApp::~AFApp()
 
 void AFApp::StartLoop()
 {
-	AFInput::GetInstance().BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window.GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
+	AFInput::BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window.GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
 
 #ifdef __EMSCRIPTEN__
 	printf("Running on Emscripten.\n");

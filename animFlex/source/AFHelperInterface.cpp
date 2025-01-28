@@ -44,7 +44,7 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 
 	ImGui::Text("Triangles:");
 	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(sceneData.triangles).c_str());
+	ImGui::Text("%s", std::to_string(sceneData.sceneTriangles).c_str());
 
 	std::string windowDims = std::to_string(appData.width) + "x" + std::to_string(appData.height);
 	ImGui::Text("Window Dimensions:");
@@ -53,27 +53,9 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 
 	ImGui::Separator();
 
-	ImGui::Checkbox("Test State", &m_checkBox_testState);
-	if(m_checkBox_testState)
-	{
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-		ImGui::Text("Yes");
-		ImGui::PopStyleColor();
-	}
-
-	ImGui::Separator();
-
-	const AFCamera* const camera = sceneData.activeCamera;
-	if(!camera)
-	{
-		ImGui::End();
-		return false;
-	}
-
 	ImGui::Text("Field of View");
 	ImGui::SameLine();
-	int tempFOV = camera->GetCameraComponent()->GetCameraProperties().fieldOfView;
+	int tempFOV = sceneData.activeCamera->GetCameraComponent()->GetCameraProperties().fieldOfView;
 	if(ImGui::SliderInt("##FOV", &tempFOV, 40, 150))
 	{
 		
@@ -83,15 +65,15 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 
 	ImGui::Text("Camera Pos:");
 	ImGui::SameLine();
-	const std::string& posStr = std::to_string(camera->GetLocation().x) + ", " +
-		std::to_string(camera->GetLocation().y) + ", " + std::to_string(camera->GetLocation().z);
+	const std::string& posStr = std::to_string(sceneData.activeCamera->GetLocation().x) + ", " +
+		std::to_string(sceneData.activeCamera->GetLocation().y) + ", " + std::to_string(sceneData.activeCamera->GetLocation().z);
 	ImGui::Text("%s", posStr.c_str());
 	ImGui::Text("Camera Rot:");
 	ImGui::SameLine();
-	const std::string& rotStr = std::to_string(camera->GetRotation().x) + ", " +
-		std::to_string(camera->GetRotation().y) + ", " + std::to_string(camera->GetRotation().z);
+	const std::string& rotStr = std::to_string(sceneData.activeCamera->GetRotation().x) + ", " +
+		std::to_string(sceneData.activeCamera->GetRotation().y) + ", " + std::to_string(sceneData.activeCamera->GetRotation().z);
 	ImGui::Text("%s", rotStr.c_str());
-	ImGui::Text("Camera Speed:");
+	//ImGui::Text("Camera Speed:");
 	/*ImGui::SameLine();
 	const std::string& camspeed = std::to_string(camera.GetCameraSpeedMultiplier());
 	ImGui::Text("%s", camspeed.c_str());*/
