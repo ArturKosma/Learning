@@ -13,8 +13,8 @@ public:
 	void SetTexture(const std::string& texturePath);
 	bool LoadTexture();
 
-	void Bind();
-	void UnBind();
+	void Bind() const;
+	void UnBind() const;
 
 	void Cleanup();
 

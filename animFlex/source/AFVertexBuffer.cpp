@@ -31,17 +31,17 @@ void AFVertexBuffer::UploadMesh(const AFMesh& newMesh)
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::Bind()
+void AFVertexBuffer::Bind() const
 {
 	glBindVertexArray(m_VAO);
 }
 
-void AFVertexBuffer::UnBind()
+void AFVertexBuffer::UnBind() const
 {
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::Draw(GLuint mode, unsigned int start, size_t num)
+void AFVertexBuffer::Draw(GLuint mode, unsigned int start, size_t num) const
 {
 	glDrawArrays(mode, start, static_cast<GLsizei>(num));
 }

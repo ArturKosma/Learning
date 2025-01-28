@@ -6,29 +6,40 @@
 
 #include "AFUtility.h"
 
+AFConfig& AFConfig::GetInstance()
+{
+	static AFConfig config;
+	return config;
+}
+
 bool AFConfig::Init(const std::string& filepath)
 {
 	m_configFilepath = filepath;
 
 	const bool parsed = ParseConfig();
 
-	for(const auto& [keyString, keyInt] : m_actionKeyMappings)
-	{
-		printf("%s : %d\n", keyString.c_str(), keyInt);
-	}
-
-	for (const auto& [keyString, axis] : m_axisKeyMappings)
-	{
-		printf("%s : %d(%f), %d(%f)\n", keyString.c_str(), axis.key1, axis.axis1, axis.key2, axis.axis2);
-	}
-
 	return parsed;
+}
+
+const AFConfig::FAFConfigMappings& AFConfig::GetConfigMappings() const
+{
+	return m_configMappings;
+}
+
+AFConfig::AFConfig()
+{
+
+}
+
+AFConfig::~AFConfig()
+{
+
 }
 
 bool AFConfig::ParseConfig()
 {
-	m_actionKeyMappings.clear();
-	m_axisKeyMappings.clear();
+	m_configMappings.actionMappings.clear();
+	m_configMappings.axisMappings.clear();
 
 	std::ifstream file = std::ifstream(m_configFilepath);
 	if(!file)
@@ -130,7 +141,7 @@ void AFConfig::ParseInputAction(const std::string& line)
 		return;
 	}
 
-	m_actionKeyMappings.insert_or_assign(beforeEqual, intKey);
+	m_configMappings.actionMappings.insert_or_assign(beforeEqual, intKey);
 }
 
 void AFConfig::ParseInputAxis(const std::string& line)
@@ -193,10 +204,8 @@ void AFConfig::ParseInputAxis(const std::string& line)
 	const float rightFloat = static_cast<float>(std::stoi(afterEqualRightPair.second));
 
 	FAFAxis axis;
-	axis.key1 = intKeyLeft;
-	axis.key2 = intKeyRight;
-	axis.axis1 = leftFloat;
-	axis.axis2 = rightFloat;
+	axis.keyToValue1 = { intKeyLeft, leftFloat };
+	axis.keyToValue2 = { intKeyRight, rightFloat };
 
-	m_axisKeyMappings.insert_or_assign(beforeEqual, axis);
+	m_configMappings.axisMappings.insert_or_assign(beforeEqual, axis);
 }

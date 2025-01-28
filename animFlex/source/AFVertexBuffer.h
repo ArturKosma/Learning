@@ -18,10 +18,10 @@ public:
 	void Init();
 	void UploadMesh(const AFMesh& newMesh);
 
-	void Bind();
-	void UnBind();
+	void Bind() const;
+	void UnBind() const;
 
-	void Draw(GLuint mode, unsigned int start, size_t num);
+	void Draw(GLuint mode, unsigned int start, size_t num) const;
 	void Cleanup();
 
 private:

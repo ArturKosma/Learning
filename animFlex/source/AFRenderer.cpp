@@ -1,10 +1,10 @@
 #include "AFRenderer.h"
+#include "AFCamera.h"
 
 #include <ostream>
-#include <GLFW/glfw3.h>
 #include <glm/ext/matrix_clip_space.hpp>
 
-#include "AFCamera.h"
+#include "AFRenderComponent.h"
 
 bool AFRenderer::Init(int width, int height)
 {
@@ -66,12 +66,7 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	// Safely create the projection matrix given screen width/height and camera's FOV.
 	if (frameBufferSize.x > 0 && frameBufferSize.y > 0)
 	{
-		AFCamera* activeCamera = sceneData.activeCamera;
-		if(!activeCamera)
-		{
-			return;
-		}
-		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(activeCamera->GetCameraComponent()->GetCameraProperties().fieldOfView)),
+		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(sceneData.activeCamera->GetCameraComponent()->GetCameraProperties().fieldOfView)),
 			static_cast<float>(frameBufferSize.x) / static_cast<float>(frameBufferSize.y), 0.1f, 100.0f);
 	}
 
@@ -82,19 +77,21 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	m_uniformBuffer.UploadUBOData(m_viewMatrix, m_projectionMatrix);
 
 	// Per object draw.
+	for(const AFActor* const sceneActor : sceneData.sceneActors)
+	{
+		// Per component draw.
+		for(const AFComponent* const component : sceneActor->GetComponents())
+		{
+			const AFRenderComponent* const renderComponent = dynamic_cast<const AFRenderComponent*>(component);
+			if(!renderComponent)
+			{
+				continue;
+			}
 
-	// Tell the gpu which shader to use.
-	/*m_basicShader.Use();
-	// Bind texture object - it will be used during drawing of triangles to push the texture data to frag shader.
-	m_tex.Bind();
-	// Bind the vertex buffer which already contains information about vertices - their locations, color, uv mapping, etc. 
-	m_vertexBuffer.Bind();
-	// Draw the triangles.
-	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_renderData.vertexCount);
-	// Unbind the buffer with vertices.
-	m_vertexBuffer.UnBind();
-	// Unbind the texture object.
-	m_tex.UnBind();*/
+			// Draw.
+			renderComponent->Draw();
+		}
+	}
 
 	// Unbind the frame buffer, we don't want to draw to it anymore.
 	m_framebuffer.UnBind();

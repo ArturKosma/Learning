@@ -39,12 +39,12 @@ void AFTexture::SetTexture(const std::string& texturePath)
 	m_texturePath = texturePath;
 }
 
-void AFTexture::Bind()
+void AFTexture::Bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }
 
-void AFTexture::UnBind()
+void AFTexture::UnBind() const
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

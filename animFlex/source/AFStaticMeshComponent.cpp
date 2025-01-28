@@ -1,5 +1,26 @@
 #include "AFStaticMeshComponent.h"
 
+void AFStaticMeshComponent::Draw() const
+{
+	// Tell the gpu which shader to use.
+	m_shader.Use();
+
+	// Bind texture object - it will be used during drawing of triangles to push the texture data to frag shader.
+	m_tex.Bind();
+
+	// Bind the vertex buffer which already contains information about vertices - their locations, color, uv mapping, etc. 
+	m_vertexBuffer.Bind();
+
+	// Draw the triangles.
+	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_mesh.vertices.size());
+
+	// Unbind the buffer with vertices.
+	m_vertexBuffer.UnBind();
+
+	// Unbind the texture object.
+	m_tex.UnBind();
+}
+
 int AFStaticMeshComponent::GetTrianglesNum()
 {
 	return m_mesh.vertices.size() / 3;

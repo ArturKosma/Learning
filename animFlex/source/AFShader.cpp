@@ -50,7 +50,7 @@ bool AFShader::LoadShaders()
 	return true;
 }
 
-void AFShader::Use()
+void AFShader::Use() const
 {
 	glUseProgram(m_shaderProgram);
 }

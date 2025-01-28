@@ -18,7 +18,6 @@ bool AFRenderComponent::Load()
 	return true;
 }
 
-void AFRenderComponent::Draw()
+void AFRenderComponent::Draw() const
 {
-
 }

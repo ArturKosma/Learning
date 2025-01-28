@@ -12,10 +12,8 @@ enum class EAFParseMode
 
 struct FAFAxis
 {
-	int key1;
-	int key2;
-	float axis1;
-	float axis2;
+	std::pair<int, float> keyToValue1 = {};
+	std::pair<int, float> keyToValue2 = {};
 };
 
 class AFConfig
@@ -25,9 +23,22 @@ class AFConfig
 
 public:
 
+	static AFConfig& GetInstance();
+
+	struct FAFConfigMappings
+	{
+		ActionKeyMap actionMappings = ActionKeyMap();
+		AxisKeyMap axisMappings = AxisKeyMap();
+	};
+
 	bool Init(const std::string& filepath);
 
+	const FAFConfigMappings& GetConfigMappings() const;
+
 private:
+
+	AFConfig();
+	~AFConfig();
 
 	bool ParseConfig();
 
@@ -37,6 +48,5 @@ private:
 	EAFParseMode m_currentParseMode = EAFParseMode::None;
 
 	std::string m_configFilepath = std::string();
-	ActionKeyMap m_actionKeyMappings = ActionKeyMap();
-	AxisKeyMap m_axisKeyMappings = AxisKeyMap();
+	FAFConfigMappings m_configMappings = FAFConfigMappings();
 };

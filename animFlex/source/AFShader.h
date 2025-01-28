@@ -12,7 +12,7 @@ public:
 	void SetFragmentShader(const std::string& inPath);
 
 	bool LoadShaders();
-	void Use();
+	void Use() const;
 	void Cleanup();
 
 private:

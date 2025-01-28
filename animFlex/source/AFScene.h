@@ -10,6 +10,7 @@ class AFScene
 public:
 
 	void AddActor(AFActor* newActor);
+	void SetActiveCamera(class AFCamera* newActiveCamera);
 
 	const AFSceneData& GetSceneData() const;
 

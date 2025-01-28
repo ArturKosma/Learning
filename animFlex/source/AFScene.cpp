@@ -23,6 +23,11 @@ void AFScene::AddActor(AFActor* newActor)
 	m_sceneData.sceneActors.push_back(newActor);
 }
 
+void AFScene::SetActiveCamera(AFCamera* newActiveCamera)
+{
+	m_sceneData.activeCamera = newActiveCamera;
+}
+
 const AFSceneData& AFScene::GetSceneData() const
 {
 	return m_sceneData;

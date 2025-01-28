@@ -1,10 +1,16 @@
 #pragma once
 #include "AFRenderComponent.h"
 #include "AFVertexBuffer.h"
+#include "AFShader.h"
+#include "AFTexture.h"
+
+#include <string>
 
 class AFStaticMeshComponent : public AFRenderComponent
 {
 public:
+
+	void Draw() const override;
 
 	int GetTrianglesNum() override;
 

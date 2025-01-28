@@ -2,18 +2,19 @@
 
 #include "AFInput.h"
 #include "AFStructs.h"
-#include "AFCameraManager.h"
 
 AFApp::AFApp()
 {
 	constexpr int initWidth = 800;
 	constexpr int initHeight = 600;
 
-	if(!m_config.Init("config/config.ini"))
+	if(!AFConfig::GetInstance().Init("config/config.ini"))
 	{
 		printf("%s\n", "Config Init() failed.");
 		return;
 	}
+
+	AFInput::GetInstance().Init();
 
 	SetWindowCallbacks();
 
@@ -23,7 +24,7 @@ AFApp::AFApp()
 		return;
 	}
 
-	if (!m_renderer.Init(initWidth, initHeight))
+	if (!m_renderer.Init(m_window.GetWidth(), m_window.GetHeight()))
 	{
 		printf("%s\n", "Renderer Init() failed.");
 		return;
@@ -50,6 +51,8 @@ AFApp::~AFApp()
 
 void AFApp::StartLoop()
 {
+	AFInput::GetInstance().BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window.GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
+
 #ifdef __EMSCRIPTEN__
 	printf("Running on Emscripten.\n");
 
