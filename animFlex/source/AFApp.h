@@ -1,13 +1,5 @@
 #pragma once
 
-#include "AFConfig.h"
-#include "AFWindow.h"
-#include "AFRenderer.h"
-#include "AFGame.h"
-#include "AFHelperInterface.h"
-#include "AFScene.h"
-#include "AFTimerManager.h"
-
 class AFApp
 {
 public:
@@ -16,6 +8,7 @@ public:
 	~AFApp();
 
 	void StartLoop();
+	void OnWindowResize(int newWidth, int newHeight);
 
 	static AFApp& GetInstance();
 
@@ -23,15 +16,13 @@ private:
 
 	void Tick();
 
-	void CollectAppData(AFAppData& appData);
+	void CollectAppData(struct AFAppData& appData);
 
 	void SetWindowCallbacks();
-	void OnWindowResize(int newWidth, int newHeight);
 
-	AFTimerManager m_timerManager = AFTimerManager();
-
-	AFWindow m_window = AFWindow();
-	AFRenderer m_renderer = AFRenderer();
-	AFGame m_game = AFGame();
-	AFHelperInferface m_helperInterface = AFHelperInferface();
+	class AFTimerManager* m_timerManager = nullptr;
+	class AFWindow* m_window = nullptr;
+	class AFRenderer* m_renderer = nullptr;
+	class AFGame* m_game = nullptr;
+	class AFHelperInferface* m_helperInterface = nullptr;
 };

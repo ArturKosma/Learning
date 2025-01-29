@@ -28,6 +28,11 @@ void AFScene::SetActiveCamera(AFCamera* newActiveCamera)
 	m_sceneData.activeCamera = newActiveCamera;
 }
 
+AFCamera* AFScene::GetActiveCamera() const
+{
+	return m_sceneData.activeCamera;
+}
+
 const AFSceneData& AFScene::GetSceneData() const
 {
 	return m_sceneData;
@@ -203,13 +208,26 @@ void AFScene::CreateDefaultSceneActors()
 	testBoxMesh.vertices[34].uv = glm::vec2(1.0f / 3.0f, 1.0f / 3.0f);
 	testBoxMesh.vertices[35].uv = glm::vec2(2.0f / 3.0f, 1.0f / 3.0f);
 
-	AFActor* testBoxActor = new AFActor();
-	AFStaticMeshComponent* testBox = new AFStaticMeshComponent();
-	testBox->SetMesh(testBoxMesh);
-	testBox->SetTexture("content/textures/crate2.png");
-	testBox->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
-	testBoxActor->AddComponent(testBox);
-	AddActor(testBoxActor);
+	AFActor* testBoxActor0 = new AFActor();
+	AFActor* testBoxActor1 = new AFActor();
+
+	AFStaticMeshComponent* testBox0 = new AFStaticMeshComponent();
+	testBox0->SetMesh(testBoxMesh);
+	testBox0->SetTexture("content/textures/crate2.png");
+	testBox0->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
+
+	AFStaticMeshComponent* testBox1 = new AFStaticMeshComponent();
+	testBox1->SetMesh(testBoxMesh);
+	testBox1->SetTexture("content/textures/crate2.png");
+	testBox1->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
+
+	testBoxActor0->AddComponent(testBox0);
+	testBoxActor1->AddComponent(testBox1);
+
+	AddActor(testBoxActor0);
+	AddActor(testBoxActor1);
+
+	testBoxActor1->AddOffsetLocation({ 3.0f, 0.0f, 0.0f });
 }
 
 AFScene::AFScene()

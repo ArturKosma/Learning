@@ -11,6 +11,7 @@ public:
 	AFCamera();
 
 	AFCameraComponent* GetCameraComponent() const;
+	AFMovementComponent* GetMovementComponent() const;
 
 private:
 

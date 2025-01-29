@@ -11,6 +11,7 @@ public:
 
 	void AddActor(AFActor* newActor);
 	void SetActiveCamera(class AFCamera* newActiveCamera);
+	AFCamera* GetActiveCamera() const;
 
 	const AFSceneData& GetSceneData() const;
 

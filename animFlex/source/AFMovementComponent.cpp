@@ -60,7 +60,7 @@ void AFMovementComponent::AddControlRotation(const glm::vec3& eulerToAdd)
 	}
 
 	m_controlPitch = glm::clamp(m_controlPitch + eulerToAdd.x, -89.0f, 89.0f);
-	m_controlYaw += (eulerToAdd.y * -1.0f);
+	m_controlYaw += eulerToAdd.y;
 
 	const glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
 	const glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));

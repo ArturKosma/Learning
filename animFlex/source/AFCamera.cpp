@@ -14,3 +14,8 @@ AFCameraComponent* AFCamera::GetCameraComponent() const
 {
 	return m_cameraComponent;
 }
+
+AFMovementComponent* AFCamera::GetMovementComponent() const
+{
+	return m_movementComponent;
+}

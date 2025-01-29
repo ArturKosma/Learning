@@ -15,6 +15,11 @@ void AFComponent::Tick(float deltaTime)
 
 }
 
+void AFComponent::SetOwner(AFActor* newOwner)
+{
+    m_owner = newOwner;
+}
+
 AFActor* AFComponent::GetOwner() const
 {
 	return m_owner;
@@ -40,6 +45,17 @@ glm::vec3 AFComponent::GetWorldRotation() const
     }
 
     return glm::degrees(glm::eulerAngles(m_localRotation * owner->GetRotationQuat()));
+}
+
+glm::quat AFComponent::GetWorldRotationQuat() const
+{
+    AFActor* owner = GetOwner();
+    if (!owner)
+    {
+        return glm::quat();
+    }
+
+    return m_localRotation * owner->GetRotationQuat();
 }
 
 glm::vec3 AFComponent::GetWorldScale() const
@@ -72,6 +88,11 @@ glm::vec3 AFComponent::GetLocalLocation() const
 glm::vec3 AFComponent::GetLocalRotation() const
 {
     return glm::degrees(glm::eulerAngles(m_localRotation));
+}
+
+glm::quat AFComponent::GetLocalRotationQuat() const
+{
+    return m_localRotation;
 }
 
 glm::vec3 AFComponent::GetLocalScale() const

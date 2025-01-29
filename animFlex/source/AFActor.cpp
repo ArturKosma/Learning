@@ -23,6 +23,7 @@ void AFActor::Tick(float deltaTime)
 
 void AFActor::AddComponent(AFComponent* newComponent)
 {
+    newComponent->SetOwner(this);
     m_components.push_back(newComponent);
 }
 

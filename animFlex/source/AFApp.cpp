@@ -1,10 +1,21 @@
 #include "AFApp.h"
-
 #include "AFInput.h"
 #include "AFStructs.h"
+#include "AFWindow.h"
+#include "AFRenderer.h"
+#include "AFGame.h"
+#include "AFHelperInterface.h"
+#include "AFTimerManager.h"
+#include "AFConfig.h"
 
 AFApp::AFApp()
 {
+	m_timerManager = new AFTimerManager();
+	m_window = new AFWindow();
+	m_renderer = new AFRenderer();
+	m_game = new AFGame();
+	m_helperInterface = new AFHelperInferface();
+
 	constexpr int initWidth = 800;
 	constexpr int initHeight = 600;
 
@@ -14,29 +25,29 @@ AFApp::AFApp()
 		return;
 	}
 
-	AFInput::Init();
-
 	SetWindowCallbacks();
 
-	if (!m_window.Init(initWidth, initHeight))
+	if (!m_window->Init(initWidth, initHeight))
 	{
 		printf("%s\n", "Window Init() failed.");
 		return;
 	}
 
-	if (!m_renderer.Init(m_window.GetWidth(), m_window.GetHeight()))
+	AFInput::Init(m_window->GetGLFWWindow());
+
+	if (!m_renderer->Init(m_window->GetWidth(), m_window->GetHeight()))
 	{
 		printf("%s\n", "Renderer Init() failed.");
 		return;
 	}
 
-	if (!m_game.Init())
+	if (!m_game->Init())
 	{
 		printf("%s\n", "Game Init() failed.");
 		return;
 	}
 
-	if(!m_helperInterface.Init(m_window))
+	if(!m_helperInterface->Init(*m_window))
 	{
 		printf("%s\n", "Helper Interface Init() failed.");
 		return;
@@ -47,11 +58,16 @@ AFApp::AFApp()
 
 AFApp::~AFApp()
 {
+	delete m_timerManager;
+	delete m_window;
+	delete m_renderer;
+	delete m_game;
+	delete m_helperInterface;
 }
 
 void AFApp::StartLoop()
 {
-	AFInput::BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window.GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
+	AFInput::GetInstance().BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window->GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
 
 #ifdef __EMSCRIPTEN__
 	printf("Running on Emscripten.\n");
@@ -66,7 +82,7 @@ void AFApp::StartLoop()
 #else
 	printf("Not running on Emscripten.\n");
 
-	while (!m_window.ShouldShutdown())
+	while (!m_window->ShouldShutdown())
 	{
 		Tick();
 	}
@@ -85,29 +101,29 @@ void AFApp::Tick()
 	AFTimerManager::GetInstance().DeltaCalc();
 
 	AFInput::GetInstance().Tick();
-	m_game.Tick(AFTimerManager::GetDeltaTime());
-	m_renderer.Draw(m_game.GetScene().GetSceneData());
+	m_game->Tick(AFTimerManager::GetDeltaTime());
+	m_renderer->Draw(m_game->GetScene().GetSceneData());
 
 	AFAppData appData;
 	CollectAppData(appData);
 
-	m_helperInterface.Draw(appData, m_game.GetScene().GetSceneData());
+	m_helperInterface->Draw(appData, m_game->GetScene().GetSceneData());
 
-	m_window.SwapBuffers();
-	m_window.PollEvents();
+	m_window->SwapBuffers();
+	m_window->PollEvents();
 }
 
 void AFApp::CollectAppData(AFAppData& appData)
 {
-	appData.window = m_window.GetGLFWWindow();
-	appData.width = m_window.GetWidth();
-	appData.height = m_window.GetHeight();
+	appData.window = m_window->GetGLFWWindow();
+	appData.width = m_window->GetWidth();
+	appData.height = m_window->GetHeight();
 }
 
 void AFApp::SetWindowCallbacks()
 {
 	// Window resize.
-	m_window.m_resizeCallback = [this](int newWidth, int newHeight)
+	m_window->m_resizeCallback = [this](int newWidth, int newHeight)
 		{
 			OnWindowResize(newWidth, newHeight);
 		};
@@ -116,5 +132,5 @@ void AFApp::SetWindowCallbacks()
 void AFApp::OnWindowResize(int newWidth, int newHeight)
 {
 	// Update the frame buffer.
-	m_renderer.SetSize(newWidth, newHeight);
+	m_renderer->SetSize(newWidth, newHeight);
 }

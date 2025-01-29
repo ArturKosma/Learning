@@ -27,16 +27,16 @@ void AFInput::OnKeyCallback(GLFWwindow* window, int key, int scanCode, int actio
 			{
 				if (action == GLFW_PRESS)
 				{
-					if (foundBound->second.onPressed)
+					for(const std::function<void()>& pressedFunctor : foundBound->second.onPressedFunctors)
 					{
-						foundBound->second.onPressed();
+						pressedFunctor();
 					}
 				}
 				else if (action == GLFW_RELEASE)
 				{
-					if (foundBound->second.onReleased)
+					for (const std::function<void()>& releasedFunctor : foundBound->second.onReleasedFunctors)
 					{
-						foundBound->second.onReleased();
+						releasedFunctor();
 					}
 				}
 			}
@@ -73,11 +73,17 @@ void AFInput::OnMouseButtonCallback(GLFWwindow* window, int button, int action, 
 			{
 				if (action == GLFW_PRESS)
 				{
-					foundBound->second.onPressed();
+					for (const std::function<void()>& pressedFunctor : foundBound->second.onPressedFunctors)
+					{
+						pressedFunctor();
+					}
 				}
 				else if (action == GLFW_RELEASE)
 				{
-					foundBound->second.onReleased();
+					for (const std::function<void()>& releasedFunctor : foundBound->second.onReleasedFunctors)
+					{
+						releasedFunctor();
+					}
 				}
 			}
 		}
@@ -91,8 +97,8 @@ void AFInput::OnCursorPosCallback(GLFWwindow* window, double posX, double posY)
 		return;
 	}
 
-	const float deltaX = static_cast<float>(posX - m_cursorXPos);
-	const float deltaY = static_cast<float>(posY - m_cursorYPos);
+	const float deltaX = static_cast<float>(static_cast<int>(posX) - m_cursorXPos);
+	const float deltaY = static_cast<float>(static_cast<int>(posY) - m_cursorYPos);
 
 	if(deltaX > 0.0f)
 	{
@@ -116,19 +122,15 @@ void AFInput::OnCursorPosCallback(GLFWwindow* window, double posX, double posY)
 		m_keystate.insert_or_assign(1004, abs(deltaY));
 	}
 
-	m_cursorXPos = posX;
-	m_cursorYPos = posY;
+	m_cursorXPos = static_cast<int>(posX);
+	m_cursorYPos = static_cast<int>(posY);
 }
 
 void AFInput::Tick()
 {
+	// Go through all bound axes and call their functors.
 	for(const auto& [axisName, boundAxis] : m_boundAxisMappings)
 	{
-		if(!boundAxis.fun)
-		{
-			continue;
-		}
-
 		auto foundKeystate1 = m_keystate.find(boundAxis.keyToValue1.first);
 		const float state1 = foundKeystate1->second * boundAxis.keyToValue1.second;
 
@@ -137,8 +139,11 @@ void AFInput::Tick()
 
 		const float value = state1 + state2;
 
-		// Call the bound axis with proper value based on keymap.
-		boundAxis.fun(value);
+		for (const std::function<void(float)>& axisFunctor : boundAxis.axisFunctors)
+		{
+			// Call the bound axis functor with proper value based on keymap.
+			axisFunctor(value);
+		}
 	}
 
 	// Clear state of inputs that are faked.
@@ -157,42 +162,40 @@ AFInput& AFInput::GetInstance()
 
 void AFInput::BindAction(const std::string& actionName, const std::function<void()>& actionFunction, EAFKeyAction keyAction)
 {
-	auto foundMapping = GetInstance().m_boundActionMappings.find(actionName);
+	// Allow binding of existing actions only.
+	const AFConfig::FAFConfigMappings& configMappings = AFConfig::GetInstance().GetConfigMappings();
 
-	// Modify existing mapping.
-	if(foundMapping != GetInstance().m_boundActionMappings.end())
+	auto foundAxis = configMappings.actionMappings.find(actionName);
+	if (foundAxis == configMappings.actionMappings.end())
 	{
-		FAFBoundAction foundActionFuctions = foundMapping->second;
-		if(keyAction == EAFKeyAction::Pressed)
-		{
-			foundActionFuctions.onPressed = actionFunction;
-		}
-		else if(keyAction == EAFKeyAction::Released)
-		{
-			foundActionFuctions.onReleased = actionFunction;
-		}
-		GetInstance().m_boundActionMappings.insert_or_assign(actionName, foundActionFuctions);
+		return;
 	}
-	// Add completely new mapping.
-	else
+
+	FAFBoundAction actionWrapper;
+
+	auto foundMapping = m_boundActionMappings.find(actionName);
+	if(foundMapping != m_boundActionMappings.end())
 	{
-		FAFBoundAction newActionFuctions;
-		if (keyAction == EAFKeyAction::Pressed)
-		{
-			newActionFuctions.onPressed = actionFunction;
-		}
-		else if (keyAction == EAFKeyAction::Released)
-		{
-			newActionFuctions.onReleased = actionFunction;
-		}
-		GetInstance().m_boundActionMappings.insert_or_assign(actionName, newActionFuctions);
+		actionWrapper = foundMapping->second; // Modify existing mapping.
 	}
+
+	if (keyAction == EAFKeyAction::Pressed)
+	{
+		actionWrapper.onPressedFunctors.push_back(actionFunction);
+	}
+	else if (keyAction == EAFKeyAction::Released)
+	{
+		actionWrapper.onReleasedFunctors.push_back(actionFunction);
+	}
+
+	m_boundActionMappings.insert_or_assign(actionName, actionWrapper);
 }
 
 void AFInput::BindAxis(const std::string& axis, const std::function<void(float)>& fun)
 {
-	// Remember key to value.
+	// Allow binding of existing axes only.
 	const AFConfig::FAFConfigMappings& configMappings = AFConfig::GetInstance().GetConfigMappings();
+
 	auto foundAxis = configMappings.axisMappings.find(axis);
 	if(foundAxis == configMappings.axisMappings.end())
 	{
@@ -200,20 +203,30 @@ void AFInput::BindAxis(const std::string& axis, const std::function<void(float)>
 	}
 	
 	FAFBoundAxis boundAxis;
-	boundAxis.fun = fun;
+	boundAxis.axisFunctors.push_back(fun);
 	boundAxis.keyToValue1 = foundAxis->second.keyToValue1;
 	boundAxis.keyToValue2 = foundAxis->second.keyToValue2;
 
-	GetInstance().m_boundAxisMappings.insert_or_assign(axis, boundAxis);
+	m_boundAxisMappings.insert_or_assign(axis, boundAxis);
 }
 
-void AFInput::Init()
+bool AFInput::GetFreeViewMode() const
 {
+	return m_freeView;
+}
+
+void AFInput::Init(GLFWwindow* window)
+{
+	GetInstance().m_window = window;
+
 	// Register all configurable keys into keystate map.
 	for(const auto& [action, key] : AFUtility::GetConfigurableKeys())
 	{
 		GetInstance().m_keystate.insert_or_assign(key, 0.0f);
 	}
+
+	GetInstance().BindAction("FreeViewMode", [] {GetInstance().Input_FreeViewMode_Pressed(); }, EAFKeyAction::Pressed);
+	GetInstance().BindAction("FreeViewMode", [] {GetInstance().Input_FreeViewMode_Released(); }, EAFKeyAction::Released);
 }
 
 AFInput::AFInput()
@@ -232,9 +245,18 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 	{
 		return;
 	}
+}
 
-	if (m_mouseLock)
-	{
+void AFInput::Input_FreeViewMode_Pressed()
+{
+	m_freeView = true;
 
-	}
+	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+}
+
+void AFInput::Input_FreeViewMode_Released()
+{
+	m_freeView = false;
+
+	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
