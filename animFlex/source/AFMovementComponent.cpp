@@ -17,12 +17,27 @@ void AFMovementComponent::Tick(float deltaTime)
 	if (!m_accelerating)
 	{
 		const float speed = glm::length(m_velocity);
-		const float newSpeed = glm::max(speed - (m_deceleration * deltaTime), 0.0f);
+		const float newSpeed = glm::max(speed - (GetDeceleration() * deltaTime), 0.0f);
 		m_velocity = AFMath::GetSafeNormal(m_velocity) * newSpeed;
 	}
 
 	owner->AddOffsetLocation(m_velocity * deltaTime);
 	m_accelerating = false;
+}
+
+float AFMovementComponent::GetAcceleration() const
+{
+	return m_acceleration;
+}
+
+float AFMovementComponent::GetDeceleration() const
+{
+	return m_deceleration;
+}
+
+float AFMovementComponent::GetMaxSpeed() const
+{
+	return m_maxSpeed;
 }
 
 void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
@@ -37,11 +52,11 @@ void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 	{
 		m_accelerating = true;
 
-		m_velocity = m_velocity + (AFMath::GetSafeNormal(movementInput) * m_acceleration * AFTimerManager::GetDeltaTime());
+		m_velocity = m_velocity + (AFMath::GetSafeNormal(movementInput) * GetAcceleration() * AFTimerManager::GetDeltaTime());
 
-		if (glm::length(m_velocity) > m_maxSpeed)
+		if (glm::length(m_velocity) > GetMaxSpeed())
 		{
-			m_velocity = glm::normalize(m_velocity) * m_maxSpeed;
+			m_velocity = glm::normalize(m_velocity) * GetMaxSpeed();
 		}
 	}
 }

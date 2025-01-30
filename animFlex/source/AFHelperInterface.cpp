@@ -58,7 +58,7 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 	int tempFOV = sceneData.activeCamera->GetCameraComponent()->GetCameraProperties().fieldOfView;
 	if(ImGui::SliderInt("##FOV", &tempFOV, 40, 150))
 	{
-		
+		sceneData.activeCamera->GetCameraComponent()->SetFieldOfView(tempFOV);
 	}
 
 	ImGui::Separator();
@@ -73,10 +73,10 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 	const std::string& rotStr = std::to_string(sceneData.activeCamera->GetRotation().x) + ", " +
 		std::to_string(sceneData.activeCamera->GetRotation().y) + ", " + std::to_string(sceneData.activeCamera->GetRotation().z);
 	ImGui::Text("%s", rotStr.c_str());
-	//ImGui::Text("Camera Speed:");
-	/*ImGui::SameLine();
-	const std::string& camspeed = std::to_string(camera.GetCameraSpeedMultiplier());
-	ImGui::Text("%s", camspeed.c_str());*/
+	ImGui::Text("Camera Speed:");
+	ImGui::SameLine();
+	const std::string& camspeed = std::to_string(sceneData.activeCamera->GetMovementComponent()->GetCameraSpeedMultiplier());
+	ImGui::Text("%s", camspeed.c_str());
 
 	ImGui::End();
 

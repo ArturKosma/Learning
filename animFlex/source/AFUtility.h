@@ -26,7 +26,9 @@ public:
 			{"MOUSE_TURN_RIGHT", 1001},
 			{"MOUSE_TURN_LEFT", 1002},
 			{"MOUSE_TILT_UP", 1003},
-			{"MOUSE_TILT_DOWN", 1004}
+			{"MOUSE_TILT_DOWN", 1004},
+			{"MOUSE_SCROLL_UP", 1005},
+			{"MOUSE_SCROLL_DOWN", 1006}
 		};
 
 		return keymap;

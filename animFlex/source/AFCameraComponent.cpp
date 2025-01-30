@@ -1,5 +1,10 @@
 #include "AFCameraComponent.h"
 
+void AFCameraComponent::SetFieldOfView(int newFOV)
+{
+	m_cameraProperties.fieldOfView = newFOV;
+}
+
 glm::mat4 AFCameraComponent::GetViewMatrix() const
 {
 	const glm::vec3 forward = glm::normalize(GetWorldRotationQuat() * glm::vec3(0.0f, 0.0f, -1.0f));

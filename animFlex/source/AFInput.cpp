@@ -97,37 +97,15 @@ void AFInput::OnCursorPosCallback(GLFWwindow* window, double posX, double posY)
 		return;
 	}
 
-	const float deltaX = static_cast<float>(static_cast<int>(posX) - m_cursorXPos);
-	const float deltaY = static_cast<float>(static_cast<int>(posY) - m_cursorYPos);
-
-	if(deltaX > 0.0f)
-	{
-		m_keystate.insert_or_assign(1001, deltaX);
-		m_keystate.insert_or_assign(1002, 0.0f);
-	}
-	else if(deltaX < 0.0f)
-	{
-		m_keystate.insert_or_assign(1001, 0.0f);
-		m_keystate.insert_or_assign(1002, abs(deltaX));
-	}
-
-	if (deltaY > 0.0f)
-	{
-		m_keystate.insert_or_assign(1003, deltaY);
-		m_keystate.insert_or_assign(1004, 0.0f);
-	}
-	else if (deltaY < 0.0f)
-	{
-		m_keystate.insert_or_assign(1003, 0.0f);
-		m_keystate.insert_or_assign(1004, abs(deltaY));
-	}
-
-	m_cursorXPos = static_cast<int>(posX);
-	m_cursorYPos = static_cast<int>(posY);
+	// Upon PollEvents() this function can be called multiple times, so we just save the cursor pos here and retrieve the delta in Tick().
+	m_cursorNewXPos = posX;
+	m_cursorNewYPos = posY;
 }
 
 void AFInput::Tick()
 {
+	UpdateCursorPosState();
+
 	// Go through all bound axes and call their functors.
 	for(const auto& [axisName, boundAxis] : m_boundAxisMappings)
 	{
@@ -145,13 +123,6 @@ void AFInput::Tick()
 			axisFunctor(value);
 		}
 	}
-
-	// Clear state of inputs that are faked.
-
-	m_keystate.insert_or_assign(1001, 0.0f); // Mouse turn right.
-	m_keystate.insert_or_assign(1002, 0.0f); // Mouse turn left.
-	m_keystate.insert_or_assign(1003, 0.0f); // Mouse tilt up.
-	m_keystate.insert_or_assign(1004, 0.0f); // Mouse tilt down.
 }
 
 AFInput& AFInput::GetInstance()
@@ -173,8 +144,8 @@ void AFInput::BindAction(const std::string& actionName, const std::function<void
 
 	FAFBoundAction actionWrapper;
 
-	auto foundMapping = m_boundActionMappings.find(actionName);
-	if(foundMapping != m_boundActionMappings.end())
+	auto foundMapping = GetInstance().m_boundActionMappings.find(actionName);
+	if(foundMapping != GetInstance().m_boundActionMappings.end())
 	{
 		actionWrapper = foundMapping->second; // Modify existing mapping.
 	}
@@ -188,7 +159,7 @@ void AFInput::BindAction(const std::string& actionName, const std::function<void
 		actionWrapper.onReleasedFunctors.push_back(actionFunction);
 	}
 
-	m_boundActionMappings.insert_or_assign(actionName, actionWrapper);
+	GetInstance().m_boundActionMappings.insert_or_assign(actionName, actionWrapper);
 }
 
 void AFInput::BindAxis(const std::string& axis, const std::function<void(float)>& fun)
@@ -207,12 +178,12 @@ void AFInput::BindAxis(const std::string& axis, const std::function<void(float)>
 	boundAxis.keyToValue1 = foundAxis->second.keyToValue1;
 	boundAxis.keyToValue2 = foundAxis->second.keyToValue2;
 
-	m_boundAxisMappings.insert_or_assign(axis, boundAxis);
+	GetInstance().m_boundAxisMappings.insert_or_assign(axis, boundAxis);
 }
 
-bool AFInput::GetFreeViewMode() const
+bool AFInput::GetFreeViewMode()
 {
-	return m_freeView;
+	return GetInstance().m_freeView;
 }
 
 void AFInput::Init(GLFWwindow* window)
@@ -245,13 +216,45 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 	{
 		return;
 	}
+
+	if(yscroll > 0.0)
+	{
+		OnMouseButtonCallback(window, 1005, 1, 0);
+	}
+	if (yscroll < 0.0)
+	{
+		OnMouseButtonCallback(window, 1006, 1, 0);
+	}
+}
+
+void AFInput::UpdateCursorPosState()
+{
+	const double cursorPosXDelta = m_cursorNewXPos - m_cursorOldXPos;
+	const double cursorPosYDelta = m_cursorNewYPos - m_cursorOldYPos;
+	m_cursorOldXPos = m_cursorNewXPos;
+	m_cursorOldYPos = m_cursorNewYPos;
+
+	const double mouseTurnRight = cursorPosXDelta > 0.0 ? abs(static_cast<float>(cursorPosXDelta)) : 0.0f;
+	const double mouseTurnLeft = cursorPosXDelta < 0.0 ? abs(static_cast<float>(cursorPosXDelta)) : 0.0f;
+	const double mouseTiltUp = cursorPosYDelta > 0.0 ? abs(static_cast<float>(cursorPosYDelta)) : 0.0f;
+	const double mouseTiltDown = cursorPosYDelta < 0.0 ? abs(static_cast<float>(cursorPosYDelta)) : 0.0f;
+
+	// Update the mouse turn/tile state.
+	m_keystate.insert_or_assign(1001, static_cast<float>(mouseTurnRight)); // Mouse turn right.
+	m_keystate.insert_or_assign(1002, static_cast<float>(mouseTurnLeft)); // Mouse turn left.
+	m_keystate.insert_or_assign(1003, static_cast<float>(mouseTiltUp)); // Mouse tilt up.
+	m_keystate.insert_or_assign(1004, static_cast<float>(mouseTiltDown)); // Mouse tilt down.
 }
 
 void AFInput::Input_FreeViewMode_Pressed()
 {
 	m_freeView = true;
 
-	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	if(glfwRawMouseMotionSupported())
+	{
+		glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+	}
 }
 
 void AFInput::Input_FreeViewMode_Released()

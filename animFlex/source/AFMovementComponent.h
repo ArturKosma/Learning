@@ -9,6 +9,10 @@ public:
 
 	void Tick(float deltaTime);
 
+	virtual float GetAcceleration() const;
+	virtual float GetDeceleration() const;
+	virtual float GetMaxSpeed() const;
+
 	void AddControlRotation(const glm::vec3& eulerToAdd);
 	void AddMovementInput(const glm::vec3& movementInput);
 
