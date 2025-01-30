@@ -1,4 +1,6 @@
 #include "AFScene.h"
+
+#include "AFGridComponent.h"
 #include "AFStaticMeshComponent.h"
 
 void AFScene::AddActor(AFActor* newActor)
@@ -50,6 +52,16 @@ bool AFScene::Init()
 
 void AFScene::CreateDefaultSceneActors()
 {
+	// Create a grid.
+
+	AFActor* gridActor = new AFActor();
+	gridActor->SetDisplayName("grid");
+
+	AFGridComponent* gridComponent = new AFGridComponent();
+	gridActor->AddComponent(gridComponent);
+
+	AddActor(gridActor);
+
 	// Create test box.
 
 	AFMesh testBoxMesh = AFMesh();
@@ -211,6 +223,9 @@ void AFScene::CreateDefaultSceneActors()
 	AFActor* testBoxActor0 = new AFActor();
 	AFActor* testBoxActor1 = new AFActor();
 
+	testBoxActor0->SetDisplayName("box0");
+	testBoxActor1->SetDisplayName("box1");
+
 	AFStaticMeshComponent* testBox0 = new AFStaticMeshComponent();
 	testBox0->SetMesh(testBoxMesh);
 	testBox0->SetTexture("content/textures/crate2.png");
@@ -228,6 +243,7 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(testBoxActor1);
 
 	testBoxActor1->AddOffsetLocation({ 3.0f, 0.0f, 0.0f });
+	testBoxActor1->AddOffsetRotation({ 15.0f, 5.0f, 5.0f });
 }
 
 AFScene::AFScene()

@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -15,6 +16,9 @@ public:
 
 	void AddComponent(AFComponent* newComponent);
 	const std::vector<AFComponent*>& GetComponents() const;
+
+	void SetDisplayName(const std::string& newName);
+	std::string GetDisplayName() const;
 
 	glm::vec3 GetLocation() const;
 	glm::vec3 GetRotation() const;
@@ -41,4 +45,6 @@ protected:
 	glm::quat m_rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	glm::vec3 m_scale = glm::vec3(1.0f);
 	glm::mat4 m_transform = glm::mat4();
+
+	std::string m_displayName = "actor";
 };

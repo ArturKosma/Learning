@@ -2,6 +2,7 @@
 
 AFActor::AFActor()
 {
+    RecreateTransform();
 }
 
 AFActor::~AFActor()
@@ -30,6 +31,16 @@ void AFActor::AddComponent(AFComponent* newComponent)
 const std::vector<AFComponent*>& AFActor::GetComponents() const
 {
     return m_components;
+}
+
+void AFActor::SetDisplayName(const std::string& newName)
+{
+    m_displayName = newName;
+}
+
+std::string AFActor::GetDisplayName() const
+{
+    return m_displayName;
 }
 
 glm::vec3 AFActor::GetLocation() const
@@ -92,7 +103,7 @@ void AFActor::AddOffsetLocation(const glm::vec3& offset)
 
 void AFActor::AddOffsetRotation(const glm::vec3& offset)
 {
-    glm::quat quatToAdd = glm::quat(offset);
+    glm::quat quatToAdd = glm::quat(glm::radians(offset));
 
     SetRotation(quatToAdd * m_rotation);
 }

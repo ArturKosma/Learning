@@ -3,7 +3,7 @@
 
 AFComponent::AFComponent()
 {
-
+    RecreateTransform();
 }
 
 AFComponent::~AFComponent()

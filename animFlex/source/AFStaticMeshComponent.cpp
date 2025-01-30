@@ -28,7 +28,7 @@ int AFStaticMeshComponent::GetTrianglesNum()
 
 bool AFStaticMeshComponent::Load()
 {
-	m_vertexBuffer.Init();
+	m_vertexBuffer.Init(EAFVertexBufferType::StaticMesh);
 	m_vertexBuffer.UploadMesh(m_mesh);
 
 	if (!m_tex.LoadTexture())

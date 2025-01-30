@@ -9,6 +9,7 @@ layout (std140) uniform Matrices
 {
 	mat4 view;
 	mat4 projection;
+	mat4 modelTransform;
 };
 
 out vec4 texColor;
@@ -16,7 +17,7 @@ out vec2 texCoord;
 
 void main()
 {
-	gl_Position = projection * view * vec4(aPos, 1.0);
+	gl_Position = projection * view * modelTransform * vec4(aPos, 1.0);
 	texColor = vec4(aColor, 1.0);
 	texCoord = aTexCoord;
 }

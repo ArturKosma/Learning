@@ -9,7 +9,7 @@ public:
 
 	void Init();
 
-	void UploadUBOData(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+	void UploadUBOData(glm::mat4 viewMatrix, glm::mat4 projectionMatrix, glm::mat4 modelMatrix);
 
 	void Cleanup();
 

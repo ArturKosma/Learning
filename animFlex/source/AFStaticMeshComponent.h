@@ -1,7 +1,6 @@
 #pragma once
+
 #include "AFRenderComponent.h"
-#include "AFVertexBuffer.h"
-#include "AFShader.h"
 #include "AFTexture.h"
 
 #include <string>
@@ -24,8 +23,5 @@ public:
 
 private:
 
-	AFMesh m_mesh = AFMesh();
-	AFShader m_shader = AFShader();
 	AFTexture m_tex = AFTexture();
-	AFVertexBuffer m_vertexBuffer = AFVertexBuffer();
 };

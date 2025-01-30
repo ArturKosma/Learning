@@ -1,13 +1,13 @@
 #pragma once
 
-#include "AFRenderData.h"
-#include <vector>
-
-#include <glm/glm.hpp>
 #include <glad/glad.h> 
-#include <GLFW/glfw3.h>
-
 #include "AFStructs.h"
+
+enum class EAFVertexBufferType
+{
+	StaticMesh,
+	Grid
+};
 
 class AFVertexBuffer
 {
@@ -15,7 +15,7 @@ class AFVertexBuffer
 
 public:
 
-	void Init();
+	void Init(EAFVertexBufferType vertexBufferType);
 	void UploadMesh(const AFMesh& newMesh);
 
 	void Bind() const;

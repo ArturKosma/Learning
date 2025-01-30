@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <GLFW/glfw3.h>
+#include <glm/vec3.hpp>
 
 class AFUtility
 {
@@ -47,5 +48,10 @@ public:
 		{
 			return -1;
 		}
+	}
+
+	static std::string Vec3ToString(const glm::vec3& vec3)
+	{
+		return std::to_string(vec3.x) + ", " + std::to_string(vec3.y) + ", " + std::to_string(vec3.z);
 	}
 };

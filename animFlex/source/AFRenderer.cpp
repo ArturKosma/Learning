@@ -50,6 +50,9 @@ const GLubyte* AFRenderer::GetOpenGLVersion()
 
 void AFRenderer::Draw(const AFSceneData& sceneData)
 {
+	// Make sure closer objects are drawn before farther.
+	glDepthFunc(GL_LESS);
+
 	// Enable drawing to the frame buffer.
 	m_framebuffer.Bind();
 
@@ -62,19 +65,21 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	// Enable face culling to not render back of triangles.
 	glEnable(GL_CULL_FACE);
 
+	// Enable depth testing.
+	glEnable(GL_DEPTH_TEST);
+
 	const glm::vec2& frameBufferSize = m_framebuffer.GetSize();
 	// Safely create the projection matrix given screen width/height and camera's FOV.
 	if (frameBufferSize.x > 0 && frameBufferSize.y > 0)
 	{
 		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(sceneData.activeCamera->GetCameraComponent()->GetCameraProperties().fieldOfView)),
-			static_cast<float>(frameBufferSize.x) / static_cast<float>(frameBufferSize.y), 0.1f, 100.0f);
+			frameBufferSize.x / frameBufferSize.y, 0.1f, 100.0f);
+
+		m_orthoMatrix = glm::ortho(0.0f, frameBufferSize.x, frameBufferSize.y, 0.0f, -1.0f, 1.0f);
 	}
 
 	// Create the view matrix given camera's transform.
 	m_viewMatrix = sceneData.activeCamera->GetCameraComponent()->GetViewMatrix();
-
-	// Upload the view and projection matrices into the uniform buffer, which will be used across shaders.
-	m_uniformBuffer.UploadUBOData(m_viewMatrix, m_projectionMatrix);
 
 	// Per object draw.
 	for(const AFActor* const sceneActor : sceneData.sceneActors)
@@ -87,6 +92,9 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 			{
 				continue;
 			}
+
+			// Upload the view, projection and model matrices into the uniform buffer, which will be used across shaders.
+			m_uniformBuffer.UploadUBOData(m_viewMatrix, m_projectionMatrix, renderComponent->GetWorldTransform());
 
 			// Draw.
 			renderComponent->Draw();

@@ -6,6 +6,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "AFUtility.h"
 #include "AFWindow.h"
 
 bool AFHelperInferface::Init(const class AFWindow& window)
@@ -64,19 +65,61 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 	ImGui::Separator();
 
 	ImGui::Text("Camera Pos:");
+
 	ImGui::SameLine();
-	const std::string& posStr = std::to_string(sceneData.activeCamera->GetLocation().x) + ", " +
-		std::to_string(sceneData.activeCamera->GetLocation().y) + ", " + std::to_string(sceneData.activeCamera->GetLocation().z);
-	ImGui::Text("%s", posStr.c_str());
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+	const std::string& posX = std::to_string(sceneData.activeCamera->GetLocation().x);
+	ImGui::Text("%s", posX.c_str());
+	ImGui::PopStyleColor();
+
+	ImGui::SameLine();
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+	const std::string& posY = std::to_string(sceneData.activeCamera->GetLocation().y);
+	ImGui::Text("%s", posY.c_str());
+	ImGui::PopStyleColor();
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+
+	ImGui::SameLine();
+	const std::string& posZ = std::to_string(sceneData.activeCamera->GetLocation().z);
+	ImGui::Text("%s", posZ.c_str());
+	ImGui::PopStyleColor();
+
 	ImGui::Text("Camera Rot:");
 	ImGui::SameLine();
-	const std::string& rotStr = std::to_string(sceneData.activeCamera->GetRotation().x) + ", " +
-		std::to_string(sceneData.activeCamera->GetRotation().y) + ", " + std::to_string(sceneData.activeCamera->GetRotation().z);
-	ImGui::Text("%s", rotStr.c_str());
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+	const std::string& rotPitch = std::to_string(sceneData.activeCamera->GetRotation().x);
+	ImGui::Text("%s", rotPitch.c_str());
+	ImGui::PopStyleColor();
+
+	ImGui::SameLine();
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+	const std::string& rotYaw = std::to_string(sceneData.activeCamera->GetRotation().y);
+	ImGui::Text("%s", rotYaw.c_str());
+	ImGui::PopStyleColor();
+
+	ImGui::SameLine();
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+	const std::string& rotRoll = std::to_string(sceneData.activeCamera->GetRotation().z);
+	ImGui::Text("%s", rotRoll.c_str());
+	ImGui::PopStyleColor();
+
 	ImGui::Text("Camera Speed:");
 	ImGui::SameLine();
 	const std::string& camspeed = std::to_string(sceneData.activeCamera->GetMovementComponent()->GetCameraSpeedMultiplier());
 	ImGui::Text("%s", camspeed.c_str());
+
+	ImGui::Separator();
+
+	// Actors display.
+	for(AFActor* actor : sceneData.sceneActors)
+	{
+		ImGui::Text(actor->GetDisplayName().c_str());
+		ImGui::SameLine();
+		ImGui::Text("Pos:");
+		ImGui::SameLine();
+		const std::string& actorPosStr = AFUtility::Vec3ToString(actor->GetLocation());
+		ImGui::Text(actorPosStr.c_str());
+	}
 
 	ImGui::End();
 

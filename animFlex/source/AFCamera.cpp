@@ -90,8 +90,7 @@ void AFCamera::Input_FreeView_UpDown(float axis)
 {
 	if (AFInput::GetInstance().GetFreeViewMode())
 	{
-		const glm::quat& cameraRotQuat = GetRotationQuat();
-		const glm::vec3& up = cameraRotQuat * glm::vec3(0.0f, 1.0f, 0.0f);
+		const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f);
 		const glm::vec3& movementInputDirection = (up * axis);
 
 		GetMovementComponent()->AddMovementInput(movementInputDirection);
