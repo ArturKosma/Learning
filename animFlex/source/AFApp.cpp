@@ -9,7 +9,7 @@
 #include "AFConfig.h"
 #include "AFUtility.h"
 
-#define TESTDRAW true
+#define TESTDRAW false
 
 AFApp::AFApp()
 {
@@ -39,13 +39,13 @@ AFApp::AFApp()
 	AFInput::Init(m_window->GetGLFWWindow());
 
 #if TESTDRAW
-#define RendererInit TESTInit
+#define RendererInit() TESTInit(m_window->GetWidth(), m_window->GetHeight())
 #else
-#define RendererInit Init
+#define RendererInit() Init(m_window->GetWidth(), m_window->GetHeight())
 #endif
 
 
-	if (!m_renderer->RendererInit(m_window->GetWidth(), m_window->GetHeight()))
+	if (!m_renderer->RendererInit())
 	{
 		printf("%s\n", "Renderer Init() failed.");
 		return;

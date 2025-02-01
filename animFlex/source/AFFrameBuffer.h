@@ -44,6 +44,4 @@ private:
 
 	GLuint m_screenVAO = 0;
 	GLuint m_screenVBO = 0;
-
-	AFScreenShader m_screenShader;
 };

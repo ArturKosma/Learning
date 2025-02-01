@@ -8,11 +8,9 @@
 
 bool AFFramebuffer::Init(int width, int height)
 {
-	// Create resolve framebuffer.
 	glGenFramebuffers(1, &m_buffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_buffer);
 
-	// Create single-sample texture for resolve color output.
 	glGenTextures(1, &m_colorTex);
 	glBindTexture(GL_TEXTURE_2D, m_colorTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -24,7 +22,6 @@ bool AFFramebuffer::Init(int width, int height)
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTex, 0);
 
-	// Create single-sample depth renderbuffer.
 	glGenRenderbuffers(1, &m_depthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
@@ -37,53 +34,6 @@ bool AFFramebuffer::Init(int width, int height)
 
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// Create quad for the screen.
-	AFMesh screenMesh;
-	screenMesh.vertices.resize(6);
-	screenMesh.vertices[0].position = glm::vec3(-0.8f, 0.8f, 0.0f); // Top left.
-	screenMesh.vertices[1].position = glm::vec3(-1.0f, -1.0f, 0.0f); // Lower left.
-	screenMesh.vertices[2].position = glm::vec3(1.0f, -1.0f, 0.0f); // Lower right.
-	screenMesh.vertices[3].position = glm::vec3(-0.8f, 0.8f, 0.0f); // Top left.
-	screenMesh.vertices[4].position = glm::vec3(1.0f, -1.0f, 0.0f); // Lower right.
-	screenMesh.vertices[5].position = glm::vec3(1.0f, 1.0f, 0.0f); // Upper right.
-	screenMesh.vertices[0].color = glm::vec3(0.0f, 0.0f, 0.0f);
-	screenMesh.vertices[1].color = glm::vec3(0.0f, 0.0f, 0.0f);
-	screenMesh.vertices[2].color = glm::vec3(1.0f, 1.0f, 1.0f);
-	screenMesh.vertices[3].color = glm::vec3(0.0f, 0.0f, 0.0f);
-	screenMesh.vertices[4].color = glm::vec3(1.0f, 1.0f, 1.0f);
-	screenMesh.vertices[5].color = glm::vec3(1.0f, 1.0f, 1.0f);
-	screenMesh.vertices[0].uv = glm::vec2(0.0f, 1.0f);
-	screenMesh.vertices[1].uv = glm::vec2(0.0f, 0.0f);
-	screenMesh.vertices[2].uv = glm::vec2(1.0f, 0.0f);
-	screenMesh.vertices[3].uv = glm::vec2(0.0f, 0.0f);
-	screenMesh.vertices[4].uv = glm::vec2(1.0f, 0.0f);
-	screenMesh.vertices[5].uv = glm::vec2(1.0f, 1.0f);
-
-	glGenVertexArrays(1, &m_screenVAO);
-	glGenBuffers(1, &m_screenVBO);
-
-	glBindVertexArray(m_screenVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_screenVBO);
-	glBufferData(GL_ARRAY_BUFFER, screenMesh.vertices.size() * sizeof(AFVertex), &screenMesh.vertices.at(0), GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, position));
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, color));
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, uv));
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
-	glBindVertexArray(0);
-
-	m_screenShader.SetVertexShader("content/shaders/screen.vert");
-	m_screenShader.SetFragmentShader("content/shaders/screen.frag");
-	const bool shadersLoaded = m_screenShader.LoadShaders();
 
 	return CheckComplete();
 }
