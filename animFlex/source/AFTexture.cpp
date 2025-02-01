@@ -3,6 +3,8 @@
 
 #include "AFTexture.h"
 
+#include "AFUtility.h"
+
 bool AFTexture::LoadTexture()
 {
 	int texWidth, texHeight, numberOfChannels;
@@ -24,7 +26,14 @@ bool AFTexture::LoadTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
+	if(numberOfChannels == 4)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
+	}
+	else if(numberOfChannels == 1)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, texWidth, texHeight, 0, GL_RED, GL_UNSIGNED_BYTE, textureData);
+	}
 
 	glGenerateMipmap(GL_TEXTURE_2D);
 

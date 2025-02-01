@@ -1,5 +1,6 @@
 #include "AFVertexBuffer.h"
 #include "AFStructs.h"
+#include "AFUtility.h"
 
 void AFVertexBuffer::Init(EAFVertexBufferType vertexBufferType)
 {

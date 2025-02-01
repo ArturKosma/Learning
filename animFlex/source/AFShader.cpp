@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "AFUtility.h"
+
 void AFShader::SetVertexShader(const std::string& inPath)
 {
 	m_vertexShaderPath = inPath;
@@ -41,8 +43,7 @@ bool AFShader::LoadShaders()
 		return false;
 	}
 
-	GLint uboIndex = glGetUniformBlockIndex(m_shaderProgram, "Matrices");
-	glUniformBlockBinding(m_shaderProgram, uboIndex, 0);
+	UniformBinding();
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
@@ -58,6 +59,19 @@ void AFShader::Use() const
 void AFShader::Cleanup()
 {
 	glDeleteProgram(m_shaderProgram);
+}
+
+GLuint AFShader::GetProgram() const
+{
+	return m_shaderProgram;
+}
+
+AFShader::AFShader()
+{
+}
+
+AFShader::~AFShader()
+{
 }
 
 GLuint AFShader::ReadShader(const std::string& shaderFilename, GLuint shaderType)
@@ -113,4 +127,24 @@ GLuint AFShader::ReadShader(const std::string& shaderFilename, GLuint shaderType
 	}
 
 	return shader;
+}
+
+void AFShader::UniformBinding()
+{
+	glUseProgram(m_shaderProgram);
+
+	GLint matricesIndex = glGetUniformBlockIndex(m_shaderProgram, "Matrices");
+	GLint cameraIndex = glGetUniformBlockIndex(m_shaderProgram, "Camera");
+
+	if(matricesIndex > -1)
+	{
+		glUniformBlockBinding(m_shaderProgram, matricesIndex, 0);
+	}
+
+	if(cameraIndex > -1)
+	{
+		glUniformBlockBinding(m_shaderProgram, cameraIndex, 1);
+	}
+
+	glUseProgram(0);
 }

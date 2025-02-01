@@ -2,6 +2,7 @@
 
 #include "AFGridComponent.h"
 #include "AFStaticMeshComponent.h"
+#include "AFUtility.h"
 
 void AFScene::AddActor(AFActor* newActor)
 {
@@ -242,8 +243,10 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(testBoxActor0);
 	AddActor(testBoxActor1);
 
-	testBoxActor1->AddOffsetLocation({ 3.0f, 0.0f, 0.0f });
-	testBoxActor1->AddOffsetRotation({ 15.0f, 5.0f, 5.0f });
+	testBoxActor0->AddOffsetLocation({ 0.0f, 0.5f, 0.0f });
+
+	testBoxActor1->AddOffsetLocation({ 3.0f, 0.5f, 0.0f });
+	testBoxActor1->AddOffsetRotation({ 0.0f, 15.0f, 0.0f });
 }
 
 AFScene::AFScene()

@@ -13,6 +13,7 @@ class AFRenderer
 public:
 
 	bool Init(int width, int height);
+	bool TESTInit(int width, int height);
 
 	void SetSize(int newWidth, int newHeight);
 	void Cleanup();
@@ -27,6 +28,7 @@ private:
 	~AFRenderer();
 
 	void Draw(const struct AFSceneData& sceneData);
+	void TESTDraw(const struct AFSceneData& sceneData);
 
 	AFFramebuffer m_framebuffer = AFFramebuffer();
 	AFUniformBuffer m_uniformBuffer = AFUniformBuffer();

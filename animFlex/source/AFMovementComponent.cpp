@@ -40,6 +40,11 @@ float AFMovementComponent::GetMaxSpeed() const
 	return m_maxSpeed;
 }
 
+glm::vec3 AFMovementComponent::GetControlRotation() const
+{
+	return { glm::vec3(m_controlPitch, m_controlYaw, 0.0f) };
+}
+
 void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 {
 	AFActor* owner = GetOwner();

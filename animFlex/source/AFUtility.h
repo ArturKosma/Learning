@@ -54,4 +54,33 @@ public:
 	{
 		return std::to_string(vec3.x) + ", " + std::to_string(vec3.y) + ", " + std::to_string(vec3.z);
 	}
+
+	static const char* GetGLErrorString(GLenum error)
+	{
+		switch (error)
+		{
+		case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
+		case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
+		case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
+		case GL_STACK_OVERFLOW: return "GL_STACK_OVERFLOW";
+		case GL_STACK_UNDERFLOW: return "GL_STACK_UNDERFLOW";
+		case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
+		default: return "UNKNOWN_ERROR";
+		}
+	}
+
+	static bool OpenGLError()
+	{
+		GLenum error = glGetError();
+		if (error != GL_NO_ERROR)
+		{
+			printf("OpenGL Error: 0x%X (%s)\n", error, GetGLErrorString(error));
+			return true;
+		}
+
+		return false;
+	}
 };
+
+#define DebugOpenGL() if(AFUtility::OpenGLError()) assert(false)
+#define ClearOpenGLErrors() while (glGetError() != GL_NO_ERROR)

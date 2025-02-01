@@ -1,9 +1,9 @@
 #include "AFWindow.h"
 #include "AFInput.h"
-#include "AFStructs.h"
 
 #include <iostream>
-#include <glad/glad.h>
+
+#include "AFUtility.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -18,11 +18,13 @@ bool AFWindow::Init(int initWidth, int initHeight)
 		return false;
 	}
 
-	// Set OpenGL ES 3.0 context.
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+
+	// Request MSAA.
+	//glfwWindowHint(GLFW_SAMPLES, 4);
 
 	m_window = glfwCreateWindow(initWidth, initHeight, "myFlexWindow", nullptr, nullptr);
 	if (!m_window)
@@ -105,9 +107,10 @@ bool AFWindow::Init(int initWidth, int initHeight)
 	const int height = videoMode->height;
 
 	glfwSetWindowSize(m_window, width, height);
+	ClearOpenGLErrors();
+	DebugOpenGL();
 
 #endif
-
 	return true;
 }
 
@@ -136,7 +139,8 @@ int AFWindow::GetHeight() const
 
 bool AFWindow::ShouldShutdown()
 {
-	return glfwWindowShouldClose(m_window);
+	const bool shouldShutdown = glfwWindowShouldClose(m_window);
+	return shouldShutdown;
 }
 
 AFWindow::AFWindow()
