@@ -20,19 +20,27 @@ layout (location = 2) in vec2 aUV;
 out vec2 UV;
 out float CellNum;
 out vec3 WorldPos;
+out vec2 NearFarPlanes;
 
 void main()
 {
-	float cellNum = 100.0f;
+	float cellNum = 500.0f;
 	vec3 posScaled = aPos * cellNum;
 
-	float gridStepSize = 2.0f; 
+	float gridStepSize = 1.0f; 
 	vec2 snapOffset = round(cameraTransform[3].xz / gridStepSize) * gridStepSize;
+	//snapOffset = vec2(0.0f);
 
 	float xPos = posScaled.x + snapOffset.x;
 	float zPos = posScaled.z + snapOffset.y;
 
 	vec3 posOffset = vec3(xPos, posScaled.y, zPos);
+
+	// Extract near plane from the projection matrix.
+	NearFarPlanes.x = projection[3][2] / (projection[2][2] - 1.0);
+
+	// Extract far plane from the projection matrix.
+	NearFarPlanes.y = projection[3][2] / (projection[2][2] + 1.0);
 
 	UV = aUV;
 	CellNum = cellNum;

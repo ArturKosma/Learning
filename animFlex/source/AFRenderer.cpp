@@ -68,6 +68,18 @@ const GLubyte* AFRenderer::GetOpenGLVersion()
 
 void AFRenderer::TESTDraw(const AFSceneData& sceneData)
 {
+	AFCamera* camera = sceneData.activeCamera;
+	if(!camera)
+	{
+		return;
+	}
+
+	AFCameraComponent* cameraComp = camera->GetCameraComponent();
+	if(!cameraComp)
+	{
+		return;
+	}
+
 	// Make sure closer objects are drawn before farther.
 	glDepthFunc(GL_LESS);
 
@@ -90,14 +102,14 @@ void AFRenderer::TESTDraw(const AFSceneData& sceneData)
 	// Safely create the projection matrix given screen width/height and camera's FOV.
 	if (frameBufferSize.x > 0 && frameBufferSize.y > 0)
 	{
-		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(sceneData.activeCamera->GetCameraComponent()->GetCameraProperties().fieldOfView)),
+		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(cameraComp->GetCameraProperties().fieldOfView)),
 			frameBufferSize.x / frameBufferSize.y, 0.1f, 100.0f);
 
 		m_orthoMatrix = glm::ortho(0.0f, frameBufferSize.x, frameBufferSize.y, 0.0f, -1.0f, 1.0f);
 	}
 
 	// Create the view matrix given camera's transform.
-	m_viewMatrix = sceneData.activeCamera->GetCameraComponent()->GetViewMatrix();
+	m_viewMatrix = cameraComp->GetViewMatrix();
 
 	// Per object draw.
 	for(const AFActor* const sceneActor : sceneData.sceneActors)
@@ -113,7 +125,7 @@ void AFRenderer::TESTDraw(const AFSceneData& sceneData)
 
 			// Upload the view, projection and model matrices into the uniform buffer, which will be used across shaders.
 			m_uniformBuffer.UploadMatrices(m_viewMatrix, m_projectionMatrix, renderComponent->GetWorldTransform());
-			m_uniformBuffer.UploadCamera(sceneData.activeCamera->GetCameraComponent()->GetWorldTransform());
+			m_uniformBuffer.UploadCamera(cameraComp->GetWorldTransform());
 
 			// Draw.
 			renderComponent->Draw();

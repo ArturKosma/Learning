@@ -5,7 +5,7 @@
 
 struct AFCameraProperties
 {
-	int fieldOfView = 90;
+	int fieldOfView = 60;
 };
 
 struct AFSceneData

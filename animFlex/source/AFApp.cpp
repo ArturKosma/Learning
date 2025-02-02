@@ -9,7 +9,7 @@
 #include "AFConfig.h"
 #include "AFUtility.h"
 
-#define TESTDRAW false
+#define TESTDRAW true
 
 AFApp::AFApp()
 {

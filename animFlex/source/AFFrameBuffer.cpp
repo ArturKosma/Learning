@@ -121,59 +121,6 @@ void AFFramebuffer::TESTDrawToScreen()
 		0, 0, m_bufferWidth, m_bufferHeight,
 		GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-	/*
-	// Unbind framebuffers
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// Bind the default framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// Use the screen shader
-	m_screenShader.Use();
-
-	// Bind the resolved texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_colorTex);
-
-	// Set shader uniform
-	GLint texLocation = glGetUniformLocation(m_screenShader.GetProgram(), "Tex");
-	glUniform1i(texLocation, 0);
-
-	// Draw the fullscreen quad
-	glBindVertexArray(m_screenVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glBindVertexArray(0);
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
-	*/
-	
-
-	// WORKS AS RED SCREEN!
-
-	/*
-	// Bind the default framebuffer (screen)
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// Use the screen shader
-	m_screenShader.Use();
-
-	// Bind the texture from `m_buffer`
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_colorTex);
-
-	// Set uniform to tell shader to sample from texture unit 0
-	GLint texLocation = glGetUniformLocation(m_screenShader.GetProgram(), "Tex");
-	glUniform1i(texLocation, 0);
-
-	// Draw a fullscreen quad
-	glBindVertexArray(m_screenVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glBindVertexArray(0);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	*/
-
 	DebugOpenGL();
 }
 
