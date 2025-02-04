@@ -13,7 +13,6 @@ class AFRenderer
 public:
 
 	bool Init(int width, int height);
-	bool TESTInit(int width, int height);
 
 	void SetSize(int newWidth, int newHeight);
 	void Cleanup();
@@ -28,7 +27,6 @@ private:
 	~AFRenderer();
 
 	void Draw(const struct AFSceneData& sceneData);
-	void TESTDraw(const struct AFSceneData& sceneData);
 
 	AFFramebuffer m_framebuffer = AFFramebuffer();
 	AFUniformBuffer m_uniformBuffer = AFUniformBuffer();
@@ -36,4 +34,6 @@ private:
 	glm::mat4 m_viewMatrix = glm::mat4(1.0f);
 	glm::mat4 m_projectionMatrix = glm::mat4(1.0f);
 	glm::mat4 m_orthoMatrix = glm::mat4(1.0f);
+
+	AFShader m_backgroundShader = AFShader();
 };

@@ -1,7 +1,5 @@
 #include "AFStaticMeshComponent.h"
 
-#include "AFUtility.h"
-
 void AFStaticMeshComponent::Draw() const
 {
 	// Tell the gpu which shader to use.

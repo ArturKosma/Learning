@@ -9,8 +9,6 @@
 #include "AFConfig.h"
 #include "AFUtility.h"
 
-#define TESTDRAW true
-
 AFApp::AFApp()
 {
 	m_timerManager = new AFTimerManager();
@@ -38,14 +36,7 @@ AFApp::AFApp()
 
 	AFInput::Init(m_window->GetGLFWWindow());
 
-#if TESTDRAW
-#define RendererInit() TESTInit(m_window->GetWidth(), m_window->GetHeight())
-#else
-#define RendererInit() Init(m_window->GetWidth(), m_window->GetHeight())
-#endif
-
-
-	if (!m_renderer->RendererInit())
+	if (!m_renderer->Init(m_window->GetWidth(), m_window->GetHeight()))
 	{
 		printf("%s\n", "Renderer Init() failed.");
 		return;
@@ -105,12 +96,6 @@ AFApp& AFApp::GetInstance()
 	return appInstance;
 }
 
-#if TESTDRAW
-#define DrawFun() TESTDraw(m_game->GetScene().GetSceneData())
-#else
-#define DrawFun() Draw(m_game->GetScene().GetSceneData())
-#endif
-
 void AFApp::Tick()
 {
 	// Calculate delta time.
@@ -118,7 +103,7 @@ void AFApp::Tick()
 
 	AFInput::GetInstance().Tick();
 	m_game->Tick(AFTimerManager::GetDeltaTime());
-	m_renderer->DrawFun();
+	m_renderer->Draw(m_game->GetScene().GetSceneData());
 
 	AFAppData appData;
 	CollectAppData(appData);

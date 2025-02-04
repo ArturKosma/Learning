@@ -30,6 +30,11 @@ struct AFVertex
 	{
 		
 	}
+	AFVertex(const glm::vec3& newPosition, const glm::vec3& newColor, const glm::vec2& newUV)
+		: position(newPosition), color(newColor), uv(newUV)
+	{
+
+	}
 
 	glm::vec3 position;
 	glm::vec3 color;

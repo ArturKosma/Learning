@@ -3,7 +3,6 @@ precision highp float;
 
 in vec2 UV;
 in float CellNum;
-in vec2 NearFarPlanes;
 
 layout (location = 0) out vec4 FragColor;
 
@@ -39,48 +38,18 @@ void main()
 {	
 	// Generate brightness for the grid line.
 	float line = GridLineGeneration(UV, CellNum);
+	//line = 0.0f;
 
 	// Sum the horizontal and vertical lines.
 	// Clamp the brightness.
 	float lineMask = clamp(line, 0.0f, 0.7f);
 
-	// Find depth mask to reduce grid lines brightness which are far away.
-	float nearPlane = NearFarPlanes.x;
-	float farPlane = NearFarPlanes.y;
-	float depth = (2.0 * nearPlane) / (farPlane + nearPlane - gl_FragCoord.z * (farPlane - nearPlane));
-	float depthClamped = clamp(depth, 0.0f, 0.9f);
-
-	// Screen space vigniette.
-	// @todo Push uniform with screen size.
-	float screenUVx = gl_FragCoord.x / vec2(2560.0f, 1440.0f);
-	float screenUVxDist = 1.0f - abs(0.5f - screenUVx);
-	float vigniette = smoothstep(0.3f, 1.0f, screenUVxDist);
-
-	// Find depth mask for the whole quad.
-	float depthMaskQuad = (1.0f - smoothstep(0.0f, 0.9f, depthClamped)) * vigniette;
-
-	// Find depth mask for the grid.
-	float depthMaskGrid = (1.0f - smoothstep(0.0f, 0.6f, depthClamped)) * vigniette;
-
-	// Get grid lines close to view.
-	vec4 lineMaskDepth = vec4(vec3(lineMask * depthMaskGrid), 1.0f);
-
 	// Define base quad color.
 	vec4 baseColor = vec4(0.254f, 0.336f, 0.363f, 1.0f);
 
-	// Get base color of the quad with depth.
-	vec4 baseColorDepth = baseColor * depthMaskQuad;
-
-	// Find the change of UV in screen space.
-	// The more change - the more distorted the grid lines, so use that change to fade out the grid lines brightness.
-	float changeMultiplier = 1000.0f;
-	float changeX = fwidth(UV.x) * changeMultiplier;
-	float changeY = fwidth(UV.y) * changeMultiplier;
-	float change = clamp(1.0f - clamp(changeX + changeY, 0.0f, 1.0f), 0.1f, 0.8f);
-
 	// Final color.
-	float lineColor = -0.22f * lineMaskDepth;
+	float lineColor = -0.22f * lineMask;
 
 	//FragColor = vec4(vec3(baseColorDepth), 1.0f);
-	FragColor = (baseColorDepth + (lineColor * change));
+	FragColor = baseColor + lineColor;
 }

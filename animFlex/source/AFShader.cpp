@@ -3,8 +3,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "AFUtility.h"
-
 void AFShader::SetVertexShader(const std::string& inPath)
 {
 	m_vertexShaderPath = inPath;
@@ -133,17 +131,23 @@ void AFShader::UniformBinding()
 {
 	glUseProgram(m_shaderProgram);
 
-	GLint matricesIndex = glGetUniformBlockIndex(m_shaderProgram, "Matrices");
+	GLint viewProjectionIndex = glGetUniformBlockIndex(m_shaderProgram, "ViewProjection");
+	GLint modelIndex = glGetUniformBlockIndex(m_shaderProgram, "Model");
 	GLint cameraIndex = glGetUniformBlockIndex(m_shaderProgram, "Camera");
 
-	if(matricesIndex > -1)
+	if (viewProjectionIndex != -1)
 	{
-		glUniformBlockBinding(m_shaderProgram, matricesIndex, 0);
+		glUniformBlockBinding(m_shaderProgram, viewProjectionIndex, 0);
 	}
 
-	if(cameraIndex > -1)
+	if(modelIndex != -1)
 	{
-		glUniformBlockBinding(m_shaderProgram, cameraIndex, 1);
+		glUniformBlockBinding(m_shaderProgram, modelIndex, 1);
+	}
+
+	if(cameraIndex != -1)
+	{
+		glUniformBlockBinding(m_shaderProgram, cameraIndex, 2);
 	}
 
 	glUseProgram(0);

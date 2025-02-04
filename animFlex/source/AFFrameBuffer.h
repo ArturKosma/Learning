@@ -3,7 +3,8 @@
 #include <glad/glad.h>
 #include <glm/vec2.hpp>
 
-#include "AFScreenShader.h"
+#include "AFPostprocessShader.h"
+#include "AFStructs.h"
 
 class AFFramebuffer
 {
@@ -17,11 +18,9 @@ public:
 	glm::vec2 GetSize() const;
 
 	void Bind();
-	void TESTBind();
 	void UnBind();
 
 	void DrawToScreen();
-	void TESTDrawToScreen();
 	void Cleanup();
 
 private:
@@ -34,6 +33,10 @@ private:
 	GLint m_bufferWidth = 800;
 	GLint m_bufferHeight = 600;
 
+	GLuint m_resolveFramebuffer = 0;
+	GLuint m_resolveColorTex = 0;
+	GLuint m_resolveDepthTex = 0;
+
 	GLuint m_msFBO = 0;
 	GLuint m_msColorBuffer = 0;
 	GLuint m_msDepthBuffer = 0;
@@ -44,4 +47,7 @@ private:
 
 	GLuint m_screenVAO = 0;
 	GLuint m_screenVBO = 0;
+	AFMesh m_screenMesh = AFMesh();
+
+	AFPostprocessShader m_postprocessShader = AFPostprocessShader();
 };
