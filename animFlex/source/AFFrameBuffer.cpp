@@ -1,44 +1,11 @@
 #include "AFFrameBuffer.h"
 
-#include <iostream>
 #include <ostream>
 
 #include "AFStructs.h"
 #include "AFUtility.h"
 
 bool AFFramebuffer::Init(int width, int height)
-{
-	glGenFramebuffers(1, &m_buffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_buffer);
-
-	glGenTextures(1, &m_colorTex);
-	glBindTexture(GL_TEXTURE_2D, m_colorTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTex, 0);
-
-	glGenRenderbuffers(1, &m_depthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer);
-
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		return false;
-	}
-
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	return CheckComplete();
-}
-
-bool AFFramebuffer::TESTInit(int width, int height)
 {
 	m_bufferWidth = width;
 	m_bufferHeight = height;
@@ -57,7 +24,7 @@ bool AFFramebuffer::TESTInit(int width, int height)
 	// Create multisampled depth renderbuffer.
 	glGenRenderbuffers(1, &m_msDepthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_msDepthBuffer);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height); // 4x MSAA.
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, width, height); // 4x MSAA.
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_msDepthBuffer);
 
@@ -87,13 +54,16 @@ bool AFFramebuffer::TESTInit(int width, int height)
 	// Create resolve depth texture.
 	glGenTextures(1, &m_resolveDepthTex);
 	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_resolveDepthTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_resolveDepthTex, 0);
 
 	// Check if resolve FBO is complete.
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -156,6 +126,12 @@ glm::vec2 AFFramebuffer::GetSize() const
 	return { m_bufferWidth, m_bufferHeight };
 }
 
+void AFFramebuffer::SetZNearFar(float zNear, float zFar)
+{
+	m_zNear = zNear;
+	m_zFar = zFar;
+}
+
 void AFFramebuffer::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_msFBO);
@@ -177,18 +153,11 @@ void AFFramebuffer::DrawToScreen()
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_resolveFramebuffer);
 
 	// Blit color & depth.
-	glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight,
-					0, 0, m_bufferWidth, m_bufferHeight,
-					GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight,
-					0, 0, m_bufferWidth, m_bufferHeight,
-					GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight, 
+		GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
-	// Unbind the framebuffers.
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	// Start drawing to default framebuffer.
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Bind the resolved textures to texture units.
 	glActiveTexture(GL_TEXTURE0);
@@ -198,6 +167,19 @@ void AFFramebuffer::DrawToScreen()
 
 	// Set use postprocess shaders.
 	m_postprocessShader.Use();
+
+	GLint zNearLoc = glGetUniformLocation(m_postprocessShader.GetProgram(), "u_zNear");
+	GLint zFarLoc = glGetUniformLocation(m_postprocessShader.GetProgram(), "u_zFar");
+
+	// Push uniform zNear and zFar.
+	if (zNearLoc != -1)
+	{
+		glUniform1f(zNearLoc, m_zNear);
+	}
+	if (zFarLoc != -1)
+	{
+		glUniform1f(zFarLoc, m_zFar);
+	}
 
 	// Bind screen quad VAO.
 	glBindVertexArray(m_screenVAO);

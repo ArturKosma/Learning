@@ -13,9 +13,9 @@ class AFFramebuffer
 public:
 
 	bool Init(int width, int height);
-	bool TESTInit(int width, int height);
 	bool Resize(int newWidth, int newHeight);
 	glm::vec2 GetSize() const;
+	void SetZNearFar(float zNear, float zFar);
 
 	void Bind();
 	void UnBind();
@@ -48,6 +48,9 @@ private:
 	GLuint m_screenVAO = 0;
 	GLuint m_screenVBO = 0;
 	AFMesh m_screenMesh = AFMesh();
+
+	float m_zNear = 0.1f;
+	float m_zFar = 100.0f;
 
 	AFPostprocessShader m_postprocessShader = AFPostprocessShader();
 };

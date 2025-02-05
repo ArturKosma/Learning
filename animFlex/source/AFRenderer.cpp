@@ -12,11 +12,14 @@ bool AFRenderer::Init(int width, int height)
 	printf("%s\n", GetOpenGLVersion());
 
 	// Init the frame buffer with initial information, tell it how to interpret textures, tell it to create depth buffer.
-	if (!m_framebuffer.TESTInit(width, height))
+	if (!m_framebuffer.Init(width, height))
 	{
 		printf("%s\n", "Fail on frame buffer Init().");
 		return false;
 	}
+
+	// Set near and far planes.
+	m_framebuffer.SetZNearFar(m_zNear, m_zFar);
 
 	// Set up the uniform buffer.
 	m_uniformBuffer.Init();
@@ -80,13 +83,11 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 
 	const glm::vec2& frameBufferSize = m_framebuffer.GetSize();
 
-	// Safely create the projection matrix given screen width/height and camera's FOV.
+	// Safely create the projection matrix given screen width/height.
 	if (frameBufferSize.x > 0 && frameBufferSize.y > 0)
 	{
 		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(cameraComp->GetCameraProperties().fieldOfView)),
-			frameBufferSize.x / frameBufferSize.y, 0.1f, 100.0f);
-
-		m_orthoMatrix = glm::ortho(0.0f, frameBufferSize.x, frameBufferSize.y, 0.0f, -1.0f, 1.0f);
+			frameBufferSize.x / frameBufferSize.y, m_zNear, m_zFar);
 	}
 
 	// Create the view matrix given camera's transform.
@@ -131,9 +132,6 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 
 	// Enable face culling to not render back of triangles.
 	glEnable(GL_CULL_FACE);
-
-	// Enable depth testing.
-	glEnable(GL_DEPTH_TEST);
 
 	// Upload proper view, projection and camera matrices.
 	m_uniformBuffer.UploadViewProjection(m_viewMatrix, m_projectionMatrix);

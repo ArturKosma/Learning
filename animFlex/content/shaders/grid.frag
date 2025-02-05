@@ -6,6 +6,11 @@ in float CellNum;
 
 layout (location = 0) out vec4 FragColor;
 
+float LinearizeDepth(float d, float zNear, float zFar)
+{
+	return (2.0f * zNear * zFar) / (zFar + zNear - (d * 2.0f - 1.0f) * (zFar - zNear));
+}
+
 float GridLineGeneration(vec2 in_fun_UV, float in_fun_cellNum)
 {
 	// Make repeating UV grid.
@@ -38,7 +43,9 @@ void main()
 {	
 	// Generate brightness for the grid line.
 	float line = GridLineGeneration(UV, CellNum);
-	//line = 0.0f;
+	line = 0.0f;
+
+	float depth = LinearizeDepth(gl_FragCoord.z, 0.1f, 100.0f) / 100.0f;
 
 	// Sum the horizontal and vertical lines.
 	// Clamp the brightness.
@@ -50,6 +57,8 @@ void main()
 	// Final color.
 	float lineColor = -0.22f * lineMask;
 
-	//FragColor = vec4(vec3(baseColorDepth), 1.0f);
+	//FragColor = vec4(vec3(depth), 1.0f);
+
+
 	FragColor = baseColor + lineColor;
 }
