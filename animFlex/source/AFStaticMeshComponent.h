@@ -21,7 +21,10 @@ public:
 	void SetMesh(const AFMesh& newMesh);
 	const AFMesh& GetMesh() const;
 
+	void SetUseDepthTest(bool useDepthTest);
+
 private:
 
+	bool m_depthTest = true;
 	AFTexture m_tex = AFTexture();
 };

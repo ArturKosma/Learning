@@ -18,20 +18,14 @@ bool AFRenderer::Init(int width, int height)
 		return false;
 	}
 
-	// Set near and far planes.
-	m_framebuffer.SetZNearFar(m_zNear, m_zFar);
-
 	// Set up the uniform buffer.
 	m_uniformBuffer.Init();
 
-	// Set up the background shader.
-	m_backgroundShader.SetVertexShader("content/shaders/background.vert");
-	m_backgroundShader.SetFragmentShader("content/shaders/background.frag");
-	if (!m_backgroundShader.LoadShaders())
-	{
-		printf("%s\n", "Fail on background shader load.");
-		return false;
-	}
+	// Make sure closer objects are drawn before farther.
+	glDepthFunc(GL_LESS);
+
+	// Enable face culling to not render back of triangles.
+	glEnable(GL_CULL_FACE);
 
 	return true;
 }
@@ -81,60 +75,44 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 		return;
 	}
 
+	// Fetch framebuffer size and camera properties.
 	const glm::vec2& frameBufferSize = m_framebuffer.GetSize();
+	const AFCameraProperties& cameraProps = cameraComp->GetCameraProperties();
+	const float fov = static_cast<float>(cameraProps.fieldOfView);
+	const float near = cameraProps.near;
+	const float far = cameraProps.far;
 
 	// Safely create the projection matrix given screen width/height.
 	if (frameBufferSize.x > 0 && frameBufferSize.y > 0)
 	{
-		m_projectionMatrix = glm::perspective(glm::radians(static_cast<float>(cameraComp->GetCameraProperties().fieldOfView)),
-			frameBufferSize.x / frameBufferSize.y, m_zNear, m_zFar);
+		m_projectionMatrix = glm::perspective(glm::radians(fov), frameBufferSize.x / frameBufferSize.y, near, far);
 	}
-
-	// Create the view matrix given camera's transform.
-	m_viewMatrix = cameraComp->GetViewMatrix();
-
-	// Set the background colour.
-	glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
-
-	// Make sure closer objects are drawn before farther.
-	glDepthFunc(GL_LESS);
 
 	// Enable drawing to the frame buffer.
 	m_framebuffer.Bind();
 
+	// Set the background colour.
+	glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
+
 	// Clear colour and depth buffers.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Disable depth for background drawing.
-	glDepthMask(GL_FALSE);
-	glDisable(GL_DEPTH_TEST);
+	// Create the view matrix given camera's transform.
+	m_viewMatrix = cameraComp->GetViewMatrix();
 
-	// Upload inverse of view and projection, purely for the background shader.
-	m_uniformBuffer.UploadViewProjection(glm::inverse(m_viewMatrix), glm::inverse(m_projectionMatrix));
+	// Inverse view & projection upload.
+	m_uniformBuffer.UploadInverseViewProjection(glm::inverse(m_viewMatrix), glm::inverse(m_projectionMatrix));
 
-	// Use background shader.
-	m_backgroundShader.Use();
+	// Resolution upload.
+	glm::mat4 resolutionMatrix;
+	resolutionMatrix[0][0] = frameBufferSize.x;
+	resolutionMatrix[0][1] = frameBufferSize.y;
+	m_uniformBuffer.UploadResolution(resolutionMatrix);
 
-	// Resolution, projection and view uniforms for the background shader.
-	GLint resolutionUniformLoc = glGetUniformLocation(m_backgroundShader.GetProgram(), "u_Resolution");
-	glUniform2f(resolutionUniformLoc, static_cast<float>(frameBufferSize.x), static_cast<float>(frameBufferSize.y));
-	GLint viewProjectionIndex = glGetUniformBlockIndex(m_backgroundShader.GetProgram(), "InverseViewProjection");
-	glUniformBlockBinding(m_backgroundShader.GetProgram(), viewProjectionIndex, 0);
-	GLint cameraPositionIndex = glGetUniformLocation(m_backgroundShader.GetProgram(), "u_CameraPos");
-	glUniform3f(cameraPositionIndex, cameraComp->GetWorldLocation().x, cameraComp->GetWorldLocation().y, cameraComp->GetWorldLocation().z);
-
-	// Draw 3 non defined points.
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	// Enable depth for rest of scene.
-	glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST);
-
-	// Enable face culling to not render back of triangles.
-	glEnable(GL_CULL_FACE);
-
-	// Upload proper view, projection and camera matrices.
+	// View & projection upload.
 	m_uniformBuffer.UploadViewProjection(m_viewMatrix, m_projectionMatrix);
+
+	// Camera transform upload.
 	m_uniformBuffer.UploadCamera(cameraComp->GetWorldTransform());
 
 	// Per object draw.
@@ -148,6 +126,7 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 			{
 				continue;
 			}
+
 			// Upload the model matrix.
 			m_uniformBuffer.UploadTransform(renderComponent->GetWorldTransform());
 
@@ -160,7 +139,7 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	m_framebuffer.UnBind();
 
 	// Draw all the contents of the frame buffer to the screen.
-	m_framebuffer.DrawToScreen();
+	m_framebuffer.DrawToScreen(sceneData);
 }
 
 AFRenderer::AFRenderer()

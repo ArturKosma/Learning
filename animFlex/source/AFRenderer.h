@@ -34,9 +34,4 @@ private:
 	glm::mat4 m_viewMatrix = glm::mat4(1.0f);
 	glm::mat4 m_projectionMatrix = glm::mat4(1.0f);
 	glm::mat4 m_orthoMatrix = glm::mat4(1.0f);
-
-	AFShader m_backgroundShader = AFShader();
-
-	float m_zNear = 0.1f;
-	float m_zFar = 100.0f;
 };

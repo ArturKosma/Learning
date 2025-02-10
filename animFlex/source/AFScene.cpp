@@ -1,5 +1,6 @@
 #include "AFScene.h"
 
+#include "AFBackgroundComponent.h"
 #include "AFGridComponent.h"
 #include "AFStaticMeshComponent.h"
 #include "AFUtility.h"
@@ -53,8 +54,14 @@ bool AFScene::Init()
 
 void AFScene::CreateDefaultSceneActors()
 {
-	// Create a grid.
+	// Create background.
+	AFActor* background = new AFActor();
+	AFBackgroundComponent* backgroundMesh = new AFBackgroundComponent();
+	background->AddComponent(backgroundMesh);
+	background->SetDisplayName("background");
+	AddActor(background);
 
+	// Create a grid.
 	AFActor* gridActor = new AFActor();
 	gridActor->SetDisplayName("grid");
 

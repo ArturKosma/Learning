@@ -1,14 +1,15 @@
 #version 300 es
-precision highp float;
-
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
-layout (location = 2) in vec2 aTexCoord;
-
-out vec2 TexCoord;
+precision mediump float;
 
 void main()
 {
-	TexCoord = aTexCoord;
-	gl_Position = vec4(aPos, 1.0);
+	// Whole screen triangle.
+	const vec2 positions[3] = vec2[]
+    (
+        vec2(-1.0f, -1.0f),
+        vec2( 3.0f, -1.0f),
+        vec2(-1.0f,  3.2f)
+    );
+
+    gl_Position = vec4(positions[gl_VertexID], 0.0f, 1.0f);
 }

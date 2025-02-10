@@ -6,6 +6,8 @@
 struct AFCameraProperties
 {
 	int fieldOfView = 60;
+	float near = 1.0f;
+	float far = 200.0f;
 };
 
 struct AFSceneData
@@ -13,6 +15,7 @@ struct AFSceneData
 	std::vector<class AFActor*> sceneActors = std::vector<class AFActor*>();
 	int sceneTriangles = 0;
 	class AFCamera* activeCamera = nullptr;
+	class AFStaticMeshComponent* background = nullptr;
 };
 
 struct AFAppData

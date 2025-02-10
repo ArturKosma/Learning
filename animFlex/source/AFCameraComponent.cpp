@@ -1,8 +1,30 @@
 #include "AFCameraComponent.h"
 
+AFCameraComponent::AFCameraComponent()
+{
+	// Init postprocess shader.
+	m_postprocessShader.SetVertexShader("content/shaders/postprocess.vert");
+	m_postprocessShader.SetFragmentShader("content/shaders/postprocess.frag");
+	m_postprocessShader.LoadShaders();
+
+	// Set far/near plane uniforms.
+	m_postprocessShader.SetUniform1f("u_zNear", GetCameraProperties().near);
+	m_postprocessShader.SetUniform1f("u_zFar", GetCameraProperties().far);
+}
+
+AFCameraComponent::~AFCameraComponent()
+{
+
+}
+
 void AFCameraComponent::SetFieldOfView(int newFOV)
 {
 	m_cameraProperties.fieldOfView = newFOV;
+}
+
+AFPostprocessShader AFCameraComponent::GetPostprocessShader() const
+{
+	return m_postprocessShader;
 }
 
 glm::mat4 AFCameraComponent::GetViewMatrix() const

@@ -14,6 +14,10 @@ public:
 	void SetVertexShader(const std::string& inPath);
 	void SetFragmentShader(const std::string& inPath);
 
+	void SetUniform1f(const GLchar* uniformName, float uniformFloat1);
+	void SetUniform2f(const GLchar* uniformName, float uniformFloat1, float uniformFloat2);
+	void SetUniform3f(const GLchar* uniformName, float uniformFloat1, float uniformFloat2, float uniformFloat3);
+
 	bool LoadShaders();
 	void Use() const;
 	void Cleanup();

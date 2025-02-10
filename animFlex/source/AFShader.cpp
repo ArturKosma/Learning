@@ -13,6 +13,30 @@ void AFShader::SetFragmentShader(const std::string& inPath)
 	m_fragmentShaderPath = inPath;
 }
 
+void AFShader::SetUniform1f(const GLchar* uniformName, float uniformFloat1)
+{
+	Use();
+
+	GLint resolutionUniformLoc = glGetUniformLocation(m_shaderProgram, uniformName);
+	glUniform1f(resolutionUniformLoc, uniformFloat1);
+}
+
+void AFShader::SetUniform2f(const GLchar* uniformName, float uniformFloat1, float uniformFloat2)
+{
+	Use();
+
+	GLint resolutionUniformLoc = glGetUniformLocation(m_shaderProgram, uniformName);
+	glUniform2f(resolutionUniformLoc, uniformFloat1, uniformFloat2);
+}
+
+void AFShader::SetUniform3f(const GLchar* uniformName, float uniformFloat1, float uniformFloat2, float uniformFloat3)
+{
+	Use();
+
+	GLint resolutionUniformLoc = glGetUniformLocation(m_shaderProgram, uniformName);
+	glUniform3f(resolutionUniformLoc, uniformFloat1, uniformFloat2, uniformFloat3);
+}
+
 bool AFShader::LoadShaders()
 {
 	GLuint vertexShader = ReadShader(m_vertexShaderPath, GL_VERTEX_SHADER);
@@ -132,22 +156,34 @@ void AFShader::UniformBinding()
 	glUseProgram(m_shaderProgram);
 
 	GLint viewProjectionIndex = glGetUniformBlockIndex(m_shaderProgram, "ViewProjection");
+	GLint inverseViewProjectionIndex = glGetUniformBlockIndex(m_shaderProgram, "InverseViewProjection");
 	GLint modelIndex = glGetUniformBlockIndex(m_shaderProgram, "Model");
 	GLint cameraIndex = glGetUniformBlockIndex(m_shaderProgram, "Camera");
+	GLint resolutionIndex = glGetUniformBlockIndex(m_shaderProgram, "Resolution");
 
 	if (viewProjectionIndex != -1)
 	{
 		glUniformBlockBinding(m_shaderProgram, viewProjectionIndex, 0);
 	}
 
+	if (inverseViewProjectionIndex != -1)
+	{
+		glUniformBlockBinding(m_shaderProgram, inverseViewProjectionIndex, 1);
+	}
+
 	if(modelIndex != -1)
 	{
-		glUniformBlockBinding(m_shaderProgram, modelIndex, 1);
+		glUniformBlockBinding(m_shaderProgram, modelIndex, 2);
 	}
 
 	if(cameraIndex != -1)
 	{
-		glUniformBlockBinding(m_shaderProgram, cameraIndex, 2);
+		glUniformBlockBinding(m_shaderProgram, cameraIndex, 3);
+	}
+
+	if (resolutionIndex != -1)
+	{
+		glUniformBlockBinding(m_shaderProgram, resolutionIndex, 4);
 	}
 
 	glUseProgram(0);

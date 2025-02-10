@@ -23,6 +23,7 @@ layout (location = 2) in vec2 aUV;
 
 out vec2 UV;
 out float CellNum;
+out vec3 WorldPosition;
 
 void main()
 {
@@ -34,7 +35,7 @@ void main()
 	// Move the whole grid with camera with.
 	float gridStepSize = 1.0f; 
 	vec2 snapOffset = round(cameraTransform[3].xz / gridStepSize) * gridStepSize;
-	snapOffset = vec2(0.0f);
+	//snapOffset = vec2(0.0f);
 	float xPos = posScaled.x + snapOffset.x;
 	float zPos = posScaled.z + snapOffset.y;
 	vec3 posOffset = vec3(xPos, posScaled.y, zPos);
@@ -42,5 +43,6 @@ void main()
 	// Pass information further.
 	UV = aUV;
 	CellNum = cellNum;
-	gl_Position = projection * view * vec4(posOffset, 1.0);
+	WorldPosition = vec4(posOffset, 1.0f).xyz;
+	gl_Position = projection * view * vec4(posOffset, 1.0f);
 }

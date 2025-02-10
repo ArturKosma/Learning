@@ -11,6 +11,20 @@ void AFStaticMeshComponent::Draw() const
 	// Bind the vertex buffer which already contains information about vertices - their locations, color, uv mapping, etc. 
 	m_vertexBuffer.Bind();
 
+	// Should this mesh use depth testing when drawing.
+	if(m_depthTest)
+	{
+		// Enable depth for rest of scene.
+		glDepthMask(GL_TRUE);
+		glEnable(GL_DEPTH_TEST);
+	}
+	else
+	{
+		// Disable depth for drawing.
+		glDepthMask(GL_FALSE);
+		glDisable(GL_DEPTH_TEST);
+	}
+
 	// Draw the triangles.
 	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_mesh.vertices.size());
 
@@ -63,4 +77,9 @@ void AFStaticMeshComponent::SetMesh(const AFMesh& newMesh)
 const AFMesh& AFStaticMeshComponent::GetMesh() const
 {
 	return m_mesh;
+}
+
+void AFStaticMeshComponent::SetUseDepthTest(bool useDepthTest)
+{
+	m_depthTest = useDepthTest;
 }
