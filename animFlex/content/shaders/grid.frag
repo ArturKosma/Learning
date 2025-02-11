@@ -93,18 +93,26 @@ void main()
 	float lineMask = clamp(line, 0.0f, 0.7f);
 
 	// Find line distance.
-	float lineDist = Remap(fragDist, 10.0f, 300.0f, 0.0f, 1.0f);
+	float lineDist = Remap(fragDist, 10.0f, 500.0f, 0.0f, 1.0f);
 	lineDist = exp(-20.0f * lineDist);
 
 	// Lower the line brightness with distance.
 	lineMask *= lineDist;
 
+	// Lower the brightness with height.
 	float lineHeightMaxRadius = Remap(cameraPos.y, 0.0f, 10.0f, 10.0f, 300.0f);
 	float gridBrightnessHeightModifier = smoothstep(0.0f, lineHeightMaxRadius, fragDist);
 	gridBrightnessHeightModifier = exp(-pow(gridBrightnessHeightModifier, 2.0f) / 0.3f) * (1.0f - gridBrightnessHeightModifier);
 
+	vec2 flatDist = vec2(abs(WorldPosition.x - cameraPos.x), abs(WorldPosition.z - cameraPos.z));
+	float flatDistX = Remap(flatDist.x, 0.0f, CellNum, 0.0f, 1.0f);
+	float flatDistY = Remap(flatDist.y, 0.0f, CellNum, 0.0f, 1.0f);
+	flatDist = vec2(flatDistX, flatDistY) - (flatDistX * flatDistY) * CellNum / 1.3f;
+	float dist45 = length(flatDist);
+	dist45 = clamp((1.0f / exp(dist45)) * (2.0f - dist45), 0.2f, 1.0f);
+
 	// Final line color.
-	float lineColor = -0.35f * lineMask * gridBrightnessHeightModifier;
+	float lineColor = clamp(-0.65f * lineMask * gridBrightnessHeightModifier * dist45, -1.0f, 0.0f);
 
 	// Faked spotlight in the direction of camera.
 	vec3 s_light_cameraPos = vec3(cameraPos.x, 20.0f, cameraPos.z);
@@ -150,7 +158,7 @@ void main()
 	// Dither final color to get rid of banding.
 	finalColor += (noise - 0.5f) * 0.02f;
 
-	FragColor = finalColor + lineColor;
-	//FragColor = vec4(vec3(gridBrightnessHeightModifier), 1.0f);
-	//FragColor = vec4(vec3(s_light_distModifier), 1.0f);
+	FragColor = finalColor;
+	//FragColor = vec4(vec3(dist45), 1.0f);
+	//FragColor = vec4(flatDist, 0.0f, 1.0f);
 }
