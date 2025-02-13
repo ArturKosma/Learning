@@ -12,12 +12,14 @@ public:
 
 	void SetFieldOfView(int newFOV);
 
-	AFPostprocessShader GetPostprocessShader() const;
+	AFPostprocessShader GetNeutralShader() const;
+	std::vector<AFPostprocessShader> GetPostprocessShaders() const;
 	glm::mat4 GetViewMatrix() const;
 	const AFCameraProperties& GetCameraProperties() const;
 
 private:
 
-	AFPostprocessShader m_postprocessShader = AFPostprocessShader();
+	AFPostprocessShader m_neutralShader = AFPostprocessShader();
+	std::vector<AFPostprocessShader> m_postprocessShaders = {};
 	AFCameraProperties m_cameraProperties = AFCameraProperties();
 };

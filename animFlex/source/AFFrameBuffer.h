@@ -31,9 +31,12 @@ private:
 	GLint m_bufferWidth = 800;
 	GLint m_bufferHeight = 600;
 
-	GLuint m_resolveFramebuffer = 0;
-	GLuint m_resolveColorTex = 0;
-	GLuint m_resolveDepthTex = 0;
+	GLuint m_resolveFramebuffer0 = 0;
+	GLuint m_resolveFramebuffer1 = 0;
+	GLuint m_resolveColorTex0 = 0;
+	GLuint m_resolveColorTex1 = 0;
+	GLuint m_resolveDepthTex0 = 0;
+	GLuint m_resolveDepthTex1 = 0;
 
 	GLuint m_msFBO = 0;
 	GLuint m_msColorBuffer = 0;

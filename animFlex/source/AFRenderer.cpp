@@ -6,6 +6,7 @@
 
 #include "AFMath.h"
 #include "AFRenderComponent.h"
+#include "AFUtility.h"
 
 bool AFRenderer::Init(int width, int height)
 {
@@ -103,11 +104,13 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	// Inverse view & projection upload.
 	m_uniformBuffer.UploadInverseViewProjection(glm::inverse(m_viewMatrix), glm::inverse(m_projectionMatrix));
 
-	// Resolution upload.
-	glm::mat4 resolutionMatrix;
-	resolutionMatrix[0][0] = frameBufferSize.x;
-	resolutionMatrix[0][1] = frameBufferSize.y;
-	m_uniformBuffer.UploadResolution(resolutionMatrix);
+	// Render properties upload.
+	glm::mat4 renderPropertiesMat = AFUtility::CreateRenderPropertiesMat(
+		static_cast<int>(frameBufferSize.x),
+		static_cast<int>(frameBufferSize.y),
+		cameraComp->GetCameraProperties().near,
+		cameraComp->GetCameraProperties().far);
+	m_uniformBuffer.UploadRenderProperties(renderPropertiesMat);
 
 	// View & projection upload.
 	m_uniformBuffer.UploadViewProjection(m_viewMatrix, m_projectionMatrix);

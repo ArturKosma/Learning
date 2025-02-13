@@ -41,12 +41,12 @@ void AFUniformBuffer::Init()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	// Resolution buffer.
-	glGenBuffers(1, &m_resolutionBuffer);
-	glBindBuffer(GL_UNIFORM_BUFFER, m_resolutionBuffer);
+	glGenBuffers(1, &m_renderPropertiesBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, m_renderPropertiesBuffer);
 
 	glBufferData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
 
-	glBindBufferBase(GL_UNIFORM_BUFFER, 4, m_resolutionBuffer);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 4, m_renderPropertiesBuffer);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 }
@@ -81,10 +81,10 @@ void AFUniformBuffer::UploadCamera(glm::mat4 cameraTrs)
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void AFUniformBuffer::UploadResolution(glm::mat4 framebufferResolution)
+void AFUniformBuffer::UploadRenderProperties(glm::mat4 renderProperties)
 {
-	glBindBuffer(GL_UNIFORM_BUFFER, m_resolutionBuffer);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(framebufferResolution));
+	glBindBuffer(GL_UNIFORM_BUFFER, m_renderPropertiesBuffer);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(renderProperties));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -94,5 +94,5 @@ void AFUniformBuffer::Cleanup()
 	glDeleteBuffers(1, &m_inverseViewProjectionBuffer);
 	glDeleteBuffers(1, &m_transformBuffer);
 	glDeleteBuffers(1, &m_cameraBuffer);
-	glDeleteBuffers(1, &m_resolutionBuffer);
+	glDeleteBuffers(1, &m_renderPropertiesBuffer);
 }

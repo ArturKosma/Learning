@@ -2,6 +2,8 @@
 
 void AFPostprocessShader::UniformBinding()
 {
+    AFShader::UniformBinding();
+
     glUseProgram(m_shaderProgram);
 
     GLint colorLoc = glGetUniformLocation(m_shaderProgram, "u_ColorTex");

@@ -12,9 +12,9 @@ layout (std140) uniform Camera
 	mat4 cameraTransform;
 };
 
-layout (std140) uniform Resolution
+layout (std140) uniform RenderProperties
 {
-	mat4 resolution;
+	mat4 renderProperties;
 };
 
 layout (location = 0) out vec4 FragColor;
@@ -27,7 +27,7 @@ float hash(vec2 p)
 void main()
 {	
 	// Fetch uniform resolution.
-	vec2 frameRes = vec2(resolution[0][0], resolution[0][1]);
+	vec2 frameRes = vec2(renderProperties[0][0], renderProperties[0][1]);
 
 	// Get screen space UV.
     vec2 uv = gl_FragCoord.xy / frameRes;
@@ -71,8 +71,7 @@ void main()
 	vec3 horizon = vec3(horizonBrightness * horizonColor);
 
 	// Create noise for dithering (needed to get rid of banding).
-	// @todo Pass uniform resolution.
-	float noise = hash(worldDir.xy * vec2(1920.0, 1080.0));
+	float noise = hash(worldDir.xy * frameRes);
 
 	// Add the dither noise to horizon brightness mask.
 	horizon += (noise - 0.5f) * 0.02f;

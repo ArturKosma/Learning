@@ -6,9 +6,9 @@ layout (std140) uniform Camera
 	mat4 cameraTransform;
 };
 
-layout (std140) uniform Resolution
+layout (std140) uniform RenderProperties
 {
-	mat4 resolution;
+	mat4 renderProperties;
 };
 
 in vec2 UV;
@@ -31,8 +31,8 @@ float GridLineGeneration(vec2 in_fun_UV, float in_fun_cellNum)
 	// Get the minimum width of X and Y lines. 
 	// Width becomes bigger with stronger UV changes (far distance, big angle).
 	float scaledUVChangeMultiplier = 1.5f;
-	float minLineWidthX = max(0.016f, fwidth(scaledUV.x) * scaledUVChangeMultiplier);  
-	float minLineWidthY = max(0.016f, fwidth(scaledUV.y) * scaledUVChangeMultiplier);
+	float minLineWidthX = max(0.012f, fwidth(scaledUV.x) * scaledUVChangeMultiplier);  
+	float minLineWidthY = max(0.012f, fwidth(scaledUV.y) * scaledUVChangeMultiplier);
 
 	// Get the distance from the center of UV tile.
 	float distX = abs(gridUV.x - 0.5f);
@@ -79,9 +79,8 @@ void main()
 	float fragDist = length(cameraPos - WorldPosition);
 	
 	// Cache near/far planes.
-	// @todo pass it via uniform.
-	float near = 1.0f;
-	float far = 200.0f;
+	float near = renderProperties[0][2];
+	float far = renderProperties[0][3];
 
 	// Generate brightness for the grid line.
 	float line = GridLineGeneration(UV, CellNum);
@@ -112,7 +111,7 @@ void main()
 	dist45 = clamp((1.0f / exp(dist45)) * (2.0f - dist45), 0.2f, 1.0f);
 
 	// Final line color.
-	float lineColor = clamp(-0.65f * lineMask * gridBrightnessHeightModifier * dist45, -1.0f, 0.0f);
+	float lineColor = clamp(-0.45f * lineMask * gridBrightnessHeightModifier * dist45, -1.0f, 0.0f);
 
 	// Faked spotlight in the direction of camera.
 	vec3 s_light_cameraPos = vec3(cameraPos.x, 20.0f, cameraPos.z);
@@ -131,7 +130,7 @@ void main()
 	vec2 screenSpaceUV = gl_FragCoord.xy;
 
 	// Fetch uniform resolution.
-	vec2 frameRes = vec2(resolution[0][0], resolution[0][1]);
+	vec2 frameRes = vec2(renderProperties[0][0], renderProperties[0][1]);
 
 	// Get proper screen space uv.
 	screenSpaceUV /= frameRes;
@@ -153,12 +152,10 @@ void main()
 
 	// Create noise for dithering (needed to get rid of banding).
 	// @todo pass uniform resolution.
-	float noise = hash(UV * vec2(1920.0, 1080.0));	
+	float noise = hash(UV * frameRes);	
 
 	// Dither final color to get rid of banding.
 	finalColor += (noise - 0.5f) * 0.02f;
 
 	FragColor = finalColor;
-	//FragColor = vec4(vec3(dist45), 1.0f);
-	//FragColor = vec4(flatDist, 0.0f, 1.0f);
 }

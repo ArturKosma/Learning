@@ -159,7 +159,7 @@ void AFShader::UniformBinding()
 	GLint inverseViewProjectionIndex = glGetUniformBlockIndex(m_shaderProgram, "InverseViewProjection");
 	GLint modelIndex = glGetUniformBlockIndex(m_shaderProgram, "Model");
 	GLint cameraIndex = glGetUniformBlockIndex(m_shaderProgram, "Camera");
-	GLint resolutionIndex = glGetUniformBlockIndex(m_shaderProgram, "Resolution");
+	GLint renderPropertiesIndex = glGetUniformBlockIndex(m_shaderProgram, "RenderProperties");
 
 	if (viewProjectionIndex != -1)
 	{
@@ -181,9 +181,9 @@ void AFShader::UniformBinding()
 		glUniformBlockBinding(m_shaderProgram, cameraIndex, 3);
 	}
 
-	if (resolutionIndex != -1)
+	if (renderPropertiesIndex != -1)
 	{
-		glUniformBlockBinding(m_shaderProgram, resolutionIndex, 4);
+		glUniformBlockBinding(m_shaderProgram, renderPropertiesIndex, 4);
 	}
 
 	glUseProgram(0);

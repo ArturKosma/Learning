@@ -35,7 +35,7 @@ void main()
 	// Move the whole grid with camera with.
 	float gridStepSize = 1.0f; 
 	vec2 snapOffset = round(cameraTransform[3].xz / gridStepSize) * gridStepSize;
-	//snapOffset = vec2(0.0f);
+
 	float xPos = posScaled.x + snapOffset.x;
 	float zPos = posScaled.z + snapOffset.y;
 	vec3 posOffset = vec3(xPos, posScaled.y, zPos);

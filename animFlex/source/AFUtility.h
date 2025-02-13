@@ -3,7 +3,8 @@
 #include <string>
 #include <unordered_map>
 #include <GLFW/glfw3.h>
-#include <glm/vec3.hpp>
+#include <glm/fwd.hpp>
+#include <glm/glm.hpp>
 
 class AFUtility
 {
@@ -79,6 +80,17 @@ public:
 		}
 
 		return false;
+	}
+
+	static glm::mat4 CreateRenderPropertiesMat(float resolutionX, float resolutionY, float nearPlane, float farPlane)
+	{
+		glm::mat4 renderProperties;
+		renderProperties[0][0] = resolutionX;
+		renderProperties[0][1] = resolutionY;
+		renderProperties[0][2] = nearPlane;
+		renderProperties[0][3] = farPlane;
+
+		return renderProperties;
 	}
 };
 

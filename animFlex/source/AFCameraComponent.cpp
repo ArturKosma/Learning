@@ -2,14 +2,40 @@
 
 AFCameraComponent::AFCameraComponent()
 {
-	// Init postprocess shader.
-	m_postprocessShader.SetVertexShader("content/shaders/postprocess.vert");
-	m_postprocessShader.SetFragmentShader("content/shaders/postprocess.frag");
-	m_postprocessShader.LoadShaders();
+	// Init postprocess shaders.
 
-	// Set far/near plane uniforms.
-	m_postprocessShader.SetUniform1f("u_zNear", GetCameraProperties().near);
-	m_postprocessShader.SetUniform1f("u_zFar", GetCameraProperties().far);
+	// Neutral.
+	m_neutralShader.SetVertexShader("content/shaders/neutral.vert");
+	m_neutralShader.SetFragmentShader("content/shaders/neutral.frag");
+	m_neutralShader.LoadShaders();
+
+	// Fisheye.
+	AFPostprocessShader fisheye;
+	fisheye.SetVertexShader("content/shaders/fisheye.vert");
+	fisheye.SetFragmentShader("content/shaders/fisheye.frag");
+	fisheye.LoadShaders();
+	m_postprocessShaders.push_back(fisheye);
+
+	// Gaussian horizontal.
+	AFPostprocessShader gaussianHorizontal;
+	gaussianHorizontal.SetVertexShader("content/shaders/gaussianHorizontal.vert");
+	gaussianHorizontal.SetFragmentShader("content/shaders/gaussianHorizontal.frag");
+	gaussianHorizontal.LoadShaders();
+	m_postprocessShaders.push_back(gaussianHorizontal);
+
+	// Gaussian vertical.
+	AFPostprocessShader gaussianVertical;
+	gaussianVertical.SetVertexShader("content/shaders/gaussianVertical.vert");
+	gaussianVertical.SetFragmentShader("content/shaders/gaussianVertical.frag");
+	gaussianVertical.LoadShaders();
+	m_postprocessShaders.push_back(gaussianVertical);
+
+	// Vignette.
+	AFPostprocessShader vignette;
+	vignette.SetVertexShader("content/shaders/vignette.vert");
+	vignette.SetFragmentShader("content/shaders/vignette.frag");
+	vignette.LoadShaders();
+	m_postprocessShaders.push_back(vignette);
 }
 
 AFCameraComponent::~AFCameraComponent()
@@ -22,9 +48,14 @@ void AFCameraComponent::SetFieldOfView(int newFOV)
 	m_cameraProperties.fieldOfView = newFOV;
 }
 
-AFPostprocessShader AFCameraComponent::GetPostprocessShader() const
+AFPostprocessShader AFCameraComponent::GetNeutralShader() const
 {
-	return m_postprocessShader;
+	return m_neutralShader;
+}
+
+std::vector<AFPostprocessShader> AFCameraComponent::GetPostprocessShaders() const
+{
+	return m_postprocessShaders;
 }
 
 glm::mat4 AFCameraComponent::GetViewMatrix() const

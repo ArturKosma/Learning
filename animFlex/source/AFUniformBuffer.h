@@ -13,7 +13,7 @@ public:
 	void UploadInverseViewProjection(glm::mat4 inverseViewMatrix, glm::mat4 inverseProjectionMatrix);
 	void UploadTransform(glm::mat4 modelMatrix);
 	void UploadCamera(glm::mat4 cameraTrs);
-	void UploadResolution(glm::mat4 framebufferResolution);
+	void UploadRenderProperties(glm::mat4 renderProperties);
 
 	void Cleanup();
 
@@ -23,5 +23,5 @@ private:
 	GLuint m_inverseViewProjectionBuffer = 0;
 	GLuint m_transformBuffer = 0;
 	GLuint m_cameraBuffer = 0;
-	GLuint m_resolutionBuffer = 0;
+	GLuint m_renderPropertiesBuffer = 0;
 };
