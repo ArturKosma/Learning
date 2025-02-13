@@ -109,7 +109,8 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 		static_cast<int>(frameBufferSize.x),
 		static_cast<int>(frameBufferSize.y),
 		cameraComp->GetCameraProperties().near,
-		cameraComp->GetCameraProperties().far);
+		cameraComp->GetCameraProperties().far,
+		cameraMov->GetControlRotation().x);
 	m_uniformBuffer.UploadRenderProperties(renderPropertiesMat);
 
 	// View & projection upload.

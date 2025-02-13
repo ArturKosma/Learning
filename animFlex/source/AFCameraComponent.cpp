@@ -17,6 +17,7 @@ AFCameraComponent::AFCameraComponent()
 	m_postprocessShaders.push_back(fisheye);
 
 	// Gaussian horizontal.
+	/*
 	AFPostprocessShader gaussianHorizontal;
 	gaussianHorizontal.SetVertexShader("content/shaders/gaussianHorizontal.vert");
 	gaussianHorizontal.SetFragmentShader("content/shaders/gaussianHorizontal.frag");
@@ -35,7 +36,7 @@ AFCameraComponent::AFCameraComponent()
 	vignette.SetVertexShader("content/shaders/vignette.vert");
 	vignette.SetFragmentShader("content/shaders/vignette.frag");
 	vignette.LoadShaders();
-	m_postprocessShaders.push_back(vignette);
+	m_postprocessShaders.push_back(vignette);*/
 }
 
 AFCameraComponent::~AFCameraComponent()

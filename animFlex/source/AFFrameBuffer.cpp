@@ -54,8 +54,8 @@ bool AFFramebuffer::Init(int width, int height)
 	glGenTextures(1, &m_resolveDepthTex0);
 	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -88,8 +88,8 @@ bool AFFramebuffer::Init(int width, int height)
 	glGenTextures(1, &m_resolveDepthTex1);
 	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -146,7 +146,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	}
 
 	// Bind the multisampled framebuffer as read.
-	// Bind the resolve framebuffer as draw.
+	// Bind the resolve0 framebuffer as draw.
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_msFBO);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_resolveFramebuffer0);
 
@@ -218,6 +218,8 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void AFFramebuffer::Cleanup()

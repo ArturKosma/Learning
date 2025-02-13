@@ -82,13 +82,14 @@ public:
 		return false;
 	}
 
-	static glm::mat4 CreateRenderPropertiesMat(float resolutionX, float resolutionY, float nearPlane, float farPlane)
+	static glm::mat4 CreateRenderPropertiesMat(float resolutionX, float resolutionY, float nearPlane, float farPlane, float cameraPitch)
 	{
 		glm::mat4 renderProperties;
 		renderProperties[0][0] = resolutionX;
 		renderProperties[0][1] = resolutionY;
 		renderProperties[0][2] = nearPlane;
 		renderProperties[0][3] = farPlane;
+		renderProperties[1][0] = cameraPitch;
 
 		return renderProperties;
 	}

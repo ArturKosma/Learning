@@ -83,6 +83,10 @@ void AFGridComponent::Draw() const
 	// Bind the vertex buffer which already contains information about vertices - their locations, color, uv mapping, etc. 
 	m_vertexBuffer.Bind();
 
+	// Enable depth for the grid.
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+
 	// Draw the triangles.
 	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_mesh.vertices.size());
 

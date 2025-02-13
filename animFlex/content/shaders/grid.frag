@@ -157,5 +157,7 @@ void main()
 	// Dither final color to get rid of banding.
 	finalColor += (noise - 0.5f) * 0.02f;
 
+	//finalColor = vec4(vec3(depth), 1.0f);
+
 	FragColor = finalColor;
 }
