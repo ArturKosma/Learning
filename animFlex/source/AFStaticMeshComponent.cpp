@@ -35,14 +35,14 @@ void AFStaticMeshComponent::Draw() const
 	m_tex.UnBind();
 }
 
-int AFStaticMeshComponent::GetTrianglesNum()
+unsigned long long AFStaticMeshComponent::GetVertexCount()
 {
-	return static_cast<int>(m_mesh.vertices.size() / 3);
+	return m_mesh.vertices.size();
 }
 
 bool AFStaticMeshComponent::Load()
 {
-	m_vertexBuffer.Init(EAFVertexBufferType::StaticMesh);
+	m_vertexBuffer.Init();
 	m_vertexBuffer.UploadMesh(m_mesh);
 
 	if (!m_tex.LoadTexture())

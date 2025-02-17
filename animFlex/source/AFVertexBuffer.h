@@ -3,19 +3,13 @@
 #include <glad/glad.h> 
 #include "AFStructs.h"
 
-enum class EAFVertexBufferType
-{
-	StaticMesh,
-	Grid
-};
-
 class AFVertexBuffer
 {
 	friend class AFRenderer;
 
 public:
 
-	void Init(EAFVertexBufferType vertexBufferType);
+	void Init();
 	void UploadMesh(const AFMesh& newMesh);
 
 	void Bind() const;

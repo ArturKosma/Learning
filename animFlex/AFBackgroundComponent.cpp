@@ -10,6 +10,8 @@ bool AFBackgroundComponent::Load()
 		printf("%s\n", "Fail on background shader load.");
 		return false;
 	}
+
+	return true;
 }
 
 void AFBackgroundComponent::Draw() const

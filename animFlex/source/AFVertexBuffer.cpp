@@ -2,7 +2,7 @@
 #include "AFStructs.h"
 #include "AFUtility.h"
 
-void AFVertexBuffer::Init(EAFVertexBufferType vertexBufferType)
+void AFVertexBuffer::Init()
 {
 	glGenVertexArrays(1, &m_VAO);
 	glGenBuffers(1, &m_vertexVBO);
@@ -10,29 +10,13 @@ void AFVertexBuffer::Init(EAFVertexBufferType vertexBufferType)
 	glBindVertexArray(m_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
 
-	switch(vertexBufferType)
-	{
-		case EAFVertexBufferType::StaticMesh:
-		{
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, position));
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, color));
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, uv));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, position));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, color));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, uv));
 
-			glEnableVertexAttribArray(0);
-			glEnableVertexAttribArray(1);
-			glEnableVertexAttribArray(2);
-
-			break;
-		}
-		case EAFVertexBufferType::Grid:
-		{
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, position));
-
-			glEnableVertexAttribArray(0);
-
-			break;
-		}
-	}
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

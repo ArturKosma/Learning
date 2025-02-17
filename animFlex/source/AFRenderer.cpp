@@ -106,10 +106,10 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 
 	// Render properties upload.
 	glm::mat4 renderPropertiesMat = AFUtility::CreateRenderPropertiesMat(
-		static_cast<int>(frameBufferSize.x),
-		static_cast<int>(frameBufferSize.y),
-		cameraComp->GetCameraProperties().near,
-		cameraComp->GetCameraProperties().far,
+		frameBufferSize.x,
+		frameBufferSize.y,
+		near,
+		far,
 		cameraMov->GetControlRotation().x);
 	m_uniformBuffer.UploadRenderProperties(renderPropertiesMat);
 

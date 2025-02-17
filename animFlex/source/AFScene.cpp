@@ -21,7 +21,7 @@ void AFScene::AddActor(AFActor* newActor)
 			continue;
 		}
 		renderComp->Load();
-		m_sceneData.sceneTriangles += renderComp->GetTrianglesNum();
+		m_sceneData.vertexCount += renderComp->GetVertexCount();
 	}
 
 	m_sceneData.sceneActors.push_back(newActor);
@@ -71,7 +71,6 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(gridActor);
 
 	// Create test box.
-
 	AFMesh testBoxMesh = AFMesh();
 	testBoxMesh.vertices.resize(36);
 

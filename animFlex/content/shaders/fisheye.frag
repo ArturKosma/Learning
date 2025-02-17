@@ -65,12 +65,11 @@ void main()
 
 	vec4 depth = texture(u_DepthTex, uv);
 	float depthLin = LinearizeDepth(depth.x, near, far) / far;
-	depthLin = smoothstep(0.8f, 1.0f, depthLin);
 
 	vec4 screen = texture(u_ColorTex, uv);
 	vec4 finalColor = vec4(vec3(screen.xyz), 1.0f);
 
-	finalColor = vec4(vec3(depthLin), 1.0f);
+	//finalColor = vec4(vec3(depthLin), 1.0f);
 
 	FragColor = finalColor;
 }

@@ -11,7 +11,7 @@ public:
 	AFRenderComponent();
 	virtual ~AFRenderComponent() override;
 
-	virtual int GetTrianglesNum();
+	virtual unsigned long long GetVertexCount();
 	virtual bool Load();
 
 	virtual void Draw() const;

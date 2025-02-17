@@ -11,7 +11,7 @@ public:
 
 	void Draw() const override;
 
-	int GetTrianglesNum() override;
+	unsigned long long GetVertexCount() override;
 
 	bool Load() override;
 

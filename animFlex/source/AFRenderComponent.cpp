@@ -8,7 +8,7 @@ AFRenderComponent::~AFRenderComponent()
 {
 }
 
-int AFRenderComponent::GetTrianglesNum()
+unsigned long long AFRenderComponent::GetVertexCount()
 {
 	return 0;
 }

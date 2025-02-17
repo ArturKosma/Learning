@@ -4,51 +4,54 @@
 
 #include "AFUtility.h"
 
+unsigned long long AFGridComponent::GetVertexCount()
+{
+	return m_mesh.vertices.size();
+}
+
 bool AFGridComponent::Load()
 {
-	m_vertexBuffer.Init(EAFVertexBufferType::StaticMesh);
+	m_vertexBuffer.Init();
 
 	AFMesh gridMesh;
-	/*for(int i = -5; i < 5; ++i)
+
+	// How many vertices in a single grid line row.
+	// Grid is constructed in a way that whole model space is squeezed into a <-0.5f, 0.5f> space.
+	// Later on the vertex shader scales the grid
+	const int gridComplexity = 100;
+
+	for(int i = 0; i < gridComplexity; ++i)
 	{
-		// X.
-		gridMesh.vertices.emplace_back(glm::vec3(static_cast<float>(i), 0.0f, -5.0f));
-		gridMesh.vertices.emplace_back(glm::vec3(static_cast<float>(i), 0.0f, 5.0f));
-		gridMesh.vertices.emplace_back(glm::vec3(-1.0f * static_cast<float>(i), 0.0f, -5.0f));
-		gridMesh.vertices.emplace_back(glm::vec3(-1.0f * static_cast<float>(i), 0.0f, 5.0f));
+		for(int j = 0; j < gridComplexity; ++j)
+		{
+			const glm::vec3 anchor = glm::vec3((static_cast<float>(j) / gridComplexity) - 0.5f, 0.0f, (static_cast<float>(i) / gridComplexity) - 0.5f);
+			const float offset = 1.0f / gridComplexity;
 
-		// Z.
-		gridMesh.vertices.emplace_back(glm::vec3(-5.0f, 0.0f, static_cast<float>(i)));
-		gridMesh.vertices.emplace_back(glm::vec3(5.0f, 0.0f, static_cast<float>(i)));
-		gridMesh.vertices.emplace_back(glm::vec3(-5.0f, 0.0f, -1.0f * static_cast<float>(i)));
-		gridMesh.vertices.emplace_back(glm::vec3(5.0f, 0.0f, -1.0f * static_cast<float>(i)));
-	}*/
+			// Two triangles make a square.
+			const glm::vec3 vertex0 = glm::vec3(anchor.x, 0.0f, anchor.z);
+			const glm::vec3 vertex1 = glm::vec3(anchor.x, 0.0f, anchor.z + offset);
+			const glm::vec3 vertex2 = glm::vec3(anchor.x + offset, 0.0f, anchor.z);
+			const glm::vec3 vertex3 = glm::vec3(anchor.x + offset, 0.0f, anchor.z);
+			const glm::vec3 vertex4 = glm::vec3(anchor.x, 0.0f, anchor.z + offset);
+			const glm::vec3 vertex5 = glm::vec3(anchor.x + offset, 0.0f, anchor.z + offset);
 
-	const float singleCellSize = 1.0f;
+			const glm::vec2 uv = glm::vec2(anchor.x + 0.5f, anchor.z + 0.5f);
 
-	gridMesh.vertices.emplace_back(glm::vec3(0.5f, 0.0f, -0.5f) * singleCellSize);
-	gridMesh.vertices.emplace_back(glm::vec3(-0.5f, 0.0f, 0.5f) * singleCellSize);
-	gridMesh.vertices.emplace_back(glm::vec3(0.5f, 0.0f, 0.5f) * singleCellSize);
+			const glm::vec2 uv0 = glm::vec2(uv.x, uv.y + offset);
+			const glm::vec2 uv1 = glm::vec2(uv.x, uv.y);
+			const glm::vec2 uv2 = glm::vec2(uv.x + offset, uv.y + offset);
+			const glm::vec2 uv3 = glm::vec2(uv.x + offset, uv.y + offset);
+			const glm::vec2 uv4 = glm::vec2(uv.x, uv.y);
+			const glm::vec2 uv5 = glm::vec2(uv.x + offset, uv.y);
 
-	gridMesh.vertices.emplace_back(glm::vec3(0.5f, 0.0f, -0.5f) * singleCellSize);
-	gridMesh.vertices.emplace_back(glm::vec3(-0.5f, 0.0f, -0.5f) * singleCellSize);
-	gridMesh.vertices.emplace_back(glm::vec3(-0.5f, 0.0f, 0.5f) * singleCellSize);
-
-	gridMesh.vertices[0].color = glm::vec3(1.0f);
-	gridMesh.vertices[1].color = glm::vec3(1.0f);
-	gridMesh.vertices[2].color = glm::vec3(1.0f);
-
-	gridMesh.vertices[3].color = glm::vec3(1.0f);
-	gridMesh.vertices[4].color = glm::vec3(1.0f);
-	gridMesh.vertices[5].color = glm::vec3(1.0f);
-
-	gridMesh.vertices[0].uv = glm::vec2(1.0f, 1.0f);
-	gridMesh.vertices[1].uv = glm::vec2(0.0f, 0.0f);
-	gridMesh.vertices[2].uv = glm::vec2(1.0f, 0.0f);
-
-	gridMesh.vertices[3].uv = glm::vec2(1.0f, 1.0f);
-	gridMesh.vertices[4].uv = glm::vec2(0.0f, 1.0f);
-	gridMesh.vertices[5].uv = glm::vec2(0.0f, 0.0f);
+			gridMesh.vertices.emplace_back(vertex0, glm::vec3(0.0f), uv0);
+			gridMesh.vertices.emplace_back(vertex1, glm::vec3(0.0f), uv1);
+			gridMesh.vertices.emplace_back(vertex2, glm::vec3(0.0f), uv2);
+			gridMesh.vertices.emplace_back(vertex3, glm::vec3(0.0f), uv3);
+			gridMesh.vertices.emplace_back(vertex4, glm::vec3(0.0f), uv4);
+			gridMesh.vertices.emplace_back(vertex5, glm::vec3(0.0f), uv5);
+		}
+	}
 
 	m_mesh = gridMesh;
 	
@@ -89,6 +92,7 @@ void AFGridComponent::Draw() const
 
 	// Draw the triangles.
 	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_mesh.vertices.size());
+	//m_vertexBuffer.Draw(GL_LINES, 0, m_mesh.vertices.size());
 
 	// Unbind the buffer with vertices.
 	m_vertexBuffer.UnBind();

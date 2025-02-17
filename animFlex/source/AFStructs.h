@@ -13,7 +13,7 @@ struct AFCameraProperties
 struct AFSceneData
 {
 	std::vector<class AFActor*> sceneActors = std::vector<class AFActor*>();
-	int sceneTriangles = 0;
+	unsigned long long vertexCount = 0;
 	class AFCamera* activeCamera = nullptr;
 	class AFStaticMeshComponent* background = nullptr;
 };
@@ -47,4 +47,5 @@ struct AFVertex
 struct AFMesh
 {
 	std::vector<AFVertex> vertices;
+	//std::vector<GLuint> indices;
 };

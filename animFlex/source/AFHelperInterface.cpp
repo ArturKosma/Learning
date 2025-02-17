@@ -43,9 +43,9 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 
 	ImGui::Separator();
 
-	ImGui::Text("Triangles:");
+	ImGui::Text("Vertex Count:");
 	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(sceneData.sceneTriangles).c_str());
+	ImGui::Text("%s", std::to_string(sceneData.vertexCount).c_str());
 
 	std::string windowDims = std::to_string(appData.width) + "x" + std::to_string(appData.height);
 	ImGui::Text("Window Dimensions:");
