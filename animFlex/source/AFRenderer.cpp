@@ -95,8 +95,10 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	// Set the background colour.
 	glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 
-	// Clear colour and depth buffers.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Clear colour, depth and stencil buffers.
+	glStencilMask(0xFF);      // Enable writing to all bits of the stencil buffer.
+	glClearStencil(0);        // Set the clear value for the stencil to 0.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	// Create the view matrix given camera's transform.
 	m_viewMatrix = cameraComp->GetViewMatrix();
@@ -111,6 +113,7 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 		near,
 		far,
 		cameraMov->GetControlRotation().x);
+
 	m_uniformBuffer.UploadRenderProperties(renderPropertiesMat);
 
 	// View & projection upload.

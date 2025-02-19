@@ -8,6 +8,7 @@ void AFPostprocessShader::UniformBinding()
 
     GLint colorLoc = glGetUniformLocation(m_shaderProgram, "u_ColorTex");
     GLint depthLoc = glGetUniformLocation(m_shaderProgram, "u_DepthTex");
+    GLint stencilLoc = glGetUniformLocation(m_shaderProgram, "u_StencilTex");
 
     if (colorLoc != -1)
     {
@@ -17,6 +18,11 @@ void AFPostprocessShader::UniformBinding()
     if(depthLoc != -1)
     {
         glUniform1i(depthLoc, 1);
+    }
+
+    if (stencilLoc != -1)
+    {
+        glUniform1i(stencilLoc, 2);
     }
 
     glUseProgram(0);

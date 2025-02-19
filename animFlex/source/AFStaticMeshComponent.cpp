@@ -11,6 +11,17 @@ void AFStaticMeshComponent::Draw() const
 	// Bind the vertex buffer which already contains information about vertices - their locations, color, uv mapping, etc. 
 	m_vertexBuffer.Bind();
 
+	// Should this mesh use stencil testing when drawing.
+	if (m_stencilTest)
+	{
+		glEnable(GL_STENCIL_TEST);
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	}
+
 	// Should this mesh use depth testing when drawing.
 	if(m_depthTest)
 	{
@@ -26,7 +37,10 @@ void AFStaticMeshComponent::Draw() const
 	}
 
 	// Draw the triangles.
-	m_vertexBuffer.Draw(GL_TRIANGLES, 0, m_mesh.vertices.size());
+	m_vertexBuffer.Draw(GL_TRIANGLES, m_mesh.indices.size());
+
+	glDisable(GL_STENCIL_TEST);
+	glStencilMask(0x00);
 
 	// Unbind the buffer with vertices.
 	m_vertexBuffer.UnBind();

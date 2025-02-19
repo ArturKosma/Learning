@@ -1,8 +1,9 @@
 #version 300 es
-precision mediump float;
+precision highp float;
 
 uniform sampler2D u_ColorTex;
 uniform sampler2D u_DepthTex;
+uniform sampler2D u_StencilTex;
 
 layout (std140) uniform InverseViewProjection
 {
@@ -28,22 +29,43 @@ layout (std140) uniform RenderProperties
 
 layout (location = 0) out vec4 FragColor;
 
-float LinearizeDepth(float d, float zNear, float zFar)
+float GetHorizonMask(vec2 uv, vec2 frameRes)
 {
-	return (2.0f * zNear * zFar) / (zFar + zNear - (d * 2.0f - 1.0f) * (zFar - zNear));
-}
+	// Get UV <0.0f, 1.0f> into Normalized Device Coordinates <-1.0f, 1.0f>. We need sign for proper vector direction.
+	vec2 ndc = (uv - 0.5f) * 2.0f;
 
-// Given a vec2 in <-1.0f, 1.0f>, generate a texture coord in <0.0f, 1.0f>.
-vec2 BarrelDistortion(vec2 p)
-{
-	const float barrelPowerMaxOffset = 0.2f;
+	// Aspect ratio correction.
+	ndc.x *= (frameRes.y / frameRes.x);
 
-	float theta  = atan(p.y, p.x);
-    float radius = length(p);
-    radius = pow(radius, 1.0f + barrelPowerMaxOffset);
-    p.x = radius * cos(theta);
-    p.y = radius * sin(theta);
-    return 0.5 * (p + 1.0);
+	// We need NDC in homogeneous. We apply Z = 1.0f to indicate it's into/outo the screen.
+	vec4 clipPos = vec4(ndc.x, ndc.y, 1.0f, 1.0f);
+
+	// Convert to view space by multiplying with inverse projection.
+	vec4 viewPos = inverseProjection * clipPos;
+
+	// Leave homogeneous and get direction.
+	vec3 viewDir = normalize(viewPos.xyz / viewPos.w);
+
+	// Get world direction of the ray.
+	vec3 worldDir = normalize((inverseView * vec4(viewDir, 0.0f)).xyz);
+
+	// Calculate an offset based on camera height.
+	// This is very arbitrary but I can't come up with a better solution yet.
+	vec3 cameraPos = cameraTransform[3].xyz;
+	float offset = (cameraPos.y * 0.005f) - 0.01f;
+
+	// Get the Y, which is height of the ray.
+	float height = clamp(worldDir.y + offset + 0.05f, 0.0f, 1.0f); // Height is shifted down, to cover both edge of grid and background.
+	float heightCeil = ceil(height);
+	float horizonMask = clamp(height + (0.9f * heightCeil), 0.0f, 1.0f); // Everything above 0.1f will end up 1.0f;
+	horizonMask = abs(horizonMask - (1.0f * heightCeil)); // Everything that remained below 1.0f will become negative, we abs it.
+	horizonMask = ceil(horizonMask); // We ceil it to get a uniform 1.0f on a thin patch.
+
+	// Make the line patch gradient out from the center.
+	height = smoothstep(0.0f, 0.1f, height);
+	height = 1.0f - abs(height - 0.5f) * 2.0f;
+
+	return height * horizonMask;
 }
 
 float Remap(float value, float inMin, float inMax, float outMin, float outMax)
@@ -55,21 +77,25 @@ float Remap(float value, float inMin, float inMax, float outMin, float outMax)
 
 void main()
 {	
+	// Fetch uniform resolution.
 	vec2 frameRes = vec2(renderProperties[0][0], renderProperties[0][1]);
-
-	float near = renderProperties[0][2];
-	float far = renderProperties[0][3];
 
 	// Get screen space UV.
     vec2 uv = gl_FragCoord.xy / frameRes;
 
-	vec4 depth = texture(u_DepthTex, uv);
-	float depthLin = LinearizeDepth(depth.x, near, far) / far;
+	// Stencil of objects used for occlusion.
+	float stencil = 1.0f - texture(u_StencilTex, uv).r;
+
+	// Find horizon mask.
+	float horizonMask = GetHorizonMask(uv, frameRes);
+
+	// Horizon mask can be occluded.
+	horizonMask *= stencil;
 
 	vec4 screen = texture(u_ColorTex, uv);
-	vec4 finalColor = vec4(vec3(screen.xyz), 1.0f);
-
-	//finalColor = vec4(vec3(depthLin), 1.0f);
+	vec4 finalColor = vec4(horizonMask > 0.0f ? vec3(horizonMask) : vec3(screen.xyz), 1.0f);
+	//finalColor = vec4(vec3(horizonMask), 1.0f);
+	//finalColor = vec4(vec3(depthSaturated), 1.0f);
 
 	FragColor = finalColor;
 }

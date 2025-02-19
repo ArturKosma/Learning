@@ -26,13 +26,27 @@ bool AFTexture::LoadTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	if(numberOfChannels == 4)
+	switch(numberOfChannels)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
-	}
-	else if(numberOfChannels == 1)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, texWidth, texHeight, 0, GL_RED, GL_UNSIGNED_BYTE, textureData);
+		case 1:
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, texWidth, texHeight, 0, GL_RED, GL_UNSIGNED_BYTE, textureData);
+			break;
+		}
+		case 3:
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+			break;
+		}
+		case 4:
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
+			break;
+		}
+		default:
+		{
+			break;
+		}
 	}
 
 	glGenerateMipmap(GL_TEXTURE_2D);

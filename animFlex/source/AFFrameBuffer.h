@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <glm/vec2.hpp>
 
+#include "AFShader.h"
 #include "AFStructs.h"
 
 class AFFramebuffer
@@ -21,6 +22,9 @@ public:
 	void DrawToScreen(const AFSceneData& sceneData);
 	void Cleanup();
 
+	void DrawStencil();
+	void ClearStencil();
+
 private:
 
 	AFFramebuffer();
@@ -38,7 +42,14 @@ private:
 	GLuint m_resolveDepthTex0 = 0;
 	GLuint m_resolveDepthTex1 = 0;
 
+	GLuint m_resolveStencilColorTex = 0;
+	GLuint m_resolveStencilTex = 0;
+
 	GLuint m_msFBO = 0;
 	GLuint m_msColorBuffer = 0;
 	GLuint m_msDepthBuffer = 0;
+
+	GLuint m_stencilFBO = 0;
+
+	AFShader m_stencilShader = AFShader();
 };

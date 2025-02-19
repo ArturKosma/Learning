@@ -104,9 +104,9 @@ void main()
 	gridBrightnessHeightModifier = exp(-pow(gridBrightnessHeightModifier, 2.0f) / 0.3f) * (1.0f - gridBrightnessHeightModifier);
 
 	vec2 flatDist = vec2(abs(WorldPosition.x - cameraPos.x), abs(WorldPosition.z - cameraPos.z));
-	float flatDistX = Remap(flatDist.x, 0.0f, CellNum, 0.0f, 1.0f);
-	float flatDistY = Remap(flatDist.y, 0.0f, CellNum, 0.0f, 1.0f);
-	flatDist = vec2(flatDistX, flatDistY) - (flatDistX * flatDistY) * CellNum / 1.3f;
+	float flatDistX = Remap(flatDist.x, 0.0f, 300.0, 0.0f, 1.0f);
+	float flatDistY = Remap(flatDist.y, 0.0f, 300.0f, 0.0f, 1.0f);
+	flatDist = vec2(flatDistX, flatDistY) - (flatDistX * flatDistY) * 300.0f / 1.3f;
 	float dist45 = length(flatDist);
 	dist45 = clamp((1.0f / exp(dist45)) * (2.0f - dist45), 0.2f, 1.0f);
 
@@ -151,13 +151,12 @@ void main()
 	vec4 finalColor = (baseColor + lineColor) * brightnessModifier;
 
 	// Create noise for dithering (needed to get rid of banding).
-	// @todo pass uniform resolution.
 	float noise = hash(UV * frameRes);	
 
 	// Dither final color to get rid of banding.
 	finalColor += (noise - 0.5f) * 0.02f;
 
-	//finalColor = vec4(vec3(depth), 1.0f);
+	//finalColor = vec4(vec3(0.0f), 1.0f);
 
 	FragColor = finalColor;
 }

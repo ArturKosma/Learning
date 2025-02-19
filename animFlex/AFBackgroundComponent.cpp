@@ -23,6 +23,9 @@ void AFBackgroundComponent::Draw() const
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 
+	glDisable(GL_STENCIL_TEST);
+	glStencilMask(0x00);
+
 	// Draw 3 non defined points for the background.
 	// Background defines the vertices in background vertex shader.
 	glDrawArrays(GL_TRIANGLES, 0, 3);

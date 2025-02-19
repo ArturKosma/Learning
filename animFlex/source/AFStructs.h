@@ -29,23 +29,22 @@ struct AFVertex
 {
 	AFVertex() = default;
 	AFVertex(const glm::vec3 newPosition)
-		: position(newPosition), color(glm::vec3(0.0f)), uv(glm::vec2(0.0f))
+		: position(newPosition), uv(glm::vec2(0.0f))
 	{
 		
 	}
-	AFVertex(const glm::vec3& newPosition, const glm::vec3& newColor, const glm::vec2& newUV)
-		: position(newPosition), color(newColor), uv(newUV)
+	AFVertex(const glm::vec3& newPosition, const glm::vec2& newUV)
+		: position(newPosition), uv(newUV)
 	{
 
 	}
 
 	glm::vec3 position;
-	glm::vec3 color;
 	glm::vec2 uv;
 };
 
 struct AFMesh
 {
 	std::vector<AFVertex> vertices;
-	//std::vector<GLuint> indices;
+	std::vector<unsigned int> indices;
 };

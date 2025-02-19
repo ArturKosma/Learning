@@ -26,5 +26,6 @@ public:
 private:
 
 	bool m_depthTest = true;
+	bool m_stencilTest = true;
 	AFTexture m_tex = AFTexture();
 };
