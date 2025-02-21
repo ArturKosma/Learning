@@ -55,15 +55,16 @@ float GetHorizonMask(vec2 uv, vec2 frameRes)
 	float offset = (cameraPos.y * 0.005f) - 0.01f;
 
 	// Get the Y, which is height of the ray.
-	float height = clamp(worldDir.y + offset + 0.05f, 0.0f, 1.0f); // Height is shifted down, to cover both edge of grid and background.
+	float correction = 0.5f;
+	float height = clamp(worldDir.y + offset + correction, 0.0f, 1.0f); // Height is shifted down.
 	float heightCeil = ceil(height);
-	float horizonMask = clamp(height + (0.9f * heightCeil), 0.0f, 1.0f); // Everything above 0.1f will end up 1.0f;
+	float horizonMask = clamp(height + ((1.0f - correction * 2.0f) * heightCeil), 0.0f, 1.0f); // Everything above 0.1f will end up 1.0f;
 	horizonMask = abs(horizonMask - (1.0f * heightCeil)); // Everything that remained below 1.0f will become negative, we abs it.
 	horizonMask = ceil(horizonMask); // We ceil it to get a uniform 1.0f on a thin patch.
 
 	// Make the line patch gradient out from the center.
-	height = smoothstep(0.0f, 0.1f, height);
-	height = 1.0f - abs(height - 0.5f) * 2.0f;
+	height = smoothstep(0.0f, correction * 2.0f, height);
+	//height = 1.0f - abs(height - 0.5f) * 2.0f;
 
 	return height * horizonMask;
 }
@@ -73,6 +74,11 @@ float Remap(float value, float inMin, float inMax, float outMin, float outMax)
 	float mappedValue = (value - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
 
 	return clamp(mappedValue, min(outMin, outMax), max(outMin, outMax));
+}
+
+float Sigmoid(float x, float k)
+{
+	return 1.0f / (1.0f + exp(-k * (x - 0.5f)));
 }
 
 void main()
@@ -88,14 +94,26 @@ void main()
 
 	// Find horizon mask.
 	float horizonMask = GetHorizonMask(uv, frameRes);
+	float mask = horizonMask;
 
 	// Horizon mask can be occluded.
 	horizonMask *= stencil;
 
+	// The further away from the horizontal center of the screen something is - the stronger the effect.
+	float horizontalModifier = 0.0f;
+	horizontalModifier = abs((uv.x - 0.5f) * 2.0f); // Distance.
+	horizontalModifier = pow(horizontalModifier, 2.0f); // Distance non linear.
+	horizonMask = horizonMask * horizontalModifier / 2.0f;
+	horizonMask *= 1.0f;
+
+	uv += vec2(0.0f, horizonMask * 0.1f);
+
 	vec4 screen = texture(u_ColorTex, uv);
 	vec4 finalColor = vec4(horizonMask > 0.0f ? vec3(horizonMask) : vec3(screen.xyz), 1.0f);
-	//finalColor = vec4(vec3(horizonMask), 1.0f);
+	finalColor = screen;
+	//finalColor = vec4(vec3(mask), 1.0f);
 	//finalColor = vec4(vec3(depthSaturated), 1.0f);
+	//finalColor = vec4(0.0f, uv.y, 0.0f, 1.0f);
 
 	FragColor = finalColor;
 }
