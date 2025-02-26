@@ -111,9 +111,6 @@ void main()
 	vec4 screen = texture(u_ColorTex, uv);
 	vec4 finalColor = vec4(horizonMask > 0.0f ? vec3(horizonMask) : vec3(screen.xyz), 1.0f);
 	finalColor = screen;
-	//finalColor = vec4(vec3(mask), 1.0f);
-	//finalColor = vec4(vec3(depthSaturated), 1.0f);
-	//finalColor = vec4(0.0f, uv.y, 0.0f, 1.0f);
 
 	FragColor = finalColor;
 }

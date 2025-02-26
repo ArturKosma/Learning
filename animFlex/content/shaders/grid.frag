@@ -17,30 +17,23 @@ in vec3 WorldPosition;
 
 layout (location = 0) out vec4 FragColor;
 
+int MaxSamples = 10;
+
 float LinearizeDepth(float d, float zNear, float zFar)
 {
 	return (2.0f * zNear * zFar) / (zFar + zNear - (d * 2.0f - 1.0f) * (zFar - zNear));
 }
 
-float GridLineGeneration(vec2 in_fun_UV, float in_fun_cellNum)
+float GridLineGenerationAliased(vec2 uv)
 {
-	// Make repeating UV grid.
-	vec2 scaledUV = in_fun_UV * in_fun_cellNum;
-	vec2 gridUV = fract(scaledUV + 0.5f);
-
-	// Get the minimum width of X and Y lines. 
-	// Width becomes bigger with stronger UV changes (far distance, big angle).
-	float scaledUVChangeMultiplier = 1.5f;
-	float minLineWidthX = max(0.012f, fwidth(scaledUV.x) * scaledUVChangeMultiplier);  
-	float minLineWidthY = max(0.012f, fwidth(scaledUV.y) * scaledUVChangeMultiplier);
+	float minLineWidthX = 0.015f;  
+	float minLineWidthY = 0.015f;
 
 	// Get the distance from the center of UV tile.
-	float distX = abs(gridUV.x - 0.5f);
-	float distY = abs(gridUV.y - 0.5f);
+	float distX = abs(uv.x - 0.5f);
+	float distY = abs(uv.y - 0.5f);
 
 	// Smoothly transition between 0.0f and 1.0f for X and Y lines,
-	// based on the pixel distance from center of UV tile.
-	// Order is reversed, so <dist> being bigger than <minWidth> returns 0.0f.
 	float lineX = smoothstep(minLineWidthX, 0.0f, distX);
 	float lineY = smoothstep(minLineWidthY, 0.0f, distY);
 
@@ -48,6 +41,31 @@ float GridLineGeneration(vec2 in_fun_UV, float in_fun_cellNum)
 	float line = clamp(lineX + lineY, 0.0f, 1.0f);
 
 	return line;
+}
+
+float SampleGridWithFilter(vec2 uv, float cellSize, float detail)
+{
+    vec2 cellUV = uv * cellSize;
+    vec2 dCellUVx = dFdx(uv * cellSize);
+	vec2 dCellUVy = dFdy(uv * cellSize);
+
+	int sx = 1 + clamp(int(detail * length(dCellUVx - cellUV)), 0, MaxSamples - 1);
+    int sy = 1 + clamp(int(detail * length(dCellUVy - cellUV)), 0, MaxSamples - 1);
+
+    float gridSum = 0.0;
+
+    for(int j = 0; j < sy; j++)
+	{	
+		for(int i = 0; i < sx; i++)
+		{
+			vec2 st = vec2(float(i), float(j)) / vec2(float(sx), float(sy));
+			vec2 sampleUV = cellUV + st.x * dCellUVx + st.y * dCellUVy;
+
+			gridSum += GridLineGenerationAliased(fract(sampleUV));
+		}
+	}
+
+    return gridSum / float(sx * sy);
 }
 
 float Remap(float value, float inMin, float inMax, float outMin, float outMax)
@@ -82,11 +100,8 @@ void main()
 	float near = renderProperties[0][2];
 	float far = renderProperties[0][3];
 
-	// Generate brightness for the grid line.
-	float line = GridLineGeneration(UV, CellNum);
-
-	// Get grid depth.
-	float depth = LinearizeDepth(gl_FragCoord.z, near, far) / far;
+	// Generate grid lines.
+	float line = SampleGridWithFilter(UV + 0.5f, CellNum, 2.0f);
 
 	// Clamp the brightness line.
 	float lineMask = clamp(line, 0.0f, 0.7f);
@@ -156,7 +171,7 @@ void main()
 	// Dither final color to get rid of banding.
 	finalColor += (noise - 0.5f) * 0.02f;
 
-	//finalColor = vec4(vec3(0.0f), 1.0f);
+	//finalColor = vec4(UV, 0.0f, 1.0f);
 
 	FragColor = finalColor;
 }

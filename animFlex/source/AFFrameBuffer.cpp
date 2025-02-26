@@ -119,7 +119,7 @@ bool AFFramebuffer::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// Create stencil-only resolve FBO.
+	// Create stencil & color resolve FBO.
 	glGenFramebuffers(1, &m_stencilFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_stencilFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_resolveStencilColorTex, 0);
@@ -190,6 +190,9 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight,
 	GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
+	// Disable depth testing before drawing any full screen triangle.
+	glDisable(GL_DEPTH_TEST);
+
 	// Create stencil color texture m_resolveStencilColorTex.
 	DrawStencil();
 
@@ -199,9 +202,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	// Alternate between resolve FBOs while applying all postprocess shaders.
 	std::vector<GLuint> resolveFbo = { m_resolveFramebuffer0, m_resolveFramebuffer1 };
 	std::vector<GLuint> resolveColorTex = { m_resolveColorTex0, m_resolveColorTex1 };
-	std::vector<GLuint> resolveDepthTex = { m_resolveDepthTex0, m_resolveDepthTex1 };
 	GLuint finalColorTex = m_resolveColorTex0;
-	GLuint finalDepthTex = m_resolveDepthTex0;
 	bool alternate = false;
 	for(AFPostprocessShader postprocess : cameraPostprocessShaders)
 	{
@@ -216,7 +217,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, finalColorTex);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, finalDepthTex);
+		glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex0);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_resolveStencilColorTex);
 
@@ -227,9 +228,8 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 		// Postprocess vertex shader should create a full screen triangle.
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		// Copy color and depth to final textures.
+		// Copy color to final texture.
 		finalColorTex = resolveColorTex[drawIdx];
-		finalDepthTex = resolveDepthTex[drawIdx];
 
 		// Alternate.
 		alternate = !alternate;
@@ -242,7 +242,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, finalColorTex);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, finalDepthTex);
+	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex0);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_resolveStencilColorTex);
 
@@ -289,9 +289,6 @@ void AFFramebuffer::DrawStencil()
 	glEnable(GL_STENCIL_TEST);
 	glStencilFunc(GL_NOTEQUAL, 0, 0xFF); // Render only where stencil != 0.
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-	// Disable depth testing before drawing any full screen triangle.
-	glDisable(GL_DEPTH_TEST);
 
 	// Draw 3 undefined points.
 	// Postprocess vertex shader should create a full screen triangle.
