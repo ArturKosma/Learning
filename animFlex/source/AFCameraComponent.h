@@ -1,9 +1,9 @@
 #pragma once
-#include "AFComponent.h"
 #include "AFPostprocessShader.h"
+#include "AFSceneComponent.h"
 #include "AFStructs.h"
 
-class AFCameraComponent : public AFComponent
+class AFCameraComponent : public AFSceneComponent
 {
 public:
 

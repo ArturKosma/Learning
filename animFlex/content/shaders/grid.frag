@@ -43,6 +43,9 @@ float GridLineGenerationAliased(vec2 uv)
 	return line;
 }
 
+// Acts like a supersampling?
+// @todo Try understanding this better.
+// https://iquilezles.org/articles/filtering/
 float SampleGridWithFilter(vec2 uv, float cellSize, float detail)
 {
     vec2 cellUV = uv * cellSize;
@@ -61,7 +64,7 @@ float SampleGridWithFilter(vec2 uv, float cellSize, float detail)
 			vec2 st = vec2(float(i), float(j)) / vec2(float(sx), float(sy));
 			vec2 sampleUV = cellUV + st.x * dCellUVx + st.y * dCellUVy;
 
-			gridSum += GridLineGenerationAliased(fract(sampleUV));
+			gridSum += GridLineGenerationAliased(fract(sampleUV + 0.5f));
 		}
 	}
 
@@ -101,10 +104,11 @@ void main()
 	float far = renderProperties[0][3];
 
 	// Generate grid lines.
-	float line = SampleGridWithFilter(UV + 0.5f, CellNum, 2.0f);
+	float line = SampleGridWithFilter(UV, CellNum, 2.0f);
 
 	// Clamp the brightness line.
-	float lineMask = clamp(line, 0.0f, 0.7f);
+	float lineMask = line; 
+	lineMask = clamp(lineMask, 0.0f, 1.0f);
 
 	// Find line distance.
 	float lineDist = Remap(fragDist, 10.0f, 500.0f, 0.0f, 1.0f);
@@ -162,8 +166,23 @@ void main()
 	// Define base quad color.
 	vec4 baseColor = vec4(0.259f, 0.4f, 0.439f, 1.0f) * 1.4f;
 
+	// Final ground cell color.
+	// Darken every second cell - chessboard.
+	vec4 groundColor = baseColor;
+	float cellDarken = mod(ceil(WorldPosition.x) + ceil(WorldPosition.z), 2.0f); 
+	float cellDarkenDistMod = Remap(fragDist, 10.0f, 30.0f, 1.0f, 0.0f);
+	float cellDarkenBrightness = 1.0f - (0.15f * cellDarken) * cellDarkenDistMod; // Don't darken when far away.
+	groundColor *= cellDarkenBrightness;
+
+	// Final line color.
+	vec4 baseLineColor = baseColor;
+	//baseLineColor = vec4(mix(baseLineColor.rgb, vec3(0.2f, 0.2f, 0.2f), Remap(abs(WorldPosition.x), 0.0f, 0.3f, 1.0f, 0.0f)), 1.0f); // Z-line.
+	//baseLineColor = vec4(mix(baseLineColor.rgb, vec3(0.2f, 0.2f, 0.2f), Remap(abs(WorldPosition.z), 0.0f, 0.3f, 1.0f, 0.0f)), 1.0f); // X-line.
+	vec4 finalLineColor = abs(lineColor) * baseLineColor;
+
 	// Compute final color.
-	vec4 finalColor = (baseColor + lineColor) * brightnessModifier;
+	vec4 finalColor = vec4(mix(groundColor.rgb, finalLineColor.rgb, lineMask), 1.0f);
+	finalColor *= brightnessModifier;
 
 	// Create noise for dithering (needed to get rid of banding).
 	float noise = hash(UV * frameRes);	
@@ -172,6 +191,7 @@ void main()
 	finalColor += (noise - 0.5f) * 0.02f;
 
 	//finalColor = vec4(UV, 0.0f, 1.0f);
+	//finalColor = vec4(vec3(), 1.0f);
 
 	FragColor = finalColor;
 }

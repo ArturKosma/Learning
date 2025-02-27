@@ -1,10 +1,11 @@
 #pragma once
 
 #include "AFComponent.h"
+#include "AFSceneComponent.h"
 #include "AFShader.h"
 #include "AFVertexBuffer.h"
 
-class AFRenderComponent : public AFComponent
+class AFRenderComponent : public AFSceneComponent
 {
 public:
 

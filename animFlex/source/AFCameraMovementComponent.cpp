@@ -1,5 +1,7 @@
 #include "AFCameraMovementComponent.h"
 
+#include <glm/common.hpp>
+
 float AFCameraMovementComponent::GetAcceleration() const
 {
 	return AFMovementComponent::GetAcceleration() * m_cameraSpeedMultiplier;

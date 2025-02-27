@@ -10,39 +10,6 @@ AFActor::~AFActor()
 
 }
 
-void AFActor::Tick(float deltaTime)
-{
-    for(AFComponent* comp : m_components)
-    {
-	    if(!comp)
-	    {
-            continue;
-	    }
-        comp->Tick(deltaTime);
-    }
-}
-
-void AFActor::AddComponent(AFComponent* newComponent)
-{
-    newComponent->SetOwner(this);
-    m_components.push_back(newComponent);
-}
-
-const std::vector<AFComponent*>& AFActor::GetComponents() const
-{
-    return m_components;
-}
-
-void AFActor::SetDisplayName(const std::string& newName)
-{
-    m_displayName = newName;
-}
-
-std::string AFActor::GetDisplayName() const
-{
-    return m_displayName;
-}
-
 glm::vec3 AFActor::GetLocation() const
 {
     return m_location;

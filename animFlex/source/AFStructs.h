@@ -13,6 +13,7 @@ struct AFCameraProperties
 struct AFSceneData
 {
 	std::vector<class AFActor*> sceneActors = std::vector<class AFActor*>();
+	std::vector<class AFUI*> uis = std::vector<class AFUI*>();
 	unsigned long long vertexCount = 0;
 	class AFCamera* activeCamera = nullptr;
 	class AFStaticMeshComponent* background = nullptr;

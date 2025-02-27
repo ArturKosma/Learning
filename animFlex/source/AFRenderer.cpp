@@ -142,6 +142,26 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 		}
 	}
 
+	// Per UI draw.
+	for(const AFUI* const ui : sceneData.uis)
+	{
+		// Per component draw.
+		for (const AFComponent* const component : ui->GetComponents())
+		{
+			const AFUIRenderComponent* const renderComponent = dynamic_cast<const AFUIRenderComponent*>(component);
+			if (!renderComponent)
+			{
+				continue;
+			}
+
+			// Upload the ui matrix.
+			m_uniformBuffer.UploadUITransform(renderComponent->GetUITransform());
+
+			// Draw.
+			renderComponent->Draw();
+		}
+	}
+
 	// Unbind the frame buffer, we don't want to draw to it anymore.
 	m_framebuffer.UnBind();
 

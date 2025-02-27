@@ -8,7 +8,7 @@
 
 void AFMovementComponent::Tick(float deltaTime)
 {
-	AFActor* owner = GetOwner();
+	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
 	if(!owner)
 	{
 		return;
@@ -47,7 +47,7 @@ glm::vec3 AFMovementComponent::GetControlRotation() const
 
 void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 {
-	AFActor* owner = GetOwner();
+	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
 	if (!owner)
 	{
 		return;
@@ -68,7 +68,7 @@ void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 
 void AFMovementComponent::AddControlRotation(const glm::vec3& eulerToAdd)
 {
-	AFActor* owner = GetOwner();
+	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
 	if (!owner)
 	{
 		return;
