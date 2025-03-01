@@ -10,10 +10,13 @@ public:
 	void Init();
 
 	void UploadViewProjection(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+	void UploadViewRotation(glm::mat4 viewRotationMatrix);
+	void UploadOrthoProjection(glm::mat4 orthoProjectionMatrix);
 	void UploadInverseViewProjection(glm::mat4 inverseViewMatrix, glm::mat4 inverseProjectionMatrix);
 	void UploadTransform(glm::mat4 modelMatrix);
 	void UploadCamera(glm::mat4 cameraTrs);
 	void UploadRenderProperties(glm::mat4 renderProperties);
+	void UploadUITransform(glm::mat4 uiTransform);
 
 	void Cleanup();
 
@@ -24,4 +27,7 @@ private:
 	GLuint m_transformBuffer = 0;
 	GLuint m_cameraBuffer = 0;
 	GLuint m_renderPropertiesBuffer = 0;
+	GLuint m_uiTransformBuffer = 0;
+	GLuint m_viewRotationBuffer = 0;
+	GLuint m_orthoProjectionBuffer = 0;
 };

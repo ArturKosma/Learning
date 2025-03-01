@@ -1,9 +1,12 @@
 #include "AFScene.h"
 
+#include "AFUI.h"
 #include "AFBackgroundComponent.h"
 #include "AFBoxComponent.h"
 #include "AFGridComponent.h"
+#include "AFOrientationGizmoUIComponent.h"
 #include "AFStaticMeshComponent.h"
+#include "AFUIRenderComponent.h"
 #include "AFUtility.h"
 
 void AFScene::AddActor(AFActor* newActor)
@@ -28,6 +31,27 @@ void AFScene::AddActor(AFActor* newActor)
 	m_sceneData.sceneActors.push_back(newActor);
 }
 
+void AFScene::AddUI(AFUI* newUI)
+{
+	if (!newUI)
+	{
+		return;
+	}
+
+	// Upon adding new UI to the scene, load all of its renderable assets.
+	for (AFComponent* comp : newUI->GetComponents())
+	{
+		AFUIRenderComponent* const uiRenderComp = dynamic_cast<AFUIRenderComponent*>(comp);
+		if (!uiRenderComp)
+		{
+			continue;
+		}
+		uiRenderComp->Load();
+	}
+
+	m_sceneData.uis.push_back(newUI);
+}
+
 void AFScene::SetActiveCamera(AFCamera* newActiveCamera)
 {
 	m_sceneData.activeCamera = newActiveCamera;
@@ -45,10 +69,12 @@ const AFSceneData& AFScene::GetSceneData() const
 
 bool AFScene::Init()
 {
-	// Reserve some space for the scene.
+	// Reserve some space for the scene & ui.
 	m_sceneData.sceneActors.reserve(20);
+	m_sceneData.uis.reserve(20);
 
 	CreateDefaultSceneActors();
+	CreateDefaultUIs();
 
 	return true;
 }
@@ -70,6 +96,7 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(gridActor);
 
 	// Create test boxes.
+	/*
 	AFActor* testBoxActor0 = new AFActor();
 	AFActor* testBoxActor1 = new AFActor();
 	AFActor* testBoxActor2 = new AFActor();
@@ -94,7 +121,19 @@ void AFScene::CreateDefaultSceneActors()
 	testBoxActor0->AddOffsetLocation({ 0.0f, 0.5f, 0.0f });
 	testBoxActor1->AddOffsetLocation({ 3.0f, 0.5f, 0.0f });
 	testBoxActor1->AddOffsetRotation({ 0.0f, 15.0f, 0.0f });
-	testBoxActor2->AddOffsetLocation({ -3.5f, 0.5f, 0.5f });
+	testBoxActor2->AddOffsetLocation({ -3.5f, 0.5f, 0.5f });*/
+}
+
+void AFScene::CreateDefaultUIs()
+{
+	// Create orientation gizmo.
+	AFUI* orientationGizmo = new AFUI();
+	orientationGizmo->SetDisplayName("Orientation Gizmo UI");
+	AFOrientationGizmoUIComponent* orientationGizmoComponent = new AFOrientationGizmoUIComponent();
+	orientationGizmo->AddComponent(orientationGizmoComponent);
+	orientationGizmoComponent->SetLocation(glm::vec2(-0.85f, -0.80f));
+	orientationGizmoComponent->SetScale(glm::vec2(0.15f, 0.15f));
+	AddUI(orientationGizmo);
 }
 
 AFScene::AFScene()

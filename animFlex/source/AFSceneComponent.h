@@ -15,6 +15,7 @@ public:
 	glm::vec3 GetWorldRotation() const;
 	glm::quat GetWorldRotationQuat() const;
 	glm::vec3 GetWorldScale() const;
+
 	glm::mat4 GetWorldTransform() const;
 
 	glm::vec3 GetLocalLocation() const;

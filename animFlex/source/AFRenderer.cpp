@@ -1,12 +1,13 @@
 #include "AFRenderer.h"
 #include "AFCamera.h"
+#include "AFMath.h"
+#include "AFRenderComponent.h"
+#include "AFUIRenderComponent.h"
+#include "AFUtility.h"
+#include "AFUI.h"
 
 #include <ostream>
 #include <glm/ext/matrix_clip_space.hpp>
-
-#include "AFMath.h"
-#include "AFRenderComponent.h"
-#include "AFUtility.h"
 
 bool AFRenderer::Init(int width, int height)
 {
@@ -113,16 +114,23 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 		near,
 		far,
 		cameraMov->GetControlRotation().x);
-
 	m_uniformBuffer.UploadRenderProperties(renderPropertiesMat);
 
 	// View & projection upload.
 	m_uniformBuffer.UploadViewProjection(m_viewMatrix, m_projectionMatrix);
 
+	// View rotation upload.
+	m_viewMatrix[3] = glm::vec4(0, 0, 0, 1); // Simply get rid of translation.
+	m_uniformBuffer.UploadViewRotation(m_viewMatrix);
+
+	// Ortho projection upload.
+	m_orthoMatrix = AFUtility::CreateOrthoProjectionMat(frameBufferSize.x, frameBufferSize.y);
+	m_uniformBuffer.UploadOrthoProjection(m_orthoMatrix);
+
 	// Camera transform upload.
 	m_uniformBuffer.UploadCamera(cameraComp->GetWorldTransform());
 
-	// Per object draw.
+	// Per actor draw.
 	for(const AFActor* const sceneActor : sceneData.sceneActors)
 	{
 		// Per component draw.
@@ -142,31 +150,34 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 		}
 	}
 
-	// Per UI draw.
-	for(const AFUI* const ui : sceneData.uis)
-	{
-		// Per component draw.
-		for (const AFComponent* const component : ui->GetComponents())
-		{
-			const AFUIRenderComponent* const renderComponent = dynamic_cast<const AFUIRenderComponent*>(component);
-			if (!renderComponent)
-			{
-				continue;
-			}
-
-			// Upload the ui matrix.
-			m_uniformBuffer.UploadUITransform(renderComponent->GetUITransform());
-
-			// Draw.
-			renderComponent->Draw();
-		}
-	}
-
 	// Unbind the frame buffer, we don't want to draw to it anymore.
 	m_framebuffer.UnBind();
 
 	// Draw all the contents of the frame buffer to the screen.
 	m_framebuffer.DrawToScreen(sceneData);
+
+	// Draw UIs on top of everything.
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	// Per UI draw.
+	for (const AFUI* const ui : sceneData.uis)
+	{
+		// Per component draw.
+		for (const AFComponent* const component : ui->GetComponents())
+		{
+			const AFUIRenderComponent* const uiRenderComponent = dynamic_cast<const AFUIRenderComponent*>(component);
+			if (!uiRenderComponent)
+			{
+				continue;
+			}
+
+			// Upload the ui matrix.
+			m_uniformBuffer.UploadUITransform(uiRenderComponent->GetUITransform());
+
+			// Draw.
+			uiRenderComponent->Draw();
+		}
+	}
 }
 
 AFRenderer::AFRenderer()

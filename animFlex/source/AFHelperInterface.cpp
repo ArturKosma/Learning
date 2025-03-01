@@ -108,10 +108,10 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 	const std::string& camspeed = std::to_string(sceneData.activeCamera->GetMovementComponent()->GetCameraSpeedMultiplier());
 	ImGui::Text("%s", camspeed.c_str());
 
-	ImGui::Separator();
+	//ImGui::Separator();
 
 	// Actors display.
-	for(AFActor* actor : sceneData.sceneActors)
+	/*for(AFActor* actor : sceneData.sceneActors)
 	{
 		ImGui::Text(actor->GetDisplayName().c_str());
 		ImGui::SameLine();
@@ -119,7 +119,7 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 		ImGui::SameLine();
 		const std::string& actorPosStr = AFUtility::Vec3ToString(actor->GetLocation());
 		ImGui::Text(actorPosStr.c_str());
-	}
+	}*/
 
 	ImGui::End();
 

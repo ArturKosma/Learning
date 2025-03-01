@@ -10,6 +10,8 @@ class AFScene
 public:
 
 	void AddActor(AFActor* newActor);
+	void AddUI(AFUI* newUI);
+
 	void SetActiveCamera(class AFCamera* newActiveCamera);
 	AFCamera* GetActiveCamera() const;
 
@@ -19,6 +21,7 @@ private:
 
 	bool Init();
 	void CreateDefaultSceneActors();
+	void CreateDefaultUIs();
 
 	AFScene();
 	~AFScene();

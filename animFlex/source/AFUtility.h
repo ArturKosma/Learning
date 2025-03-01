@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 class AFUtility
 {
@@ -92,6 +93,12 @@ public:
 		renderProperties[1][0] = cameraPitch;
 
 		return renderProperties;
+	}
+
+	static glm::mat4 CreateOrthoProjectionMat(float screenWidth, float screenHeight)
+	{
+		float aspectRatio = screenWidth / screenHeight;
+		return glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
 	}
 };
 
