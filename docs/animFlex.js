@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpdm2b594w.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmplkgsrxxx.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -141,6 +141,7 @@ var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
       function assert(check, msg) {
         if (!check) throw msg + new Error().stack;
       }
+Module['FS_createPath']("/", "config", true, true);
 Module['FS_createPath']("/", "content", true, true);
 Module['FS_createPath']("/content", "shaders", true, true);
 Module['FS_createPath']("/content", "textures", true, true);
@@ -210,25 +211,25 @@ Module['FS_createPath']("/content", "textures", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/content/shaders/basic.frag", "start": 0, "end": 212}, {"filename": "/content/shaders/basic.vert", "start": 212, "end": 620}, {"filename": "/content/shaders/changed.frag", "start": 620, "end": 1009}, {"filename": "/content/shaders/changed.vert", "start": 1009, "end": 1464}, {"filename": "/content/textures/crate1.png", "start": 1464, "end": 427766}, {"filename": "/content/textures/crate2.png", "start": 427766, "end": 5319304}], "remote_package_size": 5319304});
+    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 410}, {"filename": "/content/shaders/background.frag", "start": 410, "end": 2681}, {"filename": "/content/shaders/background.vert", "start": 2681, "end": 2971}, {"filename": "/content/shaders/basic.frag", "start": 2971, "end": 3239}, {"filename": "/content/shaders/basic.vert", "start": 3239, "end": 3618}, {"filename": "/content/shaders/fisheye.frag", "start": 3618, "end": 7216}, {"filename": "/content/shaders/fisheye.vert", "start": 7216, "end": 7503}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 7503, "end": 8778}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 8778, "end": 9065}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 9065, "end": 10336}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 10336, "end": 10623}, {"filename": "/content/shaders/grid.frag", "start": 10623, "end": 17248}, {"filename": "/content/shaders/grid.vert", "start": 17248, "end": 18549}, {"filename": "/content/shaders/neutral.frag", "start": 18549, "end": 19030}, {"filename": "/content/shaders/neutral.vert", "start": 19030, "end": 19319}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 19319, "end": 19573}, {"filename": "/content/shaders/stencil.frag", "start": 19573, "end": 19761}, {"filename": "/content/shaders/stencil.vert", "start": 19761, "end": 20050}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 20050, "end": 20476}, {"filename": "/content/shaders/uibasic.frag", "start": 20476, "end": 20625}, {"filename": "/content/shaders/uibasic.vert", "start": 20625, "end": 20825}, {"filename": "/content/shaders/vignette.frag", "start": 20825, "end": 21817}, {"filename": "/content/shaders/vignette.vert", "start": 21817, "end": 22106}, {"filename": "/content/textures/crate2.png", "start": 22106, "end": 336441}], "remote_package_size": 336441});
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpdm2b594w.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpyu61sie1.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmplkgsrxxx.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp6r82xsek.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpyu61sie1.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpp6hvukxh.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp6r82xsek.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwxwxphmo.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpp6hvukxh.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwxwxphmo.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -4173,41 +4174,6 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
         stringToUTF8(summerName, std_name, 17);
       }
     };
-
-  var _emscripten_get_now = () => performance.now();
-  
-  var _emscripten_date_now = () => Date.now();
-  
-  var nowIsMonotonic = 1;
-  
-  var checkWasiClock = (clock_id) => clock_id >= 0 && clock_id <= 3;
-  
-  var INT53_MAX = 9007199254740992;
-  
-  var INT53_MIN = -9007199254740992;
-  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
-  function _clock_time_get(clk_id, ignored_precision, ptime) {
-    ignored_precision = bigintToI53Checked(ignored_precision);
-  
-    
-      if (!checkWasiClock(clk_id)) {
-        return 28;
-      }
-      var now;
-      // all wasi clocks but realtime are monotonic
-      if (clk_id === 0) {
-        now = _emscripten_date_now();
-      } else if (nowIsMonotonic) {
-        now = _emscripten_get_now();
-      } else {
-        return 52;
-      }
-      // "now" is in ms, and wasi times are in ns.
-      var nsec = Math.round(now * 1000 * 1000);
-      HEAP64[((ptime)>>3)] = BigInt(nsec);
-      return 0;
-    ;
-  }
 
   var _emscripten_err = (str) => err(UTF8ToString(str));
 
@@ -8202,6 +8168,7 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   };
   
   
+  var _emscripten_get_now = () => performance.now();
   
   
     /**
@@ -8425,6 +8392,10 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   }
 
   
+  var INT53_MAX = 9007199254740992;
+  
+  var INT53_MIN = -9007199254740992;
+  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
   function _fd_seek(fd, offset, whence, newOffset) {
     offset = bigintToI53Checked(offset);
   
@@ -10325,14 +10296,6 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
       return prevcbfun;
     };
 
-  var _glfwSetFramebufferSizeCallback = (winid, cbfun) => {
-      var win = GLFW.WindowFromId(winid);
-      if (!win) return null;
-      var prevcbfun = win.framebufferSizeFunc;
-      win.framebufferSizeFunc = cbfun;
-      return prevcbfun;
-    };
-
   var _glfwSetInputMode = (winid, mode, value) => {
       GLFW.setInputMode(winid, mode, value);
     };
@@ -10364,6 +10327,8 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
     };
 
   var _glfwSetWindowSize = (winid, width, height) => GLFW.setWindowSize(winid, width, height);
+
+  var _glfwSetWindowSizeCallback = (winid, cbfun) => GLFW.setWindowSizeCallback(winid, cbfun);
 
   var _glfwSetWindowUserPointer = (winid, ptr) => {
       var win = GLFW.WindowFromId(winid);
@@ -10559,8 +10524,6 @@ var wasmImports = {
   _abort_js: __abort_js,
   /** @export */
   _tzset_js: __tzset_js,
-  /** @export */
-  clock_time_get: _clock_time_get,
   /** @export */
   emscripten_err: _emscripten_err,
   /** @export */
@@ -11270,8 +11233,6 @@ var wasmImports = {
   /** @export */
   glfwSetErrorCallback: _glfwSetErrorCallback,
   /** @export */
-  glfwSetFramebufferSizeCallback: _glfwSetFramebufferSizeCallback,
-  /** @export */
   glfwSetInputMode: _glfwSetInputMode,
   /** @export */
   glfwSetKeyCallback: _glfwSetKeyCallback,
@@ -11287,6 +11248,8 @@ var wasmImports = {
   glfwSetWindowShouldClose: _glfwSetWindowShouldClose,
   /** @export */
   glfwSetWindowSize: _glfwSetWindowSize,
+  /** @export */
+  glfwSetWindowSizeCallback: _glfwSetWindowSizeCallback,
   /** @export */
   glfwSetWindowUserPointer: _glfwSetWindowUserPointer,
   /** @export */
@@ -11424,6 +11387,7 @@ var missingLibrarySymbols = [
   'jsStackTrace',
   'getCallstack',
   'convertPCtoSourceLocation',
+  'checkWasiClock',
   'wasiRightsToMuslOFlags',
   'wasiOFlagsToMuslOFlags',
   'setImmediateWrapped',
@@ -11535,7 +11499,6 @@ var unexportedSymbols = [
   'UNWIND_CACHE',
   'ExitStatus',
   'getEnvStrings',
-  'checkWasiClock',
   'doReadv',
   'doWritev',
   'initRandomFill',
