@@ -66,7 +66,7 @@ bool AFWindow::Init(int initWidth, int initHeight)
 	});
 
 	// Bind window resize.
-	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int newWidth, int newHeight)
+	glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int newWidth, int newHeight)
 		{
 			AFWindow* windowInstance = static_cast<AFWindow*>(glfwGetWindowUserPointer(window));
 			if (windowInstance)
@@ -104,8 +104,6 @@ bool AFWindow::Init(int initWidth, int initHeight)
 	const int height = videoMode->height;
 
 	glfwSetWindowSize(m_window, width, height);
-	ClearOpenGLErrors();
-	DebugOpenGL();
 
 #endif
 	return true;
@@ -162,6 +160,5 @@ void AFWindow::PollEvents()
 
 void AFWindow::OnWindowResize(int newWidth, int newHeight)
 {
-	glfwSetWindowSize(m_window, newWidth, newHeight);
 	m_resizeCallback(newWidth, newHeight);
 }

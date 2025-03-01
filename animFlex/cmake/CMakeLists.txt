@@ -46,5 +46,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
 -s ALLOW_MEMORY_GROWTH=1 \
 -s FORCE_FILESYSTEM \
 --preload-file ../../content \
+--preload-file ../../config \
 --shell-file=${CUSTOM_SHELL_FILE} \
 -s EXPORTED_RUNTIME_METHODS=['ccall']")

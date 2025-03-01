@@ -57,6 +57,12 @@ bool AFConfig::ParseConfig()
 	std::string line;
 	while (std::getline(file, line)) 
 	{
+		// Remove trailing '\r'.
+		if(!line.empty() && line.back() == '\r')
+		{
+			line.pop_back();
+		}
+
 		// Skip empty lines.
 		if (std::all_of(line.begin(), line.end(), [](unsigned char c) { return std::isspace(c); })) 
 		{

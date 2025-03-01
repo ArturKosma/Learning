@@ -8,6 +8,9 @@
 #include "AFTimerManager.h"
 #include "AFConfig.h"
 #include "AFUtility.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
 
 AFApp::AFApp()
 {
@@ -74,15 +77,13 @@ void AFApp::StartLoop()
 	printf("Running on Emscripten.\n");
 
 	// Set the web main loop to run at requestAnimationFrame() fps.
-	emscripten_set_main_loop_arg([](void* InWindowPtr)
+	emscripten_set_main_loop_arg([](void* InAppPtr)
 		{
-			AFWindow* windowPtr = static_cast<AFWindow*>(InWindowPtr);
-			windowPtr->Tick();
+			AFApp* appPtr = static_cast<AFApp*>(InAppPtr);
+			appPtr->Tick();
 		}, this, 0, true);
 
 #else
-	printf("Not running on Emscripten.\n");
-
 	while (!m_window->ShouldShutdown())
 	{
 		Tick();
@@ -101,6 +102,7 @@ void AFApp::Tick()
 	// Calculate delta time.
 	AFTimerManager::GetInstance().DeltaCalc();
 
+	m_window->PollEvents();
 	AFInput::GetInstance().Tick();
 	m_game->Tick(AFTimerManager::GetDeltaTime());
 	m_renderer->Draw(m_game->GetScene().GetSceneData());
@@ -111,7 +113,6 @@ void AFApp::Tick()
 	m_helperInterface->Draw(appData, m_game->GetScene().GetSceneData());
 
 	m_window->SwapBuffers();
-	m_window->PollEvents();
 }
 
 void AFApp::CollectAppData(AFAppData& appData)
@@ -133,5 +134,10 @@ void AFApp::SetWindowCallbacks()
 void AFApp::OnWindowResize(int newWidth, int newHeight)
 {
 	// Update the frame buffer.
+
+#ifdef __EMSCRIPTEN__
+	glfwSetWindowSize(m_window->GetGLFWWindow(), newWidth, newHeight);
+#endif
+
 	m_renderer->SetSize(newWidth, newHeight);
 }

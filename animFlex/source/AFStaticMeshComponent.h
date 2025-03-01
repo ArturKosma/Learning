@@ -9,6 +9,9 @@ class AFStaticMeshComponent : public AFRenderComponent
 {
 public:
 
+	AFStaticMeshComponent() = default;
+	virtual ~AFStaticMeshComponent() override = default;
+
 	void Draw() const override;
 
 	unsigned long long GetVertexCount() override;
