@@ -16,5 +16,5 @@ public:
 
 private:
 
-	float m_cameraSpeedMultiplier = 1.0f;
+	float m_cameraSpeedMultiplier = 3.5f;
 };

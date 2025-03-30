@@ -8,14 +8,14 @@ AFCameraComponent::AFCameraComponent()
 	m_neutralShader.SetVertexShader("content/shaders/neutral.vert");
 	m_neutralShader.SetFragmentShader("content/shaders/neutral.frag");
 	m_neutralShader.LoadShaders();
-
+	
 	// Fisheye.
 	AFPostprocessShader fisheye;
 	fisheye.SetVertexShader("content/shaders/fisheye.vert");
 	fisheye.SetFragmentShader("content/shaders/fisheye.frag");
 	fisheye.LoadShaders();
 	m_postprocessShaders.push_back(fisheye);
-
+	
 	// Gaussian horizontal.
 	AFPostprocessShader gaussianHorizontal;
 	gaussianHorizontal.SetVertexShader("content/shaders/gaussianHorizontal.vert");
@@ -29,6 +29,19 @@ AFCameraComponent::AFCameraComponent()
 	gaussianVertical.SetFragmentShader("content/shaders/gaussianVertical.frag");
 	gaussianVertical.LoadShaders();
 	m_postprocessShaders.push_back(gaussianVertical);
+
+	// #hack
+	// I have no clue why, but on WebGL I have to apply this postprocess twice to see the effect.
+	// I assume it has something to do with how blit is behaving on desktop vs web.
+#ifdef __EMSCRIPTEN__
+
+	AFPostprocessShader fisheye1;
+	fisheye1.SetVertexShader("content/shaders/fisheye.vert");
+	fisheye1.SetFragmentShader("content/shaders/fisheye.frag");
+	fisheye1.LoadShaders();
+	m_postprocessShaders.push_back(fisheye1);
+
+#endif
 
 	// Vignette.
 	/*

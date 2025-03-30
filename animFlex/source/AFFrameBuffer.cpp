@@ -206,12 +206,10 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	bool alternate = false;
 	for(AFPostprocessShader postprocess : cameraPostprocessShaders)
 	{
-		const GLuint readIdx = alternate ? 1 : 0;
 		const GLuint drawIdx = alternate ? 0 : 1;
 
 		// Bind read and draw FBOs.
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, resolveFbo[readIdx]);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, resolveFbo[drawIdx]);
+		glBindFramebuffer(GL_FRAMEBUFFER, resolveFbo[drawIdx]);
 
 		// Bind the final textures.
 		glActiveTexture(GL_TEXTURE0);
@@ -228,7 +226,6 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 		// Postprocess vertex shader should create a full screen triangle.
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		// Copy color to final texture.
 		finalColorTex = resolveColorTex[drawIdx];
 
 		// Alternate.
@@ -236,7 +233,11 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	}
 
 	// Start drawing to default framebuffer.
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// Use neutral shader.
+	cameraComp->GetNeutralShader().Use();
 
 	// Bind the final textures.
 	glActiveTexture(GL_TEXTURE0);
@@ -246,11 +247,8 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_resolveStencilColorTex);
 
-	// Use neutral shader.
-	cameraComp->GetNeutralShader().Use();
-
 	// Draw 3 undefined points.
-	// Postprocess vertex shader should create a full screen triangle.
+	// Final vertex shader should create a full screen triangle.
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	// Unbind textures.
@@ -260,8 +258,6 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void AFFramebuffer::Cleanup()

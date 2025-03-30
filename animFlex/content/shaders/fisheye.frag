@@ -112,5 +112,6 @@ void main()
 	vec4 finalColor = vec4(horizonMask > 0.0f ? vec3(horizonMask) : vec3(screen.xyz), 1.0f);
 	finalColor = screen;
 
+
 	FragColor = finalColor;
 }

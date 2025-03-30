@@ -17,43 +17,37 @@ in vec3 WorldPosition;
 
 layout (location = 0) out vec4 FragColor;
 
-int MaxSamples = 10;
-
-float LinearizeDepth(float d, float zNear, float zFar)
+// Computes the grid intensity along one axis.
+float gridAxisAA(float coord, float thickness)
 {
-	return (2.0f * zNear * zFar) / (zFar + zNear - (d * 2.0f - 1.0f) * (zFar - zNear));
+    float d = min(fract(coord), 1.0 - fract(coord));
+	float aa = fwidth(coord);
+
+    return 1.0 - smoothstep(0.0, thickness + aa, d);
 }
 
-float GridLineGenerationAliased(vec2 uv)
-{
-	float minLineWidthX = 0.015f;  
-	float minLineWidthY = 0.015f;
+float GridLineGenerationAliased(vec2 uv, float cellSize)
+{    
+	float lineThickness = 0.003f;
 
-	// Get the distance from the center of UV tile.
-	float distX = abs(uv.x - 0.5f);
-	float distY = abs(uv.y - 0.5f);
-
-	// Smoothly transition between 0.0f and 1.0f for X and Y lines,
-	float lineX = smoothstep(minLineWidthX, 0.0f, distX);
-	float lineY = smoothstep(minLineWidthY, 0.0f, distY);
-
-	// Sum the lines.
-	float line = clamp(lineX + lineY, 0.0f, 1.0f);
-
-	return line;
+    float lineX = gridAxisAA(uv.x, lineThickness);
+    float lineY = gridAxisAA(uv.y, lineThickness);
+    
+    return max(lineX, lineY);
 }
 
 // Acts like a supersampling?
 // @todo Try understanding this better.
 // https://iquilezles.org/articles/filtering/
+int MaxSamples = 30;
 float SampleGridWithFilter(vec2 uv, float cellSize, float detail)
 {
-    vec2 cellUV = uv * cellSize;
-    vec2 dCellUVx = dFdx(uv * cellSize);
-	vec2 dCellUVy = dFdy(uv * cellSize);
+    vec2 cellUV = uv;
+    vec2 dCellUVx = dFdx(cellUV);
+	vec2 dCellUVy = dFdy(cellUV);
 
 	int sx = 1 + clamp(int(detail * length(dCellUVx - cellUV)), 0, MaxSamples - 1);
-    int sy = 1 + clamp(int(detail * length(dCellUVy - cellUV)), 0, MaxSamples - 1);
+	int sy = 1 + clamp(int(detail * length(dCellUVy - cellUV)), 0, MaxSamples - 1);
 
     float gridSum = 0.0;
 
@@ -64,7 +58,7 @@ float SampleGridWithFilter(vec2 uv, float cellSize, float detail)
 			vec2 st = vec2(float(i), float(j)) / vec2(float(sx), float(sy));
 			vec2 sampleUV = cellUV + st.x * dCellUVx + st.y * dCellUVy;
 
-			gridSum += GridLineGenerationAliased(fract(sampleUV + 0.5f));
+			gridSum += GridLineGenerationAliased(sampleUV * cellSize, cellSize);
 		}
 	}
 
@@ -98,21 +92,24 @@ void main()
 	vec3 cameraPos = cameraTransform[3].xyz;
 	vec3 cameraFwd = normalize(vec3(cameraTransform[2].xyz));
 	float fragDist = length(cameraPos - WorldPosition);
+
+	// Cache resolution.
+	vec2 res = vec2(renderProperties[0][0], renderProperties[0][1]);
 	
 	// Cache near/far planes.
 	float near = renderProperties[0][2];
 	float far = renderProperties[0][3];
 
 	// Generate grid lines.
-	float line = SampleGridWithFilter(UV, CellNum, 2.0f);
+	float line = SampleGridWithFilter(UV, CellNum, 5.0f);
 
 	// Clamp the brightness line.
 	float lineMask = line; 
 	lineMask = clamp(lineMask, 0.0f, 1.0f);
 
 	// Find line distance.
-	float lineDist = Remap(fragDist, 10.0f, 500.0f, 0.0f, 1.0f);
-	lineDist = exp(-20.0f * lineDist);
+	float lineDist = Remap(fragDist, 0.0f, 200.0f, 0.0f, 1.0f);
+	lineDist = exp(-15.0 * lineDist);
 
 	// Lower the line brightness with distance.
 	lineMask *= lineDist;

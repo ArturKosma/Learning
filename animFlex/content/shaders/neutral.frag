@@ -2,8 +2,6 @@
 precision mediump float;
 
 uniform sampler2D u_ColorTex;
-uniform sampler2D u_DepthTex;
-uniform sampler2D u_StencilTex;
 
 layout (std140) uniform RenderProperties
 {
