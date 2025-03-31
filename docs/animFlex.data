@@ -243,7 +243,7 @@ void main()
 
 	// The further away from the horizontal center of the screen something is - the stronger the effect.
 	float horizontalModifier = 0.0f;
-	horizontalModifier = abs((uv.x - 0.5f) * 2.0f); // Distance.
+	horizontalModifier = abs((uv.x - 0.5f) * 2.5f); // Distance.
 	horizontalModifier = pow(horizontalModifier, 2.0f); // Distance non linear.
 	horizonMask = horizonMask * horizontalModifier / 2.0f;
 	horizonMask *= 1.0f;
@@ -251,8 +251,9 @@ void main()
 	uv += vec2(0.0f, horizonMask * 0.1f);
 
 	vec4 screen = texture(u_ColorTex, uv);
-	vec4 finalColor = vec4(horizonMask > 0.0f ? vec3(horizonMask) : vec3(screen.xyz), 1.0f);
-	finalColor = screen;
+	//vec4 finalColor = vec4(horizonMask > 0.0f ? vec3(horizonMask) : vec3(screen.xyz), 1.0f);
+	vec4 finalColor = screen;
+	//vec4 finalColor = vec4(vec3(stencil), 1.0f);
 
 
 	FragColor = finalColor;

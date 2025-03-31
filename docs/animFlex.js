@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpa0g981yy.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4yguldmz.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -211,25 +211,25 @@ Module['FS_createPath']("/content", "textures", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 410}, {"filename": "/content/shaders/background.frag", "start": 410, "end": 2681}, {"filename": "/content/shaders/background.vert", "start": 2681, "end": 2971}, {"filename": "/content/shaders/basic.frag", "start": 2971, "end": 3239}, {"filename": "/content/shaders/basic.vert", "start": 3239, "end": 3618}, {"filename": "/content/shaders/fisheye.frag", "start": 3618, "end": 7218}, {"filename": "/content/shaders/fisheye.vert", "start": 7218, "end": 7505}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 7505, "end": 8780}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 8780, "end": 9067}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 9067, "end": 10338}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 10338, "end": 10625}, {"filename": "/content/shaders/grid.frag", "start": 10625, "end": 17150}, {"filename": "/content/shaders/grid.vert", "start": 17150, "end": 18451}, {"filename": "/content/shaders/neutral.frag", "start": 18451, "end": 18868}, {"filename": "/content/shaders/neutral.vert", "start": 18868, "end": 19157}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 19157, "end": 19411}, {"filename": "/content/shaders/stencil.frag", "start": 19411, "end": 19599}, {"filename": "/content/shaders/stencil.vert", "start": 19599, "end": 19888}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 19888, "end": 20314}, {"filename": "/content/shaders/uibasic.frag", "start": 20314, "end": 20463}, {"filename": "/content/shaders/uibasic.vert", "start": 20463, "end": 20663}, {"filename": "/content/shaders/vignette.frag", "start": 20663, "end": 21655}, {"filename": "/content/shaders/vignette.vert", "start": 21655, "end": 21944}, {"filename": "/content/textures/crate2.png", "start": 21944, "end": 336279}], "remote_package_size": 336279});
+    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 410}, {"filename": "/content/shaders/background.frag", "start": 410, "end": 2681}, {"filename": "/content/shaders/background.vert", "start": 2681, "end": 2971}, {"filename": "/content/shaders/basic.frag", "start": 2971, "end": 3239}, {"filename": "/content/shaders/basic.vert", "start": 3239, "end": 3618}, {"filename": "/content/shaders/fisheye.frag", "start": 3618, "end": 7274}, {"filename": "/content/shaders/fisheye.vert", "start": 7274, "end": 7561}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 7561, "end": 8836}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 8836, "end": 9123}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 9123, "end": 10394}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 10394, "end": 10681}, {"filename": "/content/shaders/grid.frag", "start": 10681, "end": 17206}, {"filename": "/content/shaders/grid.vert", "start": 17206, "end": 18507}, {"filename": "/content/shaders/neutral.frag", "start": 18507, "end": 18924}, {"filename": "/content/shaders/neutral.vert", "start": 18924, "end": 19213}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 19213, "end": 19467}, {"filename": "/content/shaders/stencil.frag", "start": 19467, "end": 19655}, {"filename": "/content/shaders/stencil.vert", "start": 19655, "end": 19944}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 19944, "end": 20370}, {"filename": "/content/shaders/uibasic.frag", "start": 20370, "end": 20519}, {"filename": "/content/shaders/uibasic.vert", "start": 20519, "end": 20719}, {"filename": "/content/shaders/vignette.frag", "start": 20719, "end": 21711}, {"filename": "/content/shaders/vignette.vert", "start": 21711, "end": 22000}, {"filename": "/content/textures/crate2.png", "start": 22000, "end": 336335}], "remote_package_size": 336335});
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpa0g981yy.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpmad0whrx.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4yguldmz.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmprkqz8jd5.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpmad0whrx.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp_w41rm43.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmprkqz8jd5.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpyv8wsovz.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp_w41rm43.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpyv8wsovz.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -8639,47 +8639,6 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   
   
   
@@ -10325,70 +10284,6 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
 
   var _glfwGetClipboardString = (win) => {};
 
-  var _glfwGetCursorPos = (winid, x, y) => GLFW.getCursorPos(winid, x, y);
-
-  var _glfwGetFramebufferSize = (winid, width, height) => {
-      var ww = 0;
-      var wh = 0;
-  
-      var win = GLFW.WindowFromId(winid);
-      if (win) {
-        ww = win.framebufferWidth;
-        wh = win.framebufferHeight;
-      }
-  
-      if (width) {
-        HEAP32[((width)>>2)] = ww;
-      }
-  
-      if (height) {
-        HEAP32[((height)>>2)] = wh;
-      }
-    };
-
-  var _glfwGetInputMode = (winid, mode) => {
-      var win = GLFW.WindowFromId(winid);
-      if (!win) return;
-  
-      switch (mode) {
-        case 0x00033001: { // GLFW_CURSOR
-          if (Browser.pointerLock) {
-            win.inputModes[mode] = 0x00034003; // GLFW_CURSOR_DISABLED
-          } else {
-            win.inputModes[mode] = 0x00034001; // GLFW_CURSOR_NORMAL
-          }
-        }
-      }
-  
-      return win.inputModes[mode];
-    };
-
-  var _glfwGetJoystickAxes = (joy, count) => {
-      GLFW.refreshJoysticks();
-  
-      var state = GLFW.joys[joy];
-      if (!state || !state.axes) {
-        HEAP32[((count)>>2)] = 0;
-        return;
-      }
-  
-      HEAP32[((count)>>2)] = state.axesCount;
-      return state.axes;
-    };
-
-  var _glfwGetJoystickButtons = (joy, count) => {
-      GLFW.refreshJoysticks();
-  
-      var state = GLFW.joys[joy];
-      if (!state || !state.buttons) {
-        HEAP32[((count)>>2)] = 0;
-        return;
-      }
-  
-      HEAP32[((count)>>2)] = state.buttonsCount;
-      return state.buttons;
-    };
-
   var _glfwGetKey = (winid, key) => GLFW.getKey(winid, key);
 
   var _glfwGetTime = () => GLFW.getTime() - GLFW.initialTime;
@@ -10462,8 +10357,6 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
 
   var _glfwSetClipboardString = (win, string) => {};
 
-  var _glfwSetCursor = (winid, cursor) => {};
-
   var _glfwSetCursorEnterCallback = (winid, cbfun) => {
       var win = GLFW.WindowFromId(winid);
       if (!win) return null;
@@ -10472,18 +10365,12 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
       return prevcbfun;
     };
 
-  var _glfwSetCursorPos = (winid, x, y) => GLFW.setCursorPos(winid, x, y);
-
   var _glfwSetCursorPosCallback = (winid, cbfun) => GLFW.setCursorPosCallback(winid, cbfun);
 
   var _glfwSetErrorCallback = (cbfun) => {
       var prevcbfun = GLFW.errorFunc;
       GLFW.errorFunc = cbfun;
       return prevcbfun;
-    };
-
-  var _glfwSetInputMode = (winid, mode, value) => {
-      GLFW.setInputMode(winid, mode, value);
     };
 
   var _glfwSetKeyCallback = (winid, cbfun) => GLFW.setKeyCallback(winid, cbfun);
@@ -11291,107 +11178,15 @@ var wasmImports = {
   /** @export */
   fd_write: _fd_write,
   /** @export */
-  glActiveTexture: _glActiveTexture,
-  /** @export */
-  glAttachShader: _glAttachShader,
-  /** @export */
-  glBindBuffer: _glBindBuffer,
-  /** @export */
-  glBindTexture: _glBindTexture,
-  /** @export */
-  glBindVertexArrayOES: _glBindVertexArrayOES,
-  /** @export */
-  glBlendEquation: _glBlendEquation,
-  /** @export */
-  glBlendEquationSeparate: _glBlendEquationSeparate,
-  /** @export */
-  glBlendFuncSeparate: _glBlendFuncSeparate,
-  /** @export */
-  glBufferData: _glBufferData,
-  /** @export */
-  glBufferSubData: _glBufferSubData,
-  /** @export */
-  glCompileShader: _glCompileShader,
-  /** @export */
-  glCreateProgram: _glCreateProgram,
-  /** @export */
-  glCreateShader: _glCreateShader,
-  /** @export */
-  glDeleteShader: _glDeleteShader,
-  /** @export */
-  glDeleteVertexArraysOES: _glDeleteVertexArraysOES,
-  /** @export */
-  glDetachShader: _glDetachShader,
-  /** @export */
-  glDisable: _glDisable,
-  /** @export */
-  glDrawElements: _glDrawElements,
-  /** @export */
-  glEnable: _glEnable,
-  /** @export */
-  glEnableVertexAttribArray: _glEnableVertexAttribArray,
-  /** @export */
-  glGenBuffers: _glGenBuffers,
-  /** @export */
-  glGenTextures: _glGenTextures,
-  /** @export */
-  glGenVertexArraysOES: _glGenVertexArraysOES,
-  /** @export */
-  glGetAttribLocation: _glGetAttribLocation,
-  /** @export */
   glGetIntegerv: _glGetIntegerv,
   /** @export */
-  glGetProgramInfoLog: _glGetProgramInfoLog,
-  /** @export */
-  glGetProgramiv: _glGetProgramiv,
-  /** @export */
-  glGetShaderInfoLog: _glGetShaderInfoLog,
-  /** @export */
-  glGetShaderiv: _glGetShaderiv,
-  /** @export */
   glGetString: _glGetString,
-  /** @export */
-  glGetUniformLocation: _glGetUniformLocation,
-  /** @export */
-  glIsEnabled: _glIsEnabled,
-  /** @export */
-  glIsProgram: _glIsProgram,
-  /** @export */
-  glLinkProgram: _glLinkProgram,
-  /** @export */
-  glScissor: _glScissor,
-  /** @export */
-  glShaderSource: _glShaderSource,
-  /** @export */
-  glTexImage2D: _glTexImage2D,
-  /** @export */
-  glTexParameteri: _glTexParameteri,
-  /** @export */
-  glUniform1i: _glUniform1i,
-  /** @export */
-  glUniformMatrix4fv: _glUniformMatrix4fv,
-  /** @export */
-  glUseProgram: _glUseProgram,
-  /** @export */
-  glVertexAttribPointer: _glVertexAttribPointer,
-  /** @export */
-  glViewport: _glViewport,
   /** @export */
   glfwCreateStandardCursor: _glfwCreateStandardCursor,
   /** @export */
   glfwCreateWindow: _glfwCreateWindow,
   /** @export */
   glfwGetClipboardString: _glfwGetClipboardString,
-  /** @export */
-  glfwGetCursorPos: _glfwGetCursorPos,
-  /** @export */
-  glfwGetFramebufferSize: _glfwGetFramebufferSize,
-  /** @export */
-  glfwGetInputMode: _glfwGetInputMode,
-  /** @export */
-  glfwGetJoystickAxes: _glfwGetJoystickAxes,
-  /** @export */
-  glfwGetJoystickButtons: _glfwGetJoystickButtons,
   /** @export */
   glfwGetKey: _glfwGetKey,
   /** @export */
@@ -11411,17 +11206,11 @@ var wasmImports = {
   /** @export */
   glfwSetClipboardString: _glfwSetClipboardString,
   /** @export */
-  glfwSetCursor: _glfwSetCursor,
-  /** @export */
   glfwSetCursorEnterCallback: _glfwSetCursorEnterCallback,
-  /** @export */
-  glfwSetCursorPos: _glfwSetCursorPos,
   /** @export */
   glfwSetCursorPosCallback: _glfwSetCursorPosCallback,
   /** @export */
   glfwSetErrorCallback: _glfwSetErrorCallback,
-  /** @export */
-  glfwSetInputMode: _glfwSetInputMode,
   /** @export */
   glfwSetKeyCallback: _glfwSetKeyCallback,
   /** @export */
