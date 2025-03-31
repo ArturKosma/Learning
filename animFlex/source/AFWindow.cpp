@@ -47,26 +47,55 @@ bool AFWindow::Init(int initWidth, int initHeight)
 		return false;
 	}
 
+	const bool bIsMobile = AFUtility::IsMobile();
+	printf("Running on %s.\n", bIsMobile ? "mobile" : "desktop");
+
 	// Bind input events.
 
-	glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
+	if(bIsMobile)
 	{
-		AFInput::GetInstance().OnKeyCallback(window, key, scanCode, action, mods);
-	});
+#ifdef __EMSCRIPTEN__
+		emscripten_set_touchstart_callback("#canvas", nullptr, true, 
+			[](int eventType, const EmscriptenTouchEvent* e, void* userData)
+			{
+				AFInput::GetInstance().OnTouchStart(eventType, e);
+				return EM_TRUE;
+			});
+		emscripten_set_touchmove_callback("#canvas", nullptr, true, 
+			[](int eventType, const EmscriptenTouchEvent* e, void* userData)
+			{
+				AFInput::GetInstance().OnTouchMove(eventType, e);
+				return EM_TRUE;
+			});
+		emscripten_set_touchend_callback("#canvas", nullptr, true, 
+			[](int eventType, const EmscriptenTouchEvent* e, void* userData)
+			{
+				AFInput::GetInstance().OnTouchEnd(eventType, e);
+				return EM_TRUE;
+			});
+#endif
+	}
+	else
+	{
+		glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
+			{
+				AFInput::GetInstance().OnKeyCallback(window, key, scanCode, action, mods);
+			});
 
-	glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods)
-	{
-		AFInput::GetInstance().OnMouseButtonCallback(window, button, action, mods);
-	});
+		glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods)
+			{
+				AFInput::GetInstance().OnMouseButtonCallback(window, button, action, mods);
+			});
 
-	glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xoffset, double yoffset)
-	{
-		AFInput::GetInstance().OnCursorPosCallback(window, xoffset, yoffset);
-	});
-	glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xcursor, double ycursor)
-	{
-		AFInput::GetInstance().OnScrollCallback(window, xcursor, ycursor);
-	});
+		glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xoffset, double yoffset)
+			{
+				AFInput::GetInstance().OnCursorPosCallback(window, xoffset, yoffset);
+			});
+		glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xcursor, double ycursor)
+			{
+				AFInput::GetInstance().OnScrollCallback(window, xcursor, ycursor);
+			});
+	}
 
 	// Bind window resize.
 	glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int newWidth, int newHeight)

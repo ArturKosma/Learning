@@ -55,8 +55,9 @@ private:
 	void OnScrollCallback(struct GLFWwindow* window, double xscroll, double yscroll);
 
 #ifdef __EMSCRIPTEN__
-	void Emscripten_OnMouseButtonDownCallback(int eventType, const EmscriptenMouseEvent* mouseEvent);
-	void Emscripten_OnMouseButtonUpCallback(int eventType, const EmscriptenMouseEvent* mouseEvent);
+	void OnTouchStart(int eventType, const EmscriptenTouchEvent* e);
+	void OnTouchMove(int eventType, const EmscriptenTouchEvent* e);
+	void OnTouchEnd(int eventType, const EmscriptenTouchEvent* e);
 #endif
 
 	void UpdateCursorPosState();

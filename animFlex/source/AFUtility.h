@@ -6,6 +6,9 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
 
 class AFUtility
 {
@@ -100,6 +103,18 @@ public:
 	{
 		float aspectRatio = screenWidth / screenHeight;
 		return glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+	}
+
+	static bool IsMobile()
+	{
+#ifdef __EMSCRIPTEN__
+		std::string result = emscripten_run_script_string
+		(
+			"(/Mobi|Android|Tablet|iPad|iPhone/.test(navigator.userAgent)).toString();"
+		);
+		return result == "true";
+#endif
+		return false;
 	}
 };
 

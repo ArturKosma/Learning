@@ -18,6 +18,12 @@ bool AFHelperInferface::Init(const class AFWindow& window)
 	const char* glslVersion = "#version 300 es";
 	ImGui_ImplOpenGL3_Init(glslVersion);
 
+	// ImGui does something behind the scenes which makes my
+	// emscripten_request_pointerlock insta exit.
+	// This code prevents it.
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+
 	return true;
 }
 

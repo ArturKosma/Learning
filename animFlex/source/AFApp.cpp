@@ -74,7 +74,7 @@ void AFApp::StartLoop()
 	AFInput::GetInstance().BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window->GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
 
 #ifdef __EMSCRIPTEN__
-	printf("Running on Emscripten.\n");
+	printf("Compiled with Emscripten.\n");
 
 	// Set the web main loop to run at requestAnimationFrame() fps.
 	emscripten_set_main_loop_arg([](void* InAppPtr)
@@ -110,7 +110,7 @@ void AFApp::Tick()
 	AFAppData appData;
 	CollectAppData(appData);
 
-	//m_helperInterface->Draw(appData, m_game->GetScene().GetSceneData());
+	m_helperInterface->Draw(appData, m_game->GetScene().GetSceneData());
 
 	m_window->SwapBuffers();
 }

@@ -227,6 +227,23 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 	}
 }
 
+#ifdef __EMSCRIPTEN__
+void AFInput::OnTouchStart(int eventType, const EmscriptenTouchEvent* e)
+{
+	printf("touch start\n");
+}
+
+void AFInput::OnTouchMove(int eventType, const EmscriptenTouchEvent* e)
+{
+	printf("touch move\n");
+}
+
+void AFInput::OnTouchEnd(int eventType, const EmscriptenTouchEvent* e)
+{
+	printf("touch end\n");
+}
+#endif
+
 void AFInput::UpdateCursorPosState()
 {
 	const double cursorPosXDelta = m_cursorNewXPos - m_cursorOldXPos;
