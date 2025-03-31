@@ -22,7 +22,6 @@ public:
 	void DrawToScreen(const AFSceneData& sceneData);
 	void Cleanup();
 
-	void DrawStencil();
 	void ClearStencil();
 
 private:

@@ -3,6 +3,10 @@
 #include <string>
 #include <unordered_map>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+#endif
+
 enum class EAFKeyAction
 {
 	Pressed,
@@ -49,6 +53,11 @@ private:
 	void OnMouseButtonCallback(struct GLFWwindow* window, int button, int action, int mods);
 	void OnCursorPosCallback(struct GLFWwindow* window, double posX, double posY);
 	void OnScrollCallback(struct GLFWwindow* window, double xscroll, double yscroll);
+
+#ifdef __EMSCRIPTEN__
+	void Emscripten_OnMouseButtonDownCallback(int eventType, const EmscriptenMouseEvent* mouseEvent);
+	void Emscripten_OnMouseButtonUpCallback(int eventType, const EmscriptenMouseEvent* mouseEvent);
+#endif
 
 	void UpdateCursorPosState();
 

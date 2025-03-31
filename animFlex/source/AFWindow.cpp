@@ -48,14 +48,17 @@ bool AFWindow::Init(int initWidth, int initHeight)
 	}
 
 	// Bind input events.
+
 	glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
 	{
 		AFInput::GetInstance().OnKeyCallback(window, key, scanCode, action, mods);
 	});
+
 	glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods)
 	{
 		AFInput::GetInstance().OnMouseButtonCallback(window, button, action, mods);
 	});
+
 	glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xoffset, double yoffset)
 	{
 		AFInput::GetInstance().OnCursorPosCallback(window, xoffset, yoffset);

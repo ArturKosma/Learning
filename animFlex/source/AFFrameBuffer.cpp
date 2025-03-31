@@ -194,7 +194,37 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glDisable(GL_DEPTH_TEST);
 
 	// Create stencil color texture m_resolveStencilColorTex.
-	DrawStencil();
+
+	// Bind the multisampled framebuffer as read.
+	// Bind stencil FBO as draw, to blit stencil data into it.
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_msFBO);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_stencilFBO);
+
+	// Blit depth & stencil to a stencil texture.
+	glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight,
+		GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+	// Fill a stencil framebuffer.
+	// We will use it as a texture in shaders.
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_stencilFBO);
+
+	// Settings for the stencil.
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 0, 0xFF); // Render only where stencil != 0.
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+	// Draw 3 undefined points.
+	// Postprocess vertex shader should create a full screen triangle.
+	// Stencil texture gets filled.
+	m_stencilShader.Use();
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	// Disable stencil test.
+	glDisable(GL_STENCIL_TEST);
+
+	// Disable framebuffer bindings.
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 	// Fetch all the camera postprocesses.
 	std::vector<AFPostprocessShader> cameraPostprocessShaders = cameraComp->GetPostprocessShaders();
@@ -202,20 +232,22 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	// Alternate between resolve FBOs while applying all postprocess shaders.
 	std::vector<GLuint> resolveFbo = { m_resolveFramebuffer0, m_resolveFramebuffer1 };
 	std::vector<GLuint> resolveColorTex = { m_resolveColorTex0, m_resolveColorTex1 };
+	std::vector<GLuint> resolveDepthTex = { m_resolveDepthTex0, m_resolveDepthTex1 };
 	GLuint finalColorTex = m_resolveColorTex0;
+	GLuint finalDepthTex = m_resolveDepthTex0;
 	bool alternate = false;
 	for(AFPostprocessShader postprocess : cameraPostprocessShaders)
 	{
 		const GLuint drawIdx = alternate ? 0 : 1;
 
-		// Bind read and draw FBOs.
-		glBindFramebuffer(GL_FRAMEBUFFER, resolveFbo[drawIdx]);
+		// Bind the target framebuffer.
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, resolveFbo[drawIdx]);
 
 		// Bind the final textures.
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, finalColorTex);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex0);
+		glBindTexture(GL_TEXTURE_2D, finalDepthTex);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_resolveStencilColorTex);
 
@@ -227,6 +259,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		finalColorTex = resolveColorTex[drawIdx];
+		finalDepthTex = resolveDepthTex[drawIdx];
 
 		// Alternate.
 		alternate = !alternate;
@@ -243,7 +276,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, finalColorTex);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex0);
+	glBindTexture(GL_TEXTURE_2D, finalDepthTex);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_resolveStencilColorTex);
 
@@ -264,37 +297,6 @@ void AFFramebuffer::Cleanup()
 {
 	UnBind();
 	Delete();
-}
-
-void AFFramebuffer::DrawStencil()
-{
-	// Bind stencil FBO as draw, to blit stencil data into it.
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_msFBO);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_stencilFBO);
-
-	// Blit depth & stencil to a stencil texture.
-	glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight,
-		GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-
-	// Fill a stencil framebuffer.
-	// We will use it as a texture in shaders.
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_stencilFBO);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_stencilFBO);
-
-	// Settings for the stencil.
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 0, 0xFF); // Render only where stencil != 0.
-	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-	// Draw 3 undefined points.
-	// Postprocess vertex shader should create a full screen triangle.
-	m_stencilShader.Use();
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	// Disable stencil test.
-	glDisable(GL_STENCIL_TEST);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void AFFramebuffer::ClearStencil()

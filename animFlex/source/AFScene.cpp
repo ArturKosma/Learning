@@ -96,7 +96,7 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(gridActor);
 
 	// Create test boxes.
-	/*
+	
 	AFActor* testBoxActor0 = new AFActor();
 	AFActor* testBoxActor1 = new AFActor();
 	AFActor* testBoxActor2 = new AFActor();
@@ -121,7 +121,7 @@ void AFScene::CreateDefaultSceneActors()
 	testBoxActor0->AddOffsetLocation({ 0.0f, 0.5f, 0.0f });
 	testBoxActor1->AddOffsetLocation({ 3.0f, 0.5f, 0.0f });
 	testBoxActor1->AddOffsetRotation({ 0.0f, 15.0f, 0.0f });
-	testBoxActor2->AddOffsetLocation({ -3.5f, 0.5f, 0.5f });*/
+	testBoxActor2->AddOffsetLocation({ -3.5f, 0.5f, 0.5f });
 }
 
 void AFScene::CreateDefaultUIs()

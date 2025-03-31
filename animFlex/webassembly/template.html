@@ -20,39 +20,30 @@
             flex-direction: row;
         }
 
-        .emscripten_border {
+        .emscripten_border 
+        {
             flex: 1;
             height: 100%;
             min-width: 0;
-        }
-
-        textarea.emscripten {
-            flex: 0 0 20%;
-            height: 100%;
-            background-color: black;
-            color: white;
-            font-family: Consolas;
-            resize: none;
         }
     </style>
 </head>
 <body>
     <div class="emscripten_border">
-        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
     </div>
-    <textarea class="emscripten" id="output" rows="8"></textarea>
-
     <script type='text/javascript'>
-        var Module = {
+        var Module =
+        {
             print: (function () {
                 var element = document.getElementById('output');
-                if (element) element.value = ''; // clear browser cache
+                if (element) element.value = '';
                 return (...args) => {
                     var text = args.join(' ');
                     console.log(text);
                     if (element) {
                         element.value += text + "\n";
-                        element.scrollTop = element.scrollHeight; // focus on bottom
+                        element.scrollTop = element.scrollHeight;
                     }
                 };
             })(),

@@ -110,7 +110,7 @@ void AFApp::Tick()
 	AFAppData appData;
 	CollectAppData(appData);
 
-	m_helperInterface->Draw(appData, m_game->GetScene().GetSceneData());
+	//m_helperInterface->Draw(appData, m_game->GetScene().GetSceneData());
 
 	m_window->SwapBuffers();
 }

@@ -250,16 +250,25 @@ void AFInput::Input_FreeViewMode_Pressed()
 {
 	m_freeView = true;
 
+#ifdef __EMSCRIPTEN__
+	emscripten_request_pointerlock("#canvas", true);
+#else
 	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	if(glfwRawMouseMotionSupported())
 	{
 		glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 	}
+#endif
 }
 
 void AFInput::Input_FreeViewMode_Released()
 {
 	m_freeView = false;
 
+#ifdef __EMSCRIPTEN__
+	emscripten_exit_pointerlock();
+#else
 	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+#endif
+
 }
