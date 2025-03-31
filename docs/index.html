@@ -26,12 +26,24 @@
             height: 100%;
             min-width: 0;
         }
+
+        textarea.emscripten 
+        {
+            flex: 0 0 20%;
+            height: 100%;
+            background-color: black;
+            color: white;
+            font-family: Consolas;
+            resize: none;
+        }
     </style>
 </head>
 <body>
     <div class="emscripten_border">
         <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
     </div>
+    <textarea class="emscripten" id="output" rows="8"></textarea>
+
     <script type='text/javascript'>
         var Module =
         {
