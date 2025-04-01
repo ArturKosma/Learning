@@ -29,35 +29,45 @@ struct FAFBoundAxis
 
 struct FAFTouch
 {
-	FAFTouch(int new_id, glm::vec2 new_origin)
-		: id(new_id), origin(new_origin)
+	FAFTouch()
+		: origin(0, 0), lastFrame(0, 0), newLocation(0, 0)
 	{
 		
+	}
+
+	FAFTouch(glm::ivec2 new_origin)
+		: origin(new_origin)
+	{
+		lastFrame = origin;
+		newLocation = lastFrame;
 	}
 
 	FAFTouch(const FAFTouch& other)
-		: id(other.id), origin(other.origin)
+		: origin(other.origin)
 	{
-		
+		lastFrame = origin;
+		newLocation = lastFrame;
 	}
 
 	FAFTouch(FAFTouch&& other) noexcept
-		: id(other.id), origin(other.origin)
+		: origin(other.origin)
 	{
-		
+		lastFrame = origin;
+		newLocation = lastFrame;
 	}
 
 	FAFTouch& operator=(const FAFTouch& other)
 	{
-		id = other.id;
 		origin = other.origin;
+		lastFrame = origin;
+		newLocation = lastFrame;
 
 		return *this;
 	}
 
-	int id = -1;
 	glm::ivec2 origin = glm::ivec2(0, 0);
-	glm::ivec2 delta = glm::ivec2(0, 0);
+	glm::ivec2 lastFrame = glm::ivec2(0, 0);
+	glm::ivec2 newLocation = glm::ivec2(0, 0);
 };
 
 class AFInput
@@ -94,7 +104,11 @@ private:
 	void OnTouchEnd(int eventType, const EmscriptenTouchEvent* e);
 #endif
 
+	void RegisterTouch(int id, const glm::ivec2& location);
+	void UnregisterTouch(int id);
+
 	void UpdateCursorPosState();
+	void UpdateStrokeState();
 
 	void Input_FreeViewMode_Pressed();
 	void Input_FreeViewMode_Released();
@@ -104,7 +118,7 @@ private:
 	std::unordered_map<std::string, FAFBoundAction> m_boundActionMappings = {};
 	std::unordered_map<std::string, FAFBoundAxis> m_boundAxisMappings = {};
 	std::unordered_map<int, float> m_keystate = {};
-	std::vector<FAFTouch> m_touchstate = {};
+	std::unordered_map<int, FAFTouch> m_touchstate = {};
 
 	double m_cursorOldXPos = 0.0;
 	double m_cursorOldYPos = 0.0;

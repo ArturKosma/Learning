@@ -105,6 +105,7 @@ void AFInput::OnCursorPosCallback(GLFWwindow* window, double posX, double posY)
 void AFInput::Tick()
 {
 	UpdateCursorPosState();
+	UpdateStrokeState();
 
 	// Go through all bound axes and call their functors.
 	for(const auto& [axisName, boundAxis] : m_boundAxisMappings)
@@ -121,15 +122,6 @@ void AFInput::Tick()
 		{
 			// Call the bound axis functor with proper value based on keymap.
 			axisFunctor(value);
-		}
-	}
-
-	if(m_touchstate.size())
-	{
-		for(const FAFTouch& touch : m_touchstate)
-		{
-			printf("%d ", touch.id);
-			printf("\n");
 		}
 	}
 }
@@ -236,6 +228,18 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 	}
 }
 
+void AFInput::RegisterTouch(int id, const glm::ivec2& location)
+{
+	// Register new touch.
+	m_touchstate[id] = FAFTouch(location);
+}
+
+void AFInput::UnregisterTouch(int id)
+{
+	// Unregister touch.
+	m_touchstate.erase(id);
+}
+
 #ifdef __EMSCRIPTEN__
 void AFInput::OnTouchStart(int eventType, const EmscriptenTouchEvent* e)
 {
@@ -244,19 +248,40 @@ void AFInput::OnTouchStart(int eventType, const EmscriptenTouchEvent* e)
 		return;
 	}
 
-	for(EmscriptenTouchPoint point : e->touches)
+	for (int i = 0; i < e->numTouches; ++i)
 	{
+		const EmscriptenTouchPoint& point = e->touches[i];
 		if(point.isChanged)
 		{
-			// Register new touch.
-			m_touchstate.emplace_back(point.identifier, glm::ivec2(point.clientX, point.clientY));
+			const bool alreadyRegistered = m_touchstate.find(point.identifier) != m_touchstate.end();
+			if(!alreadyRegistered)
+			{
+				RegisterTouch(point.identifier, { point.clientX, point.clientY });
+			}
 		}
 	}
 }
 
 void AFInput::OnTouchMove(int eventType, const EmscriptenTouchEvent* e)
 {
-	//printf("touch move\n");
+	if (!e)
+	{
+		return;
+	}
+
+	for (int i = 0; i < e->numTouches; ++i)
+	{
+		const EmscriptenTouchPoint& point = e->touches[i];
+		if (point.isChanged)
+		{
+			auto it = m_touchstate.find(point.identifier);
+			if(it != m_touchstate.end())
+			{
+				printf("move event\n");
+				it->second.newLocation = { point.clientX, point.clientY };
+			}
+		}
+	}
 }
 
 void AFInput::OnTouchEnd(int eventType, const EmscriptenTouchEvent* e)
@@ -266,20 +291,12 @@ void AFInput::OnTouchEnd(int eventType, const EmscriptenTouchEvent* e)
 		return;
 	}
 
-	for (EmscriptenTouchPoint point : e->touches)
+	for (int i = 0; i < e->numTouches; ++i)
 	{
+		const EmscriptenTouchPoint& point = e->touches[i];
 		if (point.isChanged)
 		{
-			// Unregister touch.
-			m_touchstate.erase
-			(
-				std::remove_if(m_touchstate.begin(), m_touchstate.end(),
-					[point](const FAFTouch& touch)
-					{
-						return touch.id == point.identifier;
-					}),
-				m_touchstate.end()
-			);
+			UnregisterTouch(point.identifier);
 		}
 	}
 }
@@ -302,6 +319,41 @@ void AFInput::UpdateCursorPosState()
 	m_keystate.insert_or_assign(1002, static_cast<float>(mouseTurnLeft)); // Mouse turn left.
 	m_keystate.insert_or_assign(1003, static_cast<float>(mouseTiltUp)); // Mouse tilt up.
 	m_keystate.insert_or_assign(1004, static_cast<float>(mouseTiltDown)); // Mouse tilt down.
+}
+
+void AFInput::UpdateStrokeState()
+{
+	// Initially we assume there is no stroke at all.
+	// This is because we don't want to update both zoom and turn together, for example.
+	m_keystate.insert_or_assign(1007, static_cast<float>(0)); // Stroke turn right.
+	m_keystate.insert_or_assign(1008, static_cast<float>(0)); // Stroke turn left.
+	m_keystate.insert_or_assign(1009, static_cast<float>(0)); // Stroke tilt up.
+	m_keystate.insert_or_assign(1010, static_cast<float>(0)); // Stroke tilt down.
+
+	// How many active touches there is?
+	const size_t count = m_touchstate.size();
+
+	// Single stroke.
+	if(count == 1)
+	{
+		// Find delta and update last frame.
+		auto& [id, singleTouch] = *m_touchstate.begin();
+		const glm::ivec2 delta = singleTouch.newLocation - singleTouch.lastFrame;
+		singleTouch.lastFrame = singleTouch.newLocation;
+
+		const double strokeTurnRight = delta.x > 0 ? abs(static_cast<float>(delta.x)) : 0.0f;
+		const double strokeTurnLeft = delta.x < 0 ? abs(static_cast<float>(delta.x)) : 0.0f;
+		const double strokeTiltUp = delta.y > 0 ? abs(static_cast<float>(delta.y)) : 0.0f;
+		const double strokeTiltDown = delta.y < 0 ? abs(static_cast<float>(delta.y)) : 0.0f;
+
+		printf("single insert\n");
+
+		// Update the single stroke turn/tilt state.
+		m_keystate.insert_or_assign(1007, static_cast<float>(strokeTurnRight)); // Stroke turn right.
+		m_keystate.insert_or_assign(1008, static_cast<float>(strokeTurnLeft)); // Stroke turn left.
+		m_keystate.insert_or_assign(1009, static_cast<float>(strokeTiltUp)); // Stroke tilt up.
+		m_keystate.insert_or_assign(1010, static_cast<float>(strokeTiltDown)); // Stroke tilt down.
+	}
 }
 
 void AFInput::Input_FreeViewMode_Pressed()

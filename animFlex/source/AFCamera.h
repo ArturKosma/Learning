@@ -19,6 +19,8 @@ private:
 
 	void Input_FreeView_CameraYaw(float delta);
 	void Input_FreeView_CameraPitch(float delta);
+	void Input_FreeView_CameraYaw_Stroke(float delta);
+	void Input_FreeView_CameraPitch_Stroke(float delta);
 
 	void Input_FreeView_ForwardBackward(float axis);
 	void Input_FreeView_RightLeft(float axis);

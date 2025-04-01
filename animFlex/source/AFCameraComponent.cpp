@@ -30,19 +30,6 @@ AFCameraComponent::AFCameraComponent()
 	gaussianVertical.LoadShaders();
 	m_postprocessShaders.push_back(gaussianVertical);
 
-	// #hack
-	// I have no clue why, but on WebGL I have to apply this postprocess twice to see the effect.
-	// I assume it has something to do with how blit is behaving on desktop vs web.
-#ifdef __EMSCRIPTEN__
-
-	/*AFPostprocessShader fisheye1;
-	fisheye1.SetVertexShader("content/shaders/fisheye.vert");
-	fisheye1.SetFragmentShader("content/shaders/fisheye.frag");
-	fisheye1.LoadShaders();
-	m_postprocessShaders.push_back(fisheye1);*/
-
-#endif
-
 	// Vignette.
 	/*
 	AFPostprocessShader vignette;

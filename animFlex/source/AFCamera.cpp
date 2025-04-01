@@ -30,6 +30,9 @@ void AFCamera::BindInputs()
 	AFInput::BindAxis("FreeView_CameraYaw", [this](float deltaX) {Input_FreeView_CameraYaw(deltaX); });
 	AFInput::BindAxis("FreeView_CameraPitch", [this](float deltaY) {Input_FreeView_CameraPitch(deltaY); });
 
+	AFInput::BindAxis("FreeView_CameraYaw_Stroke", [this](float deltaX) {Input_FreeView_CameraYaw_Stroke(deltaX); });
+	AFInput::BindAxis("FreeView_CameraPitch_Stroke", [this](float deltaY) {Input_FreeView_CameraPitch_Stroke(deltaY); });
+
 	AFInput::BindAxis("FreeView_ForwardBackward", [this](float axis) {Input_FreeView_ForwardBackward(axis); });
 	AFInput::BindAxis("FreeView_RightLeft", [this](float axis) {Input_FreeView_RightLeft(axis); });
 	AFInput::BindAxis("FreeView_UpDown", [this](float axis) {Input_FreeView_UpDown(axis); });
@@ -60,6 +63,16 @@ void AFCamera::Input_FreeView_CameraPitch(float delta)
 				0.0f,
 				0.0f));
 	}
+}
+
+void AFCamera::Input_FreeView_CameraYaw_Stroke(float delta)
+{
+	printf("%f\n", delta);
+}
+
+void AFCamera::Input_FreeView_CameraPitch_Stroke(float delta)
+{
+	printf("%f\n", delta);
 }
 
 void AFCamera::Input_FreeView_ForwardBackward(float axis)
