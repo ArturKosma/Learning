@@ -39,7 +39,9 @@ public:
 			{"STROKE_TURN_RIGHT", 1007},
 			{"STROKE_TURN_LEFT", 1008},
 			{"STROKE_TILT_UP", 1009},
-			{"STROKE_TILT_DOWN", 1010}
+			{"STROKE_TILT_DOWN", 1010},
+			{"STROKE_ZOOM_IN", 1011},
+			{"STROKE_ZOOM_OUT", 1012}
 		};
 
 		return keymap;

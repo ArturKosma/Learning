@@ -16,6 +16,7 @@ public:
 
 	void AddControlRotation(const glm::vec3& eulerToAdd);
 	void AddMovementInput(const glm::vec3& movementInput);
+	void AddOffset(const glm::vec3& offset);
 
 private:
 

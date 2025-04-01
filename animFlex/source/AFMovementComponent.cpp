@@ -66,6 +66,17 @@ void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 	}
 }
 
+void AFMovementComponent::AddOffset(const glm::vec3& offset)
+{
+	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+	if (!owner)
+	{
+		return;
+	}
+
+	owner->AddOffsetLocation(offset);
+}
+
 void AFMovementComponent::AddControlRotation(const glm::vec3& eulerToAdd)
 {
 	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());

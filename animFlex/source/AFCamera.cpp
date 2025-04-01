@@ -37,6 +37,8 @@ void AFCamera::BindInputs()
 	AFInput::BindAxis("FreeView_RightLeft", [this](float axis) {Input_FreeView_RightLeft(axis); });
 	AFInput::BindAxis("FreeView_UpDown", [this](float axis) {Input_FreeView_UpDown(axis); });
 
+	AFInput::BindAxis("FreeView_Zoom_Stroke", [this](float axis) {Input_FreeView_Zoom_Stroke(axis); });
+
 	AFInput::BindAction("CameraAddSpeed", [this] {if(AFInput::GetFreeViewMode()) m_movementComponent->AddCameraSpeedMultiplier(1.0f); }, EAFKeyAction::Pressed);
 	AFInput::BindAction("CameraLowerSpeed", [this] {if (AFInput::GetFreeViewMode()) m_movementComponent->AddCameraSpeedMultiplier(-1.0f); }, EAFKeyAction::Pressed);
 }
@@ -67,12 +69,20 @@ void AFCamera::Input_FreeView_CameraPitch(float delta)
 
 void AFCamera::Input_FreeView_CameraYaw_Stroke(float delta)
 {
-	printf("%f\n", delta);
+	GetMovementComponent()->AddControlRotation(
+		glm::vec3(
+			0.0f,
+			delta * AFTimerManager::GetDeltaTime() * m_cameraRotStrength_stroke,
+			0.0f));
 }
 
 void AFCamera::Input_FreeView_CameraPitch_Stroke(float delta)
 {
-	printf("%f\n", delta);
+	GetMovementComponent()->AddControlRotation(
+		glm::vec3(
+			delta * AFTimerManager::GetDeltaTime() * m_cameraRotStrength_stroke,
+			0.0f,
+			0.0f));
 }
 
 void AFCamera::Input_FreeView_ForwardBackward(float axis)
@@ -108,4 +118,13 @@ void AFCamera::Input_FreeView_UpDown(float axis)
 
 		GetMovementComponent()->AddMovementInput(movementInputDirection);
 	}
+}
+
+void AFCamera::Input_FreeView_Zoom_Stroke(float axis)
+{
+	const glm::quat& cameraRotQuat = GetRotationQuat();
+	const glm::vec3& forward = cameraRotQuat * glm::vec3(0.0f, 0.0f, -1.0f);
+	const glm::vec3& offset = forward * axis * 7.0f * AFTimerManager::GetDeltaTime();
+
+	GetMovementComponent()->AddOffset(offset);
 }

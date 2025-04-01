@@ -230,13 +230,11 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 
 void AFInput::RegisterTouch(int id, const glm::ivec2& location)
 {
-	// Register new touch.
 	m_touchstate[id] = FAFTouch(location);
 }
 
 void AFInput::UnregisterTouch(int id)
 {
-	// Unregister touch.
 	m_touchstate.erase(id);
 }
 
@@ -277,7 +275,6 @@ void AFInput::OnTouchMove(int eventType, const EmscriptenTouchEvent* e)
 			auto it = m_touchstate.find(point.identifier);
 			if(it != m_touchstate.end())
 			{
-				printf("move event\n");
 				it->second.newLocation = { point.clientX, point.clientY };
 			}
 		}
@@ -329,6 +326,8 @@ void AFInput::UpdateStrokeState()
 	m_keystate.insert_or_assign(1008, static_cast<float>(0)); // Stroke turn left.
 	m_keystate.insert_or_assign(1009, static_cast<float>(0)); // Stroke tilt up.
 	m_keystate.insert_or_assign(1010, static_cast<float>(0)); // Stroke tilt down.
+	m_keystate.insert_or_assign(1011, static_cast<float>(0)); // Stroke zoom in.
+	m_keystate.insert_or_assign(1012, static_cast<float>(0)); // Stroke zoom out.
 
 	// How many active touches there is?
 	const size_t count = m_touchstate.size();
@@ -346,13 +345,46 @@ void AFInput::UpdateStrokeState()
 		const double strokeTiltUp = delta.y > 0 ? abs(static_cast<float>(delta.y)) : 0.0f;
 		const double strokeTiltDown = delta.y < 0 ? abs(static_cast<float>(delta.y)) : 0.0f;
 
-		printf("single insert\n");
-
 		// Update the single stroke turn/tilt state.
 		m_keystate.insert_or_assign(1007, static_cast<float>(strokeTurnRight)); // Stroke turn right.
 		m_keystate.insert_or_assign(1008, static_cast<float>(strokeTurnLeft)); // Stroke turn left.
 		m_keystate.insert_or_assign(1009, static_cast<float>(strokeTiltUp)); // Stroke tilt up.
 		m_keystate.insert_or_assign(1010, static_cast<float>(strokeTiltDown)); // Stroke tilt down.
+	}
+	// Double stroke.
+	else if(count == 2)
+	{
+		std::vector<glm::vec2> oldLocations = { glm::vec2(0), glm::vec2(0) };
+		std::vector<glm::vec2> newLocations = { glm::vec2(0), glm::vec2(0) };
+		std::vector<float> magnitudes = { 0.0f, 0.0f };
+		size_t idx = 0;
+		for(auto& [id, touch] : m_touchstate)
+		{
+			const float magnitude = glm::distance(glm::vec2(touch.newLocation), glm::vec2(touch.lastFrame));
+			if(magnitude == 0.0f)
+			{
+				// Both touches have to move.
+				return;
+			}
+
+			oldLocations[idx] = touch.lastFrame;
+			newLocations[idx] = touch.newLocation;
+			magnitudes[idx] = magnitude;
+
+			touch.lastFrame = touch.newLocation;
+			++idx;
+		}
+
+		const float oldLocationsDist = glm::distance(oldLocations[0], oldLocations[1]);
+		const float newLocationsDist = glm::distance(newLocations[0], newLocations[1]);
+		const float avgMagnitude = (magnitudes[0] + magnitudes[1]) / 2.0f;
+
+		const float strokeZoomIn = newLocationsDist > oldLocationsDist ? avgMagnitude : 0.0f;
+		const float strokeZoomOut = newLocationsDist < oldLocationsDist ? avgMagnitude : 0.0f;
+
+		// Update the zoom in/out stroke state.
+		m_keystate.insert_or_assign(1011, static_cast<float>(strokeZoomIn)); // Stroke zoom in.
+		m_keystate.insert_or_assign(1012, static_cast<float>(strokeZoomOut)); // Stroke zoom out.
 	}
 }
 
