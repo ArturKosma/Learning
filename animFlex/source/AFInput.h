@@ -2,6 +2,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <glm/vec2.hpp>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
@@ -24,6 +25,39 @@ struct FAFBoundAxis
 	std::vector<std::function<void(float)>> axisFunctors;
 	std::pair<int, float> keyToValue1;
 	std::pair<int, float> keyToValue2;
+};
+
+struct FAFTouch
+{
+	FAFTouch(int new_id, glm::vec2 new_origin)
+		: id(new_id), origin(new_origin)
+	{
+		
+	}
+
+	FAFTouch(const FAFTouch& other)
+		: id(other.id), origin(other.origin)
+	{
+		
+	}
+
+	FAFTouch(FAFTouch&& other) noexcept
+		: id(other.id), origin(other.origin)
+	{
+		
+	}
+
+	FAFTouch& operator=(const FAFTouch& other)
+	{
+		id = other.id;
+		origin = other.origin;
+
+		return *this;
+	}
+
+	int id = -1;
+	glm::ivec2 origin = glm::ivec2(0, 0);
+	glm::ivec2 delta = glm::ivec2(0, 0);
 };
 
 class AFInput
@@ -70,6 +104,7 @@ private:
 	std::unordered_map<std::string, FAFBoundAction> m_boundActionMappings = {};
 	std::unordered_map<std::string, FAFBoundAxis> m_boundAxisMappings = {};
 	std::unordered_map<int, float> m_keystate = {};
+	std::vector<FAFTouch> m_touchstate = {};
 
 	double m_cursorOldXPos = 0.0;
 	double m_cursorOldYPos = 0.0;

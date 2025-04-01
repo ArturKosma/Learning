@@ -123,6 +123,15 @@ void AFInput::Tick()
 			axisFunctor(value);
 		}
 	}
+
+	if(m_touchstate.size())
+	{
+		for(const FAFTouch& touch : m_touchstate)
+		{
+			printf("%d ", touch.id);
+			printf("\n");
+		}
+	}
 }
 
 AFInput& AFInput::GetInstance()
@@ -230,17 +239,49 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 #ifdef __EMSCRIPTEN__
 void AFInput::OnTouchStart(int eventType, const EmscriptenTouchEvent* e)
 {
-	printf("touch start\n");
+	if(!e)
+	{
+		return;
+	}
+
+	for(EmscriptenTouchPoint point : e->touches)
+	{
+		if(point.isChanged)
+		{
+			// Register new touch.
+			m_touchstate.emplace_back(point.identifier, glm::ivec2(point.clientX, point.clientY));
+		}
+	}
 }
 
 void AFInput::OnTouchMove(int eventType, const EmscriptenTouchEvent* e)
 {
-	printf("touch move\n");
+	//printf("touch move\n");
 }
 
 void AFInput::OnTouchEnd(int eventType, const EmscriptenTouchEvent* e)
 {
-	printf("touch end\n");
+	if (!e)
+	{
+		return;
+	}
+
+	for (EmscriptenTouchPoint point : e->touches)
+	{
+		if (point.isChanged)
+		{
+			// Unregister touch.
+			m_touchstate.erase
+			(
+				std::remove_if(m_touchstate.begin(), m_touchstate.end(),
+					[point](const FAFTouch& touch)
+					{
+						return touch.id == point.identifier;
+					}),
+				m_touchstate.end()
+			);
+		}
+	}
 }
 #endif
 
