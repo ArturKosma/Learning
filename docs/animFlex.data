@@ -9,7 +9,9 @@ FreeView_ForwardBackward = KEY_W(1);KEY_S(-1)
 FreeView_RightLeft = KEY_D(1);KEY_A(-1)
 FreeView_UpDown = KEY_E(1);KEY_Q(-1)
 FreeView_CameraYaw = MOUSE_TURN_RIGHT(1);MOUSE_TURN_LEFT(-1)
-FreeView_CameraPitch = MOUSE_TILT_UP(1);MOUSE_TILT_DOWN(-1)#version 300 es
+FreeView_CameraPitch = MOUSE_TILT_UP(1);MOUSE_TILT_DOWN(-1)
+FreeView_CameraYaw_Stroke = STROKE_TURN_RIGHT(1);STROKE_TURN_LEFT(-1)
+FreeView_CameraPitch_stroke = STROKE_TILT_UP(1);STROKE_TILT_DOWN(-1)#version 300 es
 precision highp float;
 
 layout (std140) uniform InverseViewProjection
