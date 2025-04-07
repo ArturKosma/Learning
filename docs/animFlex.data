@@ -67,19 +67,20 @@ void main()
 	// Calculate an offset based on camera height.
 	// This is very arbitrary but I can't come up with a better solution yet.
 	vec3 cameraPos = cameraTransform[3].xyz;
-	float offset = (cameraPos.y * 0.005f) - 0.01f;
+	float offset = (cameraPos.y * 0.00005f) - 0.0075f;
 
 	// Get the Y, which is height of the ray.
 	float height = clamp(worldDir.y + offset, 0.0f, 1.0f);
 
 	// Background color.
-	vec3 backgroundColor = vec3(0.047f, 0.078f, 0.106f) * 1.0f;
+	vec3 backgroundColor = vec3(0.047f, 0.078f, 0.106f) * 0.5f;
 
 	// Horizon color.
 	vec3 horizonColor = (vec3(0.259f, 0.4f, 0.439f) + 0.2f) * 1.2f;
 
 	// Create horizon brightness.
-	float horizonBrightness = (1.0f / (1.0f - pow(abs(height - 0.93f), 8.0))) - 1.0f;
+	float horizonBrightness = (1.0f / (1.0f - pow(abs(height - 0.93f), 15.0f))) - 1.0f;
+	horizonBrightness *= 2.5f;
 
 	// Create horizon.
 	vec3 horizon = vec3(horizonBrightness * horizonColor);
@@ -92,6 +93,7 @@ void main()
 
 	// Colorize!
 	FragColor = vec4(backgroundColor + horizon, 1.0f);
+	//FragColor = vec4(vec3(horizonBrightness), 1.0f);
 }#version 300 es
 precision highp float;
 
@@ -287,6 +289,11 @@ layout (std140) uniform RenderProperties
 
 layout (location = 0) out vec4 FragColor;
 
+float LinearizeDepth(float d, float zNear, float zFar)
+{
+	return (2.0f * zNear) / (zFar + zNear - d * (zFar - zNear));
+}
+
 // Gaussian Blur lookup table.
 // 7x7 according to chatGPT.
 const float weights[4] = float[](0.27407, 0.22408, 0.09145, 0.01622);
@@ -295,6 +302,8 @@ void main()
 {	
 	// Get resolution.
 	vec2 res = vec2(renderProperties[0][0], renderProperties[0][1]);
+	float near = renderProperties[0][2];
+	float far = renderProperties[0][3];
 
 	// Get screen space UV.
     vec2 uv = gl_FragCoord.xy / res;
@@ -306,6 +315,7 @@ void main()
 	// Get depth modifier.
 	// It controls the lerp between blur and clean image.
 	float depth = texture(u_DepthTex, uv).x;
+	float depthLin = LinearizeDepth(depth, near, far);
 	depth = smoothstep(0.9f, 1.0f, depth);
 
 	// Get center color.
@@ -320,7 +330,8 @@ void main()
 	}
 
 	// Color lerp between blur and sharp.
-	FragColor = vec4(mix(sharp, blur, depth), 1.0f);
+	// FragColor = vec4(mix(sharp, blur, depth), 1.0f);
+	FragColor = vec4(vec3(depth), 1.0f);
 }#version 300 es
 precision highp float;
 
@@ -348,6 +359,11 @@ layout (std140) uniform RenderProperties
 
 layout (location = 0) out vec4 FragColor;
 
+float LinearizeDepth(float d, float zNear, float zFar)
+{
+	return (2.0f * zNear) / (zFar + zNear - d * (zFar - zNear));
+}
+
 // Gaussian Blur lookup table.
 // 7x7 according to chatGPT.
 const float weights[4] = float[](0.27407, 0.22408, 0.09145, 0.01622);
@@ -356,6 +372,8 @@ void main()
 {	
 	// Get resolution.
 	vec2 res = vec2(renderProperties[0][0], renderProperties[0][1]);
+	float near = renderProperties[0][2];
+	float far = renderProperties[0][3];
 
 	// Get screen space UV.
     vec2 uv = gl_FragCoord.xy / res;
@@ -367,6 +385,7 @@ void main()
 	// Get depth modifier.
 	// It controls the lerp between blur and clean image.
 	float depth = texture(u_DepthTex, uv).x;
+	float depthLin = LinearizeDepth(depth, near, far);
 	depth = smoothstep(0.9f, 1.0f, depth);
 
 	// Get center color.
@@ -382,6 +401,7 @@ void main()
 
 	// Color lerp between blur and sharp.
 	FragColor = vec4(mix(sharp, blur, depth), 1.0f);
+	//FragColor = vec4(vec3(depthLin), 1.0f);
 }#version 300 es
 precision highp float;
 
@@ -410,21 +430,21 @@ layout (std140) uniform RenderProperties
 };
 
 in vec2 UV;
-in float CellNum;
+in float GridSize;
+in float CellSize;
 in vec3 WorldPosition;
 
 layout (location = 0) out vec4 FragColor;
 
-// Computes the grid intensity along one axis.
 float gridAxisAA(float coord, float thickness)
 {
-    float d = min(fract(coord), 1.0 - fract(coord));
+    float d = min(fract(coord), 1.0f - fract(coord));
 	float aa = fwidth(coord);
 
-    return 1.0 - smoothstep(0.0, thickness + aa, d);
+    return 1.0f - smoothstep(0.0f, thickness + aa, d);
 }
 
-float GridLineGenerationAliased(vec2 uv, float cellSize)
+float GridLineGeneration(vec2 uv, float cellSize)
 {    
 	float lineThickness = 0.003f;
 
@@ -456,7 +476,9 @@ float SampleGridWithFilter(vec2 uv, float cellSize, float detail)
 			vec2 st = vec2(float(i), float(j)) / vec2(float(sx), float(sy));
 			vec2 sampleUV = cellUV + st.x * dCellUVx + st.y * dCellUVy;
 
-			gridSum += GridLineGenerationAliased(sampleUV * cellSize, cellSize);
+			sampleUV *= GridSize;
+
+			gridSum += GridLineGeneration(sampleUV / cellSize * 2.0f, cellSize);
 		}
 	}
 
@@ -499,27 +521,27 @@ void main()
 	float far = renderProperties[0][3];
 
 	// Generate grid lines.
-	float line = SampleGridWithFilter(UV, CellNum, 5.0f);
+	float line = SampleGridWithFilter(UV, CellSize, 5.0f);
 
 	// Clamp the brightness line.
 	float lineMask = line; 
 	lineMask = clamp(lineMask, 0.0f, 1.0f);
 
 	// Find line distance.
-	float lineDist = Remap(fragDist, 0.0f, 200.0f, 0.0f, 1.0f);
-	lineDist = exp(-15.0 * lineDist);
+	float lineDist = Remap(fragDist, 0.0f, 20000.0f, 0.0f, 1.0f);
+	lineDist = exp(-15.0f * lineDist);
 
 	// Lower the line brightness with distance.
 	lineMask *= lineDist;
 
 	// Lower the brightness with height.
-	float lineHeightMaxRadius = Remap(cameraPos.y, 0.0f, 10.0f, 10.0f, 300.0f);
+	float lineHeightMaxRadius = Remap(cameraPos.y, 0.0f, 100.0f, 10.0f, 3000.0f);
 	float gridBrightnessHeightModifier = smoothstep(0.0f, lineHeightMaxRadius, fragDist);
 	gridBrightnessHeightModifier = exp(-pow(gridBrightnessHeightModifier, 2.0f) / 0.3f) * (1.0f - gridBrightnessHeightModifier);
 
 	vec2 flatDist = vec2(abs(WorldPosition.x - cameraPos.x), abs(WorldPosition.z - cameraPos.z));
-	float flatDistX = Remap(flatDist.x, 0.0f, 300.0, 0.0f, 1.0f);
-	float flatDistY = Remap(flatDist.y, 0.0f, 300.0f, 0.0f, 1.0f);
+	float flatDistX = Remap(flatDist.x, 0.0f, 30000.0, 0.0f, 1.0f);
+	float flatDistY = Remap(flatDist.y, 0.0f, 30000.0f, 0.0f, 1.0f);
 	flatDist = vec2(flatDistX, flatDistY) - (flatDistX * flatDistY) * 300.0f / 1.3f;
 	float dist45 = length(flatDist);
 	dist45 = clamp((1.0f / exp(dist45)) * (2.0f - dist45), 0.2f, 1.0f);
@@ -528,12 +550,12 @@ void main()
 	float lineColor = clamp(-0.45f * lineMask * gridBrightnessHeightModifier * dist45, -1.0f, 0.0f);
 
 	// Faked spotlight in the direction of camera.
-	vec3 s_light_cameraPos = vec3(cameraPos.x, 20.0f, cameraPos.z);
+	vec3 s_light_cameraPos = vec3(cameraPos.x, 2000.0f, cameraPos.z);
 	vec3 s_light_cameraDir = normalize(vec3(cameraFwd.x, 0.0f, cameraFwd.z));
-	float s_light_radius = 20.0f;
+	float s_light_radius = 2000.0f;
 	float s_light_dist = Spotlight(WorldPosition, s_light_cameraPos, s_light_cameraDir, fragDist);
 	float s_light_attenuation = s_light_radius / s_light_dist;
-	float s_light_distModifier = Remap(fragDist, 5.0f, 200.0f, 0.0f, 1.0f);
+	float s_light_distModifier = Remap(fragDist, 500.0f, 20000.0f, 0.0f, 1.0f);
 	s_light_distModifier = exp(-5.0f * s_light_distModifier) + 0.1f;
 	float s_light = (s_light_attenuation * s_light_distModifier) + 0.2f;
 
@@ -564,8 +586,14 @@ void main()
 	// Final ground cell color.
 	// Darken every second cell - chessboard.
 	vec4 groundColor = baseColor;
-	float cellDarken = mod(ceil(WorldPosition.x) + ceil(WorldPosition.z), 2.0f); 
-	float cellDarkenDistMod = Remap(fragDist, 10.0f, 30.0f, 1.0f, 0.0f);
+
+	// Get cell indices.
+	int cellX = int(floor(WorldPosition.x / CellSize));
+	int cellZ = int(floor(WorldPosition.z / CellSize));
+
+	float cellDarken = mod(float(cellX + cellZ), 2.0f);
+
+	float cellDarkenDistMod = Remap(fragDist, 1000.0f, 3000.0f, 1.0f, 0.0f);
 	float cellDarkenBrightness = 1.0f - (0.15f * cellDarken) * cellDarkenDistMod; // Don't darken when far away.
 	groundColor *= cellDarkenBrightness;
 
@@ -617,7 +645,8 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aUV;
 
 out vec2 UV;
-out float CellNum;
+out float GridSize;
+out float CellSize;
 out vec3 WorldPosition;
 
 float Remap(float value, float inMin, float inMax, float outMin, float outMax)
@@ -629,20 +658,20 @@ float Remap(float value, float inMin, float inMax, float outMin, float outMax)
 
 void main()
 {
-	// Move the whole grid with camera.
-	float gridStepSize = 6.0f / 3.0f; 
-	vec2 snapOffset = round(cameraTransform[3].xz / gridStepSize) * gridStepSize;
+	float gridSize = 20000.0f * 2.0f;
+	float cellSize = 100.0f;
 
-	float cellNum = 300.0f;
+	vec2 snapOffset = round(cameraTransform[3].xz / cellSize) * cellSize;
 
-	float xPos = (aPos.x * cellNum) + snapOffset.x;
-	float zPos = (aPos.z * cellNum) + snapOffset.y;
+	float xPos = (aPos.x * gridSize) + snapOffset.x;
+	float zPos = (aPos.z * gridSize) + snapOffset.y;
 	vec3 posOffset = vec3(xPos, aPos.y, zPos);
 
 	// Pass information further.
 	UV = aUV;
 	WorldPosition = posOffset;
-	CellNum = cellNum * 2.0f; // We need to "fake" twice cell num, because the model of the grid is really 2x2, not 1x1.
+	GridSize = gridSize;
+	CellSize = cellSize;
 	gl_Position = projection * view * vec4(posOffset, 1.0f);
 }#version 300 es
 precision mediump float;
