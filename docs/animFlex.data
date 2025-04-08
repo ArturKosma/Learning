@@ -199,7 +199,7 @@ float GetHorizonMask(vec2 uv, vec2 frameRes)
 	// Calculate an offset based on camera height.
 	// This is very arbitrary but I can't come up with a better solution yet.
 	vec3 cameraPos = cameraTransform[3].xyz;
-	float offset = (cameraPos.y * 0.005f) - 0.01f;
+	float offset = (cameraPos.y * 0.00005f) - 0.0075f;
 
 	// Get the Y, which is height of the ray.
 	float correction = 0.5f;
@@ -289,49 +289,38 @@ layout (std140) uniform RenderProperties
 
 layout (location = 0) out vec4 FragColor;
 
-float LinearizeDepth(float d, float zNear, float zFar)
-{
-	return (2.0f * zNear) / (zFar + zNear - d * (zFar - zNear));
-}
-
 // Gaussian Blur lookup table.
-// 7x7 according to chatGPT.
-const float weights[4] = float[](0.27407, 0.22408, 0.09145, 0.01622);
+const float weights[6] = float[](0.2270, 0.1946, 0.1216, 0.0541, 0.0162, 0.0044);
 
 void main()
 {	
 	// Get resolution.
 	vec2 res = vec2(renderProperties[0][0], renderProperties[0][1]);
-	float near = renderProperties[0][2];
-	float far = renderProperties[0][3];
 
 	// Get screen space UV.
     vec2 uv = gl_FragCoord.xy / res;
 
 	// Get texel width and height.
 	float texelWidth = 1.0f / res.x;
-	float texelHeight = 1.0f / res.y;
 
 	// Get depth modifier.
 	// It controls the lerp between blur and clean image.
 	float depth = texture(u_DepthTex, uv).x;
-	float depthLin = LinearizeDepth(depth, near, far);
-	depth = smoothstep(0.9f, 1.0f, depth);
+	depth = smoothstep(0.98f, 1.0f, depth);
 
 	// Get center color.
 	vec3 sharp = texture(u_ColorTex, uv).rgb;
 	vec3 blur = texture(u_ColorTex, uv).rgb * weights[0];
 
 	// Add kernel colors.
-	for(int i = 1; i < 4; ++i)
+	for(int i = 1; i < 6; ++i)
 	{
 		blur += texture(u_ColorTex, vec2(uv.x + (texelWidth * float(i)), uv.y)).rgb * weights[i];
 		blur += texture(u_ColorTex, vec2(uv.x - (texelWidth * float(i)), uv.y)).rgb * weights[i];
 	}
 
 	// Color lerp between blur and sharp.
-	// FragColor = vec4(mix(sharp, blur, depth), 1.0f);
-	FragColor = vec4(vec3(depth), 1.0f);
+	FragColor = vec4(mix(sharp, blur, depth), 1.0f);
 }#version 300 es
 precision highp float;
 
@@ -359,49 +348,38 @@ layout (std140) uniform RenderProperties
 
 layout (location = 0) out vec4 FragColor;
 
-float LinearizeDepth(float d, float zNear, float zFar)
-{
-	return (2.0f * zNear) / (zFar + zNear - d * (zFar - zNear));
-}
-
 // Gaussian Blur lookup table.
-// 7x7 according to chatGPT.
-const float weights[4] = float[](0.27407, 0.22408, 0.09145, 0.01622);
+const float weights[6] = float[](0.2270, 0.1946, 0.1216, 0.0541, 0.0162, 0.0044);
 
 void main()
 {	
 	// Get resolution.
 	vec2 res = vec2(renderProperties[0][0], renderProperties[0][1]);
-	float near = renderProperties[0][2];
-	float far = renderProperties[0][3];
 
 	// Get screen space UV.
     vec2 uv = gl_FragCoord.xy / res;
 
-	// Get texel width and height.
-	float texelWidth = 1.0f / res.x;
+	// Get texel height.
 	float texelHeight = 1.0f / res.y;
 
 	// Get depth modifier.
 	// It controls the lerp between blur and clean image.
 	float depth = texture(u_DepthTex, uv).x;
-	float depthLin = LinearizeDepth(depth, near, far);
-	depth = smoothstep(0.9f, 1.0f, depth);
+	depth = smoothstep(0.98f, 1.0f, depth);
 
 	// Get center color.
 	vec3 sharp = texture(u_ColorTex, uv).rgb;
 	vec3 blur = texture(u_ColorTex, uv).rgb * weights[0];
 
 	// Add kernel colors.
-	for(int i = 1; i < 4; ++i)
+	for(int i = 1; i < 6; ++i)
 	{
-		blur += texture(u_ColorTex, vec2(uv.x, uv.y + texelWidth * float(i))).rgb * weights[i];
-		blur += texture(u_ColorTex, vec2(uv.x, uv.y - texelWidth * float(i))).rgb * weights[i];
+		blur += texture(u_ColorTex, vec2(uv.x, uv.y + texelHeight * float(i))).rgb * weights[i];
+		blur += texture(u_ColorTex, vec2(uv.x, uv.y - texelHeight * float(i))).rgb * weights[i];
 	}
 
 	// Color lerp between blur and sharp.
 	FragColor = vec4(mix(sharp, blur, depth), 1.0f);
-	//FragColor = vec4(vec3(depthLin), 1.0f);
 }#version 300 es
 precision highp float;
 
