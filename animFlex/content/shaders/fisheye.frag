@@ -52,7 +52,7 @@ float GetHorizonMask(vec2 uv, vec2 frameRes)
 	// Calculate an offset based on camera height.
 	// This is very arbitrary but I can't come up with a better solution yet.
 	vec3 cameraPos = cameraTransform[3].xyz;
-	float offset = (cameraPos.y * 0.005f) - 0.01f;
+	float offset = (cameraPos.y * 0.00005f) - 0.0075f;
 
 	// Get the Y, which is height of the ray.
 	float correction = 0.5f;

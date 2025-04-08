@@ -6,8 +6,8 @@
 struct AFCameraProperties
 {
 	int fieldOfView = 60;
-	float near = 1.0f;
-	float far = 200.0f;
+	float near = 20.0f;
+	float far = 20000.0f;
 };
 
 struct AFSceneData

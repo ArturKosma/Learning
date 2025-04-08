@@ -12,8 +12,7 @@ layout (std140) uniform RenderProperties
 layout (location = 0) out vec4 FragColor;
 
 // Gaussian Blur lookup table.
-// 7x7 according to chatGPT.
-const float weights[4] = float[](0.27407, 0.22408, 0.09145, 0.01622);
+const float weights[6] = float[](0.2270, 0.1946, 0.1216, 0.0541, 0.0162, 0.0044);
 
 void main()
 {	
@@ -25,19 +24,18 @@ void main()
 
 	// Get texel width and height.
 	float texelWidth = 1.0f / res.x;
-	float texelHeight = 1.0f / res.y;
 
 	// Get depth modifier.
 	// It controls the lerp between blur and clean image.
 	float depth = texture(u_DepthTex, uv).x;
-	depth = smoothstep(0.9f, 1.0f, depth);
+	depth = smoothstep(0.98f, 1.0f, depth);
 
 	// Get center color.
 	vec3 sharp = texture(u_ColorTex, uv).rgb;
 	vec3 blur = texture(u_ColorTex, uv).rgb * weights[0];
 
 	// Add kernel colors.
-	for(int i = 1; i < 4; ++i)
+	for(int i = 1; i < 6; ++i)
 	{
 		blur += texture(u_ColorTex, vec2(uv.x + (texelWidth * float(i)), uv.y)).rgb * weights[i];
 		blur += texture(u_ColorTex, vec2(uv.x - (texelWidth * float(i)), uv.y)).rgb * weights[i];

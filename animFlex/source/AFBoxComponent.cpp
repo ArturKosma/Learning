@@ -158,10 +158,10 @@ bool AFBoxComponent::Load()
 	*/
 
 	// Front.
-	boxMesh.vertices.emplace_back(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 1.0f)); // 0.
-	boxMesh.vertices.emplace_back(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)); // 1.
-	boxMesh.vertices.emplace_back(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f)); // 2.
-	boxMesh.vertices.emplace_back(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f)); // 3.
+	boxMesh.vertices.emplace_back(glm::vec3(-50.0f, 50.0f, 50.0f), glm::vec2(0.0f, 1.0f)); // 0.
+	boxMesh.vertices.emplace_back(glm::vec3(-50.0f, -50.0f, 50.0f), glm::vec2(0.0f, 0.0f)); // 1.
+	boxMesh.vertices.emplace_back(glm::vec3(50.0f, -50.0f, 50.0f), glm::vec2(1.0f, 0.0f)); // 2.
+	boxMesh.vertices.emplace_back(glm::vec3(50.0f, 50.0f, 50.0f), glm::vec2(1.0f, 1.0f)); // 3.
 	boxMesh.indices.emplace_back(0);
 	boxMesh.indices.emplace_back(1);
 	boxMesh.indices.emplace_back(2);
@@ -170,8 +170,8 @@ bool AFBoxComponent::Load()
 	boxMesh.indices.emplace_back(3);
 
 	// Upper.
-	boxMesh.vertices.emplace_back(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 0.0f)); // 4.
-	boxMesh.vertices.emplace_back(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 0.0f)); // 5.
+	boxMesh.vertices.emplace_back(glm::vec3(-50.0f, 50.0f, -50.0f), glm::vec2(0.0f, 0.0f)); // 4.
+	boxMesh.vertices.emplace_back(glm::vec3(50.0f, 50.0f, -50.0f), glm::vec2(1.0f, 0.0f)); // 5.
 	boxMesh.indices.emplace_back(4);
 	boxMesh.indices.emplace_back(0);
 	boxMesh.indices.emplace_back(3);
@@ -180,8 +180,8 @@ bool AFBoxComponent::Load()
 	boxMesh.indices.emplace_back(5);
 
 	// Behind.
-	boxMesh.vertices.emplace_back(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)); // 6.
-	boxMesh.vertices.emplace_back(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 1.0f)); // 7.
+	boxMesh.vertices.emplace_back(glm::vec3(-50.0f, -50.0f, -50.0f), glm::vec2(0.0f, 1.0f)); // 6.
+	boxMesh.vertices.emplace_back(glm::vec3(50.0f, -50.0f, -50.0f), glm::vec2(1.0f, 1.0f)); // 7.
 	boxMesh.indices.emplace_back(5);
 	boxMesh.indices.emplace_back(7);
 	boxMesh.indices.emplace_back(6);
@@ -198,8 +198,8 @@ bool AFBoxComponent::Load()
 	boxMesh.indices.emplace_back(2);
 
 	// Right.
-	boxMesh.vertices.emplace_back(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f)); // 8.
-	boxMesh.vertices.emplace_back(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f)); // 9.
+	boxMesh.vertices.emplace_back(glm::vec3(50.0f, -50.0f, -50.0f), glm::vec2(0.0f, 0.0f)); // 8.
+	boxMesh.vertices.emplace_back(glm::vec3(50.0f, 50.0f, -50.0f), glm::vec2(0.0f, 1.0f)); // 9.
 	boxMesh.indices.emplace_back(3);
 	boxMesh.indices.emplace_back(2);
 	boxMesh.indices.emplace_back(8);
@@ -208,8 +208,8 @@ bool AFBoxComponent::Load()
 	boxMesh.indices.emplace_back(9);
 
 	// Left.
-	boxMesh.vertices.emplace_back(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)); // 10.
-	boxMesh.vertices.emplace_back(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 0.0f)); // 11.
+	boxMesh.vertices.emplace_back(glm::vec3(-50.0f, 50.0f, -50.0f), glm::vec2(1.0f, 1.0f)); // 10.
+	boxMesh.vertices.emplace_back(glm::vec3(-50.0f, -50.0f, -50.0f), glm::vec2(1.0f, 0.0f)); // 11.
 	boxMesh.indices.emplace_back(10);
 	boxMesh.indices.emplace_back(11);
 	boxMesh.indices.emplace_back(1);

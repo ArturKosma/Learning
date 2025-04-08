@@ -118,10 +118,10 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(testBoxActor0);
 	AddActor(testBoxActor1);
 	AddActor(testBoxActor2);
-	testBoxActor0->AddOffsetLocation({ 0.0f, 0.5f, 0.0f });
-	testBoxActor1->AddOffsetLocation({ 3.0f, 0.5f, 0.0f });
+	testBoxActor0->AddOffsetLocation({ 0.0f, 50.0f, 0.0f });
+	testBoxActor1->AddOffsetLocation({ 300.0f, 50.0f, 0.0f });
 	testBoxActor1->AddOffsetRotation({ 0.0f, 15.0f, 0.0f });
-	testBoxActor2->AddOffsetLocation({ -3.5f, 0.5f, 0.5f });
+	testBoxActor2->AddOffsetLocation({ -350.0f, 50.0f, 50.0f });
 }
 
 void AFScene::CreateDefaultUIs()

@@ -8,7 +8,7 @@ AFCameraComponent::AFCameraComponent()
 	m_neutralShader.SetVertexShader("content/shaders/neutral.vert");
 	m_neutralShader.SetFragmentShader("content/shaders/neutral.frag");
 	m_neutralShader.LoadShaders();
-	
+
 	// Fisheye.
 	AFPostprocessShader fisheye;
 	fisheye.SetVertexShader("content/shaders/fisheye.vert");

@@ -53,19 +53,20 @@ void main()
 	// Calculate an offset based on camera height.
 	// This is very arbitrary but I can't come up with a better solution yet.
 	vec3 cameraPos = cameraTransform[3].xyz;
-	float offset = (cameraPos.y * 0.005f) - 0.01f;
+	float offset = (cameraPos.y * 0.00005f) - 0.0075f;
 
 	// Get the Y, which is height of the ray.
 	float height = clamp(worldDir.y + offset, 0.0f, 1.0f);
 
 	// Background color.
-	vec3 backgroundColor = vec3(0.047f, 0.078f, 0.106f) * 1.0f;
+	vec3 backgroundColor = vec3(0.047f, 0.078f, 0.106f) * 0.5f;
 
 	// Horizon color.
 	vec3 horizonColor = (vec3(0.259f, 0.4f, 0.439f) + 0.2f) * 1.2f;
 
 	// Create horizon brightness.
-	float horizonBrightness = (1.0f / (1.0f - pow(abs(height - 0.93f), 8.0))) - 1.0f;
+	float horizonBrightness = (1.0f / (1.0f - pow(abs(height - 0.93f), 15.0f))) - 1.0f;
+	horizonBrightness *= 2.5f;
 
 	// Create horizon.
 	vec3 horizon = vec3(horizonBrightness * horizonColor);
@@ -78,4 +79,5 @@ void main()
 
 	// Colorize!
 	FragColor = vec4(backgroundColor + horizon, 1.0f);
+	//FragColor = vec4(vec3(horizonBrightness), 1.0f);
 }

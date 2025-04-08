@@ -14,7 +14,7 @@ bool AFGame::Init()
 	// Create default camera.
 	AFCamera* initCamera = new AFCamera();
 	m_scene.AddActor(initCamera);
-	initCamera->SetLocation({ 0.0f, 2.0f, 4.0f });
+	initCamera->SetLocation({ 0.0f, 200.0f, 400.0f });
 	m_scene.SetActiveCamera(initCamera);
 
 	return true;

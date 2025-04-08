@@ -12,21 +12,21 @@ layout (std140) uniform RenderProperties
 };
 
 in vec2 UV;
-in float CellNum;
+in float GridSize;
+in float CellSize;
 in vec3 WorldPosition;
 
 layout (location = 0) out vec4 FragColor;
 
-// Computes the grid intensity along one axis.
 float gridAxisAA(float coord, float thickness)
 {
-    float d = min(fract(coord), 1.0 - fract(coord));
+    float d = min(fract(coord), 1.0f - fract(coord));
 	float aa = fwidth(coord);
 
-    return 1.0 - smoothstep(0.0, thickness + aa, d);
+    return 1.0f - smoothstep(0.0f, thickness + aa, d);
 }
 
-float GridLineGenerationAliased(vec2 uv, float cellSize)
+float GridLineGeneration(vec2 uv, float cellSize)
 {    
 	float lineThickness = 0.003f;
 
@@ -58,7 +58,9 @@ float SampleGridWithFilter(vec2 uv, float cellSize, float detail)
 			vec2 st = vec2(float(i), float(j)) / vec2(float(sx), float(sy));
 			vec2 sampleUV = cellUV + st.x * dCellUVx + st.y * dCellUVy;
 
-			gridSum += GridLineGenerationAliased(sampleUV * cellSize, cellSize);
+			sampleUV *= GridSize;
+
+			gridSum += GridLineGeneration(sampleUV / cellSize * 2.0f, cellSize);
 		}
 	}
 
@@ -101,27 +103,27 @@ void main()
 	float far = renderProperties[0][3];
 
 	// Generate grid lines.
-	float line = SampleGridWithFilter(UV, CellNum, 5.0f);
+	float line = SampleGridWithFilter(UV, CellSize, 5.0f);
 
 	// Clamp the brightness line.
 	float lineMask = line; 
 	lineMask = clamp(lineMask, 0.0f, 1.0f);
 
 	// Find line distance.
-	float lineDist = Remap(fragDist, 0.0f, 200.0f, 0.0f, 1.0f);
-	lineDist = exp(-15.0 * lineDist);
+	float lineDist = Remap(fragDist, 0.0f, 20000.0f, 0.0f, 1.0f);
+	lineDist = exp(-15.0f * lineDist);
 
 	// Lower the line brightness with distance.
 	lineMask *= lineDist;
 
 	// Lower the brightness with height.
-	float lineHeightMaxRadius = Remap(cameraPos.y, 0.0f, 10.0f, 10.0f, 300.0f);
+	float lineHeightMaxRadius = Remap(cameraPos.y, 0.0f, 100.0f, 10.0f, 3000.0f);
 	float gridBrightnessHeightModifier = smoothstep(0.0f, lineHeightMaxRadius, fragDist);
 	gridBrightnessHeightModifier = exp(-pow(gridBrightnessHeightModifier, 2.0f) / 0.3f) * (1.0f - gridBrightnessHeightModifier);
 
 	vec2 flatDist = vec2(abs(WorldPosition.x - cameraPos.x), abs(WorldPosition.z - cameraPos.z));
-	float flatDistX = Remap(flatDist.x, 0.0f, 300.0, 0.0f, 1.0f);
-	float flatDistY = Remap(flatDist.y, 0.0f, 300.0f, 0.0f, 1.0f);
+	float flatDistX = Remap(flatDist.x, 0.0f, 30000.0, 0.0f, 1.0f);
+	float flatDistY = Remap(flatDist.y, 0.0f, 30000.0f, 0.0f, 1.0f);
 	flatDist = vec2(flatDistX, flatDistY) - (flatDistX * flatDistY) * 300.0f / 1.3f;
 	float dist45 = length(flatDist);
 	dist45 = clamp((1.0f / exp(dist45)) * (2.0f - dist45), 0.2f, 1.0f);
@@ -130,12 +132,12 @@ void main()
 	float lineColor = clamp(-0.45f * lineMask * gridBrightnessHeightModifier * dist45, -1.0f, 0.0f);
 
 	// Faked spotlight in the direction of camera.
-	vec3 s_light_cameraPos = vec3(cameraPos.x, 20.0f, cameraPos.z);
+	vec3 s_light_cameraPos = vec3(cameraPos.x, 2000.0f, cameraPos.z);
 	vec3 s_light_cameraDir = normalize(vec3(cameraFwd.x, 0.0f, cameraFwd.z));
-	float s_light_radius = 20.0f;
+	float s_light_radius = 2000.0f;
 	float s_light_dist = Spotlight(WorldPosition, s_light_cameraPos, s_light_cameraDir, fragDist);
 	float s_light_attenuation = s_light_radius / s_light_dist;
-	float s_light_distModifier = Remap(fragDist, 5.0f, 200.0f, 0.0f, 1.0f);
+	float s_light_distModifier = Remap(fragDist, 500.0f, 20000.0f, 0.0f, 1.0f);
 	s_light_distModifier = exp(-5.0f * s_light_distModifier) + 0.1f;
 	float s_light = (s_light_attenuation * s_light_distModifier) + 0.2f;
 
@@ -166,8 +168,14 @@ void main()
 	// Final ground cell color.
 	// Darken every second cell - chessboard.
 	vec4 groundColor = baseColor;
-	float cellDarken = mod(ceil(WorldPosition.x) + ceil(WorldPosition.z), 2.0f); 
-	float cellDarkenDistMod = Remap(fragDist, 10.0f, 30.0f, 1.0f, 0.0f);
+
+	// Get cell indices.
+	int cellX = int(floor(WorldPosition.x / CellSize));
+	int cellZ = int(floor(WorldPosition.z / CellSize));
+
+	float cellDarken = mod(float(cellX + cellZ), 2.0f);
+
+	float cellDarkenDistMod = Remap(fragDist, 1000.0f, 3000.0f, 1.0f, 0.0f);
 	float cellDarkenBrightness = 1.0f - (0.15f * cellDarken) * cellDarkenDistMod; // Don't darken when far away.
 	groundColor *= cellDarkenBrightness;
 

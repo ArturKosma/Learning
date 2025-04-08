@@ -29,6 +29,9 @@ bool AFHelperInferface::Init(const class AFWindow& window)
 
 void AFHelperInferface::Draw(const AFAppData& appData, const AFSceneData& sceneData)
 {
+	// Inject touch as "mouse".
+	/*io.MousePos = ImVec2(touchX, touchY);
+	io.MouseDown[0] = isTouching;*/
 	CreateFrame(appData, sceneData);
 	Render();
 }

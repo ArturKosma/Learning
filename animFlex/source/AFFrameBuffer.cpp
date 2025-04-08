@@ -50,17 +50,6 @@ bool AFFramebuffer::Init(int width, int height)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_resolveColorTex0, 0);
 
-	// Create resolve depth texture 0.
-	glGenTextures(1, &m_resolveDepthTex0);
-	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_resolveDepthTex0, 0);
-
 	// Check if resolve FBO 0 is complete.
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -84,18 +73,31 @@ bool AFFramebuffer::Init(int width, int height)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_resolveColorTex1, 0);
 
-	// Create resolve depth texture 1.
-	glGenTextures(1, &m_resolveDepthTex1);
-	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex1);
+	// Check if resolve FBO 1 is complete.
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		return false;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Create resolve depth texture.
+	glGenTextures(1, &m_resolveDepthTex);
+	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_resolveDepthTex1, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_resolveDepthTex, 0);
 
-	// Check if resolve FBO 1 is complete.
+	// Create depth resolve FBO.
+	glGenFramebuffers(1, &m_depthFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_depthFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_resolveDepthTex, 0);
+
+	// Check if depth resolve FBO is complete.
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		return false;
@@ -119,7 +121,7 @@ bool AFFramebuffer::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// Create stencil & color resolve FBO.
+	// Create stencil resolve FBO.
 	glGenFramebuffers(1, &m_stencilFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_stencilFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_resolveStencilColorTex, 0);
@@ -186,9 +188,18 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_msFBO);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_resolveFramebuffer0);
 
-	// Blit color & depth to a resolve texture.
+	// Blit color to a resolve texture.
 	glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight,
-	GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+	// Bind the multisampled framebuffer as read.
+	// Bind the depth resolve framebuffer as draw.
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_msFBO);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_depthFBO);
+
+	// Blit depth to a resolve texture.
+	glBlitFramebuffer(0, 0, m_bufferWidth, m_bufferHeight, 0, 0, m_bufferWidth, m_bufferHeight,
+		GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
 	// Disable depth testing before drawing any full screen triangle.
 	glDisable(GL_DEPTH_TEST);
@@ -232,9 +243,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	// Alternate between resolve FBOs while applying all postprocess shaders.
 	std::vector<GLuint> resolveFbo = { m_resolveFramebuffer0, m_resolveFramebuffer1 };
 	std::vector<GLuint> resolveColorTex = { m_resolveColorTex0, m_resolveColorTex1 };
-	std::vector<GLuint> resolveDepthTex = { m_resolveDepthTex0, m_resolveDepthTex1 };
 	GLuint finalColorTex = m_resolveColorTex0;
-	GLuint finalDepthTex = m_resolveDepthTex0;
 	bool alternate = false;
 	for(AFPostprocessShader postprocess : cameraPostprocessShaders)
 	{
@@ -247,7 +256,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, finalColorTex);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, finalDepthTex);
+		glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_resolveStencilColorTex);
 
@@ -259,7 +268,6 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		finalColorTex = resolveColorTex[drawIdx];
-		finalDepthTex = resolveDepthTex[drawIdx];
 
 		// Alternate.
 		alternate = !alternate;
@@ -276,7 +284,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, finalColorTex);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, finalDepthTex);
+	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_resolveStencilColorTex);
 
@@ -317,8 +325,7 @@ AFFramebuffer::~AFFramebuffer()
 void AFFramebuffer::Delete()
 {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glDeleteTextures(1, &m_resolveDepthTex0);
-	glDeleteTextures(1, &m_resolveDepthTex1);
+	glDeleteTextures(1, &m_resolveDepthTex);
 	glDeleteTextures(1, &m_resolveColorTex0);
 	glDeleteTextures(1, &m_resolveColorTex1);
 	glDeleteTextures(1, &m_resolveStencilTex);
@@ -329,4 +336,5 @@ void AFFramebuffer::Delete()
 	glDeleteFramebuffers(1, &m_resolveFramebuffer0);
 	glDeleteFramebuffers(1, &m_resolveFramebuffer1);
 	glDeleteFramebuffers(1, &m_stencilFBO);
+	glDeleteFramebuffers(1, &m_depthFBO);
 }
