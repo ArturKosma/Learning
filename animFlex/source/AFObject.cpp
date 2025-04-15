@@ -13,3 +13,8 @@ std::string AFObject::GetDisplayName() const
 {
     return m_displayName;
 }
+
+unsigned int AFObject::GetUniqueID() const
+{
+    return uniqueId;
+}

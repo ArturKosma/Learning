@@ -19,7 +19,7 @@ public:
 
 	bool Load();
 
-	void Draw() const;
+	void Draw(bool override = false, const AFDrawOverride& overrideProperties = {}) const;
 
 protected:
 

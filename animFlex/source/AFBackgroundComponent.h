@@ -9,5 +9,5 @@ public:
 
 	bool Load() override;
 
-	void Draw() const override;
+	void Draw(bool override = false, const AFDrawOverride& overrideProperties = {}) const override;
 };

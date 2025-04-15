@@ -43,10 +43,10 @@ bool AFGridComponent::Load()
 	return true;
 }
 
-void AFGridComponent::Draw() const
+void AFGridComponent::Draw(bool override, const AFDrawOverride& overrideProperties) const
 {
 	// Tell the gpu which shader to use.
-	m_shader.Use();
+	override ? overrideProperties.shader.Use() : m_shader.Use();
 
 	// Bind texture object - it will be used during drawing of triangles to push the texture data to frag shader.
 	m_tex.Bind();

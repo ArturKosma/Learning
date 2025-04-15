@@ -17,8 +17,6 @@ public:
 	void SetSize(int newWidth, int newHeight);
 	void Cleanup();
 
-	static void CheckGLErrors(const char* label);
-
 	const GLubyte* GetOpenGLVersion();
 
 private:
@@ -28,7 +26,8 @@ private:
 
 	void Draw(const struct AFSceneData& sceneData);
 
-	AFFramebuffer m_framebuffer = AFFramebuffer();
+	AFFramebuffer m_framebufferMS = AFFramebuffer();
+	AFFrameBufferBase m_framebufferIdPicker = AFFrameBufferBase();
 	AFUniformBuffer m_uniformBuffer = AFUniformBuffer();
 
 	glm::mat4 m_viewMatrix = glm::mat4(1.0f);

@@ -18,6 +18,6 @@ bool AFRenderComponent::Load()
 	return true;
 }
 
-void AFRenderComponent::Draw() const
+void AFRenderComponent::Draw(bool override, const AFDrawOverride& overrideProperties) const
 {
 }

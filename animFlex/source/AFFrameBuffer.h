@@ -1,38 +1,29 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <glm/vec2.hpp>
-
+#include "AFFrameBufferBase.h"
 #include "AFShader.h"
-#include "AFStructs.h"
 
-class AFFramebuffer
+class AFFramebuffer : public AFFrameBufferBase
 {
 	friend class AFRenderer;
 
 public:
 
-	bool Init(int width, int height);
-	bool Resize(int newWidth, int newHeight);
-	glm::vec2 GetSize() const;
+	bool Init(int width, int height) override;
 
-	void Bind();
-	void UnBind();
+	void Bind() override;
+	void UnBind() override;
 
-	void DrawToScreen(const AFSceneData& sceneData);
-	void Cleanup();
+	void DrawToScreen(const AFSceneData& sceneData) override;
 
-	void ClearStencil();
+protected:
+
+	AFFramebuffer() = default;
+	~AFFramebuffer() override;
+
+	void Delete() override;
 
 private:
-
-	AFFramebuffer();
-	~AFFramebuffer();
-
-	void Delete();
-
-	GLint m_bufferWidth = 800;
-	GLint m_bufferHeight = 600;
 
 	GLuint m_resolveFramebuffer0 = 0;
 	GLuint m_resolveFramebuffer1 = 0;

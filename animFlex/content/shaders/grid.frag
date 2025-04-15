@@ -36,7 +36,6 @@ float GridLineGeneration(vec2 uv, float cellSize)
     return max(lineX, lineY);
 }
 
-// Acts like a supersampling?
 // @todo Try understanding this better.
 // https://iquilezles.org/articles/filtering/
 int MaxSamples = 30;
@@ -181,8 +180,6 @@ void main()
 
 	// Final line color.
 	vec4 baseLineColor = baseColor;
-	//baseLineColor = vec4(mix(baseLineColor.rgb, vec3(0.2f, 0.2f, 0.2f), Remap(abs(WorldPosition.x), 0.0f, 0.3f, 1.0f, 0.0f)), 1.0f); // Z-line.
-	//baseLineColor = vec4(mix(baseLineColor.rgb, vec3(0.2f, 0.2f, 0.2f), Remap(abs(WorldPosition.z), 0.0f, 0.3f, 1.0f, 0.0f)), 1.0f); // X-line.
 	vec4 finalLineColor = abs(lineColor) * baseLineColor;
 
 	// Compute final color.
@@ -194,9 +191,6 @@ void main()
 
 	// Dither final color to get rid of banding.
 	finalColor += (noise - 0.5f) * 0.02f;
-
-	//finalColor = vec4(UV, 0.0f, 1.0f);
-	//finalColor = vec4(vec3(), 1.0f);
 
 	FragColor = finalColor;
 }

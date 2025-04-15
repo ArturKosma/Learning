@@ -17,7 +17,12 @@ public:
 
 	const AFSceneData& GetSceneData() const;
 
+	template<typename T>
+	static T* CreateObject();
+
 private:
+
+	unsigned int m_idCounter = 0;
 
 	bool Init();
 	void CreateDefaultSceneActors();
@@ -28,3 +33,16 @@ private:
 
 	AFSceneData m_sceneData;
 };
+
+template <typename T>
+T* AFScene::CreateObject()
+{
+	static unsigned int idCounter = 0;
+
+	T* newObject = new T;
+	AFObject* casted = static_cast<AFObject*>(newObject);
+
+	casted->uniqueId = ++idCounter;
+
+	return newObject;
+}

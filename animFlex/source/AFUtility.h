@@ -67,6 +67,11 @@ public:
 		return std::to_string(vec3.x) + ", " + std::to_string(vec3.y) + ", " + std::to_string(vec3.z);
 	}
 
+	static std::string Vec4ToString(const glm::vec4& vec4)
+	{
+		return std::to_string(vec4.r) + ", " + std::to_string(vec4.g) + ", " + std::to_string(vec4.b) + ", " + std::to_string(vec4.a);
+	}
+
 	static const char* GetGLErrorString(GLenum error)
 	{
 		switch (error)
@@ -121,6 +126,25 @@ public:
 		return result == "true";
 #endif
 		return false;
+	}
+
+	static glm::u8vec4 PackID(const unsigned int uniqueId)
+	{
+		return
+		{
+			(uniqueId >> 0) & 0xFF,
+			(uniqueId >> 8) & 0xFF,
+			(uniqueId >> 16) & 0xFF,
+			(uniqueId >> 24) & 0xFF
+		};
+	}
+
+	static unsigned int UnpackID(const GLubyte* pixel)
+	{
+		return (pixel[0]) |
+			(pixel[1] << 8) |
+			(pixel[2] << 16) |
+			(pixel[3] << 24);
 	}
 };
 

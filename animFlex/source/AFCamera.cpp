@@ -124,7 +124,7 @@ void AFCamera::Input_FreeView_Zoom_Stroke(float axis)
 {
 	const glm::quat& cameraRotQuat = GetRotationQuat();
 	const glm::vec3& forward = cameraRotQuat * glm::vec3(0.0f, 0.0f, -1.0f);
-	const glm::vec3& offset = forward * axis * 7.0f * AFTimerManager::GetDeltaTime();
+	const glm::vec3& offset = forward * axis * 150.0f * AFTimerManager::GetDeltaTime();
 
 	GetMovementComponent()->AddOffset(offset);
 }

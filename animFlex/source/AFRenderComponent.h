@@ -15,7 +15,7 @@ public:
 	virtual unsigned long long GetVertexCount();
 	virtual bool Load();
 
-	virtual void Draw() const;
+	virtual void Draw(bool override = false, const AFDrawOverride& overrideProperties = {}) const;
 
 protected:
 

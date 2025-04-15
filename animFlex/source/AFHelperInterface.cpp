@@ -22,7 +22,7 @@ bool AFHelperInferface::Init(const class AFWindow& window)
 	// emscripten_request_pointerlock insta exit.
 	// This code prevents it.
 	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;;
 
 	return true;
 }

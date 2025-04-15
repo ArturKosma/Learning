@@ -29,7 +29,7 @@ bool AFUIRenderComponent::Load()
 	return true;
 }
 
-void AFUIRenderComponent::Draw() const
+void AFUIRenderComponent::Draw(bool override, const AFDrawOverride& overrideProperties) const
 {
 	// Disable depth for UI drawing.
 	glDisable(GL_DEPTH_TEST);
@@ -38,7 +38,7 @@ void AFUIRenderComponent::Draw() const
 	glDisable(GL_STENCIL_TEST);
 	glStencilMask(0x00);
 
-	m_shader.Use();
+	override ? overrideProperties.shader.Use() : m_shader.Use();
 	m_vertexBuffer.Bind();
 
 	m_vertexBuffer.Draw(GetDrawMode(), m_mesh.indices.size());

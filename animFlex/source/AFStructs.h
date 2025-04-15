@@ -3,6 +3,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include "AFShader.h"
+
 struct AFCameraProperties
 {
 	int fieldOfView = 60;
@@ -30,22 +32,28 @@ struct AFVertex
 {
 	AFVertex() = default;
 	AFVertex(const glm::vec3 newPosition)
-		: position(newPosition), uv(glm::vec2(0.0f))
+		: position(newPosition), uv(glm::vec2(0.0f)), uniqueId(glm::vec4(0))
 	{
 		
 	}
-	AFVertex(const glm::vec3& newPosition, const glm::vec2& newUV)
-		: position(newPosition), uv(newUV)
+	AFVertex(const glm::vec3& newPosition, const glm::vec2& newUV, const glm::vec4& newUniqueID = glm::vec4(0.0f))
+		: position(newPosition), uv(newUV), uniqueId(newUniqueID)
 	{
 
 	}
 
 	glm::vec3 position;
 	glm::vec2 uv;
+	glm::u8vec4 uniqueId;
 };
 
 struct AFMesh
 {
 	std::vector<AFVertex> vertices;
 	std::vector<unsigned int> indices;
+};
+
+struct AFDrawOverride
+{
+	AFShader shader;
 };

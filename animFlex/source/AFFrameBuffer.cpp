@@ -6,8 +6,7 @@
 
 bool AFFramebuffer::Init(int width, int height)
 {
-	m_bufferWidth = width;
-	m_bufferHeight = height;
+	AFFrameBufferBase::Init(width, height);
 
 	// Create multisampled framebuffer.
 	glGenFramebuffers(1, &m_msFBO);
@@ -141,21 +140,6 @@ bool AFFramebuffer::Init(int width, int height)
 	return true;
 }
 
-bool AFFramebuffer::Resize(int newWidth, int newHeight)
-{
-	m_bufferWidth = newWidth;
-	m_bufferHeight = newHeight;
-
-	Delete();
-
-	return Init(newWidth, newHeight);
-}
-
-glm::vec2 AFFramebuffer::GetSize() const
-{
-	return { m_bufferWidth, m_bufferHeight };
-}
-
 void AFFramebuffer::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_msFBO);
@@ -181,7 +165,9 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	}
 
 	// Clear the stencil texture.
-	ClearStencil();
+	glBindFramebuffer(GL_FRAMEBUFFER, m_stencilFBO);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	// Bind the multisampled framebuffer as read.
 	// Bind the resolve0 framebuffer as draw.
@@ -301,30 +287,14 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void AFFramebuffer::Cleanup()
-{
-	UnBind();
-	Delete();
-}
-
-void AFFramebuffer::ClearStencil()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, m_stencilFBO);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-}
-
-AFFramebuffer::AFFramebuffer()
-{
-}
-
 AFFramebuffer::~AFFramebuffer()
 {
 }
 
 void AFFramebuffer::Delete()
 {
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	AFFrameBufferBase::Delete();
+
 	glDeleteTextures(1, &m_resolveDepthTex);
 	glDeleteTextures(1, &m_resolveColorTex0);
 	glDeleteTextures(1, &m_resolveColorTex1);

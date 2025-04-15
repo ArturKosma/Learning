@@ -12,7 +12,7 @@ public:
 	AFStaticMeshComponent() = default;
 	virtual ~AFStaticMeshComponent() override = default;
 
-	void Draw() const override;
+	void Draw(bool override = false, const AFDrawOverride& overrideProperties = {}) const override;
 
 	unsigned long long GetVertexCount() override;
 

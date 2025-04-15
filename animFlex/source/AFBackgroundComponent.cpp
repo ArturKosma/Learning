@@ -14,10 +14,10 @@ bool AFBackgroundComponent::Load()
 	return true;
 }
 
-void AFBackgroundComponent::Draw() const
+void AFBackgroundComponent::Draw(bool override, const AFDrawOverride& overrideProperties) const
 {
 	// Tell the gpu which shader to use.
-	m_shader.Use();
+	override ? overrideProperties.shader.Use() : m_shader.Use();
 
 	// Disable depth for background drawing.
 	glDepthMask(GL_FALSE);

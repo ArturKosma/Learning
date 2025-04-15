@@ -82,34 +82,34 @@ bool AFScene::Init()
 void AFScene::CreateDefaultSceneActors()
 {
 	// Create background.
-	AFActor* background = new AFActor();
-	AFBackgroundComponent* backgroundMesh = new AFBackgroundComponent();
+	AFActor* background = CreateObject<AFActor>();
+	AFBackgroundComponent* backgroundMesh = CreateObject<AFBackgroundComponent>();
 	background->AddComponent(backgroundMesh);
 	background->SetDisplayName("background");
 	AddActor(background);
 
 	// Create a grid.
-	AFActor* gridActor = new AFActor();
+	AFActor* gridActor = CreateObject<AFActor>();
 	gridActor->SetDisplayName("grid");
-	AFGridComponent* gridComponent = new AFGridComponent();
+	AFGridComponent* gridComponent = CreateObject<AFGridComponent>();
 	gridActor->AddComponent(gridComponent);
 	AddActor(gridActor);
 
 	// Create test boxes.
 	
-	AFActor* testBoxActor0 = new AFActor();
-	AFActor* testBoxActor1 = new AFActor();
-	AFActor* testBoxActor2 = new AFActor();
+	AFActor* testBoxActor0 = CreateObject<AFActor>();
+	AFActor* testBoxActor1 = CreateObject<AFActor>();
+	AFActor* testBoxActor2 = CreateObject<AFActor>();
 	testBoxActor0->SetDisplayName("box0");
 	testBoxActor1->SetDisplayName("box1");
-	testBoxActor1->SetDisplayName("box2");
-	AFBoxComponent* testBox0 = new AFBoxComponent();
+	testBoxActor2->SetDisplayName("box2");
+	AFBoxComponent* testBox0 = CreateObject<AFBoxComponent>();
 	testBox0->SetTexture("content/textures/crate2.png");
 	testBox0->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
-	AFBoxComponent* testBox1 = new AFBoxComponent();
+	AFBoxComponent* testBox1 = CreateObject<AFBoxComponent>();
 	testBox1->SetTexture("content/textures/crate2.png");
 	testBox1->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
-	AFBoxComponent* testBox2 = new AFBoxComponent();
+	AFBoxComponent* testBox2 = CreateObject<AFBoxComponent>();
 	testBox2->SetTexture("content/textures/crate2.png");
 	testBox2->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
 	testBoxActor0->AddComponent(testBox0);
@@ -127,9 +127,9 @@ void AFScene::CreateDefaultSceneActors()
 void AFScene::CreateDefaultUIs()
 {
 	// Create orientation gizmo.
-	AFUI* orientationGizmo = new AFUI();
+	AFUI* orientationGizmo = CreateObject<AFUI>();
 	orientationGizmo->SetDisplayName("Orientation Gizmo UI");
-	AFOrientationGizmoUIComponent* orientationGizmoComponent = new AFOrientationGizmoUIComponent();
+	AFOrientationGizmoUIComponent* orientationGizmoComponent = CreateObject<AFOrientationGizmoUIComponent>();
 	orientationGizmo->AddComponent(orientationGizmoComponent);
 	orientationGizmoComponent->SetLocation(glm::vec2(-0.85f, -0.80f));
 	orientationGizmoComponent->SetScale(glm::vec2(0.15f, 0.15f));
