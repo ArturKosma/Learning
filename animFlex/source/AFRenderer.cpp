@@ -189,6 +189,7 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	AFDrawOverride idPickerDrawProperties;
+	idPickerDrawProperties.drawType = EAFDrawType::IDPicker;
 	idPickerDrawProperties.shader = m_framebufferIdPicker.GetIDPickerShader();
 
 	// Actors.
@@ -239,17 +240,24 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 			m_uniformBuffer.UploadUITransform(uiRenderComponent->GetUITransform());
 
 			// Draw.
-			uiRenderComponent->Draw(true, idPickerDrawProperties);
+			uiRenderComponent->Draw(idPickerDrawProperties);
 		}
 	}
 
+	m_framebufferIdPicker.UnBind();
+}
+
+FAFPickID AFRenderer::ReadColorId(int x, int y)
+{
+	m_framebufferIdPicker.Bind();
+
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	GLubyte pixel[4];
-	glReadPixels(0, 0, 1, 1, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, &pixel);
-	std::cout << "RGBA: " << (int)pixel[0] << ", " << (int)pixel[1] << ", "
-		<< (int)pixel[2] << ", " << (int)pixel[3] << std::endl;
+	glReadPixels(x, static_cast<int>(glm::abs(y - m_framebufferMS.GetSize().y)), 1, 1, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, &pixel);
 
 	m_framebufferIdPicker.UnBind();
+
+	return AFUtility::UnpackID(pixel);
 }
 
 AFRenderer::AFRenderer()

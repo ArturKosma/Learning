@@ -14,6 +14,8 @@ public:
 
 private:
 
+	void OnSelect(const FAFPickID& pickID);
+
 	AFGame();
 	~AFGame();
 

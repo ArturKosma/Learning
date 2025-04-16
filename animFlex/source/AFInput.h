@@ -98,6 +98,8 @@ private:
 	void OnCursorPosCallback(struct GLFWwindow* window, double posX, double posY);
 	void OnScrollCallback(struct GLFWwindow* window, double xscroll, double yscroll);
 
+	glm::ivec2 GetCursorPos() const;
+
 #ifdef __EMSCRIPTEN__
 	void OnTouchStart(int eventType, const EmscriptenTouchEvent* e);
 	void OnTouchMove(int eventType, const EmscriptenTouchEvent* e);

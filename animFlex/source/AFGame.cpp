@@ -2,7 +2,10 @@
 #include "AFCamera.h"
 #include "AFInput.h"
 #include "AFTimerManager.h"
+#include "AFUIComponent.h"
 #include "AFUtility.h"
+#include "IAFPickerInterface.h"
+#include "AFUI.h"
 
 bool AFGame::Init()
 {
@@ -18,26 +21,6 @@ bool AFGame::Init()
 	initCamera->SetLocation({ 0.0f, 200.0f, 400.0f });
 	m_scene.SetActiveCamera(initCamera);
 
-	//const unsigned int id = 4228;
-	/*const glm::ivec4 idBytes = glm::ivec4(
-		(id >> 0) & 0xFF,
-		(id >> 8) & 0xFF,
-		(id >> 16) & 0xFF,
-		(id >> 24) & 0xFF
-	);
-	const glm::vec4 idBytesNormalized = glm::vec4(idBytes) / 255.0f;
-
-	const glm::uvec4 idBytesUnpack = glm::uvec4(idBytesNormalized * 255.0f + 0.5f);
-
-	const unsigned int reconstructId = 
-		(idBytesUnpack.r << 0) | 
-		(idBytesUnpack.g << 8) |
-		(idBytesUnpack.b << 16) |
-		(idBytesUnpack.a << 24);*/
-
-	//printf("reconstructId: %d\n", AFUtility::UnpackID(AFUtility::PackID(id)));
-	//printf("mid product: %f, %f, %f, %f", idBytesNormalized.r, idBytesNormalized.g, idBytesNormalized.b, idBytesNormalized.a);
-
 	return true;
 }
 
@@ -52,6 +35,55 @@ void AFGame::Tick(float deltaTime)
 const AFScene& AFGame::GetScene()
 {
 	return m_scene;
+}
+
+void AFGame::OnSelect(const FAFPickID& pickID)
+{
+	for (const AFActor* const sceneActor : m_scene.GetSceneData().sceneActors)
+	{
+		// Per component select.
+		for (AFComponent* component : sceneActor->GetComponents())
+		{
+			if(component->GetUniqueID() != pickID.objectId)
+			{
+				continue;
+			}
+
+			IAFPickerInterface* pickerInterface = dynamic_cast<IAFPickerInterface*>(component);
+
+			if (!pickerInterface)
+			{
+				continue;
+			}
+
+			pickerInterface->OnClickPressed(pickID.elementId);
+
+			return;
+		}
+	}
+
+	for (const AFUI* const ui : m_scene.GetSceneData().uis)
+	{
+		// Per component select.
+		for (AFComponent* component : ui->GetComponents())
+		{
+			if (component->GetUniqueID() != pickID.objectId)
+			{
+				continue;
+			}
+
+			IAFPickerInterface* pickerInterface = dynamic_cast<IAFPickerInterface*>(component);
+
+			if (!pickerInterface)
+			{
+				continue;
+			}
+
+			pickerInterface->OnClickPressed(pickID.elementId);
+
+			return;
+		}
+	}
 }
 
 AFGame::AFGame()

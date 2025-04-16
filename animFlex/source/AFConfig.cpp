@@ -3,6 +3,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cctype>
+#include <glad/glad.h>
 
 #include "AFUtility.h"
 

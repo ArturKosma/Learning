@@ -6,14 +6,9 @@
 // IAFPickerInterface
 // ------------------------------
 
-void AFBoxComponent::OnClickPressed()
+void AFBoxComponent::OnClickPressed(uint8_t elementId)
 {
-	printf("pressed on: %s", GetOwner()->GetDisplayName().c_str());
-}
-
-void AFBoxComponent::OnClickReleased()
-{
-	printf("released on: %s", GetOwner()->GetDisplayName().c_str());
+	printf("pressed on: %s\n", GetOwner()->GetDisplayName().c_str());
 }
 
 // ------------------------------
@@ -23,7 +18,7 @@ void AFBoxComponent::OnClickReleased()
 bool AFBoxComponent::Load()
 {
 	AFMesh boxMesh = AFMesh();
-	const glm::u8vec4& uniqueIdPacked = AFUtility::PackID(uniqueId);
+	const glm::u8vec4& uniqueIdPacked = AFUtility::PackID(m_uniqueId);
 
 	// Front.
 	boxMesh.vertices.emplace_back(glm::vec3(-50.0f, 50.0f, 50.0f), glm::vec2(0.0f, 1.0f), uniqueIdPacked); // 0.

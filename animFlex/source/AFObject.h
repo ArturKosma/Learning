@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 class AFObject
 {
@@ -17,9 +18,12 @@ public:
 	std::string GetDisplayName() const;
 
 	unsigned int GetUniqueID() const;
+	const std::vector<unsigned int>& GetElementIDs() const;
 
 protected:
 
-	unsigned int uniqueId = 0;
+	unsigned int m_uniqueId = 0;
+	std::vector<unsigned int> m_elementIds = {};
+
 	std::string m_displayName = "object";
 };

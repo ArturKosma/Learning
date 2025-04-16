@@ -16,6 +16,11 @@ void AFUIRenderComponent::SetShaders(const std::string& vertexShaderPath, const 
 	m_shader.SetFragmentShader(fragmentShaderPath);
 }
 
+void AFUIRenderComponent::SetTexture(const std::string& texturePath)
+{
+	m_texture.SetTexture(texturePath);
+}
+
 bool AFUIRenderComponent::Load()
 {
 	m_vertexBuffer.Init();
@@ -26,11 +31,38 @@ bool AFUIRenderComponent::Load()
 		return false;
 	}
 
+	if (!m_texture.LoadTexture())
+	{
+		return false;
+	}
+
 	return true;
 }
 
-void AFUIRenderComponent::Draw(bool override, const AFDrawOverride& overrideProperties) const
+void AFUIRenderComponent::Draw(const AFDrawOverride& overrideProperties) const
 {
+	// Tell the gpu which shader to use.
+	AFShader drawShader = AFShader();
+	switch(overrideProperties.drawType)
+	{
+		case EAFDrawType::Normal:
+		{
+			drawShader = m_shader;
+			break;
+		}
+		case EAFDrawType::IDPicker:
+		{
+			drawShader = overrideProperties.shader;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	m_texture.Bind();
+
 	// Disable depth for UI drawing.
 	glDisable(GL_DEPTH_TEST);
 
@@ -38,10 +70,12 @@ void AFUIRenderComponent::Draw(bool override, const AFDrawOverride& overrideProp
 	glDisable(GL_STENCIL_TEST);
 	glStencilMask(0x00);
 
-	override ? overrideProperties.shader.Use() : m_shader.Use();
+	drawShader.Use();
 	m_vertexBuffer.Bind();
 
 	m_vertexBuffer.Draw(GetDrawMode(), m_mesh.indices.size());
 
 	m_vertexBuffer.UnBind();
+
+	m_texture.UnBind();
 }

@@ -2,6 +2,7 @@
 
 #include "AFActor.h"
 #include "AFStructs.h"
+#include "AFUtility.h"
 
 class AFScene
 {
@@ -42,7 +43,7 @@ T* AFScene::CreateObject()
 	T* newObject = new T;
 	AFObject* casted = static_cast<AFObject*>(newObject);
 
-	casted->uniqueId = ++idCounter;
+	casted->m_uniqueId = AFIDGenerator::Next();
 
 	return newObject;
 }

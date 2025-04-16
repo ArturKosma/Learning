@@ -6,6 +6,5 @@ public:
 
 	virtual ~IAFPickerInterface() = default;
 
-	virtual void OnClickPressed() = 0;
-	virtual void OnClickReleased() = 0;
+	virtual void OnClickPressed(uint8_t elementId) = 0;
 };

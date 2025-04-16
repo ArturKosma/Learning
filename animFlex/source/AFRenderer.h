@@ -26,6 +26,8 @@ private:
 
 	void Draw(const struct AFSceneData& sceneData);
 
+	FAFPickID ReadColorId(int x, int y);
+
 	AFFramebuffer m_framebufferMS = AFFramebuffer();
 	AFFrameBufferBase m_framebufferIdPicker = AFFrameBufferBase();
 	AFUniformBuffer m_uniformBuffer = AFUniformBuffer();

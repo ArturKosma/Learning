@@ -1,7 +1,7 @@
 #include "AFInput.h"
 #include "AFConfig.h"
+#include <glad/glad.h>
 #include "AFUtility.h"
-
 #include <algorithm>
 #include <imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
@@ -226,6 +226,11 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 	{
 		OnMouseButtonCallback(window, 1006, 1, 0);
 	}
+}
+
+glm::ivec2 AFInput::GetCursorPos() const
+{
+	return { m_cursorNewXPos, m_cursorNewYPos };
 }
 
 void AFInput::RegisterTouch(int id, const glm::ivec2& location)

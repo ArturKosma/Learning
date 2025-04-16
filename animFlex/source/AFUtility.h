@@ -6,6 +6,8 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "AFStructs.h"
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
@@ -113,7 +115,7 @@ public:
 	static glm::mat4 CreateOrthoProjectionMat(float screenWidth, float screenHeight)
 	{
 		float aspectRatio = screenWidth / screenHeight;
-		return glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+		return glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -100.0f, 100.0f);
 	}
 
 	static bool IsMobile()
@@ -128,25 +130,37 @@ public:
 		return false;
 	}
 
-	static glm::u8vec4 PackID(const unsigned int uniqueId)
+	static glm::u8vec4 PackID(const uint32_t objectId, const uint8_t elementId = 0)
 	{
-		return
-		{
-			(uniqueId >> 0) & 0xFF,
-			(uniqueId >> 8) & 0xFF,
-			(uniqueId >> 16) & 0xFF,
-			(uniqueId >> 24) & 0xFF
-		};
+		glm::u8vec4 packedColor;
+
+		packedColor.r = (objectId >> 0) & 0xFF;
+		packedColor.g = (objectId >> 8) & 0xFF;
+		packedColor.b = elementId;
+		packedColor.a = 255;
+
+		return packedColor;
 	}
 
-	static unsigned int UnpackID(const GLubyte* pixel)
+	static FAFPickID UnpackID(const GLubyte* pixel)
 	{
-		return (pixel[0]) |
-			(pixel[1] << 8) |
-			(pixel[2] << 16) |
-			(pixel[3] << 24);
+		FAFPickID pickID = {};
+
+		pickID.objectId = static_cast<uint32_t>(pixel[0]) | (static_cast<uint32_t>(pixel[1]) << 8);
+		pickID.elementId = static_cast<uint8_t>(pixel[2]);
+
+		return pickID;
 	}
 };
+
+namespace AFIDGenerator
+{
+	inline unsigned int Next()
+	{
+		static unsigned int counter = 0;
+		return ++counter;
+	}
+}
 
 #define DebugOpenGL() if(AFUtility::OpenGLError()) assert(false)
 #define ClearOpenGLErrors() while (glGetError() != GL_NO_ERROR)

@@ -4,6 +4,7 @@
 #include "AFBackgroundComponent.h"
 #include "AFBoxComponent.h"
 #include "AFGridComponent.h"
+#include "AFOrientationBoxUIComponent.h"
 #include "AFOrientationGizmoUIComponent.h"
 #include "AFStaticMeshComponent.h"
 #include "AFUIRenderComponent.h"
@@ -134,6 +135,15 @@ void AFScene::CreateDefaultUIs()
 	orientationGizmoComponent->SetLocation(glm::vec2(-0.85f, -0.80f));
 	orientationGizmoComponent->SetScale(glm::vec2(0.15f, 0.15f));
 	AddUI(orientationGizmo);
+
+	// Create orientation box.
+	AFUI* orientationBox = CreateObject<AFUI>();
+	orientationBox->SetDisplayName("Orientation Box UI");
+	AFOrientationBoxUIComponent* orientationBoxComp = CreateObject<AFOrientationBoxUIComponent>();
+	orientationBox->AddComponent(orientationBoxComp);
+	orientationBoxComp->SetLocation(glm::vec2(0.85f, 0.80f));
+	orientationBoxComp->SetScale(glm::vec2(0.05f, 0.05f));
+	AddUI(orientationBox);
 }
 
 AFScene::AFScene()

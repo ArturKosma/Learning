@@ -71,7 +71,14 @@ AFApp::~AFApp()
 
 void AFApp::StartLoop()
 {
-	AFInput::GetInstance().BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window->GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
+	AFInput::BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window->GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
+	AFInput::BindAction("Select", [this]()
+	{
+		const glm::ivec2& cursorPos = AFInput::GetInstance().GetCursorPos();
+		const FAFPickID& colorID = m_renderer->ReadColorId(cursorPos.x, cursorPos.y);
+		m_game->OnSelect(colorID);
+
+	}, EAFKeyAction::Pressed);
 
 #ifdef __EMSCRIPTEN__
 	printf("Compiled with Emscripten.\n");

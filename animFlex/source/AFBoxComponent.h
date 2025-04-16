@@ -10,8 +10,7 @@ public:
 	// IAFPickerInterface
 	// ------------------------------
 
-	void OnClickPressed() override;
-	void OnClickReleased() override;
+	void OnClickPressed(uint8_t elementId) override;
 
 	// ------------------------------
 	// AFStaticMeshComponent

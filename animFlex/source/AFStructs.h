@@ -53,7 +53,20 @@ struct AFMesh
 	std::vector<unsigned int> indices;
 };
 
+enum class EAFDrawType : uint8_t
+{
+	Normal,
+	IDPicker
+};
+
 struct AFDrawOverride
 {
+	EAFDrawType drawType;
 	AFShader shader;
+};
+
+struct FAFPickID
+{
+	uint32_t objectId = 0;
+	uint8_t elementId = 0;
 };

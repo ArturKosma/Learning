@@ -16,5 +16,10 @@ std::string AFObject::GetDisplayName() const
 
 unsigned int AFObject::GetUniqueID() const
 {
-    return uniqueId;
+    return m_uniqueId;
+}
+
+const std::vector<unsigned int>& AFObject::GetElementIDs() const
+{
+    return m_elementIds;
 }
