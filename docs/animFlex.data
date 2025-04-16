@@ -1,5 +1,6 @@
 [Input.Actions]
 FreeViewMode = MOUSE_BUTTON_RIGHT
+Select = MOUSE_BUTTON_LEFT
 CloseApp = KEY_ESCAPE
 CameraAddSpeed = MOUSE_SCROLL_UP
 CameraLowerSpeed = MOUSE_SCROLL_DOWN
@@ -120,8 +121,6 @@ layout (location = 0) out vec4 FragColor;
 void main()
 {	
     FragColor = texture(Tex, UV);
-    //FragColor = vec4(vec3(1.0f), 1.0f);
-   // FragColor = vec4(UV, 0.0f, 1.0f);
 }#version 300 es
 precision mediump float;
 
@@ -432,7 +431,6 @@ float GridLineGeneration(vec2 uv, float cellSize)
     return max(lineX, lineY);
 }
 
-// Acts like a supersampling?
 // @todo Try understanding this better.
 // https://iquilezles.org/articles/filtering/
 int MaxSamples = 30;
@@ -577,8 +575,6 @@ void main()
 
 	// Final line color.
 	vec4 baseLineColor = baseColor;
-	//baseLineColor = vec4(mix(baseLineColor.rgb, vec3(0.2f, 0.2f, 0.2f), Remap(abs(WorldPosition.x), 0.0f, 0.3f, 1.0f, 0.0f)), 1.0f); // Z-line.
-	//baseLineColor = vec4(mix(baseLineColor.rgb, vec3(0.2f, 0.2f, 0.2f), Remap(abs(WorldPosition.z), 0.0f, 0.3f, 1.0f, 0.0f)), 1.0f); // X-line.
 	vec4 finalLineColor = abs(lineColor) * baseLineColor;
 
 	// Compute final color.
@@ -590,9 +586,6 @@ void main()
 
 	// Dither final color to get rid of banding.
 	finalColor += (noise - 0.5f) * 0.02f;
-
-	//finalColor = vec4(UV, 0.0f, 1.0f);
-	//finalColor = vec4(vec3(), 1.0f);
 
 	FragColor = finalColor;
 }#version 300 es
@@ -651,6 +644,40 @@ void main()
 	GridSize = gridSize;
 	CellSize = cellSize;
 	gl_Position = projection * view * vec4(posOffset, 1.0f);
+}#version 300 es
+precision highp float;
+
+flat in uvec4 ID;
+
+layout (location = 0) out uvec4 FragColor;
+
+void main()
+{	
+    FragColor = ID;
+}#version 300 es
+precision highp float;
+
+layout (std140) uniform ViewProjection
+{
+	mat4 view;
+	mat4 projection;
+};
+
+layout (std140) uniform Model
+{
+	mat4 modelTransform;
+};
+
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aUV;
+layout (location = 2) in uvec4 aID;
+
+flat out uvec4 ID;
+
+void main()
+{
+	ID = aID;
+	gl_Position = projection * view * modelTransform * vec4(aPos, 1.0f);
 }#version 300 es
 precision mediump float;
 
@@ -742,12 +769,18 @@ layout (std140) uniform ViewRotation
 };
 
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aUV;
+layout (location = 2) in uvec4 aID;
 
 out vec3 Pos;
+out vec2 UV;
+flat out uvec4 ID;
 
 void main()
 {
 	Pos = aPos;
+	UV = aUV;
+	ID = aID;
 	gl_Position = uiTransform * orthoProjection * viewRotation * vec4(aPos, 1.0);
 }#version 300 es
 precision mediump float;

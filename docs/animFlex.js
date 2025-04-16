@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpfwrk7rl5.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp_c_gsn5b.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -211,25 +211,25 @@ Module['FS_createPath']("/content", "textures", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 613}, {"filename": "/content/shaders/background.frag", "start": 613, "end": 2972}, {"filename": "/content/shaders/background.vert", "start": 2972, "end": 3262}, {"filename": "/content/shaders/basic.frag", "start": 3262, "end": 3530}, {"filename": "/content/shaders/basic.vert", "start": 3530, "end": 3909}, {"filename": "/content/shaders/fisheye.frag", "start": 3909, "end": 7569}, {"filename": "/content/shaders/fisheye.vert", "start": 7569, "end": 7856}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 7856, "end": 9078}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 9078, "end": 9365}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 9365, "end": 10576}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 10576, "end": 10863}, {"filename": "/content/shaders/grid.frag", "start": 10863, "end": 17518}, {"filename": "/content/shaders/grid.vert", "start": 17518, "end": 18724}, {"filename": "/content/shaders/neutral.frag", "start": 18724, "end": 19141}, {"filename": "/content/shaders/neutral.vert", "start": 19141, "end": 19430}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 19430, "end": 19684}, {"filename": "/content/shaders/stencil.frag", "start": 19684, "end": 19872}, {"filename": "/content/shaders/stencil.vert", "start": 19872, "end": 20161}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 20161, "end": 20587}, {"filename": "/content/shaders/uibasic.frag", "start": 20587, "end": 20736}, {"filename": "/content/shaders/uibasic.vert", "start": 20736, "end": 20936}, {"filename": "/content/shaders/vignette.frag", "start": 20936, "end": 21928}, {"filename": "/content/shaders/vignette.vert", "start": 21928, "end": 22217}, {"filename": "/content/textures/crate2.png", "start": 22217, "end": 336552}], "remote_package_size": 336552});
+    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 641}, {"filename": "/content/shaders/background.frag", "start": 641, "end": 3000}, {"filename": "/content/shaders/background.vert", "start": 3000, "end": 3290}, {"filename": "/content/shaders/basic.frag", "start": 3290, "end": 3474}, {"filename": "/content/shaders/basic.vert", "start": 3474, "end": 3853}, {"filename": "/content/shaders/fisheye.frag", "start": 3853, "end": 7513}, {"filename": "/content/shaders/fisheye.vert", "start": 7513, "end": 7800}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 7800, "end": 9022}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 9022, "end": 9309}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 9309, "end": 10520}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 10520, "end": 10807}, {"filename": "/content/shaders/grid.frag", "start": 10807, "end": 17065}, {"filename": "/content/shaders/grid.vert", "start": 17065, "end": 18271}, {"filename": "/content/shaders/idPicker.frag", "start": 18271, "end": 18420}, {"filename": "/content/shaders/idPicker.vert", "start": 18420, "end": 18841}, {"filename": "/content/shaders/neutral.frag", "start": 18841, "end": 19258}, {"filename": "/content/shaders/neutral.vert", "start": 19258, "end": 19547}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 19547, "end": 19801}, {"filename": "/content/shaders/stencil.frag", "start": 19801, "end": 19989}, {"filename": "/content/shaders/stencil.vert", "start": 19989, "end": 20278}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 20278, "end": 20835}, {"filename": "/content/shaders/uibasic.frag", "start": 20835, "end": 20984}, {"filename": "/content/shaders/uibasic.vert", "start": 20984, "end": 21184}, {"filename": "/content/shaders/vignette.frag", "start": 21184, "end": 22176}, {"filename": "/content/shaders/vignette.vert", "start": 22176, "end": 22465}, {"filename": "/content/textures/crate2.png", "start": 22465, "end": 336800}], "remote_package_size": 336800});
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpfwrk7rl5.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp99ak4t_7.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp_c_gsn5b.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpbszfm3vd.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp99ak4t_7.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpgn06c49o.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpbszfm3vd.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp2hnqs2qf.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpgn06c49o.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp2hnqs2qf.js
 
 
 // Sometimes an existing Module object exists with properties
