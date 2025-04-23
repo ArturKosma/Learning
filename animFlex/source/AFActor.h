@@ -21,6 +21,7 @@ public:
 	void SetRotation(const glm::vec3& newEulerRotation);
 	void SetRotation(const glm::quat& newQuatRotation);
 	void SetScale(const glm::vec3& newScale);
+	void SetTransform(const glm::mat4& newTransform);
 
 	void AddOffsetLocation(const glm::vec3& offset);
 	void AddOffsetRotation(const glm::vec3& offset);

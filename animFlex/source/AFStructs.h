@@ -21,13 +21,6 @@ struct AFSceneData
 	class AFStaticMeshComponent* background = nullptr;
 };
 
-struct AFAppData
-{
-	struct GLFWwindow* window = nullptr;
-	int width = 0;
-	int height = 0;
-};
-
 struct AFVertex
 {
 	AFVertex() = default;
@@ -59,6 +52,14 @@ enum class EAFDrawType : uint8_t
 	IDPicker
 };
 
+struct AFAppData
+{
+	struct GLFWwindow* window = nullptr;
+	int width = 0;
+	int height = 0;
+	EAFDrawType drawType = EAFDrawType::Normal;
+};
+
 struct AFDrawOverride
 {
 	EAFDrawType drawType;
@@ -69,4 +70,16 @@ struct FAFPickID
 {
 	uint32_t objectId = 0;
 	uint8_t elementId = 0;
+};
+
+enum class EAFCameraMovementMode : uint8_t
+{
+	Normal,
+	Blending
+};
+
+enum class EAFAlphaInterp : uint8_t
+{
+	Linear,
+	CubicHermite
 };

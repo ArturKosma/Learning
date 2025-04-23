@@ -18,7 +18,8 @@ AFApp::AFApp()
 	m_window = new AFWindow();
 	m_renderer = new AFRenderer();
 	m_game = new AFGame();
-	m_helperInterface = new AFHelperInferface();
+	m_helperInterface = new AFHelperInterface();
+	m_appData = new AFAppData();
 
 	constexpr int initWidth = 800;
 	constexpr int initHeight = 600;
@@ -28,7 +29,7 @@ AFApp::AFApp()
 		printf("%s\n", "Config Init() failed.");
 		return;
 	}
-
+	
 	SetWindowCallbacks();
 
 	if (!m_window->Init(initWidth, initHeight))
@@ -106,20 +107,26 @@ AFApp& AFApp::GetInstance()
 
 void AFApp::Tick()
 {
-	// Calculate delta time.
 	AFTimerManager::GetInstance().DeltaCalc();
+	const float delta = AFTimerManager::GetDeltaTime();
+	AFTimerManager::GetInstance().Tick(delta);
 
 	m_window->PollEvents();
 	AFInput::GetInstance().Tick();
-	m_game->Tick(AFTimerManager::GetDeltaTime());
-	m_renderer->Draw(m_game->GetScene().GetSceneData());
+	m_game->Tick(delta);
 
-	AFAppData appData;
-	CollectAppData(appData);
+	const AFSceneData& sceneData = m_game->GetScene().GetSceneData();
+	CollectAppData(*m_appData);
 
-	m_helperInterface->Draw(appData, m_game->GetScene().GetSceneData());
+	m_renderer->Draw(sceneData, *m_appData);
+	m_helperInterface->Draw(sceneData, *m_appData);
 
 	m_window->SwapBuffers();
+
+	// Mouse hover.
+	const glm::ivec2& cursorPos = AFInput::GetInstance().GetCursorPos();
+	const FAFPickID& colorID = m_renderer->ReadColorId(cursorPos.x, cursorPos.y);
+	m_game->OnHover(colorID);
 }
 
 void AFApp::CollectAppData(AFAppData& appData)
@@ -140,11 +147,16 @@ void AFApp::SetWindowCallbacks()
 
 void AFApp::OnWindowResize(int newWidth, int newHeight)
 {
-	// Update the frame buffer.
+	// Update the frame buffers.
 
 #ifdef __EMSCRIPTEN__
 	glfwSetWindowSize(m_window->GetGLFWWindow(), newWidth, newHeight);
 #endif
 
 	m_renderer->SetSize(newWidth, newHeight);
+}
+
+AFGame* AFApp::GetGame() const
+{
+	return m_game;
 }

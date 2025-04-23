@@ -9,6 +9,16 @@ AFCameraComponent::AFCameraComponent()
 	m_neutralShader.SetFragmentShader("content/shaders/neutral.frag");
 	m_neutralShader.LoadShaders();
 
+	// ID picker visualize.
+	m_idPickerVizualiseShader.SetVertexShader("content/shaders/neutral.vert");
+	m_idPickerVizualiseShader.SetFragmentShader("content/shaders/idPickerVisualize.frag");
+	m_idPickerVizualiseShader.LoadShaders();
+
+	// UI fullscreen shader.
+	m_uiFullscreenShader.SetVertexShader("content/shaders/neutral.vert");
+	m_uiFullscreenShader.SetFragmentShader("content/shaders/uiFullscreen.frag");
+	m_uiFullscreenShader.LoadShaders();
+
 	// Fisheye.
 	AFPostprocessShader fisheye;
 	fisheye.SetVertexShader("content/shaders/fisheye.vert");
@@ -52,6 +62,16 @@ void AFCameraComponent::SetFieldOfView(int newFOV)
 AFPostprocessShader AFCameraComponent::GetNeutralShader() const
 {
 	return m_neutralShader;
+}
+
+AFPostprocessShader AFCameraComponent::GetIDPickerVisualizeShader() const
+{
+	return m_idPickerVizualiseShader;
+}
+
+AFPostprocessShader AFCameraComponent::GetUIFullScreenShader() const
+{
+	return m_uiFullscreenShader;
 }
 
 std::vector<AFPostprocessShader> AFCameraComponent::GetPostprocessShaders() const

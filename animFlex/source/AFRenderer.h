@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 
 #include "AFFrameBuffer.h"
+#include "AFFrameBufferMSUI.h"
 #include "AFUniformBuffer.h"
 
 class AFRenderer
@@ -24,11 +25,12 @@ private:
 	AFRenderer();
 	~AFRenderer();
 
-	void Draw(const struct AFSceneData& sceneData);
+	void Draw(const struct AFSceneData& sceneData, const struct AFAppData& appData);
 
 	FAFPickID ReadColorId(int x, int y);
 
 	AFFramebuffer m_framebufferMS = AFFramebuffer();
+	AFFramebufferMSUI m_framebufferMSUI = AFFramebufferMSUI();
 	AFFrameBufferBase m_framebufferIdPicker = AFFrameBufferBase();
 	AFUniformBuffer m_uniformBuffer = AFUniformBuffer();
 

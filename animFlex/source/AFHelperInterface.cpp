@@ -9,7 +9,7 @@
 #include "AFUtility.h"
 #include "AFWindow.h"
 
-bool AFHelperInferface::Init(const class AFWindow& window)
+bool AFHelperInterface::Init(const class AFWindow& window)
 {
 	IMGUI_CHECKVERSION();
 
@@ -22,21 +22,21 @@ bool AFHelperInferface::Init(const class AFWindow& window)
 	// emscripten_request_pointerlock insta exit.
 	// This code prevents it.
 	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;;
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
 	return true;
 }
 
-void AFHelperInferface::Draw(const AFAppData& appData, const AFSceneData& sceneData)
+void AFHelperInterface::Draw(const AFSceneData& sceneData, AFAppData& appData)
 {
 	// Inject touch as "mouse".
 	/*io.MousePos = ImVec2(touchX, touchY);
 	io.MouseDown[0] = isTouching;*/
-	CreateFrame(appData, sceneData);
+	CreateFrame(sceneData, appData);
 	Render();
 }
 
-bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData& sceneData)
+bool AFHelperInterface::CreateFrame(const AFSceneData& sceneData, AFAppData& appData)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -117,31 +117,29 @@ bool AFHelperInferface::CreateFrame(const AFAppData& appData, const AFSceneData&
 	const std::string& camspeed = std::to_string(sceneData.activeCamera->GetMovementComponent()->GetCameraSpeedMultiplier());
 	ImGui::Text("%s", camspeed.c_str());
 
-	//ImGui::Separator();
+	ImGui::Separator();
 
-	// Actors display.
-	/*for(AFActor* actor : sceneData.sceneActors)
+	// Select draw type.
+
+	const char* renderingTypeStrings[] = { "Normal", "IDPicker" };
+	int tmpDrawTypeSelect = static_cast<int>(appData.drawType);
+	if(ImGui::Combo("Draw Option", &tmpDrawTypeSelect, renderingTypeStrings, 2))
 	{
-		ImGui::Text(actor->GetDisplayName().c_str());
-		ImGui::SameLine();
-		ImGui::Text("Pos:");
-		ImGui::SameLine();
-		const std::string& actorPosStr = AFUtility::Vec3ToString(actor->GetLocation());
-		ImGui::Text(actorPosStr.c_str());
-	}*/
+		appData.drawType = static_cast<EAFDrawType>(tmpDrawTypeSelect);
+	}
 
 	ImGui::End();
 
 	return true;
 }
 
-void AFHelperInferface::Render()
+void AFHelperInterface::Render()
 {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void AFHelperInferface::Cleanup()
+void AFHelperInterface::Cleanup()
 {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();

@@ -23,8 +23,6 @@ protected:
 
 	void Delete() override;
 
-private:
-
 	GLuint m_resolveFramebuffer0 = 0;
 	GLuint m_resolveFramebuffer1 = 0;
 	GLuint m_resolveColorTex0 = 0;

@@ -40,6 +40,23 @@ float AFMovementComponent::GetMaxSpeed() const
 	return m_maxSpeed;
 }
 
+void AFMovementComponent::SetControlRotation(const glm::vec3& newControlRotation)
+{
+	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+	if (!owner)
+	{
+		return;
+	}
+
+	m_controlPitch = glm::clamp(newControlRotation.x, -89.0f, 89.0f);
+	m_controlYaw = newControlRotation.y;
+
+	const glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	const glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	owner->SetRotation(glm::normalize(quatYaw * quatPitch));
+}
+
 glm::vec3 AFMovementComponent::GetControlRotation() const
 {
 	return { glm::vec3(m_controlPitch, m_controlYaw, 0.0f) };

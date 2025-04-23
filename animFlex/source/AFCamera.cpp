@@ -1,6 +1,7 @@
 #include "AFCamera.h"
 
 #include "AFInput.h"
+#include "AFMath.h"
 #include "AFMovementComponent.h"
 #include "AFTimerManager.h"
 

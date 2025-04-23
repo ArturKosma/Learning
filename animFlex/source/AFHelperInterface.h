@@ -1,17 +1,17 @@
 #pragma once
 #include "AFStructs.h"
 
-class AFHelperInferface
+class AFHelperInterface
 {
 public:
 
 	bool Init(const class AFWindow& window);
-	void Draw(const AFAppData& appData, const AFSceneData& sceneData);
+	void Draw(const AFSceneData& sceneData, AFAppData& appData);
 	void Cleanup();
 
 private:
 
-	bool CreateFrame(const AFAppData& appData, const AFSceneData& sceneData);
+	bool CreateFrame(const AFSceneData& sceneData, AFAppData& appData);
 	void Render();
 
 	bool m_checkBox_testState = false;

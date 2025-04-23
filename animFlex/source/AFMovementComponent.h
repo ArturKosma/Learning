@@ -12,11 +12,13 @@ public:
 	virtual float GetAcceleration() const;
 	virtual float GetDeceleration() const;
 	virtual float GetMaxSpeed() const;
+
+	void SetControlRotation(const glm::vec3& newControlRotation);
 	glm::vec3 GetControlRotation() const;
 
-	void AddControlRotation(const glm::vec3& eulerToAdd);
-	void AddMovementInput(const glm::vec3& movementInput);
-	void AddOffset(const glm::vec3& offset);
+	virtual void AddControlRotation(const glm::vec3& eulerToAdd);
+	virtual void AddMovementInput(const glm::vec3& movementInput);
+	virtual void AddOffset(const glm::vec3& offset);
 
 private:
 

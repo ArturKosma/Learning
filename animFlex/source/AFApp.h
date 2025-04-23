@@ -1,4 +1,5 @@
 #pragma once
+#include "AFGame.h"
 
 class AFApp
 {
@@ -10,6 +11,8 @@ public:
 	void StartLoop();
 	void OnWindowResize(int newWidth, int newHeight);
 
+	AFGame* GetGame() const;
+
 	static AFApp& GetInstance();
 
 private:
@@ -20,9 +23,11 @@ private:
 
 	void SetWindowCallbacks();
 
+	struct AFAppData* m_appData = nullptr;
+
 	class AFTimerManager* m_timerManager = nullptr;
 	class AFWindow* m_window = nullptr;
 	class AFRenderer* m_renderer = nullptr;
 	class AFGame* m_game = nullptr;
-	class AFHelperInferface* m_helperInterface = nullptr;
+	class AFHelperInterface* m_helperInterface = nullptr;
 };

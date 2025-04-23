@@ -6,6 +6,11 @@
 class AFOrientationBoxUIComponent : public AFUIRenderComponent, public IAFPickerInterface
 {
 public:
+	void Tick(float deltaTime) override;
+
+	void OnHoverBegin(uint8_t elementId) override;
+	void OnHoverEnd(uint8_t elementId) override;
+
 	bool Load() override;
 
 	void Draw(const AFDrawOverride& overrideProperties) const override;
@@ -20,4 +25,6 @@ public:
 protected:
 
 	AFShader m_shaderIdPick = AFShader();
+
+	float m_brightnessFaces[6] = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 };

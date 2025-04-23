@@ -1,9 +1,9 @@
 #include "AFFrameBufferBase.h"
 
-#include <iostream>
 #include <ostream>
 
 #include "AFCamera.h"
+#include "AFUtility.h"
 
 bool AFFrameBufferBase::Init(int width, int height)
 {
@@ -22,8 +22,8 @@ bool AFFrameBufferBase::Init(int width, int height)
 	glGenTextures(1, &m_basicColorTex);
 	glBindTexture(GL_TEXTURE_2D, m_basicColorTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI, width, height, 0, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -90,13 +90,13 @@ void AFFrameBufferBase::DrawToScreen(const AFSceneData& sceneData)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Use neutral shader.
-	cameraComp->GetNeutralShader().Use();
+	cameraComp->GetIDPickerVisualizeShader().Use();
 
 	// Bind the final textures.
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_basicColorTex);
 
-	// Disable depth testing before drawing any full screen triangle.
+	// Disable depth testing.
 	glDisable(GL_DEPTH_TEST);
 
 	// Disable stencil test.

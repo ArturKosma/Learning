@@ -13,6 +13,9 @@ public:
 	void SetFieldOfView(int newFOV);
 
 	AFPostprocessShader GetNeutralShader() const;
+	AFPostprocessShader GetIDPickerVisualizeShader() const;
+	AFPostprocessShader GetUIFullScreenShader() const;
+
 	std::vector<AFPostprocessShader> GetPostprocessShaders() const;
 	glm::mat4 GetViewMatrix() const;
 	const AFCameraProperties& GetCameraProperties() const;
@@ -20,6 +23,8 @@ public:
 private:
 
 	AFPostprocessShader m_neutralShader = AFPostprocessShader();
+	AFPostprocessShader m_idPickerVizualiseShader = AFPostprocessShader();
+	AFPostprocessShader m_uiFullscreenShader = AFPostprocessShader();
 	std::vector<AFPostprocessShader> m_postprocessShaders = {};
 	AFCameraProperties m_cameraProperties = AFCameraProperties();
 };

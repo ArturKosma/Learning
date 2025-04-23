@@ -2,30 +2,49 @@
 
 #include <GLFW/glfw3.h>
 
-void AFTimerManager::AFTimer::Start()
-{
-	if (m_running)
-	{
-		return;
-	}
+#include <vector>
+#include <algorithm>
 
-	m_running = true;
-	m_startTime = std::chrono::steady_clock::now();
+#include "AFStructs.h"
+#include "AFMath.h"
+
+float AFAlphaTimer::GetCurrentAlpha() const
+{
+	return m_alpha;
 }
 
-float AFTimerManager::AFTimer::Stop()
+void AFAlphaTimer::Tick(float deltaTime)
 {
-	if (!m_running)
+	m_timeElapsed += deltaTime;
+	m_timeElapsed = glm::clamp(m_timeElapsed, 0.0f, m_length);
+
+	m_alpha = AFMath::MapRangeClamped(m_timeElapsed, 0.0f, m_length, 0.0f, 1.0f);
+
+	float interpAlpha = m_alpha;
+
+	if(m_alphaInterpMethod == EAFAlphaInterp::CubicHermite)
 	{
-		return 0.0f;
+		interpAlpha = (-2.0f * glm::pow(m_alpha, 3.0f)) + (3.0f * glm::pow(m_alpha, 2.0f));
 	}
 
-	const auto stopTime = std::chrono::steady_clock::now();
-	float elapsed = std::chrono::duration_cast<std::chrono::microseconds>(stopTime - m_startTime).count() / 1000.0f;
+	m_alphaFunctor(m_inverse ? 1.0f - interpAlpha : interpAlpha, m_timeElapsed);
+}
 
-	m_running = false;
+std::shared_ptr<AFAlphaTimer> AFTimerManager::SetAlphaTimer(const AlphaFunctor& functor, float length, 
+	const AlphaFunctorFin& functorFin, EAFAlphaInterp interpMethod, bool inverse)
+{
+	std::shared_ptr<AFAlphaTimer> newAlphaTimer = std::make_shared<AFAlphaTimer>();
+	newAlphaTimer->m_alphaFunctor = functor;
+	newAlphaTimer->m_alphaFunctorFin = functorFin;
+	newAlphaTimer->m_length = length;
+	newAlphaTimer->m_alphaInterpMethod = interpMethod;
+	newAlphaTimer->m_inverse = inverse;
 
-	return elapsed;
+	GetInstance().m_alphaTimers.push_back(newAlphaTimer);
+
+	newAlphaTimer->Tick(0.0f);
+
+	return newAlphaTimer;
 }
 
 AFTimerManager& AFTimerManager::GetInstance()
@@ -41,7 +60,29 @@ float AFTimerManager::GetDeltaTime()
 
 void AFTimerManager::Init()
 {
-	m_previousTime = static_cast<float>(glfwGetTime());;
+	m_previousTime = static_cast<float>(glfwGetTime());
+}
+
+void AFTimerManager::Tick(float deltaTime)
+{
+	for(std::shared_ptr<AFAlphaTimer> alphaTimer : m_alphaTimers)
+	{
+		alphaTimer->Tick(deltaTime);
+
+		if(alphaTimer->GetCurrentAlpha() == 1.0f)
+		{
+			if(alphaTimer->m_alphaFunctorFin)
+			{
+				alphaTimer->m_alphaFunctorFin();
+			}
+		}
+	}
+
+	m_alphaTimers.erase(std::remove_if(m_alphaTimers.begin(), m_alphaTimers.end(),
+		[](const std::shared_ptr<AFAlphaTimer>& alphaTimer)
+		{
+			return alphaTimer->GetCurrentAlpha() == 1.0f;
+		}), m_alphaTimers.end());
 }
 
 void AFTimerManager::DeltaCalc()

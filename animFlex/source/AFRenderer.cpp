@@ -1,7 +1,5 @@
 #include "AFRenderer.h"
 
-#include <iostream>
-
 #include "AFCamera.h"
 #include "AFMath.h"
 #include "AFRenderComponent.h"
@@ -25,6 +23,18 @@ bool AFRenderer::Init(int width, int height)
 		return false;
 	}
 
+	if (!m_framebufferIdPicker.Init(width, height))
+	{
+		printf("%s\n", "Fail on frame buffer id picker Init().");
+		return false;
+	}
+
+	if (!m_framebufferMSUI.Init(width, height))
+	{
+		printf("%s\n", "Fail on frame buffer ui Init().");
+		return false;
+	}
+
 	// Set up the uniform buffer.
 	m_uniformBuffer.Init();
 
@@ -41,6 +51,8 @@ void AFRenderer::SetSize(int newWidth, int newHeight)
 {
 	m_framebufferMS.Resize(newWidth, newHeight);
 	m_framebufferIdPicker.Resize(newWidth, newHeight);
+	m_framebufferMSUI.Resize(newWidth, newHeight);
+
 	glViewport(0, 0, newWidth, newHeight);
 }
 
@@ -55,7 +67,7 @@ const GLubyte* AFRenderer::GetOpenGLVersion()
 	return glGetString(GL_VERSION);
 }
 
-void AFRenderer::Draw(const AFSceneData& sceneData)
+void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 {
 	AFCamera* camera = sceneData.activeCamera;
 	if(!camera)
@@ -88,7 +100,7 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 		m_projectionMatrix = glm::perspective(glm::radians(fov), frameBufferSize.x / frameBufferSize.y, near, far);
 	}
 
-	// Enable drawing to the frame buffer.
+	// Enable drawing to the main frame buffer.
 	m_framebufferMS.Bind();
 
 	// Set the background colour.
@@ -151,11 +163,14 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	// Unbind the frame buffer, we don't want to draw to it anymore.
 	m_framebufferMS.UnBind();
 
-	// Draw all the contents of the frame buffer to the screen.
-	m_framebufferMS.DrawToScreen(sceneData);
+	// Draw all the contents of the main frame buffer to the screen.
+	if (appData.drawType == EAFDrawType::Normal)
+	{
+		m_framebufferMS.DrawToScreen(sceneData);
+	}
 
-	// Draw UIs on top of everything.
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	// Separate multisampled draw loop for the ui.
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Per UI draw.
 	for (const AFUI* const ui : sceneData.uis)
@@ -176,17 +191,19 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 			uiRenderComponent->Draw();
 		}
 	}
-
+	
 	// Separate draw loop for the id-picker.
 	m_framebufferIdPicker.Bind();
-
-	// Set the background colour.
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// Clear colour, depth and stencil buffers.
 	glStencilMask(0xFF);      // Enable writing to all bits of the stencil buffer.
 	glClearStencil(0);        // Set the clear value for the stencil to 0.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	const GLuint clearColor[4] = { 255, 255, 255, 255 };
+	glClearBufferuiv(GL_COLOR, 0, clearColor);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	// Set the background colour.
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	AFDrawOverride idPickerDrawProperties;
 	idPickerDrawProperties.drawType = EAFDrawType::IDPicker;
@@ -245,6 +262,12 @@ void AFRenderer::Draw(const AFSceneData& sceneData)
 	}
 
 	m_framebufferIdPicker.UnBind();
+
+	// ID picker draw.
+	if(appData.drawType == EAFDrawType::IDPicker)
+	{
+		m_framebufferIdPicker.DrawToScreen(sceneData);
+	}
 }
 
 FAFPickID AFRenderer::ReadColorId(int x, int y)
