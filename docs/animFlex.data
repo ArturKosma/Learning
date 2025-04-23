@@ -680,6 +680,29 @@ void main()
 	gl_Position = projection * view * modelTransform * vec4(aPos, 1.0f);
 }#version 300 es
 precision mediump float;
+precision mediump usampler2D;
+
+uniform usampler2D u_ColorTex;
+
+layout (std140) uniform RenderProperties
+{
+	mat4 renderProperties;
+};
+
+layout (location = 0) out vec4 FragColor;
+
+void main()
+{	
+	vec2 res = vec2(renderProperties[0][0], renderProperties[0][1]);
+
+	// Get screen space UV.
+    vec2 uv = gl_FragCoord.xy / res;
+
+	uvec4 screen = texture(u_ColorTex, uv);
+
+	FragColor = vec4(screen) / 255.0f;
+}#version 300 es
+precision mediump float;
 
 uniform sampler2D u_ColorTex;
 
@@ -714,6 +737,19 @@ void main()
     );
 
     gl_Position = vec4(positions[gl_VertexID], 0.0f, 1.0f);
+}#version 300 es
+precision mediump float;
+
+uniform sampler2D Tex;
+
+in vec2 UV;
+flat in float brightness;
+
+layout (location = 0) out vec4 FragColor;
+
+void main()
+{	
+    FragColor = texture(Tex, UV) * brightness;
 }#version 300 es
 precision mediump float;
 
@@ -753,6 +789,33 @@ void main()
 }#version 300 es
 precision mediump float;
 
+uniform sampler2D u_ColorTex;
+
+layout (std140) uniform RenderProperties
+{
+	mat4 renderProperties;
+};
+
+layout (location = 0) out vec4 FragColor;
+
+void main()
+{	
+	vec2 res = vec2(renderProperties[0][0], renderProperties[0][1]);
+
+	// Get screen space UV.
+    vec2 uv = gl_FragCoord.xy / res;
+
+	vec4 screen = texture(u_ColorTex, uv);
+
+	if (screen.a < 0.01f)
+	{
+		discard;
+	}
+
+	FragColor = screen;
+}#version 300 es
+precision mediump float;
+
 layout (std140) uniform UITransform
 {
     mat4 uiTransform;
@@ -768,6 +831,8 @@ layout (std140) uniform ViewRotation
 	mat4 viewRotation;
 };
 
+uniform float uBrightnessFaces[32];
+
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aUV;
 layout (location = 2) in uvec4 aID;
@@ -775,12 +840,16 @@ layout (location = 2) in uvec4 aID;
 out vec3 Pos;
 out vec2 UV;
 flat out uvec4 ID;
+flat out float brightness;
 
 void main()
 {
 	Pos = aPos;
 	UV = aUV;
 	ID = aID;
+
+	brightness = uBrightnessFaces[aID.b];
+
 	gl_Position = uiTransform * orthoProjection * viewRotation * vec4(aPos, 1.0);
 }#version 300 es
 precision mediump float;
