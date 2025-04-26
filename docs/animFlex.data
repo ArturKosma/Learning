@@ -670,7 +670,7 @@ layout (std140) uniform Model
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aUV;
-layout (location = 2) in uvec4 aID;
+layout (location = 3) in uvec4 aID;
 
 flat out uvec4 ID;
 
@@ -744,12 +744,19 @@ uniform sampler2D Tex;
 
 in vec2 UV;
 flat in float brightness;
+in float normBrightness;
+in float distBrightness;
 
 layout (location = 0) out vec4 FragColor;
 
 void main()
 {	
-    FragColor = texture(Tex, UV) * brightness;
+    float highlightAlpha = smoothstep(1.0f, 1.2f, brightness);
+    float brightnessMix = mix(normBrightness * distBrightness, brightness, highlightAlpha);
+
+    vec4 texColor = texture(Tex, UV);
+
+    FragColor = vec4(texColor.rgb * brightnessMix, texColor.a);
 }#version 300 es
 precision mediump float;
 
@@ -814,6 +821,70 @@ void main()
 
 	FragColor = screen;
 }#version 300 es
+precision highp float;
+precision highp int;
+
+layout (std140) uniform UITransform
+{
+    mat4 uiTransform;
+};
+
+layout (std140) uniform OrthoProjection
+{
+    mat4 orthoProjection;
+};
+
+layout (std140) uniform ViewRotation
+{
+	mat4 viewRotation;
+};
+
+uniform float uBrightnessFaces[32];
+
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aUV;
+layout (location = 2) in vec3 aNormal;
+layout (location = 3) in uvec4 aID;
+layout (location = 4) in vec2 aUVCenter;
+
+out vec3 Pos;
+out vec2 UV;
+flat out uvec4 ID;
+flat out float brightness;
+out float normBrightness;
+out float distBrightness;
+
+void main()
+{
+	Pos = aPos;
+	UV = aUV;
+	ID = aID;
+
+	brightness = uBrightnessFaces[aID.b];
+
+	// Find position after rotation.
+	vec4 rotatedPos = viewRotation * vec4(aPos, 1.0f);
+
+	// Find normal after rotation.
+	vec4 rotatedNorm = vec4(normalize((viewRotation * vec4(aNormal, 0.0f)).xyz), 0.0f);
+
+	// Find brightness based on normal.
+	normBrightness = clamp(dot(vec3(0.0f, 0.0f, 1.0f), rotatedNorm.xyz), 0.5f, 0.8f);
+	//normBrightness = 1.0f;
+
+	// Find brightness based on distance (deeper = darker).
+	distBrightness = clamp(rotatedPos.z + 0.75f, 0.5f, 1.1f);
+	//distBrightness = 1.0f;
+
+	// Fake perspective in ortho view.
+	float fakePerspectiveScale = 1.0f + rotatedPos.z * 0.2f;
+    rotatedPos.xy *= fakePerspectiveScale;
+
+	// Fix UV after fake perspective.
+	UV = (aUV - aUVCenter) * fakePerspectiveScale * 0.9f + aUVCenter;
+
+	gl_Position = uiTransform * orthoProjection * rotatedPos;
+}#version 300 es
 precision mediump float;
 
 layout (std140) uniform UITransform
@@ -835,7 +906,7 @@ uniform float uBrightnessFaces[32];
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aUV;
-layout (location = 2) in uvec4 aID;
+layout (location = 3) in uvec4 aID;
 
 out vec3 Pos;
 out vec2 UV;
@@ -850,7 +921,7 @@ void main()
 
 	brightness = uBrightnessFaces[aID.b];
 
-	gl_Position = uiTransform * orthoProjection * viewRotation * vec4(aPos, 1.0);
+	gl_Position = uiTransform * orthoProjection * viewRotation * vec4(aPos, 1.0f);
 }#version 300 es
 precision mediump float;
 
@@ -2049,4 +2120,18 @@ Z‘RWên²÷J£µ³¥~UžOô"2T°[¾~–×·Ë~·«¯S?‹akõ–êŒÅ_Ëç‹ìqbæd¶zDexPß~¤±E[N7Yÿb­¶j
 5²õ×9WÂó(˜T>ê‘ýÆ,ÈóTh—¶u…JÏ¢¯¢˜½€CqWŽ"|§xj8ÐØÜÛÙ-ÀÃq__e2,|Õ™nLi¨;¤m4#T™CVÏwu-Åº”iUX™ù¯Ùf¸™*=ÜžÈ m°«L¤8³(¢kÆ>vž›¨îIg˜@–0Ê]L¨˜?}5Ÿ‰u•‘ÃøÓïëË>œ¬3ÀÆNä<ËbEâ·7±½2GÁIà.»,Ãmå40¹LÁzT,þJ°X5¿+‡û$†UäÎlœ[‡;¬>ªãaTg}ú§©`ÿ©syÂåT¬JH5kä>’¦BÈWs¾\C²Îù;¾Ë…s[Ÿ3òÝõ÷À÷æ'1kÁ¯ï’ù­F„ßÍ°ÈëNšhwz·WAçŒâ…|3+Ó š†uuMs
 á›Þ›?€G¿f`&˜^7¢Ìçe	)ê=º _eUÿnÝ§ø³ºM›¢`la›¯Ì.îÅ„FD\2•¥j¾I&é`°j[c€’Ü5Y¯†0ž{ˆÅS—ñí6Ùûoÿþ/ÏÓz±¾=ÏÓxÄ‡¥ìQø<á»íÔÏY®,E5(4ÕfºmîVuQRÓ'¹]G]³FˆÆˆLx±·^ÇÊ´–°TÍ©¥ƒEªu!|8»±—Ø:å–ÇÑ’•ÕéÖ€
 ÛòbÿÛyöH¹ìºÊ„K¤h%äÐÜ­¶†€ÑÐ^¤udß]Ä$Qƒ¶Ò:v;}ë‹ðÔãÎX|õÇq¶XãÞ‘Üâi°<+-#†u¤'7D&š ]ÿ³V0»J/Ò7‘³^Ú×-µ¨ÆÉ.Ïr=ÛNDæÃ½À.´NS£osëy#¯vø¼JR{Á9bmÌè Ùß&zhK`A7±<;÷{»!ê¹¼*Ž¸SÓæuAÛý¡sÜ¦^òU®ëéñPWÝ[m#zû°„ÉsfcÈ)ÀmösÊÚP³K<š)–Y8X€×jÞõø¾‰>´©;×Ž!çkÄ Ò|88Pj_òã×·7‘P?>Ÿêóy~8»ÇÓž'9a½A9óx†®°.ŽÃØ¾lÍq»þjQüòå¶Èh¹iÄ[”¢ÁÓíEº“àÃÅº›ÚêGª„Û‹®º–Äâ5o0gáwÂJmÎ0l0ñ?žDþ®l¢âñM@Ãã.Ü|ÂH¾ú™#êƒËdrÞÙ¢Õ1~óùí¼:%„²Á‚M›K—ˆ¤ß8ÊðAé#¹—aÁ~ˆÜßä¡“Ø;C»ÔB9°¡éL¿5´¨.¢QFqémaŠc/Ýô'Å)wvø e>ƒ}3Á5Šãb:×˜O	Õ$4ÕÝ–•ºË/R ×JJ
-ÏÀ˜d‘Ì~¿«¥MþÅßþ‹Ú”öÁOâE¹[¸FžC‰¥jÞåÄq‚¢>çé0&	¯†0ðò¤×?{¼Q-7šz=Ô:ýóí2»z@`ß-Æ« ­5Lå6wÎê<.TôNÉjÆŒb¨ž’[ýyjº-±„òÏ‰& </°®ÆƒkÓ˜	…Ý†ÙÍEŸ´d×:a2µ;3#—ŽŽçž±žxŒÁ¿L²£‘Ç¤D ü°'7Ê“-l8éï0ô@Œ€hºß£•ÅêN‘ì¹ÌZ·B–ñˆ[AtžÖ¬{Üš¦'ÒÞì’]µt¶¹š:Ï‚Ã¦É2±ªnV<›bmŒæ«i×óãÜ ž­/çëõ2ÉóÕÖÃ£ÎMú6q4ýëæDÎA÷ø¶õn¦r‚%»1ïuü*Y€­yç	f¡4{~>êˆ±ÿÕÔü¢™jêK‘=œô5$NË™ÙÄ¼òŒcÈ¶¨Q˜m?–HŽè>ÃÇ=ˆuºûð|àJûöz­7Aýqö»ûOÏœ/WŽ4óò%Ì½¸‹jÉiïõ4œÌìÈœã$âŠŒ_Ÿ·#Âoás[ò_cã]_³FßåÁ•`ÙÙ½‡¢™(t&è›1«ëu$œ¾W°á¹gCÉâ#\ õœ‚Á‰Ò0$AÙTÑãp?„ïb„ë³z~t` !ÕÏ—%fÎüè¬lä7gÈ²¬Làì·fŠìeYèy	1<_u½¡nÞ½Ÿ÷5¨”°Vyî#+òÕK’`ÙE½’=¢E4ÓÐ<f%+È9‡~kã[Óbôy!Da2åw-…Ý®'¯%¸YÂ£%Ì, (gµònø;‰ÁšQ½V    IEND®B`‚
+ÏÀ˜d‘Ì~¿«¥MþÅßþ‹Ú”öÁOâE¹[¸FžC‰¥jÞåÄq‚¢>çé0&	¯†0ðò¤×?{¼Q-7šz=Ô:ýóí2»z@`ß-Æ« ­5Lå6wÎê<.TôNÉjÆŒb¨ž’[ýyjº-±„òÏ‰& </°®ÆƒkÓ˜	…Ý†ÙÍEŸ´d×:a2µ;3#—ŽŽçž±žxŒÁ¿L²£‘Ç¤D ü°'7Ê“-l8éï0ô@Œ€hºß£•ÅêN‘ì¹ÌZ·B–ñˆ[AtžÖ¬{Üš¦'ÒÞì’]µt¶¹š:Ï‚Ã¦É2±ªnV<›bmŒæ«i×óãÜ ž­/çëõ2ÉóÕÖÃ£ÎMú6q4ýëæDÎA÷ø¶õn¦r‚%»1ïuü*Y€­yç	f¡4{~>êˆ±ÿÕÔü¢™jêK‘=œô5$NË™ÙÄ¼òŒcÈ¶¨Q˜m?–HŽè>ÃÇ=ˆuºûð|àJûöz­7Aýqö»ûOÏœ/WŽ4óò%Ì½¸‹jÉiïõ4œÌìÈœã$âŠŒ_Ÿ·#Âoás[ò_cã]_³FßåÁ•`ÙÙ½‡¢™(t&è›1«ëu$œ¾W°á¹gCÉâ#\ õœ‚Á‰Ò0$AÙTÑãp?„ïb„ë³z~t` !ÕÏ—%fÎüè¬lä7gÈ²¬Làì·fŠìeYèy	1<_u½¡nÞ½Ÿ÷5¨”°Vyî#+òÕK’`ÙE½’=¢E4ÓÐ<f%+È9‡~kã[Óbôy!Da2åw-…Ý®'¯%¸YÂ£%Ì, (gµònø;‰ÁšQ½V    IEND®B`‚‰PNG
+
+   IHDR         \r¨f  „iCCPICC profile  (‘}‘=HÃ@Å_?DÑŠƒ¤8d¨â`q,U,‚…ÒVhÕÁäÒ/hÒ¤¸8
+®?«.Îº:¸
+‚àˆ»à¤è"%þ/)´ˆñà¸ïî=îÞþf•©f0¨še¤q1—_{_D˜€ 1SOf³ð_÷ðñõ.Ê³¼Ïý9•‚É ŸHcºaoÏnZ:ç}b•%…øœxÒ ?r]vùsÉa?ÏŒlzžX K],w1+*ñqDQ5Ê÷ç\V8oqV«uÖ¾'a¨ ­d¸Ns	,!‰DÈ¨£‚*,DiÕH1‘¦ý¸‡?ìøSä’ÉU#ÇjP!9~ð?øÝ­Yœžr“Bq çÅ¶?Æ€Þ] Õ°íïcÛn gàJëøkM`î“ôFG‹CÛÀÅuG“÷€Ë`äI—É‘4ýÅ"ð~Fß”†oþ5··ö>N€,uµ|ã%Ê^÷xw_woÿži÷÷¼ÌrÄµãÎ   bKGD ÿ ÿ ÿ ½§“   	pHYs  .#  .#x¥?v   tIMEé9çþöE   tEXtComment Created with GIMPW  éIDATxÚíÝëOS÷ÇñOmµ†€.…B•«t\ìB¦>˜(‹Y†1d.flãÏÂìÁ–ñˆmÙ²¡»84‹ÉšÅT ¬R:„q·ÎJ¡¿KO@Àˆ?ß¯'®ôœ¶çÛžw¿çœ&3uttDà…t€!    €        €        €        €        €        €     vž%ÞûûûÕÓÓ³áï§N’Ëå’$]¾|YÑè?ÿ£¡¤¤$effª¬¬LN§ÓX>jppPwïÞÕìì¬ÒÒÒTZZª’’™L&ÍÌÌè‹/¾$;wN‡–$y<y<½ÿþûš™™QWW×–¯µ¥¥E)))¼»ÀN`»Âá°‚Á ‚Á åp8$I½½½òù|ÆrSSSúå—_
+…TSS³î1¼^¯€ý.Æ¥ $}þùç
+…B’$«ÕªÌÌL•––*??ßXf·­¹ÅbQZZšŽ=ª²²28p ®˜Ç3&óóó;2nKKKêèè$½÷Þ{JNNÖèè¨¾ÿþ{%%%éÒ¥KÏdŒ$éÑ£GúôÓOF•žž®æææµ¸¸¨ùý~…B!åææª¶¶VéééÆs™Ífµ¶¶J’¦§§õå—_*55Uï¾û®ö& gÎœQ^^Þ–÷Ûl6]¼xQËËËºsçŽúúú4>>.‡Ã¡ÙÙYù|>Ùív>}Z/¿ü²&''õÝwßÉãñ¨¬¬Ìx“É$¿ß¯™™cbrssÕÖÖfD¢··÷__×~± JÒßÿ­@  @  ÚÚZUWWïùkŽD"šššÒÔÔ”$©¢¢â©¶e7Ç-‰÷MNNª°°PãããÆ—Q4ÝÕxn5F±×FUTT¤‘‘ÍÏÏ+55Õ¸nnN_ýµÂá°ñ·û÷ïëÑ£Gzûí·7<W4Õ­[·$I'Ož|êWg ±A‘$»Ý.IÆRUUeìÔÙÙÙ*..Ö½{÷4==-›Í&I:vì˜¼^¯ÔÐÐ°ïwìx¢O ­V«±|[[›"‘ˆÆÇÇuõêUy<¹Ýn™Íæ=Ù¦””µ´´heeE~¿_?ÿü³þüóÏ¸·%ž1IIIÙ‘q[YY‘$åçç+ÊétjddDN§S~¿_+++²X,{:F1@@v»]•••ÑƒÖàÖ­[
+‡Ãr¹\:~ü¸l6›æçç6}Îßÿ]ããã:~ü¸²²²ööàÊ•+ënŸ?^4n‡B!µ···N§Ž9bLs$­ÛxIÆú>4‘‘¡ââbÝ½{W¯¼òÊÿÅñV<||c±Xäp8d·Ûµ¸¸¨H$²gØ,æ™™™O½-»9n±oÁ’’]¿~]JLLTaaá®àIc$I«««VII‰ÒÓÓe±Xtÿþ}ûK ÅbÑo¼¡ÄÄDcŸX»_­=œèééÑ¡C‡TYY¹ÏÄvâ'NoNìx)öïÚéþfÊËËã¾gñ¡ßiñðq+++Õââ¢ìv»ñÙëb^XXh¦=Í¶ìæ¸ÅŽ¹322$Iƒƒƒr¹\Æç&‰())iOÇ(v¨‡•““#³Ù,§Ó©ááa…Ãa%%%iaaÁZ<ï­×ëÕÃ‡ÕÔÔ´#ûÄ®œ¸pá‚¼^¯<|>ŸqÜûvŸŸŸWnn®±ÎÌÌŒ$)99yÝceffÊápèöíÛ:zôès€ípíK’êëë÷ì$àVSÏC‡Éívo{[v{Ü–——SQQ‘|>ŸÎ;gW¯=G°Wc$IüñÇºYA^^ž†‡‡511¡üüüÛôobûÊNÙ•ß$$$ÈívËjµÊãñhiiI’Œã•Û·okvvV+++×àà ,‹Qïµ*++F544ôÜ`m 7{S ôÏåÔ‚‚555©°°pO_oìøü£>Rss³,‹úúú‡Ÿj[vsÜb;øŒoÛŒŒŒu3€½#I–$}öÙgjooWww·$illL’ôÒK/I’&&&Œˆ=I}}½$©»»;®åŸI b%®®®V4U¿€‚‚-,,¨³³SŸ|ò‰¾ýö[E£Q½þúë›N²³³•‘‘±íRîGÛ`[[›.]º¤·ÞzK999Ïìu›L¦uã¿²²òT1ßÍq[€¢¢"µ¶¶Êl6‡»=ØlŒæææô×_mºüðð°VWW•ššªÔÔTãØ~qqQ«««šÕo¿ý¶a½ÔÔT½úê«šžžÖ¯¿þº¿Ï¸\.õõõÉëõª¼¼\v»]'Ož”ÏçÓÐÐB¡²²²tìØ1åçço9°UUUúé§Ÿþ/PPP û÷ï«³³sÝ}[ðYzüø6vR×f³ÉjµîÙ¶Ä3n±oÃµ×ß%íúàIctïÞ=IRSSÓº€ÿøãòûýšššRVV–ÔÕÕ¥ÁÁA®ûò«ªªÚðœ¥¥¥’ÏçSvv¶
+
+
+v? ë®mnæã?Þ0}ýpaíáAuuõ–×³ÓÓÓËBkO¬<þ·µ‡;q6t¯¾I·Àý ))Iiiir¹\Æ¹˜½Ü–xžkyyY&“iÏð¤1òûý2™Lë®
+Hÿ\ªôûý
+ƒÊÊÊRNNŽÞyçõ÷÷kllL&“I[~®Íf³ôÕW_éúõëjnn6.µo{l;::žÿ¹5€ýu   @       @       @       @       @       @           €        €        €        €        €        €        à?²ü—•GFFtíÚ5½ùæ›*..Þt™þþ~õôôlø{]]Ün÷—9uê”\.—‚Á ººº¶|---JIIÙÕº|ù²¢Ñ¨$)))I™™™*++“Óé4–éêêR0Ü°nMMjjjŒÛ333ÐØØ˜–––ŒÇýðÃ5??¯ÎÎNUVVª¾¾ÞXç›o¾ÑÄÄ„Z[[511ñÌÇà…‡ÕØØ(‡Ã÷º£££úá‡Œx!pæÌååå=Õ2¹¹¹jkk“$y½^õööÆõx;Íf³éâÅ‹Z^^Ö;wÔ××§ññq# gÏž]÷Ïž=«ÜÜÜuá¸víš¢Ñ¨jkkURR"›Í¶í×±_Æà…‰D$Iv»=îu<x H$¢ÂÂBUWW3ˆxqpåÊ•ý¶|™óçÏëàÁƒûf°B¡ÚÛÛÛN§SGŽ‰{ý¹¹9I2fºyó¦qÿ|`ü·×ë•×ëå
+f ûQFF†Nœ8¡„„„¸×‰÷›Ífœxšež%›Í¦.ÈëõÊãñÈçómk*Ÿœœ,Išœœ”ËåRyy¹ÊËËuõêUuËnu ØIü`›äv»eµZåñx´´´÷º‡6¦þÃÃÃ
+‡ÃŠF£Z]]e`ñüÎ nÜ¸¡7n·‡Ÿx|¿öw ÏÝ Y,ª®®ÖÍ›7Õßß¯ºº:I»Vû@JJŠêêêÔ××§îîn>}`ð¼r¹\²X,òz½Z\\Œ{=·Û­Ó§O+??_‰‰‰²Z­ÊÎÎÖk¯½Æ¹ì9SGG¿H˜       €        €        €        €        €        €        €        €             @       @       @       @       @       @       @       @       @   €        €        €        €        €        €        €        €        €        €     @       @       @       @       @       @       @       @       @   € 0  @       @     ÀóïÐå[ÜÐ²T    IEND®B`‚
