@@ -14,11 +14,15 @@ void AFVertexBuffer::Init()
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, position));
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, uv));
-	glVertexAttribIPointer(2, 4, GL_UNSIGNED_BYTE, sizeof(AFVertex), (void*)offsetof(AFVertex, uniqueId));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, normal));
+	glVertexAttribIPointer(3, 4, GL_UNSIGNED_BYTE, sizeof(AFVertex), (void*)offsetof(AFVertex, uniqueId));
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, uvCenter));
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexEBO);
 

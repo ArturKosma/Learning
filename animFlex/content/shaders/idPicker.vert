@@ -14,7 +14,7 @@ layout (std140) uniform Model
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aUV;
-layout (location = 2) in uvec4 aID;
+layout (location = 3) in uvec4 aID;
 
 flat out uvec4 ID;
 

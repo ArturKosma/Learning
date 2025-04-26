@@ -25,19 +25,21 @@ struct AFVertex
 {
 	AFVertex() = default;
 	AFVertex(const glm::vec3 newPosition)
-		: position(newPosition), uv(glm::vec2(0.0f)), uniqueId(glm::vec4(0))
+		: position(newPosition), uv(glm::vec2(0.0f)), normal(glm::vec3(0.0f)), uniqueId(glm::vec4(0)), uvCenter(glm::vec2(0.0f))
 	{
 		
 	}
-	AFVertex(const glm::vec3& newPosition, const glm::vec2& newUV, const glm::vec4& newUniqueID = glm::vec4(0.0f))
-		: position(newPosition), uv(newUV), uniqueId(newUniqueID)
+	AFVertex(const glm::vec3& newPosition, const glm::vec2& newUV, const glm::vec3& newNormal = glm::vec3(0.0f), const glm::vec4& newUniqueID = glm::vec4(0.0f), const glm::vec2& newUvCenter = glm::vec2(0.0f))
+		: position(newPosition), uv(newUV), normal(newNormal), uniqueId(newUniqueID), uvCenter(newUvCenter)
 	{
 
 	}
 
 	glm::vec3 position;
 	glm::vec2 uv;
+	glm::vec3 normal;
 	glm::u8vec4 uniqueId;
+	glm::vec2 uvCenter;
 };
 
 struct AFMesh
