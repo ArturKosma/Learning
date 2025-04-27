@@ -31,6 +31,7 @@ flat out uvec4 ID;
 flat out float brightness;
 out float normBrightness;
 out float distBrightness;
+out vec2 UVCenter;
 
 void main()
 {
@@ -48,11 +49,9 @@ void main()
 
 	// Find brightness based on normal.
 	normBrightness = clamp(dot(vec3(0.0f, 0.0f, 1.0f), rotatedNorm.xyz), 0.5f, 0.8f);
-	//normBrightness = 1.0f;
 
 	// Find brightness based on distance (deeper = darker).
 	distBrightness = clamp(rotatedPos.z + 0.75f, 0.5f, 1.1f);
-	//distBrightness = 1.0f;
 
 	// Fake perspective in ortho view.
 	float fakePerspectiveScale = 1.0f + rotatedPos.z * 0.2f;
@@ -60,6 +59,8 @@ void main()
 
 	// Fix UV after fake perspective.
 	UV = (aUV - aUVCenter) * fakePerspectiveScale * 0.9f + aUVCenter;
+
+	UVCenter = aUVCenter;
 
 	gl_Position = uiTransform * orthoProjection * rotatedPos;
 }
