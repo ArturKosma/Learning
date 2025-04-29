@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpzkf079ok.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwbavkutg.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -143,6 +143,7 @@ var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
       }
 Module['FS_createPath']("/", "config", true, true);
 Module['FS_createPath']("/", "content", true, true);
+Module['FS_createPath']("/content", "fonts", true, true);
 Module['FS_createPath']("/content", "shaders", true, true);
 Module['FS_createPath']("/content", "textures", true, true);
 
@@ -211,25 +212,25 @@ Module['FS_createPath']("/content", "textures", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 641}, {"filename": "/content/shaders/background.frag", "start": 641, "end": 3000}, {"filename": "/content/shaders/background.vert", "start": 3000, "end": 3290}, {"filename": "/content/shaders/basic.frag", "start": 3290, "end": 3474}, {"filename": "/content/shaders/basic.vert", "start": 3474, "end": 3853}, {"filename": "/content/shaders/fisheye.frag", "start": 3853, "end": 7513}, {"filename": "/content/shaders/fisheye.vert", "start": 7513, "end": 7800}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 7800, "end": 9022}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 9022, "end": 9309}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 9309, "end": 10520}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 10520, "end": 10807}, {"filename": "/content/shaders/grid.frag", "start": 10807, "end": 17065}, {"filename": "/content/shaders/grid.vert", "start": 17065, "end": 18271}, {"filename": "/content/shaders/idPicker.frag", "start": 18271, "end": 18420}, {"filename": "/content/shaders/idPicker.vert", "start": 18420, "end": 18841}, {"filename": "/content/shaders/idPickerVisualize.frag", "start": 18841, "end": 19306}, {"filename": "/content/shaders/neutral.frag", "start": 19306, "end": 19723}, {"filename": "/content/shaders/neutral.vert", "start": 19723, "end": 20012}, {"filename": "/content/shaders/orientationBox.frag", "start": 20012, "end": 20505}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 20505, "end": 20759}, {"filename": "/content/shaders/stencil.frag", "start": 20759, "end": 20947}, {"filename": "/content/shaders/stencil.vert", "start": 20947, "end": 21236}, {"filename": "/content/shaders/uiFullscreen.frag", "start": 21236, "end": 21699}, {"filename": "/content/shaders/uiLocalRotate.vert", "start": 21699, "end": 23260}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 23260, "end": 23929}, {"filename": "/content/shaders/uibasic.frag", "start": 23929, "end": 24078}, {"filename": "/content/shaders/uibasic.vert", "start": 24078, "end": 24278}, {"filename": "/content/shaders/vignette.frag", "start": 24278, "end": 25270}, {"filename": "/content/shaders/vignette.vert", "start": 25270, "end": 25559}, {"filename": "/content/textures/crate2.png", "start": 25559, "end": 339894}, {"filename": "/content/textures/orientBox.png", "start": 339894, "end": 343751}], "remote_package_size": 343751});
+    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 641}, {"filename": "/content/fonts/arial.ttf", "start": 641, "end": 1046601}, {"filename": "/content/shaders/background.frag", "start": 1046601, "end": 1048960}, {"filename": "/content/shaders/background.vert", "start": 1048960, "end": 1049250}, {"filename": "/content/shaders/basic.frag", "start": 1049250, "end": 1049434}, {"filename": "/content/shaders/basic.vert", "start": 1049434, "end": 1049813}, {"filename": "/content/shaders/fisheye.frag", "start": 1049813, "end": 1053473}, {"filename": "/content/shaders/fisheye.vert", "start": 1053473, "end": 1053760}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 1053760, "end": 1054982}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 1054982, "end": 1055269}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 1055269, "end": 1056480}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 1056480, "end": 1056767}, {"filename": "/content/shaders/grid.frag", "start": 1056767, "end": 1063025}, {"filename": "/content/shaders/grid.vert", "start": 1063025, "end": 1064231}, {"filename": "/content/shaders/idPicker.frag", "start": 1064231, "end": 1064380}, {"filename": "/content/shaders/idPicker.vert", "start": 1064380, "end": 1064801}, {"filename": "/content/shaders/idPickerVisualize.frag", "start": 1064801, "end": 1065266}, {"filename": "/content/shaders/neutral.frag", "start": 1065266, "end": 1065683}, {"filename": "/content/shaders/neutral.vert", "start": 1065683, "end": 1065972}, {"filename": "/content/shaders/orientationBox.frag", "start": 1065972, "end": 1066744}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 1066744, "end": 1066998}, {"filename": "/content/shaders/stencil.frag", "start": 1066998, "end": 1067186}, {"filename": "/content/shaders/stencil.vert", "start": 1067186, "end": 1067475}, {"filename": "/content/shaders/uiFullscreen.frag", "start": 1067475, "end": 1067938}, {"filename": "/content/shaders/uiLocalRotate.vert", "start": 1067938, "end": 1069491}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 1069491, "end": 1070160}, {"filename": "/content/shaders/uibasic.frag", "start": 1070160, "end": 1070309}, {"filename": "/content/shaders/uibasic.vert", "start": 1070309, "end": 1070509}, {"filename": "/content/shaders/vignette.frag", "start": 1070509, "end": 1071501}, {"filename": "/content/shaders/vignette.vert", "start": 1071501, "end": 1071790}, {"filename": "/content/textures/crate2.png", "start": 1071790, "end": 1386125}, {"filename": "/content/textures/orientBox.png", "start": 1386125, "end": 1389982}], "remote_package_size": 1389982});
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpzkf079ok.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4jb8a57e.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwbavkutg.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwfp5jfrp.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4jb8a57e.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpiu8v9kpg.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpwfp5jfrp.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4715qbgo.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpiu8v9kpg.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4715qbgo.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -1709,7 +1710,10 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
       return Math.ceil(size / alignment) * alignment;
     };
   var mmapAlloc = (size) => {
-      abort('internal error: mmapAlloc called but `emscripten_builtin_memalign` native symbol not exported');
+      size = alignMemory(size, 65536);
+      var ptr = _emscripten_builtin_memalign(65536, size);
+      if (ptr) zeroMemory(ptr, size);
+      return ptr;
     };
   var MEMFS = {
   ops_table:null,
@@ -4003,6 +4007,17 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   }
   }
 
+  function ___syscall_fstat64(fd, buf) {
+  try {
+  
+      var stream = SYSCALLS.getStreamFromFD(fd);
+      return SYSCALLS.writeStat(buf, FS.stat(stream.path));
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return -e.errno;
+  }
+  }
+
   
   function ___syscall_ioctl(fd, op, varargs) {
   SYSCALLS.varargs = varargs;
@@ -4099,6 +4114,33 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   }
   }
 
+  function ___syscall_lstat64(path, buf) {
+  try {
+  
+      path = SYSCALLS.getStr(path);
+      return SYSCALLS.writeStat(buf, FS.lstat(path));
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return -e.errno;
+  }
+  }
+
+  function ___syscall_newfstatat(dirfd, path, buf, flags) {
+  try {
+  
+      path = SYSCALLS.getStr(path);
+      var nofollow = flags & 256;
+      var allowEmpty = flags & 4096;
+      flags = flags & (~6400);
+      assert(!flags, `unknown flags in __syscall_newfstatat: ${flags}`);
+      path = SYSCALLS.calculateAt(dirfd, path, allowEmpty);
+      return SYSCALLS.writeStat(buf, nofollow ? FS.lstat(path) : FS.stat(path));
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return -e.errno;
+  }
+  }
+
   
   function ___syscall_openat(dirfd, path, flags, varargs) {
   SYSCALLS.varargs = varargs;
@@ -4114,8 +4156,70 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   }
   }
 
+  function ___syscall_stat64(path, buf) {
+  try {
+  
+      path = SYSCALLS.getStr(path);
+      return SYSCALLS.writeStat(buf, FS.stat(path));
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return -e.errno;
+  }
+  }
+
   var __abort_js = () =>
       abort('native code called abort()');
+
+  var __emscripten_throw_longjmp = () => {
+      throw Infinity;
+    };
+
+  
+  
+  
+  
+  
+  var INT53_MAX = 9007199254740992;
+  
+  var INT53_MIN = -9007199254740992;
+  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
+  function __mmap_js(len, prot, flags, fd, offset, allocated, addr) {
+    offset = bigintToI53Checked(offset);
+  
+    
+  try {
+  
+      if (isNaN(offset)) return 61;
+      var stream = SYSCALLS.getStreamFromFD(fd);
+      var res = FS.mmap(stream, len, offset, prot, flags);
+      var ptr = res.ptr;
+      HEAP32[((allocated)>>2)] = res.allocated;
+      HEAPU32[((addr)>>2)] = ptr;
+      return 0;
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return -e.errno;
+  }
+  ;
+  }
+
+  
+  function __munmap_js(addr, len, prot, flags, fd, offset) {
+    offset = bigintToI53Checked(offset);
+  
+    
+  try {
+  
+      var stream = SYSCALLS.getStreamFromFD(fd);
+      if (prot & 2) {
+        SYSCALLS.doMsync(addr, stream, len, flags, offset);
+      }
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return -e.errno;
+  }
+  ;
+  }
 
   var stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
       assert(typeof maxBytesToWrite == 'number', 'stringToUTF8(str, outPtr, maxBytesToWrite) is missing the third parameter that specifies the length of the output buffer!');
@@ -8686,10 +8790,6 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   }
 
   
-  var INT53_MAX = 9007199254740992;
-  
-  var INT53_MIN = -9007199254740992;
-  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
   function _fd_seek(fd, offset, whence, newOffset) {
     offset = bigintToI53Checked(offset);
   
@@ -10666,6 +10766,7 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
 
 
 
+
   var getCFunc = (ident) => {
       var func = Module['_' + ident]; // closure exported function
       assert(func, 'Cannot call unknown function ' + ident + ', make sure it is exported');
@@ -10809,11 +10910,25 @@ var wasmImports = {
   /** @export */
   __syscall_fcntl64: ___syscall_fcntl64,
   /** @export */
+  __syscall_fstat64: ___syscall_fstat64,
+  /** @export */
   __syscall_ioctl: ___syscall_ioctl,
+  /** @export */
+  __syscall_lstat64: ___syscall_lstat64,
+  /** @export */
+  __syscall_newfstatat: ___syscall_newfstatat,
   /** @export */
   __syscall_openat: ___syscall_openat,
   /** @export */
+  __syscall_stat64: ___syscall_stat64,
+  /** @export */
   _abort_js: __abort_js,
+  /** @export */
+  _emscripten_throw_longjmp: __emscripten_throw_longjmp,
+  /** @export */
+  _mmap_js: __mmap_js,
+  /** @export */
+  _munmap_js: __munmap_js,
   /** @export */
   _tzset_js: __tzset_js,
   /** @export */
@@ -11559,7 +11674,17 @@ var wasmImports = {
   /** @export */
   glfwTerminate: _glfwTerminate,
   /** @export */
-  glfwWindowHint: _glfwWindowHint
+  glfwWindowHint: _glfwWindowHint,
+  /** @export */
+  invoke_iii,
+  /** @export */
+  invoke_iiii,
+  /** @export */
+  invoke_iiiii,
+  /** @export */
+  invoke_v,
+  /** @export */
+  invoke_viiii
 };
 var wasmExports;
 createWasm();
@@ -11569,7 +11694,9 @@ var _free = createExportWrapper('free', 1);
 var _malloc = createExportWrapper('malloc', 1);
 var _main = Module['_main'] = createExportWrapper('main', 2);
 var _fflush = createExportWrapper('fflush', 1);
+var _emscripten_builtin_memalign = createExportWrapper('emscripten_builtin_memalign', 2);
 var _strerror = createExportWrapper('strerror', 1);
+var _setThrew = createExportWrapper('setThrew', 2);
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
 var _emscripten_stack_get_base = () => (_emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'])();
@@ -11577,6 +11704,61 @@ var _emscripten_stack_get_end = () => (_emscripten_stack_get_end = wasmExports['
 var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['_emscripten_stack_restore'])(a0);
 var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'])(a0);
 var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'])();
+
+function invoke_viiii(index,a1,a2,a3,a4) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_iii(index,a1,a2) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1,a2);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_iiiii(index,a1,a2,a3,a4) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1,a2,a3,a4);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_v(index) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)();
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_iiii(index,a1,a2,a3) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1,a2,a3);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
 
 
 // include: postamble.js
