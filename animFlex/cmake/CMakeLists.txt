@@ -10,6 +10,7 @@ set(GLM_DIR ../../../glm/glm)
 set(STB_DIR ../../../stb)
 set(IMGUI_DIR ../../../imgui/imgui)
 set(IMGUI_BCK_DIR ../../../imgui/imgui/backends)
+set(TRUETYPE_DIR ../../../freetype/freetype-2.10.0/include)
 
 # Collect source files.
 file(GLOB_RECURSE SOURCES 
@@ -25,6 +26,7 @@ include_directories(
 	${STB_DIR}										# STB header.
 	${IMGUI_DIR}									# IMGUI header.
 	${IMGUI_BCK_DIR}								# IMGUI backends header.
+	${TRUETYPE_DIR}									# TRUETYPE headers.
 )
 
 # Specify output file and target properties.
@@ -48,4 +50,5 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
 --preload-file ../../content \
 --preload-file ../../config \
 --shell-file=${CUSTOM_SHELL_FILE} \
--s EXPORTED_RUNTIME_METHODS=['ccall']")
+-s EXPORTED_RUNTIME_METHODS=['ccall'] \
+-s USE_FREETYPE=1")

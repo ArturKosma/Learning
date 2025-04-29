@@ -12,6 +12,9 @@
 
 #include "IAFPickerInterface.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H  
+
 bool AFRenderer::Init(int width, int height)
 {
 	printf("%s\n", GetOpenGLVersion());
@@ -43,6 +46,20 @@ bool AFRenderer::Init(int width, int height)
 
 	// Enable face culling to not render back of triangles.
 	glEnable(GL_CULL_FACE);
+
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft))
+	{
+		printf("%s\n", "Could not init FreeType Library.");
+		return false;
+	}
+
+	FT_Face face;
+	if(FT_New_Face(ft, "content/fonts/arial.ttf", 0, &face))
+	{
+		printf("%s\n", "Failed to load font.");
+		return false;
+	}
 
 	return true;
 }
