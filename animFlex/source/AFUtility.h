@@ -118,6 +118,11 @@ public:
 		return glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -100.0f, 100.0f);
 	}
 
+	static glm::mat4 CreateOrthoPixelProjectionMat(float screenWidth, float screenHeight)
+	{
+		return glm::ortho(0.0f, screenWidth, 0.0f, screenHeight, -100.0f, 100.0f);
+	}
+
 	static bool IsMobile()
 	{
 #ifdef __EMSCRIPTEN__

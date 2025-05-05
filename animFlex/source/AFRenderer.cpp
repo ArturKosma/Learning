@@ -10,10 +10,8 @@
 #include <ostream>
 #include <glm/ext/matrix_clip_space.hpp>
 
+#include "AFTextRender.h"
 #include "IAFPickerInterface.h"
-
-#include <ft2build.h>
-#include FT_FREETYPE_H  
 
 bool AFRenderer::Init(int width, int height)
 {
@@ -38,6 +36,13 @@ bool AFRenderer::Init(int width, int height)
 		return false;
 	}
 
+	// Init the text rendering.
+	if(!AFTextRender::GetInstance().Init())
+	{
+		printf("%s\n", "Fail on text rendering Init().");
+		return false;
+	}
+
 	// Set up the uniform buffer.
 	m_uniformBuffer.Init();
 
@@ -46,20 +51,6 @@ bool AFRenderer::Init(int width, int height)
 
 	// Enable face culling to not render back of triangles.
 	glEnable(GL_CULL_FACE);
-
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft))
-	{
-		printf("%s\n", "Could not init FreeType Library.");
-		return false;
-	}
-
-	FT_Face face;
-	if(FT_New_Face(ft, "content/fonts/arial.ttf", 0, &face))
-	{
-		printf("%s\n", "Failed to load font.");
-		return false;
-	}
 
 	return true;
 }
@@ -153,6 +144,10 @@ void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 	// Ortho projection upload.
 	m_orthoMatrix = AFUtility::CreateOrthoProjectionMat(frameBufferSize.x, frameBufferSize.y);
 	m_uniformBuffer.UploadOrthoProjection(m_orthoMatrix);
+
+	// Ortho pixel projection upload.
+	m_orthoPixelMatrix = AFUtility::CreateOrthoPixelProjectionMat(frameBufferSize.x, frameBufferSize.y);
+	m_uniformBuffer.UploadOrthoPixelProjection(m_orthoPixelMatrix);
 
 	// Camera transform upload.
 	m_uniformBuffer.UploadCamera(cameraComp->GetWorldTransform());

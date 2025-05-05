@@ -163,6 +163,7 @@ void AFShader::UniformBinding()
 	GLint uiTransformIndex = glGetUniformBlockIndex(m_shaderProgram, "UITransform");
 	GLint viewRotationIndex = glGetUniformBlockIndex(m_shaderProgram, "ViewRotation");
 	GLint orthoProjectionIndex = glGetUniformBlockIndex(m_shaderProgram, "OrthoProjection");
+	GLint orthoPixelProjectionIndex = glGetUniformBlockIndex(m_shaderProgram, "OrthoPixelProjection");
 
 	if (viewProjectionIndex != -1)
 	{
@@ -202,6 +203,11 @@ void AFShader::UniformBinding()
 	if (orthoProjectionIndex != -1)
 	{
 		glUniformBlockBinding(m_shaderProgram, orthoProjectionIndex, 7);
+	}
+
+	if (orthoPixelProjectionIndex != -1)
+	{
+		glUniformBlockBinding(m_shaderProgram, orthoPixelProjectionIndex, 8);
 	}
 
 	glUseProgram(0);

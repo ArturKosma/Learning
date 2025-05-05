@@ -8,19 +8,21 @@ public:
 	AFApp();
 	~AFApp();
 
+	void Init();
 	void StartLoop();
+
 	void OnWindowResize(int newWidth, int newHeight);
 
 	AFGame* GetGame() const;
 
 	static AFApp& GetInstance();
+	static glm::ivec2 GetWindowSize();
 
 private:
 
 	void Tick();
 
 	void CollectAppData(struct AFAppData& appData);
-
 	void SetWindowCallbacks();
 
 	struct AFAppData* m_appData = nullptr;

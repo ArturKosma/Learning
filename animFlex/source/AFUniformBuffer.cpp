@@ -75,6 +75,15 @@ void AFUniformBuffer::Init()
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 7, m_orthoProjectionBuffer);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	// Ortho pixel projection buffer.
+	glGenBuffers(1, &m_orthoPixelProjectionBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, m_orthoPixelProjectionBuffer);
+
+	glBufferData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 8, m_orthoPixelProjectionBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void AFUniformBuffer::UploadViewProjection(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
@@ -95,6 +104,13 @@ void AFUniformBuffer::UploadViewRotation(glm::mat4 viewRotationMatrix)
 void AFUniformBuffer::UploadOrthoProjection(glm::mat4 orthoProjectionMatrix)
 {
 	glBindBuffer(GL_UNIFORM_BUFFER, m_orthoProjectionBuffer);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(orthoProjectionMatrix));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void AFUniformBuffer::UploadOrthoPixelProjection(glm::mat4 orthoProjectionMatrix)
+{
+	glBindBuffer(GL_UNIFORM_BUFFER, m_orthoPixelProjectionBuffer);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(orthoProjectionMatrix));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
@@ -145,4 +161,5 @@ void AFUniformBuffer::Cleanup()
 	glDeleteBuffers(1, &m_uiTransformBuffer);
 	glDeleteBuffers(1, &m_viewRotationBuffer);
 	glDeleteBuffers(1, &m_orthoProjectionBuffer);
+	glDeleteBuffers(1, &m_orthoPixelProjectionBuffer);
 }

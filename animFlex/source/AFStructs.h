@@ -85,3 +85,11 @@ enum class EAFAlphaInterp : uint8_t
 	Linear,
 	CubicHermite
 };
+
+struct FAFGlyph
+{
+	unsigned int textureId = 0;
+	glm::ivec2 size = glm::ivec2(0);
+	glm::ivec2 bearing = glm::ivec2(0);
+	unsigned int advance = 0;
+};

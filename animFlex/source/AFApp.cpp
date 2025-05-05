@@ -24,12 +24,12 @@ AFApp::AFApp()
 	constexpr int initWidth = 800;
 	constexpr int initHeight = 600;
 
-	if(!AFConfig::GetInstance().Init("config/config.ini"))
+	if (!AFConfig::GetInstance().Init("config/config.ini"))
 	{
 		printf("%s\n", "Config Init() failed.");
 		return;
 	}
-	
+
 	SetWindowCallbacks();
 
 	if (!m_window->Init(initWidth, initHeight))
@@ -52,7 +52,7 @@ AFApp::AFApp()
 		return;
 	}
 
-	if(!m_helperInterface->Init(*m_window))
+	if (!m_helperInterface->Init(*m_window))
 	{
 		printf("%s\n", "Helper Interface Init() failed.");
 		return;

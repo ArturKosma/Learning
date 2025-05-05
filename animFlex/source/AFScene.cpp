@@ -6,7 +6,9 @@
 #include "AFGridComponent.h"
 #include "AFOrientationBoxUIComponent.h"
 #include "AFOrientationGizmoUIComponent.h"
+#include "AFOrientationGlyph.h"
 #include "AFStaticMeshComponent.h"
+#include "AFTextComponent.h"
 #include "AFUIRenderComponent.h"
 #include "AFUtility.h"
 
@@ -134,6 +136,30 @@ void AFScene::CreateDefaultUIs()
 	orientationGizmo->AddComponent(orientationGizmoComponent);
 	orientationGizmoComponent->SetLocation(glm::vec2(-0.85f, -0.80f));
 	orientationGizmoComponent->SetScale(glm::vec2(0.15f, 0.15f));
+
+	const float textGlyphScale = 0.68f;
+
+	AFOrientationGlyph* xGlyph = CreateObject<AFOrientationGlyph>(); // X-glyph.
+	xGlyph->SetText("x");
+	orientationGizmo->AddComponent(xGlyph);
+	xGlyph->SetLocation(glm::vec2(-0.85f, -0.80f));
+	xGlyph->SetScale(glm::vec2(textGlyphScale));
+	xGlyph->SetShaders("content/shaders/glyph.vert", "content/shaders/glyph.frag");
+
+	AFOrientationGlyph* yGlyph = CreateObject<AFOrientationGlyph>(); // Y-glyph.
+	yGlyph->SetText("y");
+	orientationGizmo->AddComponent(yGlyph);
+	yGlyph->SetLocation(glm::vec2(-0.85f, -0.80f));
+	yGlyph->SetScale(glm::vec2(textGlyphScale));
+	yGlyph->SetShaders("content/shaders/glyph.vert", "content/shaders/glyph.frag");
+
+	AFOrientationGlyph* zGlyph = CreateObject<AFOrientationGlyph>(); // Z-glyph.
+	zGlyph->SetText("z");
+	orientationGizmo->AddComponent(zGlyph);
+	zGlyph->SetLocation(glm::vec2(-0.85f, -0.80f));
+	zGlyph->SetScale(glm::vec2(textGlyphScale));
+	zGlyph->SetShaders("content/shaders/glyph.vert", "content/shaders/glyph.frag");
+
 	AddUI(orientationGizmo);
 
 	// Create orientation box.
