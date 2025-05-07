@@ -23,13 +23,10 @@ bool AFTextComponent::Load()
 	// Get the loaded characters.
 	const std::map<char, FAFGlyph>& characters = AFTextRender::GetInstance().GetCharacters();
 
-	// Find current width/height.
-	AFAppData appData;
-
 	// #HACK.
 	// Create access to the app's window size during app constructor.
 	const float screenWidth = /*static_cast<float>(appData.width)*/ 2560.0f;
-	const float screenHeight = /*static_cast<float>(appData.height)*/ 1440.f;
+	const float screenHeight = /*static_cast<float>(appData.height)*/ 1440.0f;
 
 	const float aspect = screenWidth / screenHeight;
 	const float toNDCx = 2.0f * aspect / screenWidth;
@@ -128,7 +125,7 @@ void AFTextComponent::Draw(const AFDrawOverride& overrideProperties) const
 		m_vertexBuffer.Bind();
 
 		// Draw.
-		m_vertexBuffer.Draw(GetDrawMode(), glyphMesh.indices.size());
+		m_vertexBuffer.Draw(GetDrawMode());
 	}
 
 	// Unbind VAO.

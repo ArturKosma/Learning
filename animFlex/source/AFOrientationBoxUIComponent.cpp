@@ -164,7 +164,7 @@ void AFOrientationBoxUIComponent::Draw(const AFDrawOverride& overrideProperties)
 
 	m_vertexBuffer.Bind();
 
-	m_vertexBuffer.Draw(GetDrawMode(), m_mesh.indices.size());
+	m_vertexBuffer.Draw(GetDrawMode());
 
 	m_vertexBuffer.UnBind();
 

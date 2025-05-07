@@ -38,8 +38,6 @@ private:
 template <typename T>
 T* AFScene::CreateObject()
 {
-	static unsigned int idCounter = 0;
-
 	T* newObject = new T;
 	AFObject* casted = static_cast<AFObject*>(newObject);
 

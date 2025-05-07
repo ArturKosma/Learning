@@ -22,6 +22,7 @@ public:
 	void SetTexture(const std::string& texturePath);
 
 	void SetMesh(const AFMesh& newMesh);
+	void SetMesh(const AFMeshLoaded& newMesh);
 	const AFMesh& GetMesh() const;
 
 	void SetUseDepthTest(bool useDepthTest);
@@ -31,4 +32,6 @@ private:
 	bool m_depthTest = true;
 	bool m_stencilTest = true;
 	AFTexture m_tex = AFTexture();
+
+	EAFLoadSource m_loadSource = EAFLoadSource::Custom;
 };

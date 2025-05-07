@@ -48,6 +48,13 @@ struct AFMesh
 	std::vector<unsigned int> indices;
 };
 
+struct AFMeshLoaded
+{
+	GLuint vao;
+	GLsizei indexNum;
+	GLenum type;
+};
+
 enum class EAFDrawType : uint8_t
 {
 	Normal,
@@ -92,4 +99,10 @@ struct FAFGlyph
 	glm::ivec2 size = glm::ivec2(0);
 	glm::ivec2 bearing = glm::ivec2(0);
 	unsigned int advance = 0;
+};
+
+enum class EAFLoadSource : uint8_t
+{
+	Custom,
+	VAO
 };

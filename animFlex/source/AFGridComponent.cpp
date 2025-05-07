@@ -62,7 +62,7 @@ void AFGridComponent::Draw(bool override, const AFDrawOverride& overrideProperti
 	glStencilMask(0x00);
 
 	// Draw the triangles.
-	m_vertexBuffer.Draw(GL_TRIANGLES, m_mesh.indices.size());
+	m_vertexBuffer.Draw(GL_TRIANGLES);
 
 	// Unbind the buffer with vertices.
 	m_vertexBuffer.UnBind();

@@ -37,7 +37,7 @@ void AFStaticMeshComponent::Draw(bool override, const AFDrawOverride& overridePr
 	}
 
 	// Draw the triangles.
-	m_vertexBuffer.Draw(GL_TRIANGLES, m_mesh.indices.size());
+	m_vertexBuffer.Draw(GL_TRIANGLES);
 
 	glDisable(GL_STENCIL_TEST);
 	glStencilMask(0x00);
@@ -56,8 +56,19 @@ unsigned long long AFStaticMeshComponent::GetVertexCount()
 
 bool AFStaticMeshComponent::Load()
 {
-	m_vertexBuffer.Init();
-	m_vertexBuffer.UploadMesh(m_mesh);
+	switch(m_loadSource)
+	{
+		case EAFLoadSource::Custom:
+		{
+			m_vertexBuffer.Init();
+			m_vertexBuffer.UploadMesh(m_mesh);
+			break;
+		}
+		case EAFLoadSource::VAO:
+		{
+			break;
+		}
+	}
 
 	if (!m_tex.LoadTexture())
 	{
@@ -86,6 +97,12 @@ void AFStaticMeshComponent::SetTexture(const std::string& texturePath)
 void AFStaticMeshComponent::SetMesh(const AFMesh& newMesh)
 {
 	m_mesh = newMesh;
+}
+
+void AFStaticMeshComponent::SetMesh(const AFMeshLoaded& newMesh)
+{
+	m_loadSource = EAFLoadSource::VAO;
+	m_vertexBuffer.UploadMesh(newMesh);
 }
 
 const AFMesh& AFStaticMeshComponent::GetMesh() const

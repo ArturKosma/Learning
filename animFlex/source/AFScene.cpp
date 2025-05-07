@@ -3,6 +3,7 @@
 #include "AFUI.h"
 #include "AFBackgroundComponent.h"
 #include "AFBoxComponent.h"
+#include "AFGLTFLoader.h"
 #include "AFGridComponent.h"
 #include "AFOrientationBoxUIComponent.h"
 #include "AFOrientationGizmoUIComponent.h"
@@ -99,7 +100,6 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(gridActor);
 
 	// Create test boxes.
-	
 	AFActor* testBoxActor0 = CreateObject<AFActor>();
 	AFActor* testBoxActor1 = CreateObject<AFActor>();
 	AFActor* testBoxActor2 = CreateObject<AFActor>();
@@ -125,6 +125,17 @@ void AFScene::CreateDefaultSceneActors()
 	testBoxActor1->AddOffsetLocation({ 300.0f, 50.0f, 0.0f });
 	testBoxActor1->AddOffsetRotation({ 0.0f, 15.0f, 0.0f });
 	testBoxActor2->AddOffsetLocation({ -350.0f, 50.0f, 50.0f });
+
+	// TinyGLTF.
+	AFActor* tinyglTFActor = CreateObject<AFActor>();
+	tinyglTFActor->SetDisplayName("tinyglTF");
+	AFStaticMeshComponent* tinyglTFMesh = CreateObject<AFStaticMeshComponent>();
+	tinyglTFMesh->SetMesh(AFGLTFLoader::Load("content/models/woman.gltf"));
+	tinyglTFMesh->SetTexture("content/textures/crate2.png");
+	tinyglTFMesh->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
+	tinyglTFActor->AddComponent(tinyglTFMesh);
+	tinyglTFMesh->SetLocalScale(glm::vec3(100.0f));
+	AddActor(tinyglTFActor);
 }
 
 void AFScene::CreateDefaultUIs()
@@ -139,6 +150,7 @@ void AFScene::CreateDefaultUIs()
 
 	const float textGlyphScale = 0.68f;
 
+	// Create xyz letters around the orientation gizmo.
 	AFOrientationGlyph* xGlyph = CreateObject<AFOrientationGlyph>(); // X-glyph.
 	xGlyph->SetText("x");
 	orientationGizmo->AddComponent(xGlyph);

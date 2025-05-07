@@ -17,6 +17,8 @@ file(GLOB_RECURSE SOURCES
 	${SRC_DIR}/*.cpp								# All sources.	
 	${SRC_DIR}/third_party/*.c						# Third party c.
 	${SRC_DIR}/third_party/*.cpp					# Third party cpp.
+	${SRC_DIR}/third_party/*.cc						# Third party cc.
+	${SRC_DIR}/third_party/*.hpp					# Third party hpp.
 )
 
 # Include directories for headers.

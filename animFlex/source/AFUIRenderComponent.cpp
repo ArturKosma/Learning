@@ -73,7 +73,7 @@ void AFUIRenderComponent::Draw(const AFDrawOverride& overrideProperties) const
 	drawShader.Use();
 	m_vertexBuffer.Bind();
 
-	m_vertexBuffer.Draw(GetDrawMode(), m_mesh.indices.size());
+	m_vertexBuffer.Draw(GetDrawMode());
 
 	m_vertexBuffer.UnBind();
 

@@ -32,6 +32,8 @@ void AFVertexBuffer::Init()
 
 void AFVertexBuffer::UploadMesh(const AFMesh& newMesh)
 {
+	m_indexCount = static_cast<GLsizei>(newMesh.indices.size());
+
 	glBindVertexArray(m_VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
@@ -41,6 +43,13 @@ void AFVertexBuffer::UploadMesh(const AFMesh& newMesh)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, newMesh.indices.size() * sizeof(unsigned int), &newMesh.indices.at(0), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+}
+
+void AFVertexBuffer::UploadMesh(const AFMeshLoaded& newMesh)
+{
+	m_VAO = newMesh.vao;
+	m_indexCount = newMesh.indexNum;
+	m_type = newMesh.type;
 }
 
 void AFVertexBuffer::Bind() const
@@ -53,9 +62,9 @@ void AFVertexBuffer::UnBind() const
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::Draw(GLuint mode, size_t num) const
+void AFVertexBuffer::Draw(GLuint mode) const
 {
-	glDrawElements(mode, static_cast<GLsizei>(num), GL_UNSIGNED_INT, nullptr);
+	glDrawElements(mode, m_indexCount, m_type, nullptr);
 }
 
 void AFVertexBuffer::Cleanup()

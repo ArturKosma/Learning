@@ -145,10 +145,6 @@ void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 	m_orthoMatrix = AFUtility::CreateOrthoProjectionMat(frameBufferSize.x, frameBufferSize.y);
 	m_uniformBuffer.UploadOrthoProjection(m_orthoMatrix);
 
-	// Ortho pixel projection upload.
-	m_orthoPixelMatrix = AFUtility::CreateOrthoPixelProjectionMat(frameBufferSize.x, frameBufferSize.y);
-	m_uniformBuffer.UploadOrthoPixelProjection(m_orthoPixelMatrix);
-
 	// Camera transform upload.
 	m_uniformBuffer.UploadCamera(cameraComp->GetWorldTransform());
 
