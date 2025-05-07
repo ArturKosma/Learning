@@ -131,8 +131,8 @@ void AFScene::CreateDefaultSceneActors()
 	tinyglTFActor->SetDisplayName("tinyglTF");
 	AFStaticMeshComponent* tinyglTFMesh = CreateObject<AFStaticMeshComponent>();
 	tinyglTFMesh->SetMesh(AFGLTFLoader::Load("content/models/woman.gltf"));
-	tinyglTFMesh->SetTexture("content/textures/crate2.png");
-	tinyglTFMesh->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
+	tinyglTFMesh->SetTexture("content/textures/woman.png", false);
+	tinyglTFMesh->SetShaders("content/shaders/basicGLTF.vert", "content/shaders/basicGLTF.frag");
 	tinyglTFActor->AddComponent(tinyglTFMesh);
 	tinyglTFMesh->SetLocalScale(glm::vec3(100.0f));
 	AddActor(tinyglTFActor);

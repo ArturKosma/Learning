@@ -19,7 +19,7 @@ public:
 	bool Load() override;
 
 	void SetShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-	void SetTexture(const std::string& texturePath);
+	void SetTexture(const std::string& texturePath, bool verticallyFlipped = true);
 
 	void SetMesh(const AFMesh& newMesh);
 	void SetMesh(const AFMeshLoaded& newMesh);

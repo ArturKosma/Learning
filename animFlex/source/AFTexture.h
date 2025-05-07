@@ -10,7 +10,7 @@ class AFTexture
 
 public:
 
-	void SetTexture(const std::string& texturePath);
+	void SetTexture(const std::string& texturePath, bool verticallyFlipped = true);
 	bool LoadTexture();
 
 	void Bind() const;
@@ -20,6 +20,7 @@ public:
 
 private:
 
+	bool m_verticallyFlipped = true;
 	std::string m_texturePath = {};
 	GLuint m_texture = 0;
 };

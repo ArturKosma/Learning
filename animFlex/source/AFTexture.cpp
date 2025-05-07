@@ -8,7 +8,7 @@ bool AFTexture::LoadTexture()
 {
 	int texWidth, texHeight, numberOfChannels;
 
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(m_verticallyFlipped);
 	unsigned char* textureData = stbi_load(m_texturePath.c_str(), &texWidth, &texHeight, &numberOfChannels, 0);
 
 	if(!textureData)
@@ -56,8 +56,9 @@ bool AFTexture::LoadTexture()
 	return true;
 }
 
-void AFTexture::SetTexture(const std::string& texturePath)
+void AFTexture::SetTexture(const std::string& texturePath, bool verticallyFlipped)
 {
+	m_verticallyFlipped = verticallyFlipped;
 	m_texturePath = texturePath;
 }
 

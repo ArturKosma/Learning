@@ -89,9 +89,9 @@ void AFStaticMeshComponent::SetShaders(const std::string& vertexShaderPath, cons
 	m_shader.SetFragmentShader(fragmentShaderPath);
 }
 
-void AFStaticMeshComponent::SetTexture(const std::string& texturePath)
+void AFStaticMeshComponent::SetTexture(const std::string& texturePath, bool verticallyFlipped)
 {
-	m_tex.SetTexture(texturePath);
+	m_tex.SetTexture(texturePath, verticallyFlipped);
 }
 
 void AFStaticMeshComponent::SetMesh(const AFMesh& newMesh)
