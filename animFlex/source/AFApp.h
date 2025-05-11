@@ -22,10 +22,10 @@ private:
 
 	void Tick();
 
-	void CollectAppData(struct AFAppData& appData);
+	void CollectAppData(struct FAFAppData& appData);
 	void SetWindowCallbacks();
 
-	struct AFAppData* m_appData = nullptr;
+	struct FAFAppData* m_appData = nullptr;
 
 	class AFTimerManager* m_timerManager = nullptr;
 	class AFWindow* m_window = nullptr;

@@ -6,5 +6,5 @@ class AFGLTFLoader
 {
 public:
 
-	static AFMeshLoaded Load(const std::string& filename, bool binary = false);
+	static bool Load(const std::string& filename, FAFMeshLoaded& loadedMesh, bool binary = false);
 };

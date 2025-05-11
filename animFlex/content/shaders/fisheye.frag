@@ -97,6 +97,7 @@ void main()
 	float mask = horizonMask;
 
 	// Horizon mask can be occluded.
+	stencil = 1.0f;
 	horizonMask *= stencil;
 
 	// The further away from the horizontal center of the screen something is - the stronger the effect.
@@ -109,10 +110,7 @@ void main()
 	uv += vec2(0.0f, horizonMask * 0.1f);
 
 	vec4 screen = texture(u_ColorTex, uv);
-	//vec4 finalColor = vec4(horizonMask > 0.0f ? vec3(horizonMask) : vec3(screen.xyz), 1.0f);
 	vec4 finalColor = screen;
-	//vec4 finalColor = vec4(vec3(stencil), 1.0f);
-
 
 	FragColor = finalColor;
 }

@@ -56,12 +56,6 @@ bool AFTexture::LoadTexture()
 	return true;
 }
 
-void AFTexture::SetTexture(const std::string& texturePath, bool verticallyFlipped)
-{
-	m_verticallyFlipped = verticallyFlipped;
-	m_texturePath = texturePath;
-}
-
 void AFTexture::Bind() const
 {
 	glActiveTexture(GL_TEXTURE0);
@@ -76,4 +70,12 @@ void AFTexture::UnBind() const
 void AFTexture::Cleanup()
 {
 	glDeleteTextures(1, &m_texture);
+}
+
+bool AFTexture::LoadImpl(const char* filepath, bool boolean)
+{
+	m_verticallyFlipped = boolean;
+	m_texturePath = filepath;
+
+	return LoadTexture();
 }

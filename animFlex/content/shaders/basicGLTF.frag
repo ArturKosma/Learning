@@ -1,5 +1,5 @@
 #version 300 es
-precision mediump float;
+precision highp float;
 
 layout (std140) uniform Camera
 {
@@ -10,9 +10,6 @@ uniform sampler2D Tex;
 
 in vec3 Normal;
 in vec2 UV;
-
-vec3 lightPos = vec3(400.0f, 500.0f, -300.0f);
-vec3 lightColor = vec3(0.5f, 0.5f, 0.5f);
 
 layout (location = 0) out vec4 FragColor;
 

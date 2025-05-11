@@ -1,8 +1,10 @@
 #include "AFOrientationGlyph.h"
 
-void AFOrientationGlyph::Draw(const AFDrawOverride& overrideProperties) const
+#include "AFShader.h"
+
+void AFOrientationGlyph::Draw(const FAFDrawOverride& overrideProperties) const
 {
-	m_shader.Use();
+	m_shader->Use();
 
 	int id = 0;
 	if(GetText() == "y")
@@ -14,7 +16,7 @@ void AFOrientationGlyph::Draw(const AFDrawOverride& overrideProperties) const
 		id = 2;
 	}
 
-	GLint location = glGetUniformLocation(m_shader.GetProgram(), "aGlyphID");
+	GLint location = glGetUniformLocation(m_shader->GetProgram(), "aGlyphID");
 	glUniform1i(location, id);
 
 	AFTextComponent::Draw(overrideProperties);

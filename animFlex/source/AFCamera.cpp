@@ -4,24 +4,25 @@
 #include "AFMath.h"
 #include "AFMovementComponent.h"
 #include "AFTimerManager.h"
+#include "AFScene.h"
 
 AFCamera::AFCamera()
 {
-	m_movementComponent = new AFCameraMovementComponent();
+	m_movementComponent = AFScene::CreateObject<AFCameraMovementComponent>();
 	AddComponent(m_movementComponent);
 
-	m_cameraComponent = new AFCameraComponent();
+	m_cameraComponent = AFScene::CreateObject<AFCameraComponent>();
 	AddComponent(m_cameraComponent);
 
 	BindInputs();
 }
 
-AFCameraComponent* AFCamera::GetCameraComponent() const
+std::shared_ptr<AFCameraComponent> AFCamera::GetCameraComponent() const
 {
 	return m_cameraComponent;
 }
 
-AFCameraMovementComponent* AFCamera::GetMovementComponent() const
+std::shared_ptr<AFCameraMovementComponent> AFCamera::GetMovementComponent() const
 {
 	return m_movementComponent;
 }

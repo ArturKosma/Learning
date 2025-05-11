@@ -3,16 +3,15 @@
 #include <string>
 #include <glad/glad.h>
 
-class AFShader
+#include "AFStructs.h"
+
+class AFShader : public FAFAsset
 {
 
 public:
 
 	AFShader();
 	virtual ~AFShader();
-
-	void SetVertexShader(const std::string& inPath);
-	void SetFragmentShader(const std::string& inPath);
 
 	void SetUniform1f(const GLchar* uniformName, float uniformFloat1);
 	void SetUniform2f(const GLchar* uniformName, float uniformFloat1, float uniformFloat2);
@@ -25,6 +24,8 @@ public:
 	GLuint GetProgram() const;
 
 protected:
+
+	bool LoadImpl(const char* filepath1, const char* filepath2) override;
 
 	GLuint ReadShader(const std::string& shaderFilename, GLuint shaderType);
 

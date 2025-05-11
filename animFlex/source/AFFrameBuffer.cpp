@@ -1,6 +1,7 @@
 #include "AFFrameBuffer.h"
 
 #include "AFCamera.h"
+#include "AFContent.h"
 #include "AFStructs.h"
 #include "AFUtility.h"
 
@@ -133,9 +134,7 @@ bool AFFramebuffer::Init(int width, int height)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	m_stencilShader.SetVertexShader("content/shaders/stencil.vert");
-	m_stencilShader.SetFragmentShader("content/shaders/stencil.frag");
-	m_stencilShader.LoadShaders();
+	m_stencilShader = AFContent::Get().FindAsset<AFShader>("shader_stencil");
 
 	return true;
 }
@@ -150,15 +149,15 @@ void AFFramebuffer::UnBind()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
+void AFFramebuffer::DrawToScreen(const FAFSceneData& sceneData)
 {
-	AFCamera* camera = sceneData.activeCamera;
+	std::shared_ptr<AFCamera> camera = sceneData.activeCamera;
 	if (!camera)
 	{
 		return;
 	}
 
-	AFCameraComponent* cameraComp = camera->GetCameraComponent();
+	std::shared_ptr<AFCameraComponent> cameraComp = camera->GetCameraComponent();
 	if (!cameraComp)
 	{
 		return;
@@ -213,7 +212,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	// Draw 3 undefined points.
 	// Postprocess vertex shader should create a full screen triangle.
 	// Stencil texture gets filled.
-	m_stencilShader.Use();
+	m_stencilShader->Use();
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	// Disable stencil test.
@@ -224,14 +223,14 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 	// Fetch all the camera postprocesses.
-	std::vector<AFPostprocessShader> cameraPostprocessShaders = cameraComp->GetPostprocessShaders();
+	std::vector<std::shared_ptr<AFPostprocessShader>> cameraPostprocessShaders = cameraComp->GetPostprocessShaders();
 
 	// Alternate between resolve FBOs while applying all postprocess shaders.
 	std::vector<GLuint> resolveFbo = { m_resolveFramebuffer0, m_resolveFramebuffer1 };
 	std::vector<GLuint> resolveColorTex = { m_resolveColorTex0, m_resolveColorTex1 };
 	GLuint finalColorTex = m_resolveColorTex0;
 	bool alternate = false;
-	for(AFPostprocessShader postprocess : cameraPostprocessShaders)
+	for(std::shared_ptr<AFPostprocessShader> postprocess : cameraPostprocessShaders)
 	{
 		const GLuint drawIdx = alternate ? 0 : 1;
 
@@ -247,7 +246,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 		glBindTexture(GL_TEXTURE_2D, m_resolveStencilColorTex);
 
 		// Use postprocess.
-		postprocess.Use();
+		postprocess->Use();
 
 		// Draw 3 undefined points.
 		// Postprocess vertex shader should create a full screen triangle.
@@ -264,7 +263,7 @@ void AFFramebuffer::DrawToScreen(const AFSceneData& sceneData)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Use neutral shader.
-	cameraComp->GetNeutralShader().Use();
+	cameraComp->GetNeutralShader()->Use();
 
 	// Bind the final textures.
 	glActiveTexture(GL_TEXTURE0);

@@ -14,7 +14,7 @@ public:
 	void Bind() override;
 	void UnBind() override;
 
-	void DrawToScreen(const AFSceneData& sceneData) override;
+	void DrawToScreen(const FAFSceneData& sceneData) override;
 
 protected:
 
@@ -39,5 +39,5 @@ protected:
 	GLuint m_depthFBO = 0;
 	GLuint m_stencilFBO = 0;
 
-	AFShader m_stencilShader = AFShader();
+	std::shared_ptr<AFShader> m_stencilShader = nullptr;
 };

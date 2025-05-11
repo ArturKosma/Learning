@@ -1,116 +1,71 @@
 #include "AFStaticMeshComponent.h"
 
-void AFStaticMeshComponent::Draw(bool override, const AFDrawOverride& overrideProperties) const
+#include "AFShader.h"
+#include "AFTexture.h"
+#include "AFVertexBuffer.h"
+
+void AFStaticMeshComponent::Draw(bool override, const FAFDrawOverride& overrideProperties) const
 {
-	// Tell the gpu which shader to use.
-	override ? overrideProperties.shader.Use() : m_shader.Use();
-
-	// Bind texture object - it will be used during drawing of triangles to push the texture data to frag shader.
-	m_tex.Bind();
-
-	// Bind the vertex buffer which already contains information about vertices - their locations, color, uv mapping, etc. 
-	m_vertexBuffer.Bind();
-
-	// Should this mesh use stencil testing when drawing.
-	if (m_stencilTest)
+	// Draw every mesh separately.
+	for(const FAFSubMesh& sub : m_mesh->subMeshes)
 	{
-		glEnable(GL_STENCIL_TEST);
+		// Tell the gpu which shader to use.
+		override ? overrideProperties.shader->Use() : sub.shader->Use();
 
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
+		// Bind texture object.
+		sub.texture->Bind();
 
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	}
+		// Bind the vertex buffer. 
+		sub.vertexBuffer->Bind();
 
-	// Should this mesh use depth testing when drawing.
-	if(m_depthTest)
-	{
-		// Enable depth for rest of scene.
-		glDepthMask(GL_TRUE);
-		glEnable(GL_DEPTH_TEST);
-	}
-	else
-	{
-		// Disable depth for drawing.
-		glDepthMask(GL_FALSE);
-		glDisable(GL_DEPTH_TEST);
-	}
-
-	// Draw the triangles.
-	m_vertexBuffer.Draw(GL_TRIANGLES);
-
-	glDisable(GL_STENCIL_TEST);
-	glStencilMask(0x00);
-
-	// Unbind the buffer with vertices.
-	m_vertexBuffer.UnBind();
-
-	// Unbind the texture object.
-	m_tex.UnBind();
-}
-
-unsigned long long AFStaticMeshComponent::GetVertexCount()
-{
-	return m_mesh.vertices.size();
-}
-
-bool AFStaticMeshComponent::Load()
-{
-	switch(m_loadSource)
-	{
-		case EAFLoadSource::Custom:
+		// Should this sub-mesh use stencil testing when drawing.
+		if (sub.stencilTest)
 		{
-			m_vertexBuffer.Init();
-			m_vertexBuffer.UploadMesh(m_mesh);
-			break;
+			glEnable(GL_STENCIL_TEST);
+
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		}
-		case EAFLoadSource::VAO:
+		else
 		{
-			break;
+			// Disable stencil drawing.
+			glDisable(GL_STENCIL_TEST);
+			glStencilMask(0x00);
 		}
-	}
 
-	if (!m_tex.LoadTexture())
-	{
-		return false;
-	}
+		// Should this sub-mesh use depth testing when drawing.
+		if (sub.depthTest)
+		{
+			// Enable depth.
+			glDepthMask(GL_TRUE);
+			glEnable(GL_DEPTH_TEST);
+		}
+		else
+		{
+			// Disable depth drawing.
+			glDepthMask(GL_FALSE);
+			glDisable(GL_DEPTH_TEST);
+		}
 
-	if (!m_shader.LoadShaders())
-	{
-		return false;
-	}
+		// Draw.
+		sub.vertexBuffer->Draw();
 
-	return true;
+		// Unbind the buffer with vertices.
+		sub.vertexBuffer->UnBind();
+
+		// Unbind the texture object.
+		sub.texture->UnBind();
+	}
 }
 
-void AFStaticMeshComponent::SetShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
-{
-	m_shader.SetVertexShader(vertexShaderPath);
-	m_shader.SetFragmentShader(fragmentShaderPath);
-}
-
-void AFStaticMeshComponent::SetTexture(const std::string& texturePath, bool verticallyFlipped)
-{
-	m_tex.SetTexture(texturePath, verticallyFlipped);
-}
-
-void AFStaticMeshComponent::SetMesh(const AFMesh& newMesh)
+void AFStaticMeshComponent::SetMesh(std::shared_ptr<FAFMesh> newMesh)
 {
 	m_mesh = newMesh;
 }
 
-void AFStaticMeshComponent::SetMesh(const AFMeshLoaded& newMesh)
-{
-	m_loadSource = EAFLoadSource::VAO;
-	m_vertexBuffer.UploadMesh(newMesh);
-}
-
-const AFMesh& AFStaticMeshComponent::GetMesh() const
+std::shared_ptr<FAFMesh> AFStaticMeshComponent::GetMesh() const
 {
 	return m_mesh;
-}
-
-void AFStaticMeshComponent::SetUseDepthTest(bool useDepthTest)
-{
-	m_depthTest = useDepthTest;
 }

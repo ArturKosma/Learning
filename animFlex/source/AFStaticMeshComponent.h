@@ -1,9 +1,6 @@
 #pragma once
 
 #include "AFRenderComponent.h"
-#include "AFTexture.h"
-
-#include <string>
 
 class AFStaticMeshComponent : public AFRenderComponent
 {
@@ -12,26 +9,12 @@ public:
 	AFStaticMeshComponent() = default;
 	virtual ~AFStaticMeshComponent() override = default;
 
-	void Draw(bool override = false, const AFDrawOverride& overrideProperties = {}) const override;
+	void Draw(bool override = false, const FAFDrawOverride& overrideProperties = {}) const override;
 
-	unsigned long long GetVertexCount() override;
+	void SetMesh(std::shared_ptr<FAFMesh> newMesh);
+	std::shared_ptr<FAFMesh> GetMesh() const;
 
-	bool Load() override;
+protected:
 
-	void SetShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-	void SetTexture(const std::string& texturePath, bool verticallyFlipped = true);
-
-	void SetMesh(const AFMesh& newMesh);
-	void SetMesh(const AFMeshLoaded& newMesh);
-	const AFMesh& GetMesh() const;
-
-	void SetUseDepthTest(bool useDepthTest);
-
-private:
-
-	bool m_depthTest = true;
-	bool m_stencilTest = true;
-	AFTexture m_tex = AFTexture();
-
-	EAFLoadSource m_loadSource = EAFLoadSource::Custom;
+	std::shared_ptr<FAFMesh> m_mesh = nullptr;
 };

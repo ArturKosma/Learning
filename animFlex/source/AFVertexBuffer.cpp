@@ -12,11 +12,11 @@ void AFVertexBuffer::Init()
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, position));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, uv));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, normal));
-	glVertexAttribIPointer(3, 4, GL_UNSIGNED_BYTE, sizeof(AFVertex), (void*)offsetof(AFVertex, uniqueId));
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(AFVertex), (void*)offsetof(AFVertex, uvCenter));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, position));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, normal));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, uv));
+	glVertexAttribIPointer(3, 1, GL_UNSIGNED_BYTE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, faceID));
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, uvCenter));
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -30,26 +30,32 @@ void AFVertexBuffer::Init()
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::UploadMesh(const AFMesh& newMesh)
+void AFVertexBuffer::UploadMesh(const FAFSubMesh& newSubMesh)
 {
-	m_indexCount = static_cast<GLsizei>(newMesh.indices.size());
+	m_drawCount = static_cast<GLsizei>(newSubMesh.indices.size());
 
 	glBindVertexArray(m_VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
-	glBufferData(GL_ARRAY_BUFFER, newMesh.vertices.size() * sizeof(AFVertex), &newMesh.vertices.at(0), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, newSubMesh.vertices.size() * sizeof(FAFVertex), &newSubMesh.vertices.at(0), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, newMesh.indices.size() * sizeof(unsigned int), &newMesh.indices.at(0), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, newSubMesh.indices.size() * sizeof(unsigned int), &newSubMesh.indices.at(0), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::UploadMesh(const AFMeshLoaded& newMesh)
+void AFVertexBuffer::UploadMesh(const FAFSubMeshLoaded& newSubMesh)
 {
-	m_VAO = newMesh.vao;
-	m_indexCount = newMesh.indexNum;
-	m_type = newMesh.type;
+	m_VAO = newSubMesh.vao;
+	m_drawMode = newSubMesh.drawMode;
+	m_drawCount = newSubMesh.drawCount;
+	m_drawType = newSubMesh.drawType;
+}
+
+void AFVertexBuffer::SetDrawMode(GLuint newDrawMode)
+{
+	m_drawMode = newDrawMode;
 }
 
 void AFVertexBuffer::Bind() const
@@ -62,9 +68,9 @@ void AFVertexBuffer::UnBind() const
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::Draw(GLuint mode) const
+void AFVertexBuffer::Draw() const
 {
-	glDrawElements(mode, m_indexCount, m_type, nullptr);
+	glDrawElements(m_drawMode, m_drawCount, m_drawType, nullptr);
 }
 
 void AFVertexBuffer::Cleanup()

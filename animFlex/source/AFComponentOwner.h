@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 #include "AFComponent.h"
@@ -13,10 +14,10 @@ public:
 
 	void Tick(float deltaTime) override;
 
-	void AddComponent(AFComponent* newComponent);
-	const std::vector<AFComponent*>& GetComponents() const;
+	void AddComponent(std::shared_ptr<AFComponent> newComponent);
+	const std::vector<std::shared_ptr<AFComponent>>& GetComponents() const;
 
 protected:
 
-	std::vector<AFComponent*> m_components = std::vector<AFComponent*>();
+	std::vector<std::shared_ptr<AFComponent>> m_components = {};
 };

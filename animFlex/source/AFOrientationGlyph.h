@@ -5,5 +5,7 @@ class AFOrientationGlyph : public AFTextComponent
 {
 public:
 
-	void Draw(const AFDrawOverride& overrideProperties) const override;
+	void Draw(const FAFDrawOverride& overrideProperties) const override;
+
+	std::shared_ptr<AFShader> m_glyphShader = nullptr;
 };

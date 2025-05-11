@@ -7,7 +7,7 @@ public:
 	AFBackgroundComponent() = default;
 	virtual ~AFBackgroundComponent() override = default;
 
-	bool Load() override;
+	void Draw(bool override = false, const FAFDrawOverride& overrideProperties = {}) const override;
 
-	void Draw(bool override = false, const AFDrawOverride& overrideProperties = {}) const override;
+	std::shared_ptr<AFShader> m_backgroundShader = nullptr;
 };

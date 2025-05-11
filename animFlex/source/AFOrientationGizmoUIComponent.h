@@ -6,6 +6,6 @@ class AFOrientationGizmoUIComponent : public AFUIRenderComponent
 {
 public:
 
-	AFOrientationGizmoUIComponent();
+	AFOrientationGizmoUIComponent() = default;
 	virtual ~AFOrientationGizmoUIComponent() = default;
 };

@@ -10,19 +10,23 @@ class AFVertexBuffer
 public:
 
 	void Init();
-	void UploadMesh(const AFMesh& newMesh);
-	void UploadMesh(const AFMeshLoaded& newMesh);
+
+	void UploadMesh(const FAFSubMesh& newSubMesh);
+	void UploadMesh(const FAFSubMeshLoaded& newSubMesh);
+
+	void SetDrawMode(GLuint newDrawMode);
 
 	void Bind() const;
 	void UnBind() const;
 
-	void Draw(GLuint mode) const;
+	void Draw() const;
 	void Cleanup();
 
 private:
 
-	GLsizei m_indexCount = 0;
-	GLenum m_type = GL_UNSIGNED_INT;
+	GLuint m_drawMode = GL_TRIANGLES;
+	GLsizei m_drawCount = 0;
+	GLenum m_drawType = GL_UNSIGNED_INT;
 
 	GLuint m_VAO = 0;
 	GLuint m_vertexVBO = 0;

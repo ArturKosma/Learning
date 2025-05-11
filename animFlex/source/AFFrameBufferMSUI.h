@@ -9,5 +9,5 @@ public:
 	void Bind() override;
 	void UnBind() override;
 
-	void DrawToScreen(const AFSceneData& sceneData) override;
+	void DrawToScreen(const FAFSceneData& sceneData) override;
 };

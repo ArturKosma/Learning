@@ -1,58 +1,127 @@
 #pragma once
 
+#include <memory>
+#include <string>
 #include <vector>
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
-#include "AFShader.h"
-
-struct AFCameraProperties
+struct FAFCameraProperties
 {
 	int fieldOfView = 60;
 	float near = 20.0f;
 	float far = 20000.0f;
 };
 
-struct AFSceneData
+struct FAFSceneData
 {
-	std::vector<class AFActor*> sceneActors = std::vector<class AFActor*>();
-	std::vector<class AFUI*> uis = std::vector<class AFUI*>();
+	std::vector<std::shared_ptr<class AFActor>> sceneActors = {};
+	std::vector<std::shared_ptr<class AFUI>> uis = {};
 	unsigned long long vertexCount = 0;
-	class AFCamera* activeCamera = nullptr;
-	class AFStaticMeshComponent* background = nullptr;
+	std::shared_ptr<class AFCamera> activeCamera = nullptr;
 };
 
-struct AFVertex
+struct FAFVertex
 {
-	AFVertex() = default;
-	AFVertex(const glm::vec3 newPosition)
-		: position(newPosition), uv(glm::vec2(0.0f)), normal(glm::vec3(0.0f)), uniqueId(glm::vec4(0)), uvCenter(glm::vec2(0.0f))
+	FAFVertex() = default;
+	FAFVertex(const glm::vec3 newPosition)
+		: position(newPosition), normal(glm::vec3(0.0f)), uv(glm::vec2(0.0f)), faceID(0), uvCenter(glm::vec2(0.0f))
 	{
 		
 	}
-	AFVertex(const glm::vec3& newPosition, const glm::vec2& newUV, const glm::vec3& newNormal = glm::vec3(0.0f), const glm::vec4& newUniqueID = glm::vec4(0.0f), const glm::vec2& newUvCenter = glm::vec2(0.0f))
-		: position(newPosition), uv(newUV), normal(newNormal), uniqueId(newUniqueID), uvCenter(newUvCenter)
+	FAFVertex(const glm::vec3& newPosition, const glm::vec3& newNormal, const glm::vec2& newUV, glm::uint8_t newFaceID = 0, glm::vec2 newUVCenter = glm::vec2())
+		: position(newPosition), normal(newNormal), uv(newUV), faceID(newFaceID), uvCenter(newUVCenter)
 	{
 
 	}
 
 	glm::vec3 position;
-	glm::vec2 uv;
 	glm::vec3 normal;
-	glm::u8vec4 uniqueId;
+	glm::vec2 uv;
+	glm::uint8_t faceID;
 	glm::vec2 uvCenter;
 };
 
-struct AFMesh
+struct FAFAsset
 {
-	std::vector<AFVertex> vertices;
-	std::vector<unsigned int> indices;
+	friend class AFContent;
+
+	virtual ~FAFAsset() = default;
+
+	unsigned int GetUniqueID() const;
+
+	template<typename T, typename... Args>
+	bool Load(Args&&... args);
+
+	virtual bool LoadExisting();
+
+protected:
+
+	virtual bool LoadImpl(const char* filepath)
+	{
+		printf("loadimpl base char*\n");
+		return false;
+	}
+	virtual bool LoadImpl(const char* filepath1, const char* filepath2)
+	{
+		printf("loadimpl base char* char*\n");
+		return false;
+	}
+	virtual bool LoadImpl(const char* filepath, bool boolean)
+	{
+		printf("loadimpl base char* bool\n");
+		return false;
+	}
+
+	unsigned int m_uniqueID = 0;
 };
 
-struct AFMeshLoaded
+template <typename T, typename ... Args>
+bool FAFAsset::Load(Args&&... args)
+{
+	return LoadImpl(std::forward<Args>(args)...);
+}
+
+struct FAFSubMesh
+{
+	std::vector<FAFVertex> vertices = {};
+	std::vector<unsigned int> indices = {};
+
+	std::shared_ptr<class AFVertexBuffer> vertexBuffer = nullptr;
+	std::shared_ptr<class AFTexture> texture = nullptr;
+	std::shared_ptr<class AFShader> shader = nullptr;
+
+	bool depthTest = true;
+	bool stencilTest = true;
+
+	// Various additional info that might help identifying this sub-mesh.
+	// For example a single character defining what glyph this is in text rendering.
+	std::string metaInformation = {};
+
+	unsigned long long GetVertexCount() const;
+};
+
+struct FAFMesh : public FAFAsset
+{
+	std::vector<FAFSubMesh> subMeshes = {};
+
+	bool LoadExisting() override;
+	bool LoadImpl(const char* filepath) override;
+
+	unsigned long long GetVertexCount() const;
+};
+
+struct FAFSubMeshLoaded
 {
 	GLuint vao;
-	GLsizei indexNum;
-	GLenum type;
+	GLuint drawMode;
+	GLsizei drawCount;
+	GLenum drawType;
+};
+
+struct FAFMeshLoaded
+{
+	std::vector<FAFSubMeshLoaded> subMeshesLoaded;
 };
 
 enum class EAFDrawType : uint8_t
@@ -61,7 +130,7 @@ enum class EAFDrawType : uint8_t
 	IDPicker
 };
 
-struct AFAppData
+struct FAFAppData
 {
 	struct GLFWwindow* window = nullptr;
 	int width = 0;
@@ -69,10 +138,10 @@ struct AFAppData
 	EAFDrawType drawType = EAFDrawType::Normal;
 };
 
-struct AFDrawOverride
+struct FAFDrawOverride
 {
 	EAFDrawType drawType;
-	AFShader shader;
+	std::shared_ptr<class AFShader> shader;
 };
 
 struct FAFPickID
@@ -99,10 +168,4 @@ struct FAFGlyph
 	glm::ivec2 size = glm::ivec2(0);
 	glm::ivec2 bearing = glm::ivec2(0);
 	unsigned int advance = 0;
-};
-
-enum class EAFLoadSource : uint8_t
-{
-	Custom,
-	VAO
 };

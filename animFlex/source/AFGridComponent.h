@@ -1,17 +1,9 @@
 #pragma once
-#include "AFRenderComponent.h"
-#include "AFTexture.h"
+#include "AFStaticMeshComponent.h"
 
-class AFGridComponent : public AFRenderComponent
+class AFGridComponent : public AFStaticMeshComponent
 {
 public:
 
-	unsigned long long GetVertexCount() override;
-
-	bool Load() override;
-	void Draw(bool override = false, const AFDrawOverride& overrideProperties = {}) const override;
-
-private:
-
-	AFTexture m_tex = AFTexture();
+	void Draw(bool override = false, const FAFDrawOverride& overrideProperties = {}) const override;
 };

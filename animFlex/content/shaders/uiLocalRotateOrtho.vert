@@ -19,7 +19,7 @@ layout (std140) uniform ViewRotation
 uniform float uBrightnessFaces[32];
 
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aUV;
+layout (location = 2) in vec2 aUV;
 layout (location = 3) in uvec4 aID;
 
 out vec3 Pos;

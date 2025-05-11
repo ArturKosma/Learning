@@ -2,7 +2,7 @@
 
 void AFComponentOwner::Tick(float deltaTime)
 {
-    for (AFComponent* comp : m_components)
+    for (std::shared_ptr<AFComponent> comp : m_components)
     {
         if (!comp)
         {
@@ -14,13 +14,13 @@ void AFComponentOwner::Tick(float deltaTime)
     AFObject::Tick(deltaTime);
 }
 
-void AFComponentOwner::AddComponent(AFComponent* newComponent)
+void AFComponentOwner::AddComponent(std::shared_ptr<AFComponent> newComponent)
 {
     newComponent->SetOwner(this);
     m_components.push_back(newComponent);
 }
 
-const std::vector<AFComponent*>& AFComponentOwner::GetComponents() const
+const std::vector<std::shared_ptr<AFComponent>>& AFComponentOwner::GetComponents() const
 {
     return m_components;
 }

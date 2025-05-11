@@ -3,7 +3,7 @@
 #include "AFUI.h"
 #include "AFBackgroundComponent.h"
 #include "AFBoxComponent.h"
-#include "AFGLTFLoader.h"
+#include "AFContent.h"
 #include "AFGridComponent.h"
 #include "AFOrientationBoxUIComponent.h"
 #include "AFOrientationGizmoUIComponent.h"
@@ -12,61 +12,39 @@
 #include "AFTextComponent.h"
 #include "AFUIRenderComponent.h"
 #include "AFUtility.h"
+#include "AFVertexBuffer.h"
 
-void AFScene::AddActor(AFActor* newActor)
+void AFScene::AddActor(std::shared_ptr<AFActor> newActor)
 {
 	if(!newActor)
 	{
 		return;
 	}
 
-	// Upon adding new actor to the scene, load all of his renderable assets.
-	for(AFComponent* comp : newActor->GetComponents())
-	{
-		AFRenderComponent* const renderComp = dynamic_cast<AFRenderComponent*>(comp);
-		if(!renderComp)
-		{
-			continue;
-		}
-		renderComp->Load();
-		m_sceneData.vertexCount += renderComp->GetVertexCount();
-	}
-
 	m_sceneData.sceneActors.push_back(newActor);
 }
 
-void AFScene::AddUI(AFUI* newUI)
+void AFScene::AddUI(std::shared_ptr<AFUI> newUI)
 {
 	if (!newUI)
 	{
 		return;
 	}
 
-	// Upon adding new UI to the scene, load all of its renderable assets.
-	for (AFComponent* comp : newUI->GetComponents())
-	{
-		AFUIRenderComponent* const uiRenderComp = dynamic_cast<AFUIRenderComponent*>(comp);
-		if (!uiRenderComp)
-		{
-			continue;
-		}
-		uiRenderComp->Load();
-	}
-
 	m_sceneData.uis.push_back(newUI);
 }
 
-void AFScene::SetActiveCamera(AFCamera* newActiveCamera)
+void AFScene::SetActiveCamera(std::shared_ptr<AFCamera> newActiveCamera)
 {
 	m_sceneData.activeCamera = newActiveCamera;
 }
 
-AFCamera* AFScene::GetActiveCamera() const
+std::shared_ptr<AFCamera> AFScene::GetActiveCamera() const
 {
 	return m_sceneData.activeCamera;
 }
 
-const AFSceneData& AFScene::GetSceneData() const
+const FAFSceneData& AFScene::GetSceneData() const
 {
 	return m_sceneData;
 }
@@ -85,103 +63,121 @@ bool AFScene::Init()
 
 void AFScene::CreateDefaultSceneActors()
 {
-	// Create background.
-	AFActor* background = CreateObject<AFActor>();
-	AFBackgroundComponent* backgroundMesh = CreateObject<AFBackgroundComponent>();
-	background->AddComponent(backgroundMesh);
-	background->SetDisplayName("background");
-	AddActor(background);
+	// Background.
+	std::shared_ptr<AFActor> backgroundActor = CreateObject<AFActor>();
+	backgroundActor->SetDisplayName("background actor");
+	std::shared_ptr<AFBackgroundComponent> backgroundMeshComponent = CreateObject<AFBackgroundComponent>();
+	backgroundMeshComponent->SetDisplayName("background mesh component");
+	backgroundMeshComponent->m_backgroundShader = AFContent::Get().FindAsset<AFShader>("shader_background"); // Assign just the shader. Background is fully procedural.
+	backgroundActor->AddComponent(backgroundMeshComponent);
+	AddActor(backgroundActor);
 
-	// Create a grid.
-	AFActor* gridActor = CreateObject<AFActor>();
-	gridActor->SetDisplayName("grid");
-	AFGridComponent* gridComponent = CreateObject<AFGridComponent>();
-	gridActor->AddComponent(gridComponent);
+	// Grid.
+	std::shared_ptr<AFActor> gridActor = CreateObject<AFActor>();
+	gridActor->SetDisplayName("grid actor");
+	std::shared_ptr<AFGridComponent> gridMeshComponent = CreateObject<AFGridComponent>();
+	gridMeshComponent->SetDisplayName("grid mesh component");
+	std::shared_ptr<FAFMesh> gridMesh = AFContent::Get().FindAsset<FAFMesh>("sm_plane");
+	gridMesh->subMeshes[0].shader = AFContent::Get().FindAsset<AFShader>("shader_grid");
+	gridMeshComponent->SetMesh(gridMesh);
+	gridActor->AddComponent(gridMeshComponent);
 	AddActor(gridActor);
 
-	// Create test boxes.
-	AFActor* testBoxActor0 = CreateObject<AFActor>();
-	AFActor* testBoxActor1 = CreateObject<AFActor>();
-	AFActor* testBoxActor2 = CreateObject<AFActor>();
-	testBoxActor0->SetDisplayName("box0");
-	testBoxActor1->SetDisplayName("box1");
-	testBoxActor2->SetDisplayName("box2");
-	AFBoxComponent* testBox0 = CreateObject<AFBoxComponent>();
-	testBox0->SetTexture("content/textures/crate2.png");
-	testBox0->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
-	AFBoxComponent* testBox1 = CreateObject<AFBoxComponent>();
-	testBox1->SetTexture("content/textures/crate2.png");
-	testBox1->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
-	AFBoxComponent* testBox2 = CreateObject<AFBoxComponent>();
-	testBox2->SetTexture("content/textures/crate2.png");
-	testBox2->SetShaders("content/shaders/basic.vert", "content/shaders/basic.frag");
-	testBoxActor0->AddComponent(testBox0);
-	testBoxActor1->AddComponent(testBox1);
-	testBoxActor2->AddComponent(testBox2);
+	// Test boxes.
+	std::shared_ptr<AFActor> testBoxActor0 = CreateObject<AFActor>();
+	std::shared_ptr<AFActor> testBoxActor1 = CreateObject<AFActor>();
+	std::shared_ptr<AFActor> testBoxActor2 = CreateObject<AFActor>();
+	testBoxActor0->SetDisplayName("testbox actor0");
+	testBoxActor1->SetDisplayName("testbox actor1");
+	testBoxActor2->SetDisplayName("testbox actor2");
+	std::shared_ptr<AFBoxComponent> testBoxMeshComponent0 = CreateObject<AFBoxComponent>();
+	std::shared_ptr<AFBoxComponent> testBoxMeshComponent1 = CreateObject<AFBoxComponent>();
+	std::shared_ptr<AFBoxComponent> testBoxMeshComponent2 = CreateObject<AFBoxComponent>();
+	testBoxMeshComponent0->SetDisplayName("testbox mesh component0");
+	testBoxMeshComponent1->SetDisplayName("testbox mesh component1");
+	testBoxMeshComponent2->SetDisplayName("testbox mesh component2");
+	std::shared_ptr<FAFMesh> testBoxMesh = AFContent::Get().FindAsset<FAFMesh>("sm_box");
+	testBoxMesh->subMeshes[0].texture = AFContent::Get().FindAsset<AFTexture>("t_box");
+	testBoxMesh->subMeshes[0].shader = AFContent::Get().FindAsset<AFShader>("shader_basic");
+	testBoxMeshComponent0->SetMesh(testBoxMesh);
+	testBoxMeshComponent1->SetMesh(testBoxMesh);
+	testBoxMeshComponent2->SetMesh(testBoxMesh);
+	testBoxActor0->AddComponent(testBoxMeshComponent0);
+	testBoxActor1->AddComponent(testBoxMeshComponent1);
+	testBoxActor2->AddComponent(testBoxMeshComponent2);
 	AddActor(testBoxActor0);
-	AddActor(testBoxActor1);
-	AddActor(testBoxActor2);
 	testBoxActor0->AddOffsetLocation({ 0.0f, 50.0f, 0.0f });
+	AddActor(testBoxActor1);
 	testBoxActor1->AddOffsetLocation({ 300.0f, 50.0f, 0.0f });
 	testBoxActor1->AddOffsetRotation({ 0.0f, 15.0f, 0.0f });
+	AddActor(testBoxActor2);
 	testBoxActor2->AddOffsetLocation({ -350.0f, 50.0f, 50.0f });
 
-	// TinyGLTF.
-	AFActor* tinyglTFActor = CreateObject<AFActor>();
-	tinyglTFActor->SetDisplayName("tinyglTF");
-	AFStaticMeshComponent* tinyglTFMesh = CreateObject<AFStaticMeshComponent>();
-	tinyglTFMesh->SetMesh(AFGLTFLoader::Load("content/models/woman.gltf"));
-	tinyglTFMesh->SetTexture("content/textures/woman.png", false);
-	tinyglTFMesh->SetShaders("content/shaders/basicGLTF.vert", "content/shaders/basicGLTF.frag");
-	tinyglTFActor->AddComponent(tinyglTFMesh);
-	tinyglTFMesh->SetLocalScale(glm::vec3(100.0f));
-	AddActor(tinyglTFActor);
+	// TinyGLTF woman.
+	std::shared_ptr<AFActor> womanActor = CreateObject<AFActor>();
+	womanActor->SetDisplayName("woman actor");
+	std::shared_ptr<AFStaticMeshComponent> womanMeshComponent = CreateObject<AFStaticMeshComponent>();
+	womanMeshComponent->SetDisplayName("tinyglTF mesh component");
+	std::shared_ptr<FAFMesh> womanMesh = AFContent::Get().FindAsset<FAFMesh>("sm_woman");
+	womanMesh->subMeshes[0].texture = AFContent::Get().FindAsset<AFTexture>("t_woman");
+	womanMesh->subMeshes[0].shader = AFContent::Get().FindAsset<AFShader>("shader_basic");
+	womanMeshComponent->SetMesh(womanMesh);
+	womanActor->AddComponent(womanMeshComponent);
+	womanMeshComponent->SetLocalScale(glm::vec3(100.0f));
+	womanActor->AddOffsetLocation({ -200.0f, 0.0f, -300.0f });
+	womanActor->AddOffsetRotation({ 0.0f, -45.0f, 0.0f });
+	AddActor(womanActor);
 }
 
 void AFScene::CreateDefaultUIs()
 {
-	// Create orientation gizmo.
-	AFUI* orientationGizmo = CreateObject<AFUI>();
-	orientationGizmo->SetDisplayName("Orientation Gizmo UI");
-	AFOrientationGizmoUIComponent* orientationGizmoComponent = CreateObject<AFOrientationGizmoUIComponent>();
+	// Orientation gizmo.
+	std::shared_ptr<AFUI> orientationGizmo = CreateObject<AFUI>();
+	orientationGizmo->SetDisplayName("orientation gizmo ui");
+	std::shared_ptr<AFOrientationGizmoUIComponent> orientationGizmoComponent = CreateObject<AFOrientationGizmoUIComponent>();
+	orientationGizmoComponent->SetDisplayName("orientation gizmo component");
+	std::shared_ptr<FAFMesh> orientationGizmoMesh = AFContent::Get().FindAsset<FAFMesh>("sm_gizmo");
+	orientationGizmoMesh->subMeshes[0].shader = AFContent::Get().FindAsset<AFShader>("shader_gizmo");
+	orientationGizmoComponent->SetMesh(orientationGizmoMesh);
 	orientationGizmo->AddComponent(orientationGizmoComponent);
 	orientationGizmoComponent->SetLocation(glm::vec2(-0.85f, -0.80f));
 	orientationGizmoComponent->SetScale(glm::vec2(0.15f, 0.15f));
 
-	const float textGlyphScale = 0.68f;
-
-	// Create xyz letters around the orientation gizmo.
-	AFOrientationGlyph* xGlyph = CreateObject<AFOrientationGlyph>(); // X-glyph.
+	// Orientation gizmo letters.
+	const glm::vec2 textGlyphLocation = glm::vec2(-0.85f, -0.80f);
+	const float textGlyphScale = 0.5f;
+	std::shared_ptr<AFShader> glyphShader = AFContent::Get().FindAsset<AFShader>("shader_glyph");
+	std::shared_ptr<AFOrientationGlyph> xGlyph = CreateObject<AFOrientationGlyph>(); // X-glyph.
+	xGlyph->SetDisplayName("orientation x glyph");
 	xGlyph->SetText("x");
 	orientationGizmo->AddComponent(xGlyph);
-	xGlyph->SetLocation(glm::vec2(-0.85f, -0.80f));
+	xGlyph->SetLocation(textGlyphLocation);
 	xGlyph->SetScale(glm::vec2(textGlyphScale));
-	xGlyph->SetShaders("content/shaders/glyph.vert", "content/shaders/glyph.frag");
-
-	AFOrientationGlyph* yGlyph = CreateObject<AFOrientationGlyph>(); // Y-glyph.
+	std::shared_ptr<AFOrientationGlyph> yGlyph = CreateObject<AFOrientationGlyph>(); // Y-glyph.
+	yGlyph->SetDisplayName("orientation y glyph");
 	yGlyph->SetText("y");
 	orientationGizmo->AddComponent(yGlyph);
-	yGlyph->SetLocation(glm::vec2(-0.85f, -0.80f));
+	yGlyph->SetLocation(textGlyphLocation);
 	yGlyph->SetScale(glm::vec2(textGlyphScale));
-	yGlyph->SetShaders("content/shaders/glyph.vert", "content/shaders/glyph.frag");
-
-	AFOrientationGlyph* zGlyph = CreateObject<AFOrientationGlyph>(); // Z-glyph.
+	std::shared_ptr<AFOrientationGlyph> zGlyph = CreateObject<AFOrientationGlyph>(); // Z-glyph.
+	zGlyph->SetDisplayName("orientation z glyph");
 	zGlyph->SetText("z");
 	orientationGizmo->AddComponent(zGlyph);
-	zGlyph->SetLocation(glm::vec2(-0.85f, -0.80f));
+	zGlyph->SetLocation(textGlyphLocation);
 	zGlyph->SetScale(glm::vec2(textGlyphScale));
-	zGlyph->SetShaders("content/shaders/glyph.vert", "content/shaders/glyph.frag");
-
 	AddUI(orientationGizmo);
 
 	// Create orientation box.
-	AFUI* orientationBox = CreateObject<AFUI>();
-	orientationBox->SetDisplayName("Orientation Box UI");
-	AFOrientationBoxUIComponent* orientationBoxComp = CreateObject<AFOrientationBoxUIComponent>();
-	orientationBox->AddComponent(orientationBoxComp);
+	std::shared_ptr<AFUI> orientationBoxUI = CreateObject<AFUI>();
+	orientationBoxUI->SetDisplayName("orientation box ui");
+	std::shared_ptr<AFOrientationBoxUIComponent> orientationBoxComp = CreateObject<AFOrientationBoxUIComponent>();
+	orientationBoxComp->SetDisplayName("orientation box component");
+	std::shared_ptr<FAFMesh> orientationBoxMesh = AFContent::Get().FindAsset<FAFMesh>("sm_box");
+	orientationBoxComp->SetMesh(orientationBoxMesh);
+	orientationBoxUI->AddComponent(orientationBoxComp);
 	orientationBoxComp->SetLocation(glm::vec2(0.85f, 0.80f));
-	orientationBoxComp->SetScale(glm::vec2(0.05f, 0.05f));
-	AddUI(orientationBox);
+	orientationBoxComp->SetScale(glm::vec2(0.001f, 0.001f));
+	AddUI(orientationBoxUI); 
 }
 
 AFScene::AFScene()

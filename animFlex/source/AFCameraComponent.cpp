@@ -1,52 +1,28 @@
 #include "AFCameraComponent.h"
 
+#include "AFContent.h"
+
 AFCameraComponent::AFCameraComponent()
 {
-	// Init postprocess shaders.
+	// Cache postprocess shaders.
 
 	// Neutral.
-	m_neutralShader.SetVertexShader("content/shaders/neutral.vert");
-	m_neutralShader.SetFragmentShader("content/shaders/neutral.frag");
-	m_neutralShader.LoadShaders();
+	m_neutralShader = AFContent::Get().FindAsset<AFPostprocessShader>("shader_neutral");
 
 	// ID picker visualize.
-	m_idPickerVizualiseShader.SetVertexShader("content/shaders/neutral.vert");
-	m_idPickerVizualiseShader.SetFragmentShader("content/shaders/idPickerVisualize.frag");
-	m_idPickerVizualiseShader.LoadShaders();
+	m_idPickerVizualiseShader = AFContent::Get().FindAsset<AFPostprocessShader>("shader_idPickerVisualize");
 
 	// UI fullscreen shader.
-	m_uiFullscreenShader.SetVertexShader("content/shaders/neutral.vert");
-	m_uiFullscreenShader.SetFragmentShader("content/shaders/uiFullscreen.frag");
-	m_uiFullscreenShader.LoadShaders();
+	m_uiFullscreenShader = AFContent::Get().FindAsset<AFPostprocessShader>("shader_uiFullscreen");
 
 	// Fisheye.
-	AFPostprocessShader fisheye;
-	fisheye.SetVertexShader("content/shaders/fisheye.vert");
-	fisheye.SetFragmentShader("content/shaders/fisheye.frag");
-	fisheye.LoadShaders();
-	m_postprocessShaders.push_back(fisheye);
+	m_postprocessShaders.push_back(AFContent::Get().FindAsset<AFPostprocessShader>("shader_fisheye"));
 	
 	// Gaussian horizontal.
-	AFPostprocessShader gaussianHorizontal;
-	gaussianHorizontal.SetVertexShader("content/shaders/gaussianHorizontal.vert");
-	gaussianHorizontal.SetFragmentShader("content/shaders/gaussianHorizontal.frag");
-	gaussianHorizontal.LoadShaders();
-	m_postprocessShaders.push_back(gaussianHorizontal);
+	m_postprocessShaders.push_back(AFContent::Get().FindAsset<AFPostprocessShader>("shader_gaussianHorizontal"));
 
 	// Gaussian vertical.
-	AFPostprocessShader gaussianVertical;
-	gaussianVertical.SetVertexShader("content/shaders/gaussianVertical.vert");
-	gaussianVertical.SetFragmentShader("content/shaders/gaussianVertical.frag");
-	gaussianVertical.LoadShaders();
-	m_postprocessShaders.push_back(gaussianVertical);
-
-	// Vignette.
-	/*
-	AFPostprocessShader vignette;
-	vignette.SetVertexShader("content/shaders/vignette.vert");
-	vignette.SetFragmentShader("content/shaders/vignette.frag");
-	vignette.LoadShaders();
-	m_postprocessShaders.push_back(vignette);*/
+	m_postprocessShaders.push_back(AFContent::Get().FindAsset<AFPostprocessShader>("shader_gaussianVertical"));
 }
 
 AFCameraComponent::~AFCameraComponent()
@@ -59,22 +35,22 @@ void AFCameraComponent::SetFieldOfView(int newFOV)
 	m_cameraProperties.fieldOfView = newFOV;
 }
 
-AFPostprocessShader AFCameraComponent::GetNeutralShader() const
+std::shared_ptr<AFPostprocessShader> AFCameraComponent::GetNeutralShader() const
 {
 	return m_neutralShader;
 }
 
-AFPostprocessShader AFCameraComponent::GetIDPickerVisualizeShader() const
+std::shared_ptr<AFPostprocessShader> AFCameraComponent::GetIDPickerVisualizeShader() const
 {
 	return m_idPickerVizualiseShader;
 }
 
-AFPostprocessShader AFCameraComponent::GetUIFullScreenShader() const
+std::shared_ptr<AFPostprocessShader> AFCameraComponent::GetUIFullScreenShader() const
 {
 	return m_uiFullscreenShader;
 }
 
-std::vector<AFPostprocessShader> AFCameraComponent::GetPostprocessShaders() const
+std::vector<std::shared_ptr<AFPostprocessShader>> AFCameraComponent::GetPostprocessShaders() const
 {
 	return m_postprocessShaders;
 }
@@ -87,7 +63,7 @@ glm::mat4 AFCameraComponent::GetViewMatrix() const
 	return glm::lookAt(GetWorldLocation(), target, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
-const AFCameraProperties& AFCameraComponent::GetCameraProperties() const
+const FAFCameraProperties& AFCameraComponent::GetCameraProperties() const
 {
 	return m_cameraProperties;
 }

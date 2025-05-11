@@ -135,14 +135,12 @@ public:
 		return false;
 	}
 
-	static glm::u8vec4 PackID(const uint32_t objectId, const uint8_t elementId = 0)
+	static glm::u8vec2 PackID(const uint32_t objectId)
 	{
-		glm::u8vec4 packedColor;
+		glm::u8vec2 packedColor;
 
 		packedColor.r = (objectId >> 0) & 0xFF;
 		packedColor.g = (objectId >> 8) & 0xFF;
-		packedColor.b = elementId;
-		packedColor.a = 255;
 
 		return packedColor;
 	}

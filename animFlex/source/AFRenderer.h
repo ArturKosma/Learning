@@ -25,7 +25,7 @@ private:
 	AFRenderer();
 	~AFRenderer();
 
-	void Draw(const struct AFSceneData& sceneData, const struct AFAppData& appData);
+	void Draw(const struct FAFSceneData& sceneData, const struct FAFAppData& appData);
 
 	FAFPickID ReadColorId(int x, int y);
 

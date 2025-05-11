@@ -75,21 +75,21 @@ const GLubyte* AFRenderer::GetOpenGLVersion()
 	return glGetString(GL_VERSION);
 }
 
-void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
+void AFRenderer::Draw(const FAFSceneData& sceneData, const FAFAppData& appData)
 {
-	AFCamera* camera = sceneData.activeCamera;
+	std::shared_ptr<AFCamera> camera = sceneData.activeCamera;
 	if(!camera)
 	{
 		return;
 	}
 
-	AFCameraComponent* cameraComp = camera->GetCameraComponent();
+	std::shared_ptr<AFCameraComponent> cameraComp = camera->GetCameraComponent();
 	if(!cameraComp)
 	{
 		return;
 	}
 
-	AFCameraMovementComponent* cameraMov = camera->GetMovementComponent();
+	std::shared_ptr<AFCameraMovementComponent> cameraMov = camera->GetMovementComponent();
 	if(!cameraMov)
 	{
 		return;
@@ -97,7 +97,7 @@ void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 
 	// Fetch framebuffer size and camera properties.
 	const glm::vec2& frameBufferSize = m_framebufferMS.GetSize();
-	const AFCameraProperties& cameraProps = cameraComp->GetCameraProperties();
+	const FAFCameraProperties& cameraProps = cameraComp->GetCameraProperties();
 	const float fov = static_cast<float>(cameraProps.fieldOfView);
 	const float near = cameraProps.near;
 	const float far = cameraProps.far;
@@ -149,12 +149,12 @@ void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 	m_uniformBuffer.UploadCamera(cameraComp->GetWorldTransform());
 
 	// Per actor draw.
-	for(const AFActor* const sceneActor : sceneData.sceneActors)
+	for(std::shared_ptr<AFActor> sceneActor : sceneData.sceneActors)
 	{
 		// Per component draw.
-		for(const AFComponent* const component : sceneActor->GetComponents())
+		for(std::shared_ptr<AFComponent> component : sceneActor->GetComponents())
 		{
-			const AFRenderComponent* const renderComponent = dynamic_cast<const AFRenderComponent*>(component);
+			std::shared_ptr<AFRenderComponent> renderComponent = std::dynamic_pointer_cast<AFRenderComponent>(component);
 			if(!renderComponent)
 			{
 				continue;
@@ -177,16 +177,16 @@ void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 		m_framebufferMS.DrawToScreen(sceneData);
 	}
 
-	// Separate multisampled draw loop for the ui.
+	// Separate draw loop for the ui.
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Per UI draw.
-	for (const AFUI* const ui : sceneData.uis)
+	for (std::shared_ptr<AFUI> ui : sceneData.uis)
 	{
 		// Per component draw.
-		for (const AFComponent* const component : ui->GetComponents())
+		for (std::shared_ptr<AFComponent> component : ui->GetComponents())
 		{
-			const AFUIRenderComponent* const uiRenderComponent = dynamic_cast<const AFUIRenderComponent*>(component);
+			std::shared_ptr<AFUIRenderComponent> uiRenderComponent = std::dynamic_pointer_cast<AFUIRenderComponent>(component);
 			if (!uiRenderComponent)
 			{
 				continue;
@@ -213,23 +213,23 @@ void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 	// Set the background colour.
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	AFDrawOverride idPickerDrawProperties;
+	FAFDrawOverride idPickerDrawProperties;
 	idPickerDrawProperties.drawType = EAFDrawType::IDPicker;
 	idPickerDrawProperties.shader = m_framebufferIdPicker.GetIDPickerShader();
 
 	// Actors.
-	for (const AFActor* const sceneActor : sceneData.sceneActors)
+	for (std::shared_ptr<AFActor> sceneActor : sceneData.sceneActors)
 	{
 		// Per component draw.
-		for (const AFComponent* const component : sceneActor->GetComponents())
+		for (std::shared_ptr<AFComponent> component : sceneActor->GetComponents())
 		{
-			const AFRenderComponent* const renderComponent = dynamic_cast<const AFRenderComponent*>(component);
+			std::shared_ptr<AFRenderComponent> renderComponent = std::dynamic_pointer_cast<AFRenderComponent>(component);
 			if (!renderComponent)
 			{
 				continue;
 			}
 
-			const IAFPickerInterface* const pickerInterface = dynamic_cast<const IAFPickerInterface*>(component);
+			std::shared_ptr<IAFPickerInterface> pickerInterface = std::dynamic_pointer_cast<IAFPickerInterface>(component);
 			if (!pickerInterface)
 			{
 				continue;
@@ -238,24 +238,32 @@ void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 			// Upload the model matrix.
 			m_uniformBuffer.UploadTransform(renderComponent->GetWorldTransform());
 
+			// Send unique ID to the object's shader. It will be used as a color.
+			idPickerDrawProperties.shader->Use();
+			GLuint objectIDLoc = glGetUniformLocation(idPickerDrawProperties.shader->GetProgram(), "uObjectID");
+			const glm::u8vec2 objUniqueID = AFUtility::PackID(renderComponent->GetUniqueID());
+			glUniform2ui(objectIDLoc, objUniqueID.r, objUniqueID.g);
+
 			// Draw.
 			renderComponent->Draw(true, idPickerDrawProperties);
 		}
 	}
 
+	idPickerDrawProperties.shader = m_framebufferIdPicker.GetIDPickerShader(true);
+
 	// UIs.
-	for (const AFUI* const ui : sceneData.uis)
+	for (std::shared_ptr<AFUI> ui : sceneData.uis)
 	{
 		// Per component draw.
-		for (const AFComponent* const component : ui->GetComponents())
+		for (std::shared_ptr<AFComponent> component : ui->GetComponents())
 		{
-			const AFUIRenderComponent* const uiRenderComponent = dynamic_cast<const AFUIRenderComponent*>(component);
+			std::shared_ptr<AFUIRenderComponent> uiRenderComponent = std::dynamic_pointer_cast<AFUIRenderComponent>(component);
 			if (!uiRenderComponent)
 			{
 				continue;
 			}
 
-			const IAFPickerInterface* const pickerInterface = dynamic_cast<const IAFPickerInterface*>(component);
+			std::shared_ptr<IAFPickerInterface> pickerInterface = std::dynamic_pointer_cast<IAFPickerInterface>(component);
 			if (!pickerInterface)
 			{
 				continue;
@@ -263,6 +271,12 @@ void AFRenderer::Draw(const AFSceneData& sceneData, const AFAppData& appData)
 
 			// Upload the ui matrix.
 			m_uniformBuffer.UploadUITransform(uiRenderComponent->GetUITransform());
+
+			// Send unique ID to the object's shader. It will be used as a color.
+			idPickerDrawProperties.shader->Use();
+			GLuint objectIDLoc = glGetUniformLocation(idPickerDrawProperties.shader->GetProgram(), "uObjectID");
+			const glm::u8vec2 objUniqueID = AFUtility::PackID(uiRenderComponent->GetUniqueID());
+			glUniform2ui(objectIDLoc, objUniqueID.r, objUniqueID.g);
 
 			// Draw.
 			uiRenderComponent->Draw(idPickerDrawProperties);

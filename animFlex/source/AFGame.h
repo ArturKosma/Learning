@@ -23,6 +23,6 @@ private:
 
 	AFScene m_scene = AFScene();
 
-	AFObject* m_currentHover = nullptr;
+	std::shared_ptr<AFObject> m_currentHover = nullptr;
 	uint8_t m_currentHoverElement = -1;
 };

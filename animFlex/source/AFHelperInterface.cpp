@@ -27,7 +27,7 @@ bool AFHelperInterface::Init(const class AFWindow& window)
 	return true;
 }
 
-void AFHelperInterface::Draw(const AFSceneData& sceneData, AFAppData& appData)
+void AFHelperInterface::Draw(const FAFSceneData& sceneData, FAFAppData& appData)
 {
 	// Inject touch as "mouse".
 	/*io.MousePos = ImVec2(touchX, touchY);
@@ -36,7 +36,7 @@ void AFHelperInterface::Draw(const AFSceneData& sceneData, AFAppData& appData)
 	Render();
 }
 
-bool AFHelperInterface::CreateFrame(const AFSceneData& sceneData, AFAppData& appData)
+bool AFHelperInterface::CreateFrame(const FAFSceneData& sceneData, FAFAppData& appData)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -52,9 +52,9 @@ bool AFHelperInterface::CreateFrame(const AFSceneData& sceneData, AFAppData& app
 
 	ImGui::Separator();
 
-	ImGui::Text("Vertex Count:");
+	/*ImGui::Text("Vertex Count:");
 	ImGui::SameLine();
-	ImGui::Text("%s", std::to_string(sceneData.vertexCount).c_str());
+	ImGui::Text("%s", std::to_string(sceneData.vertexCount).c_str());*/
 
 	std::string windowDims = std::to_string(appData.width) + "x" + std::to_string(appData.height);
 	ImGui::Text("Window Dimensions:");

@@ -3,16 +3,6 @@
 #include <fstream>
 #include <iostream>
 
-void AFShader::SetVertexShader(const std::string& inPath)
-{
-	m_vertexShaderPath = inPath;
-}
-
-void AFShader::SetFragmentShader(const std::string& inPath)
-{
-	m_fragmentShaderPath = inPath;
-}
-
 void AFShader::SetUniform1f(const GLchar* uniformName, float uniformFloat1)
 {
 	Use();
@@ -42,14 +32,14 @@ bool AFShader::LoadShaders()
 	GLuint vertexShader = ReadShader(m_vertexShaderPath, GL_VERTEX_SHADER);
 	if(!vertexShader)
 	{
-		printf("%s\n", "1");
+		printf("%s%s\n", "Error reading vertex shader, path: ", m_vertexShaderPath.c_str());
 		return false;
 	}
 
 	GLuint fragmentShader = ReadShader(m_fragmentShaderPath, GL_FRAGMENT_SHADER);
 	if(!fragmentShader)
 	{
-		printf("%s\n", "2");
+		printf("%s%s\n", "Error reading fragment shader, path: ", m_fragmentShaderPath.c_str());
 		return false;
 	}
 
@@ -86,6 +76,14 @@ void AFShader::Cleanup()
 GLuint AFShader::GetProgram() const
 {
 	return m_shaderProgram;
+}
+
+bool AFShader::LoadImpl(const char* filepath1, const char* filepath2)
+{
+	m_vertexShaderPath = filepath1;
+	m_fragmentShaderPath = filepath2;
+
+	return LoadShaders();
 }
 
 AFShader::AFShader()

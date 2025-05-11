@@ -1,53 +1,23 @@
 #include "AFUIRenderComponent.h"
 
-GLuint AFUIRenderComponent::GetDrawMode() const
-{
-	return GL_LINES;
-}
+#include "AFShader.h"
+#include "AFTexture.h"
+#include "AFVertexBuffer.h"
 
-void AFUIRenderComponent::SetMesh(const AFMesh& newMesh)
+void AFUIRenderComponent::SetMesh(std::shared_ptr<FAFMesh> newMesh)
 {
 	m_mesh = newMesh;
 }
 
-void AFUIRenderComponent::SetShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
-{
-	m_shader.SetVertexShader(vertexShaderPath);
-	m_shader.SetFragmentShader(fragmentShaderPath);
-}
-
-void AFUIRenderComponent::SetTexture(const std::string& texturePath)
-{
-	m_texture.SetTexture(texturePath);
-}
-
-bool AFUIRenderComponent::Load()
-{
-	m_vertexBuffer.Init();
-	m_vertexBuffer.UploadMesh(m_mesh);
-
-	if (!m_shader.LoadShaders())
-	{
-		return false;
-	}
-
-	if (!m_texture.LoadTexture())
-	{
-		return false;
-	}
-
-	return true;
-}
-
-void AFUIRenderComponent::Draw(const AFDrawOverride& overrideProperties) const
+void AFUIRenderComponent::Draw(const FAFDrawOverride& overrideProperties) const
 {
 	// Tell the gpu which shader to use.
-	AFShader drawShader = AFShader();
+	std::shared_ptr<AFShader> drawShader = nullptr;
 	switch(overrideProperties.drawType)
 	{
 		case EAFDrawType::Normal:
 		{
-			drawShader = m_shader;
+			drawShader = m_mesh->subMeshes[0].shader;
 			break;
 		}
 		case EAFDrawType::IDPicker:
@@ -61,7 +31,11 @@ void AFUIRenderComponent::Draw(const AFDrawOverride& overrideProperties) const
 		}
 	}
 
-	m_texture.Bind();
+	std::shared_ptr<AFTexture> tex = m_mesh->subMeshes[0].texture;
+	if(tex)
+	{
+		tex->Bind();
+	}
 
 	// Disable depth for UI drawing.
 	glDisable(GL_DEPTH_TEST);
@@ -70,12 +44,15 @@ void AFUIRenderComponent::Draw(const AFDrawOverride& overrideProperties) const
 	glDisable(GL_STENCIL_TEST);
 	glStencilMask(0x00);
 
-	drawShader.Use();
-	m_vertexBuffer.Bind();
+	drawShader->Use();
+	m_mesh->subMeshes[0].vertexBuffer->Bind();
 
-	m_vertexBuffer.Draw(GetDrawMode());
+	m_mesh->subMeshes[0].vertexBuffer->Draw();
 
-	m_vertexBuffer.UnBind();
+	m_mesh->subMeshes[0].vertexBuffer->UnBind();
 
-	m_texture.UnBind();
+	if (tex)
+	{
+		tex->UnBind();
+	}
 }

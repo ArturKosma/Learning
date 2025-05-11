@@ -58,7 +58,7 @@ glm::mat4 AFSceneComponent::GetWorldTransform() const
         return glm::mat4();
     }
 
-    return m_localTransform * owner->GetTransform();
+    return owner->GetTransform() * m_localTransform;
 }
 
 glm::vec3 AFSceneComponent::GetLocalLocation() const

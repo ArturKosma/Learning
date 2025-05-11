@@ -107,37 +107,6 @@ bool AFWindow::Init(int initWidth, int initHeight)
 			}
 		});
 
-#ifdef __EMSCRIPTEN__
-
-	// Emscripten resizes the window by html style properties.
-
-#else
-
-	// Make the window cover whole screen on desktop.
-
-	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-	if (!primaryMonitor)
-	{
-		printf("Failed to get the primary monitor!\n");
-		glfwTerminate();
-		return false;
-	}
-
-	// Get the monitor's video mode (resolution, refresh rate, etc.).
-	const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
-	if (!videoMode)
-	{
-		printf("Failed to get video mode for the primary monitor!\n");
-		glfwTerminate();
-		return false;
-	}
-
-	const int width = videoMode->width;
-	const int height = videoMode->height;
-
-	glfwSetWindowSize(m_window, width, height);
-
-#endif
 	return true;
 }
 
@@ -190,7 +159,45 @@ void AFWindow::PollEvents()
 	glfwPollEvents();
 }
 
+void AFWindow::ResizeToMonitor()
+{
+#ifdef __EMSCRIPTEN__
+
+	// Emscripten resizes the window by html style properties.
+
+#else
+
+	// Make the window cover whole screen on desktop.
+
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+	if (!primaryMonitor)
+	{
+		printf("Failed to get the primary monitor!\n");
+		glfwTerminate();
+		return;
+	}
+
+	// Get the monitor's video mode (resolution, refresh rate, etc.).
+	const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
+	if (!videoMode)
+	{
+		printf("Failed to get video mode for the primary monitor!\n");
+		glfwTerminate();
+		return;
+	}
+
+	const int width = videoMode->width;
+	const int height = videoMode->height;
+
+	glfwSetWindowSize(m_window, width, height);
+
+#endif
+}
+
 void AFWindow::OnWindowResize(int newWidth, int newHeight)
 {
-	m_resizeCallback(newWidth, newHeight);
+	if(m_resizeCallback)
+	{
+		m_resizeCallback(newWidth, newHeight);
+	}
 }

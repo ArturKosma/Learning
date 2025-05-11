@@ -10,8 +10,8 @@ public:
 
 	AFCamera();
 
-	AFCameraComponent* GetCameraComponent() const;
-	AFCameraMovementComponent* GetMovementComponent() const;
+	std::shared_ptr<AFCameraComponent> GetCameraComponent() const;
+	std::shared_ptr<AFCameraMovementComponent> GetMovementComponent() const;
 
 private:
 
@@ -29,8 +29,8 @@ private:
 
 	void Input_FreeView_Zoom_Stroke(float axis);
 
-	AFCameraMovementComponent* m_movementComponent = nullptr;
-	AFCameraComponent* m_cameraComponent = nullptr;
+	std::shared_ptr<AFCameraMovementComponent> m_movementComponent = nullptr;
+	std::shared_ptr<AFCameraComponent> m_cameraComponent = nullptr;
 
 	float m_cameraRotStrength = 5.0f;
 

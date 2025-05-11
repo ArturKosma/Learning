@@ -6,25 +6,22 @@
 class AFOrientationBoxUIComponent : public AFUIRenderComponent, public IAFPickerInterface
 {
 public:
+	AFOrientationBoxUIComponent();
+
 	void Tick(float deltaTime) override;
 
 	void OnHoverBegin(uint8_t elementId) override;
 	void OnHoverEnd(uint8_t elementId) override;
 
-	bool Load() override;
-
-	void Draw(const AFDrawOverride& overrideProperties) const override;
+	void Draw(const FAFDrawOverride& overrideProperties) const override;
 
 	void OnClickPressed(uint8_t elementId) override;
 
-	GLuint GetDrawMode() const override;
-
-	AFOrientationBoxUIComponent();
-	virtual ~AFOrientationBoxUIComponent() = default;
+	virtual ~AFOrientationBoxUIComponent() override = default;
 
 protected:
 
-	AFShader m_shaderIdPick = AFShader();
+	std::shared_ptr<AFShader> m_shader = nullptr;
 
 	float m_brightnessFaces[6] = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 };

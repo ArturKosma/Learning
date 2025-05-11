@@ -10,16 +10,16 @@ class AFScene
 
 public:
 
-	void AddActor(AFActor* newActor);
-	void AddUI(AFUI* newUI);
+	void AddActor(std::shared_ptr<AFActor> newActor);
+	void AddUI(std::shared_ptr<AFUI> newUI);
 
-	void SetActiveCamera(class AFCamera* newActiveCamera);
-	AFCamera* GetActiveCamera() const;
+	void SetActiveCamera(std::shared_ptr<AFCamera> newActiveCamera);
+	std::shared_ptr<AFCamera> GetActiveCamera() const;
 
-	const AFSceneData& GetSceneData() const;
+	const FAFSceneData& GetSceneData() const;
 
 	template<typename T>
-	static T* CreateObject();
+	static std::shared_ptr<T> CreateObject();
 
 private:
 
@@ -32,14 +32,14 @@ private:
 	AFScene();
 	~AFScene();
 
-	AFSceneData m_sceneData;
+	FAFSceneData m_sceneData;
 };
 
 template <typename T>
-T* AFScene::CreateObject()
+std::shared_ptr<T> AFScene::CreateObject()
 {
-	T* newObject = new T;
-	AFObject* casted = static_cast<AFObject*>(newObject);
+	std::shared_ptr<T> newObject = std::make_shared<T>();
+	std::shared_ptr<AFObject> casted = std::static_pointer_cast<AFObject>(newObject);
 
 	casted->m_uniqueId = AFIDGenerator::Next();
 

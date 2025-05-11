@@ -14,15 +14,15 @@ void AFFramebufferMSUI::UnBind()
 	AFFramebuffer::UnBind();
 }
 
-void AFFramebufferMSUI::DrawToScreen(const AFSceneData& sceneData)
+void AFFramebufferMSUI::DrawToScreen(const FAFSceneData& sceneData)
 {
-	AFCamera* camera = sceneData.activeCamera;
+	std::shared_ptr<AFCamera> camera = sceneData.activeCamera;
 	if (!camera)
 	{
 		return;
 	}
 
-	AFCameraComponent* cameraComp = camera->GetCameraComponent();
+	std::shared_ptr<AFCameraComponent> cameraComp = camera->GetCameraComponent();
 	if (!cameraComp)
 	{
 		return;
@@ -77,7 +77,7 @@ void AFFramebufferMSUI::DrawToScreen(const AFSceneData& sceneData)
 	// Draw 3 undefined points.
 	// Postprocess vertex shader should create a full screen triangle.
 	// Stencil texture gets filled.
-	m_stencilShader.Use();
+	m_stencilShader->Use();
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	// Disable stencil test.
@@ -88,7 +88,7 @@ void AFFramebufferMSUI::DrawToScreen(const AFSceneData& sceneData)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 	// Fetch all the camera postprocesses.
-	std::vector<AFPostprocessShader> cameraPostprocessShaders = cameraComp->GetPostprocessShaders();
+	std::vector<std::shared_ptr<AFPostprocessShader>> cameraPostprocessShaders = cameraComp->GetPostprocessShaders();
 
 	GLuint finalColorTex = m_resolveColorTex0;
 
@@ -97,7 +97,7 @@ void AFFramebufferMSUI::DrawToScreen(const AFSceneData& sceneData)
 	//glClear(GL_COLOR_BUFFER_BIT);
 
 	// Use ui fullscreen shader.
-	cameraComp->GetUIFullScreenShader().Use();
+	cameraComp->GetUIFullScreenShader()->Use();
 
 	// Bind the final textures.
 	glActiveTexture(GL_TEXTURE0);

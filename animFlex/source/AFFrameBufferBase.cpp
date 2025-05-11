@@ -1,8 +1,7 @@
 #include "AFFrameBufferBase.h"
 
-#include <ostream>
-
 #include "AFCamera.h"
+#include "AFContent.h"
 #include "AFUtility.h"
 
 bool AFFrameBufferBase::Init(int width, int height)
@@ -10,9 +9,8 @@ bool AFFrameBufferBase::Init(int width, int height)
 	m_bufferWidth = width;
 	m_bufferHeight = height;
 
-	m_idPickerShader.SetVertexShader("content/shaders/idPicker.vert");
-	m_idPickerShader.SetFragmentShader("content/shaders/idPicker.frag");
-	m_idPickerShader.LoadShaders();
+	m_idPickerShader = AFContent::Get().FindAsset<AFShader>("shader_idPicker");
+	m_idPickerUIShader = AFContent::Get().FindAsset<AFShader>("shader_idPickerUI");
 
 	// Create basic frame buffer.
 	glGenFramebuffers(1, &m_basicFramebuffer);
@@ -71,15 +69,15 @@ glm::vec2 AFFrameBufferBase::GetSize() const
 	return { m_bufferWidth, m_bufferHeight };
 }
 
-void AFFrameBufferBase::DrawToScreen(const AFSceneData& sceneData)
+void AFFrameBufferBase::DrawToScreen(const FAFSceneData& sceneData)
 {
-	AFCamera* camera = sceneData.activeCamera;
+	std::shared_ptr<AFCamera> camera = sceneData.activeCamera;
 	if (!camera)
 	{
 		return;
 	}
 
-	AFCameraComponent* cameraComp = camera->GetCameraComponent();
+	std::shared_ptr<AFCameraComponent> cameraComp = camera->GetCameraComponent();
 	if (!cameraComp)
 	{
 		return;
@@ -90,7 +88,7 @@ void AFFrameBufferBase::DrawToScreen(const AFSceneData& sceneData)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Use neutral shader.
-	cameraComp->GetIDPickerVisualizeShader().Use();
+	cameraComp->GetIDPickerVisualizeShader()->Use();
 
 	// Bind the final textures.
 	glActiveTexture(GL_TEXTURE0);
@@ -121,9 +119,9 @@ void AFFrameBufferBase::Cleanup()
 	Delete();
 }
 
-const AFShader& AFFrameBufferBase::GetIDPickerShader() const
+std::shared_ptr<AFShader> AFFrameBufferBase::GetIDPickerShader(bool ui) const
 {
-	return m_idPickerShader;
+	return ui ? m_idPickerUIShader : m_idPickerShader;
 }
 
 void AFFrameBufferBase::Delete()

@@ -7,6 +7,7 @@
 #include "AFHelperInterface.h"
 #include "AFTimerManager.h"
 #include "AFConfig.h"
+#include "AFContent.h"
 #include "AFUtility.h"
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -19,7 +20,7 @@ AFApp::AFApp()
 	m_renderer = new AFRenderer();
 	m_game = new AFGame();
 	m_helperInterface = new AFHelperInterface();
-	m_appData = new AFAppData();
+	m_appData = new FAFAppData();
 
 	constexpr int initWidth = 800;
 	constexpr int initHeight = 600;
@@ -30,13 +31,21 @@ AFApp::AFApp()
 		return;
 	}
 
-	SetWindowCallbacks();
-
 	if (!m_window->Init(initWidth, initHeight))
 	{
 		printf("%s\n", "Window Init() failed.");
 		return;
 	}
+
+	// Init content - load all necessary assets.
+	if (!AFContent::Get().Init())
+	{
+		printf("%s\n", "Content Init() failed.");
+		return;
+	}
+
+	SetWindowCallbacks();
+	m_window->ResizeToMonitor();
 
 	AFInput::Init(m_window->GetGLFWWindow());
 
@@ -115,7 +124,7 @@ void AFApp::Tick()
 	AFInput::GetInstance().Tick();
 	m_game->Tick(delta);
 
-	const AFSceneData& sceneData = m_game->GetScene().GetSceneData();
+	const FAFSceneData& sceneData = m_game->GetScene().GetSceneData();
 	CollectAppData(*m_appData);
 
 	m_renderer->Draw(sceneData, *m_appData);
@@ -129,7 +138,7 @@ void AFApp::Tick()
 	m_game->OnHover(colorID);
 }
 
-void AFApp::CollectAppData(AFAppData& appData)
+void AFApp::CollectAppData(FAFAppData& appData)
 {
 	appData.window = m_window->GetGLFWWindow();
 	appData.width = m_window->GetWidth();

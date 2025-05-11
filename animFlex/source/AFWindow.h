@@ -23,6 +23,8 @@ private:
 	void SwapBuffers();
 	void PollEvents();
 
+	void ResizeToMonitor();
+
 	void OnWindowResize(int newWidth, int newHeight);
 	bool ShouldShutdown();
 

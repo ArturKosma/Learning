@@ -1,28 +1,16 @@
 #include "AFBackgroundComponent.h"
+#include "AFShader.h"
 
-bool AFBackgroundComponent::Load()
-{
-	// Set up the background shader.
-	m_shader.SetVertexShader("content/shaders/background.vert");
-	m_shader.SetFragmentShader("content/shaders/background.frag");
-	if (!m_shader.LoadShaders())
-	{
-		printf("%s\n", "Fail on background shader load.");
-		return false;
-	}
-
-	return true;
-}
-
-void AFBackgroundComponent::Draw(bool override, const AFDrawOverride& overrideProperties) const
+void AFBackgroundComponent::Draw(bool override, const FAFDrawOverride& overrideProperties) const
 {
 	// Tell the gpu which shader to use.
-	override ? overrideProperties.shader.Use() : m_shader.Use();
+	override ? overrideProperties.shader->Use() : m_backgroundShader->Use();
 
-	// Disable depth for background drawing.
+	// Disable depth.
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 
+	// Disable stencil.
 	glDisable(GL_STENCIL_TEST);
 	glStencilMask(0x00);
 
