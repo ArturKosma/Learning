@@ -10,4 +10,6 @@ public:
 
 	virtual void OnHoverBegin(uint8_t elementId) = 0;
 	virtual void OnHoverEnd(uint8_t elementId) = 0;
+
+	virtual std::vector<uint8_t> GetDisabledElements() = 0;
 };

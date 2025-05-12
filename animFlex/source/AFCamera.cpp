@@ -27,6 +27,13 @@ std::shared_ptr<AFCameraMovementComponent> AFCamera::GetMovementComponent() cons
 	return m_movementComponent;
 }
 
+void AFCamera::OnTransformRecreation()
+{
+	m_location.y = glm::clamp(m_location.y, 30.0f, 10000.0f);
+
+	AFActor::OnTransformRecreation();
+}
+
 void AFCamera::BindInputs()
 {
 	AFInput::BindAxis("FreeView_CameraYaw", [this](float deltaX) {Input_FreeView_CameraYaw(deltaX); });

@@ -96,6 +96,13 @@ void main()
 	float horizonMask = GetHorizonMask(uv, frameRes);
 	float mask = horizonMask;
 
+	vec2 ndc = (uv - 0.5f) * 2.0f;
+	ndc.x *= (frameRes.y / frameRes.x);
+	vec4 clipPos = vec4(ndc.x, ndc.y, 1.0f, 1.0f);
+	vec4 viewPos = inverseProjection * clipPos;
+	vec3 viewDir = normalize(viewPos.xyz / viewPos.w);
+	vec3 worldDir = normalize((inverseView * vec4(viewDir, 0.0f)).xyz);
+
 	// Horizon mask can be occluded.
 	stencil = 1.0f;
 	horizonMask *= stencil;
@@ -107,7 +114,14 @@ void main()
 	horizonMask = horizonMask * horizontalModifier / 2.0f;
 	horizonMask *= 1.0f;
 
+	// Prevent UV overflow - modify the horizon mask so it doesn't affect the UV near the top of the screen and when camera is strongly pitched.
+	float cameraFade = smoothstep(0.8f, 1.0f, uv.y);
+	float viewFade = clamp(worldDir.y * 2.0f, 0.0f, 1.0);
+	float combinedFade = max(cameraFade, viewFade);
+	horizonMask *= (1.0f - combinedFade);
+
 	uv += vec2(0.0f, horizonMask * 0.1f);
+	uv.y = clamp(uv.y, 0.0f, 1.0f);
 
 	vec4 screen = texture(u_ColorTex, uv);
 	vec4 finalColor = screen;

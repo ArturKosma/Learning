@@ -6,6 +6,7 @@
 #include "AFUtility.h"
 
 #ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
 #include <emscripten/emscripten.h>
 #endif
 
@@ -22,6 +23,7 @@ bool AFWindow::Init(int initWidth, int initHeight)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	m_window = glfwCreateWindow(initWidth, initHeight, "myFlexWindow", nullptr, nullptr);
 	if (!m_window)
@@ -34,6 +36,14 @@ bool AFWindow::Init(int initWidth, int initHeight)
 
 	// Select a current OpenGL context.
 	glfwMakeContextCurrent(m_window);
+
+#ifdef __EMSCRIPTEN__
+	// Check if MSAA is enabled in webgl.
+	EMSCRIPTEN_WEBGL_CONTEXT_HANDLE ctx = emscripten_webgl_get_current_context();
+	EmscriptenWebGLContextAttributes outAttrs;
+	emscripten_webgl_get_context_attributes(ctx, &outAttrs);
+	printf("WebGL MSAA: %s.\n", outAttrs.antialias ? "Enabled" : "Not enabled");
+#endif
 
 	// Store the window pointer in the internals of GLFW to access in bindings.
 	glfwSetWindowUserPointer(m_window, this);

@@ -7,22 +7,22 @@ AFCameraComponent::AFCameraComponent()
 	// Cache postprocess shaders.
 
 	// Neutral.
-	m_neutralShader = AFContent::Get().FindAsset<AFPostprocessShader>("shader_neutral");
+	m_neutralShader = AFContent::Get().FindAsset<AFShader>("shader_neutral");
 
 	// ID picker visualize.
-	m_idPickerVizualiseShader = AFContent::Get().FindAsset<AFPostprocessShader>("shader_idPickerVisualize");
+	m_idPickerVizualiseShader = AFContent::Get().FindAsset<AFShader>("shader_idPickerVisualize");
 
 	// UI fullscreen shader.
-	m_uiFullscreenShader = AFContent::Get().FindAsset<AFPostprocessShader>("shader_uiFullscreen");
+	m_uiFullscreenShader = AFContent::Get().FindAsset<AFShader>("shader_uiFullscreen");
 
-	// Fisheye.
-	m_postprocessShaders.push_back(AFContent::Get().FindAsset<AFPostprocessShader>("shader_fisheye"));
-	
 	// Gaussian horizontal.
 	m_postprocessShaders.push_back(AFContent::Get().FindAsset<AFPostprocessShader>("shader_gaussianHorizontal"));
 
 	// Gaussian vertical.
 	m_postprocessShaders.push_back(AFContent::Get().FindAsset<AFPostprocessShader>("shader_gaussianVertical"));
+
+	// Fisheye.
+	m_postprocessShaders.push_back(AFContent::Get().FindAsset<AFPostprocessShader>("shader_fisheye"));
 }
 
 AFCameraComponent::~AFCameraComponent()
@@ -35,17 +35,17 @@ void AFCameraComponent::SetFieldOfView(int newFOV)
 	m_cameraProperties.fieldOfView = newFOV;
 }
 
-std::shared_ptr<AFPostprocessShader> AFCameraComponent::GetNeutralShader() const
+std::shared_ptr<AFShader> AFCameraComponent::GetNeutralShader() const
 {
 	return m_neutralShader;
 }
 
-std::shared_ptr<AFPostprocessShader> AFCameraComponent::GetIDPickerVisualizeShader() const
+std::shared_ptr<AFShader> AFCameraComponent::GetIDPickerVisualizeShader() const
 {
 	return m_idPickerVizualiseShader;
 }
 
-std::shared_ptr<AFPostprocessShader> AFCameraComponent::GetUIFullScreenShader() const
+std::shared_ptr<AFShader> AFCameraComponent::GetUIFullScreenShader() const
 {
 	return m_uiFullscreenShader;
 }

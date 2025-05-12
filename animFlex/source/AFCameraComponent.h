@@ -12,9 +12,9 @@ public:
 
 	void SetFieldOfView(int newFOV);
 
-	std::shared_ptr<AFPostprocessShader> GetNeutralShader() const;
-	std::shared_ptr<AFPostprocessShader> GetIDPickerVisualizeShader() const;
-	std::shared_ptr<AFPostprocessShader> GetUIFullScreenShader() const;
+	std::shared_ptr<AFShader> GetNeutralShader() const;
+	std::shared_ptr<AFShader> GetIDPickerVisualizeShader() const;
+	std::shared_ptr<AFShader> GetUIFullScreenShader() const;
 
 	std::vector<std::shared_ptr<AFPostprocessShader>> GetPostprocessShaders() const;
 	glm::mat4 GetViewMatrix() const;
@@ -22,9 +22,9 @@ public:
 
 private:
 
-	std::shared_ptr<AFPostprocessShader> m_neutralShader = nullptr;
-	std::shared_ptr<AFPostprocessShader> m_idPickerVizualiseShader = nullptr;
-	std::shared_ptr<AFPostprocessShader> m_uiFullscreenShader = nullptr;
+	std::shared_ptr<AFShader> m_neutralShader = nullptr;
+	std::shared_ptr<AFShader> m_idPickerVizualiseShader = nullptr;
+	std::shared_ptr<AFShader> m_uiFullscreenShader = nullptr;
 	std::vector<std::shared_ptr<AFPostprocessShader>> m_postprocessShaders = {};
 	FAFCameraProperties m_cameraProperties = FAFCameraProperties();
 };

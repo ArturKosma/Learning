@@ -30,6 +30,7 @@ public:
 protected:
 
 	void RecreateTransform();
+	virtual void OnTransformRecreation();
 
 	glm::vec3 m_location = glm::vec3(0.0f);
 	glm::quat m_rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);

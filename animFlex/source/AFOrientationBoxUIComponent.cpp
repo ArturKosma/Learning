@@ -10,6 +10,11 @@
 #include "AFUtility.h"
 #include "AFVertexBuffer.h"
 
+std::vector<uint8_t> AFOrientationBoxUIComponent::GetDisabledElements()
+{
+	return { 3 };
+}
+
 AFOrientationBoxUIComponent::AFOrientationBoxUIComponent()
 {
 	m_shader = AFContent::Get().FindAsset<AFShader>("shader_orientBox");
@@ -40,7 +45,6 @@ void AFOrientationBoxUIComponent::OnHoverEnd(uint8_t elementId)
 
 void AFOrientationBoxUIComponent::Draw(const FAFDrawOverride& overrideProperties) const
 {
-	// Tell the gpu which shader to use.
 	std::shared_ptr<AFShader> drawShader = nullptr;
 	switch (overrideProperties.drawType)
 	{

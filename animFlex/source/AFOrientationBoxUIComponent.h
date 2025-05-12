@@ -6,6 +6,9 @@
 class AFOrientationBoxUIComponent : public AFUIRenderComponent, public IAFPickerInterface
 {
 public:
+
+	std::vector<uint8_t> GetDisabledElements() override;
+
 	AFOrientationBoxUIComponent();
 
 	void Tick(float deltaTime) override;

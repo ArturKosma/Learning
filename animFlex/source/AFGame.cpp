@@ -74,6 +74,13 @@ void AFGame::OnSelect(const FAFPickID& pickID)
 				continue;
 			}
 
+			const std::vector<uint8_t> disabledElements = pickerInterface->GetDisabledElements();
+			const bool containsDisabled = std::find(disabledElements.begin(), disabledElements.end(), pickID.elementId) != disabledElements.end();
+			if (containsDisabled)
+			{
+				continue;
+			}
+
 			pickerInterface->OnClickPressed(pickID.elementId);
 
 			return;
@@ -97,6 +104,13 @@ void AFGame::OnSelect(const FAFPickID& pickID)
 				continue;
 			}
 
+			const std::vector<uint8_t> disabledElements = pickerInterface->GetDisabledElements();
+			const bool containsDisabled = std::find(disabledElements.begin(), disabledElements.end(), pickID.elementId) != disabledElements.end();
+			if (containsDisabled)
+			{
+				continue;
+			}
+
 			pickerInterface->OnClickPressed(pickID.elementId);
 
 			return;
@@ -112,6 +126,7 @@ void AFGame::OnHover(const FAFPickID& pickID)
 	}
 
 	std::shared_ptr<AFObject> newHover = nullptr;
+	uint8_t newHoverElement = -1;
 
 	for (std::shared_ptr<AFActor> sceneActor : m_scene.GetSceneData().sceneActors)
 	{
@@ -168,11 +183,21 @@ void AFGame::OnHover(const FAFPickID& pickID)
 		std::shared_ptr<IAFPickerInterface> newHoverInterface = std::dynamic_pointer_cast<IAFPickerInterface>(newHover);
 		if(newHoverInterface)
 		{
-			newHoverInterface->OnHoverBegin(pickID.elementId);
+			const std::vector<uint8_t> disabledElements = newHoverInterface->GetDisabledElements();
+			const bool containsDisabled = std::find(disabledElements.begin(), disabledElements.end(), pickID.elementId) != disabledElements.end();
+			if (containsDisabled)
+			{
+				newHover = nullptr;
+			}
+			else
+			{
+				newHoverInterface->OnHoverBegin(pickID.elementId);
+				newHoverElement = pickID.elementId;
+			}
 		}
 
 		m_currentHover = newHover;
-		m_currentHoverElement = pickID.elementId;
+		m_currentHoverElement = newHoverElement;
 	}
 }
 

@@ -9,4 +9,5 @@ public:
 	void OnClickPressed(uint8_t elementId) override;
 	void OnHoverBegin(uint8_t elementId) override;
 	void OnHoverEnd(uint8_t elementId) override;
+	std::vector<uint8_t> GetDisabledElements() override;
 };

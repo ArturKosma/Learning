@@ -166,9 +166,9 @@ bool AFContent::Init()
 	AddAsset<AFShader>("shader_orientBox", "content/shaders/uiLocalRotate.vert", "content/shaders/orientationBox.frag");
 	AddAsset<AFShader>("shader_stencil", "content/shaders/stencil.vert", "content/shaders/stencil.frag");
 	AddAsset<AFShader>("shader_idPicker", "content/shaders/idPicker.vert", "content/shaders/idPicker.frag");
-	AddAsset<AFPostprocessShader>("shader_neutral", "content/shaders/neutral.vert", "content/shaders/neutral.frag");
-	AddAsset<AFPostprocessShader>("shader_idPickerVisualize", "content/shaders/neutral.vert", "content/shaders/idPickerVisualize.frag");
-	AddAsset<AFPostprocessShader>("shader_uiFullscreen", "content/shaders/neutral.vert", "content/shaders/uiFullscreen.frag");
+	AddAsset<AFShader>("shader_neutral", "content/shaders/neutral.vert", "content/shaders/neutral.frag");
+	AddAsset<AFShader>("shader_idPickerVisualize", "content/shaders/neutral.vert", "content/shaders/idPickerVisualize.frag");
+	AddAsset<AFShader>("shader_uiFullscreen", "content/shaders/neutral.vert", "content/shaders/uiFullscreen.frag");
 	AddAsset<AFPostprocessShader>("shader_fisheye", "content/shaders/fisheye.vert", "content/shaders/fisheye.frag");
 	AddAsset<AFPostprocessShader>("shader_gaussianHorizontal", "content/shaders/gaussianHorizontal.vert", "content/shaders/gaussianHorizontal.frag");
 	AddAsset<AFPostprocessShader>("shader_gaussianVertical", "content/shaders/gaussianVertical.vert", "content/shaders/gaussianVertical.frag");

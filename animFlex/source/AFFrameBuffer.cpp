@@ -47,8 +47,8 @@ bool AFFramebuffer::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_resolveColorTex0, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Check if resolve FBO 0 is complete.
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -70,8 +70,8 @@ bool AFFramebuffer::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_resolveColorTex1, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Check if resolve FBO 1 is complete.
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -81,6 +81,10 @@ bool AFFramebuffer::Init(int width, int height)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	// Create depth resolve FBO.
+	glGenFramebuffers(1, &m_depthFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_depthFBO);
+
 	// Create resolve depth texture.
 	glGenTextures(1, &m_resolveDepthTex);
 	glBindTexture(GL_TEXTURE_2D, m_resolveDepthTex);
@@ -89,12 +93,9 @@ bool AFFramebuffer::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_resolveDepthTex, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// Create depth resolve FBO.
-	glGenFramebuffers(1, &m_depthFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_depthFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_resolveDepthTex, 0);
 
 	// Check if depth resolve FBO is complete.
@@ -104,6 +105,10 @@ bool AFFramebuffer::Init(int width, int height)
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Create stencil resolve FBO.
+	glGenFramebuffers(1, &m_stencilFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_stencilFBO);
 
 	// Create resolve stencil color texture.
 	glGenTextures(1, &m_resolveStencilColorTex);
@@ -121,9 +126,6 @@ bool AFFramebuffer::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// Create stencil resolve FBO.
-	glGenFramebuffers(1, &m_stencilFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_stencilFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_resolveStencilColorTex, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_resolveStencilTex, 0);
 

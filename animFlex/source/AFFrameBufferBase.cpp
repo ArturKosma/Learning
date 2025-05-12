@@ -85,6 +85,7 @@ void AFFrameBufferBase::DrawToScreen(const FAFSceneData& sceneData)
 
 	// Start drawing to default framebuffer.
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Use neutral shader.
@@ -99,6 +100,9 @@ void AFFrameBufferBase::DrawToScreen(const FAFSceneData& sceneData)
 
 	// Disable stencil test.
 	glDisable(GL_STENCIL_TEST);
+
+	// Disable blend.
+	glDisable(GL_BLEND);
 
 	// Draw 3 undefined points.
 	// Final vertex shader should create a full screen triangle.

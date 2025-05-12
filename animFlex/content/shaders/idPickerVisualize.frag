@@ -19,6 +19,10 @@ void main()
     vec2 uv = gl_FragCoord.xy / res;
 
 	uvec4 screen = texture(u_ColorTex, uv);
+	float r = float(screen.r) / 255.0f;
+	float g = float(screen.g) / 255.0f;
+	float b = float(screen.b) / 255.0f;
+	float a = 1.0f;
 
-	FragColor = vec4(screen) / 255.0f;
+	FragColor = vec4(r, g, b, a);
 }

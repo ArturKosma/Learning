@@ -6,12 +6,17 @@
 
 class AFCamera : public AFActor
 {
+
 public:
 
 	AFCamera();
 
 	std::shared_ptr<AFCameraComponent> GetCameraComponent() const;
 	std::shared_ptr<AFCameraMovementComponent> GetMovementComponent() const;
+
+protected:
+
+	void OnTransformRecreation() override;
 
 private:
 

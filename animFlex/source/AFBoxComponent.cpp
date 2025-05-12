@@ -16,3 +16,8 @@ void AFBoxComponent::OnHoverEnd(uint8_t elementId)
 {
 	//printf("hover end on: %s\n", GetOwner()->GetDisplayName().c_str());
 }
+
+std::vector<uint8_t> AFBoxComponent::GetDisabledElements()
+{
+	return { };
+}
