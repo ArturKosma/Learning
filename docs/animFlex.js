@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpm54izb46.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpq3331al1.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -213,25 +213,25 @@ Module['FS_createPath']("/content", "textures", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 641}, {"filename": "/content/fonts/arial.ttf", "start": 641, "end": 1046601}, {"filename": "/content/models/woman.gltf", "start": 1046601, "end": 3904354}, {"filename": "/content/shaders/background.frag", "start": 3904354, "end": 3906713}, {"filename": "/content/shaders/background.vert", "start": 3906713, "end": 3907003}, {"filename": "/content/shaders/basic.frag", "start": 3907003, "end": 3907524}, {"filename": "/content/shaders/basic.vert", "start": 3907524, "end": 3908171}, {"filename": "/content/shaders/basicGLTF.frag", "start": 3908171, "end": 3908586}, {"filename": "/content/shaders/basicGLTF.vert", "start": 3908586, "end": 3909042}, {"filename": "/content/shaders/fisheye.frag", "start": 3909042, "end": 3912576}, {"filename": "/content/shaders/fisheye.vert", "start": 3912576, "end": 3912863}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 3912863, "end": 3914085}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 3914085, "end": 3914372}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 3914372, "end": 3915583}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 3915583, "end": 3915870}, {"filename": "/content/shaders/glyph.frag", "start": 3915870, "end": 3916317}, {"filename": "/content/shaders/glyph.vert", "start": 3916317, "end": 3917220}, {"filename": "/content/shaders/grid.frag", "start": 3917220, "end": 3923478}, {"filename": "/content/shaders/grid.vert", "start": 3923478, "end": 3924684}, {"filename": "/content/shaders/idPicker.frag", "start": 3924684, "end": 3924845}, {"filename": "/content/shaders/idPicker.vert", "start": 3924845, "end": 3925352}, {"filename": "/content/shaders/idPickerVisualize.frag", "start": 3925352, "end": 3925817}, {"filename": "/content/shaders/neutral.frag", "start": 3925817, "end": 3926234}, {"filename": "/content/shaders/neutral.vert", "start": 3926234, "end": 3926523}, {"filename": "/content/shaders/orientationBox.frag", "start": 3926523, "end": 3926986}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 3926986, "end": 3927240}, {"filename": "/content/shaders/stencil.frag", "start": 3927240, "end": 3927429}, {"filename": "/content/shaders/stencil.vert", "start": 3927429, "end": 3927718}, {"filename": "/content/shaders/uiFullscreen.frag", "start": 3927718, "end": 3928181}, {"filename": "/content/shaders/uiLocalRotate.vert", "start": 3928181, "end": 3929653}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 3929653, "end": 3930322}, {"filename": "/content/shaders/uibasic.frag", "start": 3930322, "end": 3930471}, {"filename": "/content/shaders/uibasic.vert", "start": 3930471, "end": 3930671}, {"filename": "/content/shaders/vignette.frag", "start": 3930671, "end": 3931663}, {"filename": "/content/shaders/vignette.vert", "start": 3931663, "end": 3931952}, {"filename": "/content/textures/orientBox.png", "start": 3931952, "end": 3935809}, {"filename": "/content/textures/woman.png", "start": 3935809, "end": 3936005}], "remote_package_size": 3936005});
+    loadPackage({"files": [{"filename": "/config/config.ini", "start": 0, "end": 641}, {"filename": "/content/fonts/arial.ttf", "start": 641, "end": 1046601}, {"filename": "/content/models/woman.gltf", "start": 1046601, "end": 3904354}, {"filename": "/content/shaders/background.frag", "start": 3904354, "end": 3906713}, {"filename": "/content/shaders/background.vert", "start": 3906713, "end": 3907003}, {"filename": "/content/shaders/basic.frag", "start": 3907003, "end": 3907524}, {"filename": "/content/shaders/basic.vert", "start": 3907524, "end": 3908171}, {"filename": "/content/shaders/basicGLTF.frag", "start": 3908171, "end": 3908586}, {"filename": "/content/shaders/basicGLTF.vert", "start": 3908586, "end": 3909042}, {"filename": "/content/shaders/fisheye.frag", "start": 3909042, "end": 3913243}, {"filename": "/content/shaders/fisheye.vert", "start": 3913243, "end": 3913530}, {"filename": "/content/shaders/gaussianHorizontal.frag", "start": 3913530, "end": 3914752}, {"filename": "/content/shaders/gaussianHorizontal.vert", "start": 3914752, "end": 3915039}, {"filename": "/content/shaders/gaussianVertical.frag", "start": 3915039, "end": 3916250}, {"filename": "/content/shaders/gaussianVertical.vert", "start": 3916250, "end": 3916537}, {"filename": "/content/shaders/glyph.frag", "start": 3916537, "end": 3916984}, {"filename": "/content/shaders/glyph.vert", "start": 3916984, "end": 3917887}, {"filename": "/content/shaders/grid.frag", "start": 3917887, "end": 3924145}, {"filename": "/content/shaders/grid.vert", "start": 3924145, "end": 3925351}, {"filename": "/content/shaders/idPicker.frag", "start": 3925351, "end": 3925512}, {"filename": "/content/shaders/idPicker.vert", "start": 3925512, "end": 3926019}, {"filename": "/content/shaders/idPickerVisualize.frag", "start": 3926019, "end": 3926611}, {"filename": "/content/shaders/neutral.frag", "start": 3926611, "end": 3927028}, {"filename": "/content/shaders/neutral.vert", "start": 3927028, "end": 3927317}, {"filename": "/content/shaders/orientationBox.frag", "start": 3927317, "end": 3927780}, {"filename": "/content/shaders/orientationGizmo.frag", "start": 3927780, "end": 3928034}, {"filename": "/content/shaders/stencil.frag", "start": 3928034, "end": 3928223}, {"filename": "/content/shaders/stencil.vert", "start": 3928223, "end": 3928512}, {"filename": "/content/shaders/uiFullscreen.frag", "start": 3928512, "end": 3928975}, {"filename": "/content/shaders/uiLocalRotate.vert", "start": 3928975, "end": 3930447}, {"filename": "/content/shaders/uiLocalRotateOrtho.vert", "start": 3930447, "end": 3931116}, {"filename": "/content/shaders/uibasic.frag", "start": 3931116, "end": 3931265}, {"filename": "/content/shaders/uibasic.vert", "start": 3931265, "end": 3931465}, {"filename": "/content/shaders/vignette.frag", "start": 3931465, "end": 3932457}, {"filename": "/content/shaders/vignette.vert", "start": 3932457, "end": 3932746}, {"filename": "/content/textures/orientBox.png", "start": 3932746, "end": 3936603}, {"filename": "/content/textures/woman.png", "start": 3936603, "end": 3936799}], "remote_package_size": 3936799});
 
   })();
 
-// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpm54izb46.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp2kiki97f.js
+// end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpq3331al1.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpswu_u599.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp2kiki97f.js
-// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp25gyg6z5.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmpswu_u599.js
+// include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4ef9fmtt.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp25gyg6z5.js
+  // end include: C:\Users\LEQUEN~1\AppData\Local\Temp\tmp4ef9fmtt.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -8683,6 +8683,36 @@ function ImGui_ImplGlfw_EmscriptenOpenURL(url) { url = url ? UTF8ToString(url) :
   var _emscripten_set_touchstart_callback_on_thread = (target, userData, useCapture, callbackfunc, targetThread) =>
       registerTouchEventCallback(target, userData, useCapture, callbackfunc, 22, "touchstart", targetThread);
 
+  var webglPowerPreferences = ["default","low-power","high-performance"];
+  
+  var _emscripten_webgl_get_context_attributes = (c, a) => {
+      if (!a) return -5;
+      c = GL.contexts[c];
+      if (!c) return -3;
+      var t = c.GLctx;
+      if (!t) return -3;
+      t = t.getContextAttributes();
+  
+      HEAP8[a] = t.alpha;
+      HEAP8[(a)+(1)] = t.depth;
+      HEAP8[(a)+(2)] = t.stencil;
+      HEAP8[(a)+(3)] = t.antialias;
+      HEAP8[(a)+(4)] = t.premultipliedAlpha;
+      HEAP8[(a)+(5)] = t.preserveDrawingBuffer;
+      var power = t['powerPreference'] && webglPowerPreferences.indexOf(t['powerPreference']);
+      HEAP32[(((a)+(8))>>2)] = power;
+      HEAP8[(a)+(12)] = t.failIfMajorPerformanceCaveat;
+      HEAP32[(((a)+(16))>>2)] = c.version;
+      HEAP32[(((a)+(20))>>2)] = 0;
+      HEAP8[(a)+(24)] = c.attributes.enableExtensionsByDefault;
+      return 0;
+    };
+
+  
+  /** @suppress {duplicate } */
+  var _emscripten_webgl_do_get_current_context = () => GL.currentContext ? GL.currentContext.handle : 0;
+  var _emscripten_webgl_get_current_context = _emscripten_webgl_do_get_current_context;
+
   var ENV = {
   };
   
@@ -11506,6 +11536,10 @@ var wasmImports = {
   emscripten_set_touchmove_callback_on_thread: _emscripten_set_touchmove_callback_on_thread,
   /** @export */
   emscripten_set_touchstart_callback_on_thread: _emscripten_set_touchstart_callback_on_thread,
+  /** @export */
+  emscripten_webgl_get_context_attributes: _emscripten_webgl_get_context_attributes,
+  /** @export */
+  emscripten_webgl_get_current_context: _emscripten_webgl_get_current_context,
   /** @export */
   environ_get: _environ_get,
   /** @export */

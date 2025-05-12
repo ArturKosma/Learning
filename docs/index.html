@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>AnimFlex</title>
+    <link rel="icon" href="data:,">
     <style>
         * 
         {
@@ -40,7 +41,7 @@
 </head>
 <body>
     <div class="emscripten_border">
-        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0" data-antialias="true"></canvas>
     </div>
     <textarea class="emscripten" id="output" rows="8"></textarea>
 
@@ -62,6 +63,21 @@
             canvas: (() => {
                 var canvas = document.getElementById('canvas');
 
+                // Force WebGL2 context with antialiasing before GLFW gets it.
+                const attrs = {
+                    antialias: true,
+                    alpha: false,
+                    preserveDrawingBuffer: false,
+                    depth: true,
+                    stencil: false
+                };
+
+                let gl = canvas.getContext("webgl2", attrs);
+                if (!gl) gl = canvas.getContext("webgl", attrs);
+
+                // Override canvas.getContext to always return our pre-created context.
+                canvas.getContext = () => gl;
+
                 canvas.addEventListener("webglcontextlost", (e) => {
                     alert('WebGL context lost. You will need to reload the page.');
                     e.preventDefault();
@@ -72,9 +88,10 @@
         };
     </script>
     <script>
-        Module.onRuntimeInitialized = function () {
+        Module.onRuntimeInitialized = function () 
+        {
             console.log("Emscripten runtime initialized");
-            resizeCanvasToContainer(); // Safe to call the C++ function now
+            resizeCanvasToContainer();
         };
 
         function resizeCanvasToContainer() {
