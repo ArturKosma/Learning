@@ -39,8 +39,6 @@ void AFHelperInterface::Draw(const FAFSceneData& sceneData, FAFAppData& appData)
 		const bool touchDown = AFInput::GetInstance().GetTouchDown(0);
 		const glm::vec2& touchPos = AFInput::GetInstance().GetTouchPos(0);
 
-		printf("%f, %f\n", touchPos.x, touchPos.y);
-
 		io.MouseDown[0] = touchDown;
 		io.MousePos = { touchPos.x, touchPos.y };
 	}

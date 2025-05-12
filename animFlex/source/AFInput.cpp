@@ -99,6 +99,13 @@ void AFInput::Tick()
 	UpdateCursorPosState();
 	UpdateStrokeState();
 
+	// Don't send any axis events when IMGui wants the input.
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+	{
+		return;
+	}
+
 	// Go through all bound axes and call their functors.
 	for(const auto& [axisName, boundAxis] : m_boundAxisMappings)
 	{
@@ -197,20 +204,21 @@ glm::vec2 AFInput::GetCursorPos()
 
 bool AFInput::GetTouchDown(int touchIndex)
 {
-	bool down = false;
-	if (m_touchstate.find(touchIndex) != m_touchstate.end())
-	{
-		down = true;
-	}
+	const bool down = m_touchstate.size() == 1;
 
 	return down;
 }
 
 glm::vec2 AFInput::GetTouchPos(int touchIndex)
 {
-	if (m_touchstate.find(touchIndex) != m_touchstate.end())
+	const size_t count = m_touchstate.size();
+
+	// Single stroke.
+	if (count == 1)
 	{
-		return m_touchstate.at(touchIndex).newLocation;
+		// Find delta and update last frame.
+		auto& [id, singleTouch] = *m_touchstate.begin();
+		return singleTouch.newLocation;
 	}
 
 	return { 0.0f, 0.0f };
@@ -260,6 +268,26 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 void AFInput::RegisterTouch(int id, const glm::ivec2& location)
 {
 	m_touchstate[id] = FAFTouch(location);
+
+	// Treat first touch as regular mouse click.
+	if(m_touchstate.size() == 1)
+	{
+		const AFConfig::FAFConfigMappings& configMappings = AFConfig::GetInstance().GetConfigMappings();
+		for (const auto& [configAction, configKey] : configMappings.actionMappings)
+		{
+			if (configKey == GLFW_MOUSE_BUTTON_1)
+			{
+				const auto& foundBound = m_boundActionMappings.find(configAction);
+				if (foundBound != m_boundActionMappings.end())
+				{
+					for (const std::function<void()>& pressedFunctor : foundBound->second.onPressedFunctors)
+					{
+						pressedFunctor();
+					}
+				}
+			}
+		}
+	}
 }
 
 void AFInput::UnregisterTouch(int id)

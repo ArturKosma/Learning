@@ -84,7 +84,7 @@ void AFApp::StartLoop()
 	AFInput::BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window->GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
 	AFInput::BindAction("Select", [this]()
 	{
-		const glm::ivec2& cursorPos = AFInput::GetInstance().GetCursorPos();
+		const glm::ivec2& cursorPos = AFUtility::IsMobile() ? AFInput::GetInstance().GetTouchPos(0) : AFInput::GetInstance().GetCursorPos();
 		const FAFPickID& colorID = m_renderer->ReadColorId(cursorPos.x, cursorPos.y);
 		m_game->OnSelect(colorID);
 

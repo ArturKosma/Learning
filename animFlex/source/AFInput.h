@@ -87,6 +87,7 @@ public:
 	bool GetMouseDown();
 	glm::vec2 GetCursorPos();
 
+	// #todo Index touches. Currently map has unique index of the touch, and we need 0, 1, 2 etc...
 	bool GetTouchDown(int touchIndex);
 	glm::vec2 GetTouchPos(int touchIndex);
 
