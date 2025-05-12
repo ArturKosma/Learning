@@ -6,6 +6,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "AFInput.h"
 #include "AFUtility.h"
 #include "AFWindow.h"
 
@@ -14,7 +15,7 @@ bool AFHelperInterface::Init(const class AFWindow& window)
 	IMGUI_CHECKVERSION();
 
 	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(window.GetGLFWWindow(), true);
+	ImGui_ImplGlfw_InitForOpenGL(window.GetGLFWWindow(), false);
 	const char* glslVersion = "#version 300 es";
 	ImGui_ImplOpenGL3_Init(glslVersion);
 
@@ -29,9 +30,29 @@ bool AFHelperInterface::Init(const class AFWindow& window)
 
 void AFHelperInterface::Draw(const FAFSceneData& sceneData, FAFAppData& appData)
 {
-	// Inject touch as "mouse".
-	/*io.MousePos = ImVec2(touchX, touchY);
-	io.MouseDown[0] = isTouching;*/
+	ImGuiIO& io = ImGui::GetIO();
+
+	// Manually inject events to ImGUI due to having touch events which are not supported.
+	const bool bIsMobile = AFUtility::IsMobile();
+	if(bIsMobile)
+	{
+		const bool touchDown = AFInput::GetInstance().GetTouchDown(0);
+		const glm::vec2& touchPos = AFInput::GetInstance().GetTouchPos(0);
+
+		printf("%f, %f\n", touchPos.x, touchPos.y);
+
+		io.MouseDown[0] = touchDown;
+		io.MousePos = { touchPos.x, touchPos.y };
+	}
+	else
+	{
+		const bool mouseDown = AFInput::GetInstance().GetMouseDown();
+		const glm::vec2& cursorPos = AFInput::GetInstance().GetCursorPos();
+
+		io.MouseDown[0] = mouseDown;
+		io.MousePos = {cursorPos.x, cursorPos.y};
+	}
+
 	CreateFrame(sceneData, appData);
 	Render();
 }

@@ -84,6 +84,12 @@ public:
 
 	static bool GetFreeViewMode();
 
+	bool GetMouseDown();
+	glm::vec2 GetCursorPos();
+
+	bool GetTouchDown(int touchIndex);
+	glm::vec2 GetTouchPos(int touchIndex);
+
 private:
 
 	static void Init(struct GLFWwindow* window);
@@ -97,8 +103,6 @@ private:
 	void OnMouseButtonCallback(struct GLFWwindow* window, int button, int action, int mods);
 	void OnCursorPosCallback(struct GLFWwindow* window, double posX, double posY);
 	void OnScrollCallback(struct GLFWwindow* window, double xscroll, double yscroll);
-
-	glm::ivec2 GetCursorPos() const;
 
 #ifdef __EMSCRIPTEN__
 	void OnTouchStart(int eventType, const EmscriptenTouchEvent* e);

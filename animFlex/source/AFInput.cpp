@@ -51,14 +51,6 @@ void AFInput::OnMouseButtonCallback(GLFWwindow* window, int button, int action, 
 		return;
 	}
 
-	const ImGuiIO& io = ImGui::GetIO();
-	if (io.WantCaptureMouse)
-	{
-		//ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-
-		return;
-	}
-
 	// Update the state of all pressed/released keys.
 	m_keystate.insert_or_assign(button, static_cast<float>(action));
 
@@ -187,6 +179,43 @@ bool AFInput::GetFreeViewMode()
 	return GetInstance().m_freeView;
 }
 
+bool AFInput::GetMouseDown()
+{
+	bool down = false;
+	if(m_keystate.find(GLFW_MOUSE_BUTTON_1) != m_keystate.end())
+	{
+		down = m_keystate.at(GLFW_MOUSE_BUTTON_1) == 1.0f;
+	}
+
+	return down;
+}
+
+glm::vec2 AFInput::GetCursorPos()
+{
+	return {m_cursorNewXPos, m_cursorNewYPos };
+}
+
+bool AFInput::GetTouchDown(int touchIndex)
+{
+	bool down = false;
+	if (m_touchstate.find(touchIndex) != m_touchstate.end())
+	{
+		down = true;
+	}
+
+	return down;
+}
+
+glm::vec2 AFInput::GetTouchPos(int touchIndex)
+{
+	if (m_touchstate.find(touchIndex) != m_touchstate.end())
+	{
+		return m_touchstate.at(touchIndex).newLocation;
+	}
+
+	return { 0.0f, 0.0f };
+}
+
 void AFInput::Init(GLFWwindow* window)
 {
 	GetInstance().m_window = window;
@@ -226,11 +255,6 @@ void AFInput::OnScrollCallback(GLFWwindow* window, double xscroll, double yscrol
 	{
 		OnMouseButtonCallback(window, 1006, 1, 0);
 	}
-}
-
-glm::ivec2 AFInput::GetCursorPos() const
-{
-	return { m_cursorNewXPos, m_cursorNewYPos };
 }
 
 void AFInput::RegisterTouch(int id, const glm::ivec2& location)
