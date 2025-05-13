@@ -49,7 +49,7 @@ bool AFRenderer::Init(int width, int height)
 	// Make sure closer objects are drawn before farther.
 	glDepthFunc(GL_LESS);
 
-	// Enable face culling to not render back of triangles.
+	// By default enable cull face.
 	glEnable(GL_CULL_FACE);
 
 	return true;

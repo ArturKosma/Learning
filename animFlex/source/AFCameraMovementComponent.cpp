@@ -81,7 +81,7 @@ float AFCameraMovementComponent::GetCameraSpeedMultiplier() const
 
 void AFCameraMovementComponent::AddCameraSpeedMultiplier(float direction)
 {
-	m_cameraSpeedMultiplier += (direction * 75.0f);
+	m_cameraSpeedMultiplier += (direction * 25.0f);
 
-	m_cameraSpeedMultiplier = glm::clamp(m_cameraSpeedMultiplier, 150.0f, 1500.0f);
+	m_cameraSpeedMultiplier = glm::clamp(m_cameraSpeedMultiplier, 25.0f, 600.0f);
 }

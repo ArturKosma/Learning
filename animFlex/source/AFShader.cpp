@@ -65,6 +65,8 @@ bool AFShader::LoadShaders()
 
 void AFShader::Use() const
 {
+	m_twoSidedMaterial ? glDisable(GL_CULL_FACE) : glEnable(GL_CULL_FACE);
+
 	glUseProgram(m_shaderProgram);
 }
 

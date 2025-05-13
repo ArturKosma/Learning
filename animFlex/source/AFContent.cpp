@@ -148,17 +148,14 @@ bool AFContent::Init()
 	// Loaded from files.
 	// -------------------------------------------------
 
-	// Meshes
-	AddAsset<FAFMesh>("sm_woman", "content/models/woman.gltf");
-
 	// Textures.
 	AddAsset<AFTexture>("t_box", "content/textures/orientBox.png", true);
-	AddAsset<AFTexture>("t_woman", "content/textures/woman.png", false);
+	std::shared_ptr<AFTexture> mannequinTex = AddAsset<AFTexture>("t_mannequin", "content/textures/mannequin.png", false);
 
 	// Shaders.
 	AddAsset<AFShader>("shader_background", "content/shaders/background.vert", "content/shaders/background.frag");
 	AddAsset<AFShader>("shader_grid", "content/shaders/grid.vert", "content/shaders/grid.frag");
-	AddAsset<AFShader>("shader_basic", "content/shaders/basic.vert", "content/shaders/basic.frag");
+	std::shared_ptr<AFShader> basicShader = AddAsset<AFShader>("shader_basic", "content/shaders/basic.vert", "content/shaders/basic.frag");
 	AddAsset<AFShader>("shader_basicGLTF", "content/shaders/basicGLTF.vert", "content/shaders/basicGLTF.frag");
 	AddAsset<AFShader>("shader_gizmo", "content/shaders/uiLocalRotateOrtho.vert", "content/shaders/orientationGizmo.frag");
 	AddAsset<AFShader>("shader_glyph", "content/shaders/glyph.vert", "content/shaders/glyph.frag");
@@ -172,6 +169,19 @@ bool AFContent::Init()
 	AddAsset<AFPostprocessShader>("shader_fisheye", "content/shaders/fisheye.vert", "content/shaders/fisheye.frag");
 	AddAsset<AFPostprocessShader>("shader_gaussianHorizontal", "content/shaders/gaussianHorizontal.vert", "content/shaders/gaussianHorizontal.frag");
 	AddAsset<AFPostprocessShader>("shader_gaussianVertical", "content/shaders/gaussianVertical.vert", "content/shaders/gaussianVertical.frag");
+
+	// Meshes
+	std::shared_ptr<FAFMesh> mannequin = AddAsset<FAFMesh>("sm_mannequin", "content/models/mannequin.glb", true);
+
+	// -------------------------------------------------
+	// Apply fallback properties post load.
+	// -------------------------------------------------
+
+	// Basic shader.
+	basicShader->m_twoSidedMaterial = true;
+
+	// Mannequin.
+	mannequin->subMeshes[0].texture = mannequinTex;
 
 	return true;
 }

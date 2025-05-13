@@ -24,5 +24,5 @@ public:
 private:
 
 	EAFCameraMovementMode m_cameraMovementMode = EAFCameraMovementMode::Normal;
-	float m_cameraSpeedMultiplier = 500.0f;
+	float m_cameraSpeedMultiplier = 100.0f;
 };

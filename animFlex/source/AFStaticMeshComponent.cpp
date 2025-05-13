@@ -13,7 +13,10 @@ void AFStaticMeshComponent::Draw(bool override, const FAFDrawOverride& overrideP
 		override ? overrideProperties.shader->Use() : sub.shader->Use();
 
 		// Bind texture object.
-		sub.texture->Bind();
+		if(sub.texture)
+		{
+			sub.texture->Bind();
+		}
 
 		// Bind the vertex buffer. 
 		sub.vertexBuffer->Bind();
@@ -56,7 +59,10 @@ void AFStaticMeshComponent::Draw(bool override, const FAFDrawOverride& overrideP
 		sub.vertexBuffer->UnBind();
 
 		// Unbind the texture object.
-		sub.texture->UnBind();
+		if(sub.texture)
+		{
+			sub.texture->UnBind();
+		}
 	}
 }
 

@@ -84,7 +84,7 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(gridActor);
 
 	// Test boxes.
-	std::shared_ptr<AFActor> testBoxActor0 = CreateObject<AFActor>();
+	/*std::shared_ptr<AFActor> testBoxActor0 = CreateObject<AFActor>();
 	std::shared_ptr<AFActor> testBoxActor1 = CreateObject<AFActor>();
 	std::shared_ptr<AFActor> testBoxActor2 = CreateObject<AFActor>();
 	testBoxActor0->SetDisplayName("testbox actor0");
@@ -111,22 +111,20 @@ void AFScene::CreateDefaultSceneActors()
 	testBoxActor1->AddOffsetLocation({ 300.0f, 50.0f, 0.0f });
 	testBoxActor1->AddOffsetRotation({ 0.0f, 15.0f, 0.0f });
 	AddActor(testBoxActor2);
-	testBoxActor2->AddOffsetLocation({ -350.0f, 50.0f, 50.0f });
+	testBoxActor2->AddOffsetLocation({ -350.0f, 50.0f, 50.0f });*/
 
-	// TinyGLTF woman.
-	std::shared_ptr<AFActor> womanActor = CreateObject<AFActor>();
-	womanActor->SetDisplayName("woman actor");
-	std::shared_ptr<AFStaticMeshComponent> womanMeshComponent = CreateObject<AFStaticMeshComponent>();
-	womanMeshComponent->SetDisplayName("tinyglTF mesh component");
-	std::shared_ptr<FAFMesh> womanMesh = AFContent::Get().FindAsset<FAFMesh>("sm_woman");
-	womanMesh->subMeshes[0].texture = AFContent::Get().FindAsset<AFTexture>("t_woman");
-	womanMesh->subMeshes[0].shader = AFContent::Get().FindAsset<AFShader>("shader_basic");
-	womanMeshComponent->SetMesh(womanMesh);
-	womanActor->AddComponent(womanMeshComponent);
-	womanMeshComponent->SetLocalScale(glm::vec3(100.0f));
-	womanActor->AddOffsetLocation({ -200.0f, 0.0f, -300.0f });
-	womanActor->AddOffsetRotation({ 0.0f, -45.0f, 0.0f });
-	AddActor(womanActor);
+	// Mannequin.
+	std::shared_ptr<AFActor> mannequinActor = CreateObject<AFActor>();
+	mannequinActor->SetDisplayName("mannequin actor");
+	std::shared_ptr<AFStaticMeshComponent> mannequinMeshComponent = CreateObject<AFStaticMeshComponent>();
+	mannequinMeshComponent->SetDisplayName("mannequin mesh component");
+	std::shared_ptr<FAFMesh> mannequinMesh = AFContent::Get().FindAsset<FAFMesh>("sm_mannequin");
+	mannequinMeshComponent->SetMesh(mannequinMesh);
+	mannequinActor->AddComponent(mannequinMeshComponent);
+	mannequinMeshComponent->SetLocalScale(glm::vec3(1.0f));
+	mannequinActor->AddOffsetLocation({ 0.0f, 0.0f, 0.0f });
+	mannequinActor->AddOffsetRotation({ 0.0f, 0.0f, 0.0f });
+	AddActor(mannequinActor);
 }
 
 void AFScene::CreateDefaultUIs()
@@ -173,6 +171,7 @@ void AFScene::CreateDefaultUIs()
 	std::shared_ptr<AFOrientationBoxUIComponent> orientationBoxComp = CreateObject<AFOrientationBoxUIComponent>();
 	orientationBoxComp->SetDisplayName("orientation box component");
 	std::shared_ptr<FAFMesh> orientationBoxMesh = AFContent::Get().FindAsset<FAFMesh>("sm_box");
+	orientationBoxMesh->subMeshes[0].texture = AFContent::Get().FindAsset<AFTexture>("t_box");
 	orientationBoxComp->SetMesh(orientationBoxMesh);
 	orientationBoxUI->AddComponent(orientationBoxComp);
 	orientationBoxComp->SetLocation(glm::vec2(0.85f, 0.80f));

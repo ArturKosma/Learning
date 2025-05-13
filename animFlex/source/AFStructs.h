@@ -106,7 +106,7 @@ struct FAFMesh : public FAFAsset
 	std::vector<FAFSubMesh> subMeshes = {};
 
 	bool LoadExisting() override;
-	bool LoadImpl(const char* filepath) override;
+	bool LoadImpl(const char* filepath, bool binary) override;
 
 	unsigned long long GetVertexCount() const;
 };

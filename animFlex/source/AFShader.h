@@ -23,6 +23,8 @@ public:
 
 	GLuint GetProgram() const;
 
+	bool m_twoSidedMaterial = false;
+
 protected:
 
 	bool LoadImpl(const char* filepath1, const char* filepath2) override;

@@ -108,36 +108,36 @@ void AFOrientationBoxUIComponent::OnClickPressed(uint8_t elementId)
 	{
 		case 0: // Front.
 		{
-			blendTargetLoc = glm::vec3(0.0f, 250.0f, 1000.0f);
+			blendTargetLoc = glm::vec3(0.0f, 120.0f, 300.0f);
 			break;
 		}
 		case 1: // Upper.
 		{
-			blendTargetLoc = glm::vec3(0.0f, 1000.0f, 0.0f);
+			blendTargetLoc = glm::vec3(0.0f, 300.0f, 0.0f);
 			blendTargetRot = glm::vec3(-89.9f, targetYaw, 0.0f);
 			break;
 		}
 		case 2: // Behind.
 		{
-			blendTargetLoc = glm::vec3(0.0f, 250.0f, -1000.0f);
+			blendTargetLoc = glm::vec3(0.0f, 120.0f, -300.0f);
 			blendTargetRot = glm::vec3(0.0f, 180.0f, 0.0f);
 			break;
 		}
 		case 3: // Under.
 		{
-			blendTargetLoc = glm::vec3(0.0f, -1000.0f, 0.0f);
+			blendTargetLoc = glm::vec3(0.0f, -300.0f, 0.0f);
 			blendTargetRot = glm::vec3(89.9f, targetYaw, 0.0f);
 			break;
 		}
 		case 4: // Right.
 		{
-			blendTargetLoc = glm::vec3(1000.0f, 250.0f, 0.0f);
+			blendTargetLoc = glm::vec3(300.0f, 120.0f, 0.0f);
 			blendTargetRot = glm::vec3(0.0f, 90.0f, 0.0f);
 			break;
 		}
 		case 5: // Left.
 		{
-			blendTargetLoc = glm::vec3(-1000.0f, 250.0f, 0.0f);
+			blendTargetLoc = glm::vec3(-300.0f, 120.0f, 0.0f);
 			blendTargetRot = glm::vec3(0.0f, -90.0f, 0.0f);
 			break;
 		}

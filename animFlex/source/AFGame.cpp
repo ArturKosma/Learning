@@ -21,7 +21,7 @@ bool AFGame::Init()
 	// Create default camera.
 	std::shared_ptr<AFCamera> initCamera = AFScene::CreateObject<AFCamera>();
 	m_scene.AddActor(initCamera);
-	initCamera->SetLocation({ 0.0f, 200.0f, 400.0f });
+	initCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
 	m_scene.SetActiveCamera(initCamera);
 
 	return true;

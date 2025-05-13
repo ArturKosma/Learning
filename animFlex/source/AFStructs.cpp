@@ -1,5 +1,6 @@
 #include "AFStructs.h"
 
+#include "AFContent.h"
 #include "AFGLTFLoader.h"
 #include "AFUtility.h"
 #include "AFVertexBuffer.h"
@@ -35,11 +36,11 @@ bool FAFMesh::LoadExisting()
 	return true;
 }
 
-bool FAFMesh::LoadImpl(const char* filepath)
+bool FAFMesh::LoadImpl(const char* filepath, bool binary)
 {
 	FAFMeshLoaded meshLoaded;
 
-	if(AFGLTFLoader::Load(filepath, meshLoaded, false))
+	if(AFGLTFLoader::Load(filepath, meshLoaded, binary))
 	{
 		// Resize this object's submeshes to match the number of loaded submeshes.
 		subMeshes.resize(meshLoaded.subMeshesLoaded.size());
@@ -48,6 +49,7 @@ bool FAFMesh::LoadImpl(const char* filepath)
 		for(int i = 0; i < subMeshes.size(); ++i)
 		{
 			subMeshes[i].vertexBuffer = std::make_shared<AFVertexBuffer>();
+			subMeshes[i].shader = AFContent::Get().FindAsset<AFShader>("shader_basic");
 			subMeshes[i].vertexBuffer->UploadMesh(meshLoaded.subMeshesLoaded[i]);
 		}
 
