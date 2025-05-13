@@ -1,5 +1,7 @@
 #include "AFGLTFLoader.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "third_party/tiny_gltf.h"
 
 bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, bool binary)
@@ -26,9 +28,61 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 	GLuint EBO = 0;
 	std::map<std::string, GLint> attributes = { {"POSITION", 0}, {"NORMAL", 1}, {"TEXCOORD_0", 2} };
 
-	// Primitive is a sub-mesh. It's like applying a material in maya to a selection of faces.
-	// Doing that creates a new material slot in unreal engine.
-	// Under the hood it's a different sub-mesh with its own VAO.
+	// Build bones tree.
+	const int rootBoneID = model.scenes.at(0).nodes.at(0);
+	std::shared_ptr<AFBone> rootBone = AFBone::CreateRoot(rootBoneID);
+
+	auto GetBoneData = [model](std::shared_ptr<AFBone> bone, const glm::mat4& boneMatrix) -> void
+		{
+			int boneID = bone->GetBoneID();
+			const tinygltf::Node& node = model.nodes.at(boneID);
+
+			if (!node.translation.empty()) 
+			{
+				bone->SetLocation(glm::make_vec3(node.translation.data()));
+			}
+			if (!node.rotation.empty()) 
+			{
+				bone->SetRotation(glm::make_quat(node.rotation.data()));
+			}
+			if (!node.scale.empty()) 
+			{
+
+				bone->SetScale(glm::make_vec3(node.scale.data()));
+			}
+
+			bone->CalculateLocalTRSMatrix();
+			bone->CalculateNodeMatrix(boneMatrix);
+		};
+
+	std::function<void(std::shared_ptr<AFBone>)> GetBones;
+	GetBones = [model, GetBoneData, &GetBones](std::shared_ptr<AFBone> bone) -> void
+		{
+			int boneID = bone->GetBoneID();
+			std::vector<int> childBones = model.nodes.at(boneID).children;
+
+			// ? - book quirks.
+			// Remove the child node without skin/mesh metadata, confuses skeleton.
+			auto removeIt = std::remove_if(childBones.begin(), childBones.end(),
+				[&](int num) {return model.nodes.at(num).skin != -1; });
+			childBones.erase(removeIt, childBones.end());
+
+			bone->AddChildren(childBones);
+			const glm::mat4& boneMatrix = bone->GetBoneMatrix();
+
+			for(auto& childBone : bone->GetChildren())
+			{
+				GetBoneData(childBone, boneMatrix);
+				GetBones(bone);
+			}
+		};
+
+	GetBoneData(rootBone, glm::mat4(1.0f));
+	GetBones(rootBone);
+
+	rootBone->PrintTree();
+
+	// Create VAO for each sub-mesh.
 	for(int meshIdx = 0; meshIdx < model.meshes.size(); ++meshIdx)
 	{
 		for (int primIdx = 0; primIdx < model.meshes.at(meshIdx).primitives.size(); ++primIdx)

@@ -53,6 +53,9 @@ bool FAFMesh::LoadImpl(const char* filepath, bool binary)
 			subMeshes[i].vertexBuffer->UploadMesh(meshLoaded.subMeshesLoaded[i]);
 		}
 
+		// Pass bones info.
+		rootbone = meshLoaded.rootbone;
+
 		return true;
 	}
 
