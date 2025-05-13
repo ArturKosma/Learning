@@ -29,6 +29,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 	std::map<std::string, GLint> attributes = { {"POSITION", 0}, {"NORMAL", 1}, {"TEXCOORD_0", 2} };
 
 	// Build bones tree.
+	const int boneCount = model.nodes.size();
 	const int rootBoneID = model.scenes.at(0).nodes.at(0);
 	std::shared_ptr<AFBone> rootBone = AFBone::CreateRoot(rootBoneID);
 
@@ -36,6 +37,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 		{
 			int boneID = bone->GetBoneID();
 			const tinygltf::Node& node = model.nodes.at(boneID);
+			bone->SetBoneName(node.name);
 
 			if (!node.translation.empty()) 
 			{
@@ -73,7 +75,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 			for(auto& childBone : bone->GetChildren())
 			{
 				GetBoneData(childBone, boneMatrix);
-				GetBones(bone);
+				GetBones(childBone);
 			}
 		};
 

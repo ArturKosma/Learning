@@ -90,108 +90,32 @@ struct AFBone
 {
 public:
 
-	void SetLocation(const glm::vec3& newLocation)
-	{
-		location = newLocation;
-	}
+	void SetLocation(const glm::vec3& newLocation);
+	void SetRotation(const glm::quat newRotation);
+	void SetScale(const glm::vec3& newScale);
 
-	void SetRotation(const glm::quat newRotation)
-	{
-		rotation = newRotation;
-	}
+	static std::shared_ptr<AFBone> CreateRoot(int rootBoneIdx);
+	void AddChildren(const std::vector<int>& newChildBones);
 
-	void SetScale(const glm::vec3& newScale)
-	{
-		scale = newScale;
-	}
+	void CalculateLocalTRSMatrix();
+	void CalculateNodeMatrix(const glm::mat4& parentNodeMatrix);
 
-	static std::shared_ptr<AFBone> CreateRoot(int rootBoneIdx)
-	{
-		std::shared_ptr<AFBone> parentBone = std::make_shared<AFBone>();
-		parentBone->boneID = rootBoneIdx;
+	glm::mat4 GetBoneMatrix() const;
 
-		return parentBone;
-	}
+	int GetBoneID() const;
 
-	void CalculateLocalTRSMatrix()
-	{
-		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), location);
-		glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
-		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
+	std::vector<std::shared_ptr<AFBone>> GetChildren() const;
 
-		localTRSMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-	}
+	void SetBoneName(const std::string& newName);
+	std::string GetBoneName() const;
 
-	void CalculateNodeMatrix(const glm::mat4& parentNodeMatrix)
-	{
-		boneMatrix = parentNodeMatrix * localTRSMatrix;
-	}
-
-	int GetBoneID() const
-	{
-		return boneID;
-	}
-
-	void AddChildren(const std::vector<int>& newChildBones)
-	{
-		for(const int childBone : newChildBones)
-		{
-			std::shared_ptr<AFBone> child = std::make_shared<AFBone>();
-			child->boneID = childBone;
-
-			childBones.push_back(child);
-		}
-	}
-
-	std::vector<std::shared_ptr<AFBone>> GetChildren() const
-	{
-		return childBones;
-	}
-
-	glm::mat4 GetBoneMatrix() const
-	{
-		return boneMatrix;
-	}
-
-	std::string GetBoneName() const
-	{
-		return boneName;
-	}
-
-	void PrintTree() const
-	{
-		printf("---- tree ----\n");
-
-		printf("parent : %i (%s)\n", boneID, boneName.c_str());
-
-		for(const auto& childBone : childBones)
-		{
-			PrintNodes(childBone, 1);
-		}
-
-		printf("---- end tree ----\n");
-	}
-
-	static void PrintNodes(std::shared_ptr<AFBone> bone, int indent)
-	{
-		std::string indendString = "";
-		for(int i = 0; i < indent; ++i)
-		{
-			indendString += " ";
-		}
-		indendString += "-";
-		printf("%s child : %i (%s)\n", indendString.c_str(), bone->GetBoneID(), bone->GetBoneName().c_str());
-
-		for(const auto& childNode : bone->childBones)
-		{
-			PrintNodes(childNode, indent + 1);
-		}
-	}
+	void PrintTree() const;
+	static void PrintNodes(std::shared_ptr<AFBone> bone, int indent);
 
 private:
 
 	int boneID = 0;
-	std::string boneName = "";
+	std::string boneName = {};
 
 	glm::vec3 location = glm::vec3(0.0f);
 	glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);

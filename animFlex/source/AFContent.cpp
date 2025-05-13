@@ -171,14 +171,14 @@ bool AFContent::Init()
 	AddAsset<AFPostprocessShader>("shader_gaussianVertical", "content/shaders/gaussianVertical.vert", "content/shaders/gaussianVertical.frag");
 
 	// Meshes
-	std::shared_ptr<FAFMesh> mannequin = AddAsset<FAFMesh>("sm_mannequin", "content/models/mannequin.glb", true);
+	std::shared_ptr<FAFMesh> mannequin = AddAsset<FAFMesh>("sm_mannequin", "content/models/mannequin.gltf", false);
 
 	// -------------------------------------------------
 	// Apply fallback properties post load.
 	// -------------------------------------------------
 
 	// Basic shader.
-	basicShader->m_twoSidedMaterial = true;
+	basicShader->m_twoSidedMaterial = false;
 
 	// Mannequin.
 	mannequin->subMeshes[0].texture = mannequinTex;
