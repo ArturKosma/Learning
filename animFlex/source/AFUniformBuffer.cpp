@@ -84,6 +84,15 @@ void AFUniformBuffer::Init()
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 8, m_orthoPixelProjectionBuffer);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	// Joints matrices.
+	glGenBuffers(1, &m_jointMatricesBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, m_jointMatricesBuffer);
+
+	glBufferData(GL_UNIFORM_BUFFER, 200 * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 9, m_jointMatricesBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void AFUniformBuffer::UploadViewProjection(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
@@ -151,6 +160,13 @@ void AFUniformBuffer::UploadUITransform(glm::mat4 uiTransform)
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
+void AFUniformBuffer::UploadJointsMatrices(const std::vector<glm::mat4>& jointsMatrices)
+{
+	glBindBuffer(GL_UNIFORM_BUFFER, m_jointMatricesBuffer);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4) * jointsMatrices.size(), glm::value_ptr(jointsMatrices[0]));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
 void AFUniformBuffer::Cleanup()
 {
 	glDeleteBuffers(1, &m_viewProjectionBuffer);
@@ -162,4 +178,5 @@ void AFUniformBuffer::Cleanup()
 	glDeleteBuffers(1, &m_viewRotationBuffer);
 	glDeleteBuffers(1, &m_orthoProjectionBuffer);
 	glDeleteBuffers(1, &m_orthoPixelProjectionBuffer);
+	glDeleteBuffers(1, &m_jointMatricesBuffer);
 }

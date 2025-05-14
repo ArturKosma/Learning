@@ -16,30 +16,30 @@ bool FAFAsset::LoadExisting()
 	return false;
 }
 
-void AFBone::SetLocation(const glm::vec3& newLocation)
+void AFNode::SetLocation(const glm::vec3& newLocation)
 {
 	location = newLocation;
 }
 
-void AFBone::SetRotation(const glm::quat newRotation)
+void AFNode::SetRotation(const glm::quat newRotation)
 {
 	rotation = newRotation;
 }
 
-void AFBone::SetScale(const glm::vec3& newScale)
+void AFNode::SetScale(const glm::vec3& newScale)
 {
 	scale = newScale;
 }
 
-std::shared_ptr<AFBone> AFBone::CreateRoot(int rootBoneIdx)
+std::shared_ptr<AFNode> AFNode::CreateRoot(int rootBoneIdx)
 {
-	std::shared_ptr<AFBone> parentBone = std::make_shared<AFBone>();
-	parentBone->boneID = rootBoneIdx;
+	std::shared_ptr<AFNode> parentBone = std::make_shared<AFNode>();
+	parentBone->nodeID = rootBoneIdx;
 
 	return parentBone;
 }
 
-void AFBone::CalculateLocalTRSMatrix()
+void AFNode::CalculateLocalTRSMatrix()
 {
 	glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), location);
 	glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
@@ -48,49 +48,49 @@ void AFBone::CalculateLocalTRSMatrix()
 	localTRSMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 }
 
-void AFBone::CalculateNodeMatrix(const glm::mat4& parentNodeMatrix)
+void AFNode::CalculateNodeMatrix(const glm::mat4& parentNodeMatrix)
 {
-	boneMatrix = parentNodeMatrix * localTRSMatrix;
+	nodeMatrix = parentNodeMatrix * localTRSMatrix;
 }
 
-int AFBone::GetBoneID() const
+int AFNode::GetNodeID() const
 {
-	return boneID;
+	return nodeID;
 }
 
-void AFBone::AddChildren(const std::vector<int>& newChildBones)
+void AFNode::AddChildren(const std::vector<int>& newChildBones)
 {
 	for (const int childBone : newChildBones)
 	{
-		std::shared_ptr<AFBone> child = std::make_shared<AFBone>();
-		child->boneID = childBone;
+		std::shared_ptr<AFNode> child = std::make_shared<AFNode>();
+		child->nodeID = childBone;
 
-		childBones.push_back(child);
+		childNodes.push_back(child);
 	}
 }
 
-std::vector<std::shared_ptr<AFBone>> AFBone::GetChildren() const
+std::vector<std::shared_ptr<AFNode>> AFNode::GetChildren() const
 {
-	return childBones;
+	return childNodes;
 }
 
-void AFBone::SetBoneName(const std::string& newName)
+void AFNode::SetNodeName(const std::string& newName)
 {
-	boneName = newName;
+	nodeName = newName;
 }
 
-std::string AFBone::GetBoneName() const
+std::string AFNode::GetNodeName() const
 {
-	return boneName;
+	return nodeName;
 }
 
-void AFBone::PrintTree() const
+void AFNode::PrintTree() const
 {
 	printf("---- tree ----\n");
 
-	printf("parent : %i (%s)\n", boneID, boneName.c_str());
+	printf("parent : %i (%s)\n", nodeID, nodeName.c_str());
 
-	for (const auto& childBone : childBones)
+	for (const auto& childBone : childNodes)
 	{
 		PrintNodes(childBone, 1);
 	}
@@ -98,7 +98,7 @@ void AFBone::PrintTree() const
 	printf("---- end tree ----\n");
 }
 
-void AFBone::PrintNodes(std::shared_ptr<AFBone> bone, int indent)
+void AFNode::PrintNodes(std::shared_ptr<AFNode> bone, int indent)
 {
 	std::string indendString = "";
 	for (int i = 0; i < indent; ++i)
@@ -106,22 +106,27 @@ void AFBone::PrintNodes(std::shared_ptr<AFBone> bone, int indent)
 		indendString += " ";
 	}
 	indendString += "-";
-	printf("%s child : %i (%s)\n", indendString.c_str(), bone->GetBoneID(), bone->GetBoneName().c_str());
+	printf("%s child : %i (%s)\n", indendString.c_str(), bone->GetNodeID(), bone->GetNodeName().c_str());
 
-	for (const auto& childNode : bone->childBones)
+	for (const auto& childNode : bone->childNodes)
 	{
 		PrintNodes(childNode, indent + 1);
 	}
 }
 
-glm::mat4 AFBone::GetBoneMatrix() const
+glm::mat4 AFNode::GetNodeMatrix() const
 {
-	return boneMatrix;
+	return nodeMatrix;
 }
 
 unsigned long long FAFSubMesh::GetVertexCount() const
 {
 	return vertices.size();
+}
+
+void FAFMesh::SetJointTransform(int jointIdx, const glm::mat4& newTransform)
+{
+
 }
 
 bool FAFMesh::LoadExisting()
@@ -152,12 +157,14 @@ bool FAFMesh::LoadImpl(const char* filepath, bool binary)
 		for(int i = 0; i < subMeshes.size(); ++i)
 		{
 			subMeshes[i].vertexBuffer = std::make_shared<AFVertexBuffer>();
-			subMeshes[i].shader = AFContent::Get().FindAsset<AFShader>("shader_basic");
+			subMeshes[i].shader = AFContent::Get().FindAsset<AFShader>("shader_basicSkinned"); // #hack Not every mesh is a skinned mesh.
 			subMeshes[i].vertexBuffer->UploadMesh(meshLoaded.subMeshesLoaded[i]);
 		}
 
-		// Pass bones info.
-		rootbone = meshLoaded.rootbone;
+		// Pass bones info. #hack Not every mesh is a skinned mesh.
+		idxToJoint = meshLoaded.idxToJoint;
+		inverseBindMatrices = meshLoaded.inverseBindMatrices;
+		jointMatrices = meshLoaded.jointMatrices;
 
 		return true;
 	}

@@ -155,7 +155,8 @@ bool AFContent::Init()
 	// Shaders.
 	AddAsset<AFShader>("shader_background", "content/shaders/background.vert", "content/shaders/background.frag");
 	AddAsset<AFShader>("shader_grid", "content/shaders/grid.vert", "content/shaders/grid.frag");
-	std::shared_ptr<AFShader> basicShader = AddAsset<AFShader>("shader_basic", "content/shaders/basic.vert", "content/shaders/basic.frag");
+	AddAsset<AFShader>("shader_basic", "content/shaders/basic.vert", "content/shaders/basic.frag");
+	AddAsset<AFShader>("shader_basicSkinned", "content/shaders/basicSkinned.vert", "content/shaders/basic.frag");
 	AddAsset<AFShader>("shader_basicGLTF", "content/shaders/basicGLTF.vert", "content/shaders/basicGLTF.frag");
 	AddAsset<AFShader>("shader_gizmo", "content/shaders/uiLocalRotateOrtho.vert", "content/shaders/orientationGizmo.frag");
 	AddAsset<AFShader>("shader_glyph", "content/shaders/glyph.vert", "content/shaders/glyph.frag");
@@ -176,9 +177,6 @@ bool AFContent::Init()
 	// -------------------------------------------------
 	// Apply fallback properties post load.
 	// -------------------------------------------------
-
-	// Basic shader.
-	basicShader->m_twoSidedMaterial = false;
 
 	// Mannequin.
 	mannequin->subMeshes[0].texture = mannequinTex;

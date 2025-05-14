@@ -18,6 +18,7 @@ public:
 	void UploadCamera(glm::mat4 cameraTrs);
 	void UploadRenderProperties(glm::mat4 renderProperties);
 	void UploadUITransform(glm::mat4 uiTransform);
+	void UploadJointsMatrices(const std::vector<glm::mat4>& jointsMatrices);
 
 	void Cleanup();
 
@@ -32,4 +33,5 @@ private:
 	GLuint m_viewRotationBuffer = 0;
 	GLuint m_orthoProjectionBuffer = 0;
 	GLuint m_orthoPixelProjectionBuffer = 0;
+	GLuint m_jointMatricesBuffer = 0;
 };

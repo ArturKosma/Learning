@@ -8,6 +8,7 @@
 #include "AFOrientationBoxUIComponent.h"
 #include "AFOrientationGizmoUIComponent.h"
 #include "AFOrientationGlyph.h"
+#include "AFSkeletalMeshComponent.h"
 #include "AFStaticMeshComponent.h"
 #include "AFTextComponent.h"
 #include "AFUIRenderComponent.h"
@@ -116,7 +117,7 @@ void AFScene::CreateDefaultSceneActors()
 	// Mannequin.
 	std::shared_ptr<AFActor> mannequinActor = CreateObject<AFActor>();
 	mannequinActor->SetDisplayName("mannequin actor");
-	std::shared_ptr<AFStaticMeshComponent> mannequinMeshComponent = CreateObject<AFStaticMeshComponent>();
+	std::shared_ptr<AFSkeletalMeshComponent> mannequinMeshComponent = CreateObject<AFSkeletalMeshComponent>();
 	mannequinMeshComponent->SetDisplayName("mannequin mesh component");
 	std::shared_ptr<FAFMesh> mannequinMesh = AFContent::Get().FindAsset<FAFMesh>("sm_mannequin");
 	mannequinMeshComponent->SetMesh(mannequinMesh);

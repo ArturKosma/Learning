@@ -1,6 +1,8 @@
 #include "AFGLTFLoader.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include "third_party/tiny_gltf.h"
 
@@ -26,63 +28,123 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 	GLuint VAO = 0;
 	std::vector<GLuint> VBO = {};
 	GLuint EBO = 0;
-	std::map<std::string, GLint> attributes = { {"POSITION", 0}, {"NORMAL", 1}, {"TEXCOORD_0", 2} };
+	std::map<std::string, GLint> attributes = { {"POSITION", 0}, {"NORMAL", 1}, {"TEXCOORD_0", 2}, {"JOINTS_0", 3}, {"WEIGHTS_0", 4} };
 
-	// Build bones tree.
-	const int boneCount = model.nodes.size();
-	const int rootBoneID = model.scenes.at(0).nodes.at(0);
-	std::shared_ptr<AFBone> rootBone = AFBone::CreateRoot(rootBoneID);
+	// Build node tree.
+	const size_t nodeCount = model.nodes.size();
+	const size_t rootNodeID = model.scenes.at(0).nodes.at(0);
+	std::shared_ptr<AFNode> rootNode = AFNode::CreateRoot(static_cast<int>(rootNodeID));
 
-	auto GetBoneData = [model](std::shared_ptr<AFBone> bone, const glm::mat4& boneMatrix) -> void
+	// Create node to joint mapping.
+	std::vector<int> nodeToJoint = {};
+	nodeToJoint.resize(model.nodes.size());
+	const tinygltf::Skin& skin = model.skins.at(0);
+	for (int i = 0; i < skin.joints.size(); ++i)
+	{
+		const int destinationNode = skin.joints.at(i);
+		nodeToJoint.at(destinationNode) = i;
+	}
+
+	// Fill the inverse bind matrices.
+	std::vector<glm::mat4> inverseBindMatrices = {};
+	std::vector<glm::mat4> jointMatrices = {};
+	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
+	auto GetInvBindMatrices = [model, &inverseBindMatrices, &jointMatrices, &idxToJoint]() -> void
 		{
-			int boneID = bone->GetBoneID();
-			const tinygltf::Node& node = model.nodes.at(boneID);
-			bone->SetBoneName(node.name);
+			const tinygltf::Skin& skin = model.skins.at(0);
+			const int invBindMatAccessor = skin.inverseBindMatrices;
 
-			if (!node.translation.empty()) 
-			{
-				bone->SetLocation(glm::make_vec3(node.translation.data()));
-			}
-			if (!node.rotation.empty()) 
-			{
-				bone->SetRotation(glm::make_quat(node.rotation.data()));
-			}
-			if (!node.scale.empty()) 
-			{
+			const tinygltf::Accessor& accessor = model.accessors.at(invBindMatAccessor);
+			const tinygltf::BufferView& bufferView = model.bufferViews.at(accessor.bufferView);
+			const tinygltf::Buffer& buffer = model.buffers.at(bufferView.buffer);
 
-				bone->SetScale(glm::make_vec3(node.scale.data()));
+			inverseBindMatrices.resize(skin.joints.size());
+			jointMatrices.resize(skin.joints.size());
+			idxToJoint.resize(skin.joints.size());
+
+			std::memcpy(inverseBindMatrices.data(), &buffer.data.at(0) + bufferView.byteOffset, bufferView.byteLength);
+		};
+	GetInvBindMatrices();
+
+	auto GetNodeData = [model, &jointMatrices, &inverseBindMatrices, &nodeToJoint, &idxToJoint](std::shared_ptr<AFNode> nodeToCalculate, const glm::mat4& nodeMatrix) -> void
+		{
+			int nodeID = nodeToCalculate->GetNodeID();
+			const tinygltf::Node& node = model.nodes.at(nodeID);
+			nodeToCalculate->SetNodeName(node.name);
+
+			if (!node.matrix.empty())
+			{
+				const glm::mat4& mat = glm::make_mat4(node.matrix.data());
+
+				glm::vec3 translation, scale, skew;
+				glm::vec4 perspective;
+				glm::quat rotation;
+
+				if (glm::decompose(mat, scale, rotation, translation, skew, perspective))
+				{
+					nodeToCalculate->SetLocation(translation);
+					nodeToCalculate->SetRotation(rotation);
+					nodeToCalculate->SetScale(scale);
+				}
+			}
+			else
+			{
+				if (!node.translation.empty())
+				{
+					nodeToCalculate->SetLocation(glm::make_vec3(node.translation.data()));
+				}
+				if (!node.rotation.empty())
+				{
+					nodeToCalculate->SetRotation(glm::make_quat(node.rotation.data()));
+				}
+				if (!node.scale.empty())
+				{
+
+					nodeToCalculate->SetScale(glm::make_vec3(node.scale.data()));
+				}
 			}
 
-			bone->CalculateLocalTRSMatrix();
-			bone->CalculateNodeMatrix(boneMatrix);
+			nodeToCalculate->CalculateLocalTRSMatrix();
+			nodeToCalculate->CalculateNodeMatrix(nodeMatrix);
+
+			idxToJoint.at(nodeToJoint.at(nodeID)) = nodeToCalculate;
+			jointMatrices.at(nodeToJoint.at(nodeID)) = nodeToCalculate->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(nodeID));
 		};
 
-	std::function<void(std::shared_ptr<AFBone>)> GetBones;
-	GetBones = [model, GetBoneData, &GetBones](std::shared_ptr<AFBone> bone) -> void
+	std::function<void(std::shared_ptr<AFNode>)> GetNodes;
+	GetNodes = [model, GetNodeData, &GetNodes](std::shared_ptr<AFNode> nodeToFill) -> void
 		{
-			int boneID = bone->GetBoneID();
-			std::vector<int> childBones = model.nodes.at(boneID).children;
+			int nodeID = nodeToFill->GetNodeID();
+			std::vector<int> childNodes = model.nodes.at(nodeID).children;
 
 			// ? - book quirks.
 			// Remove the child node without skin/mesh metadata, confuses skeleton.
-			auto removeIt = std::remove_if(childBones.begin(), childBones.end(),
+			auto removeIt = std::remove_if(childNodes.begin(), childNodes.end(),
 				[&](int num) {return model.nodes.at(num).skin != -1; });
-			childBones.erase(removeIt, childBones.end());
+			childNodes.erase(removeIt, childNodes.end());
 
-			bone->AddChildren(childBones);
-			const glm::mat4& boneMatrix = bone->GetBoneMatrix();
+			nodeToFill->AddChildren(childNodes);
+			const glm::mat4& nodeMatrix = nodeToFill->GetNodeMatrix();
 
-			for(auto& childBone : bone->GetChildren())
+			for(auto& childNode : nodeToFill->GetChildren())
 			{
-				GetBoneData(childBone, boneMatrix);
-				GetBones(childBone);
+				GetNodeData(childNode, nodeMatrix);
+				GetNodes(childNode);
 			}
 		};
 
-	GetBoneData(rootBone, glm::mat4(1.0f));
-	GetBones(rootBone);
+	// Fill info for the root node.
+	GetNodeData(rootNode, glm::mat4(1.0f));
 
-	rootBone->PrintTree();
+	// Fill info for the rest of nodes recurrently, essentially creating the default pose and whole skeleton tree.
+	GetNodes(rootNode);
+
+	//rootNode->PrintTree();
+
+	// Fill bones info for the loaded mesh temp object.
+	loadedMesh.idxToJoint = idxToJoint;
+	loadedMesh.inverseBindMatrices = inverseBindMatrices;
+	loadedMesh.jointMatrices = jointMatrices;
 
 	// Create VAO for each sub-mesh.
 	for(int meshIdx = 0; meshIdx < model.meshes.size(); ++meshIdx)
@@ -105,10 +167,11 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 				const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
 				const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
 
-				// For now we just try to import positions, normals and uvs.
 				if ((attribType != "POSITION") &&
 					(attribType != "NORMAL") &&
-					(attribType != "TEXCOORD_0"))
+					(attribType != "TEXCOORD_0") &&
+					(attribType != "JOINTS_0") &&
+					(attribType != "WEIGHTS_0"))
 				{
 					continue;
 				}
@@ -151,6 +214,11 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 					dataType = GL_FLOAT;
 					break;
 				}
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+				{
+					dataType = GL_UNSIGNED_SHORT;
+					break;
+				}
 				default:
 				{
 					printf("glTF error, accessor %i uses unkown data type %i\n", accessorNum, dataType);
@@ -163,7 +231,14 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 				glBindBuffer(GL_ARRAY_BUFFER, VBO[attributes[attribType]]);
 
 				// Configure VAO.
-				glVertexAttribPointer(attributes[attribType], dataSize, dataType, GL_FALSE, 0, nullptr);
+				if(dataType == GL_UNSIGNED_SHORT) // #hack. Allow nicer check if we talk about integers.
+				{
+					glVertexAttribIPointer(attributes[attribType], dataSize, dataType, 0, nullptr);
+				}
+				else
+				{
+					glVertexAttribPointer(attributes[attribType], dataSize, dataType, GL_FALSE, 0, nullptr);
+				}
 				glEnableVertexAttribArray(attributes[attribType]);
 			}
 

@@ -44,6 +44,8 @@ struct FAFVertex
 	glm::vec2 uv;
 	glm::uint8_t faceID;
 	glm::vec2 uvCenter;
+	glm::vec4 jointNum;
+	glm::vec4 jointWeight;
 };
 
 struct FAFAsset
@@ -86,7 +88,7 @@ bool FAFAsset::Load(Args&&... args)
 	return LoadImpl(std::forward<Args>(args)...);
 }
 
-struct AFBone
+struct AFNode
 {
 public:
 
@@ -94,38 +96,37 @@ public:
 	void SetRotation(const glm::quat newRotation);
 	void SetScale(const glm::vec3& newScale);
 
-	static std::shared_ptr<AFBone> CreateRoot(int rootBoneIdx);
+	static std::shared_ptr<AFNode> CreateRoot(int rootBoneIdx);
 	void AddChildren(const std::vector<int>& newChildBones);
 
 	void CalculateLocalTRSMatrix();
 	void CalculateNodeMatrix(const glm::mat4& parentNodeMatrix);
 
-	glm::mat4 GetBoneMatrix() const;
+	glm::mat4 GetNodeMatrix() const;
 
-	int GetBoneID() const;
+	int GetNodeID() const;
 
-	std::vector<std::shared_ptr<AFBone>> GetChildren() const;
+	std::vector<std::shared_ptr<AFNode>> GetChildren() const;
 
-	void SetBoneName(const std::string& newName);
-	std::string GetBoneName() const;
+	void SetNodeName(const std::string& newName);
+	std::string GetNodeName() const;
 
 	void PrintTree() const;
-	static void PrintNodes(std::shared_ptr<AFBone> bone, int indent);
+	static void PrintNodes(std::shared_ptr<AFNode> bone, int indent);
 
 private:
 
-	int boneID = 0;
-	std::string boneName = {};
+	int nodeID = 0;
+	std::string nodeName = {};
 
 	glm::vec3 location = glm::vec3(0.0f);
 	glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	glm::vec3 scale = glm::vec3(1.0f);
 
 	glm::mat4 localTRSMatrix = glm::mat4(1.0f);
-	glm::mat4 boneMatrix = glm::mat4(1.0f);
-	glm::mat4 inverseBindMatrix = glm::mat4(1.0f);
+	glm::mat4 nodeMatrix = glm::mat4(1.0f);
 
-	std::vector<std::shared_ptr<AFBone>> childBones = {};
+	std::vector<std::shared_ptr<AFNode>> childNodes = {};
 };
 
 struct FAFSubMesh
@@ -149,6 +150,8 @@ struct FAFSubMesh
 
 struct FAFMesh : public FAFAsset
 {
+	void SetJointTransform(int jointIdx, const glm::mat4& newTransform);
+
 	std::vector<FAFSubMesh> subMeshes = {};
 
 	bool LoadExisting() override;
@@ -156,7 +159,9 @@ struct FAFMesh : public FAFAsset
 
 	unsigned long long GetVertexCount() const;
 
-	std::shared_ptr<AFBone> rootbone = nullptr;
+	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
+	std::vector<glm::mat4> inverseBindMatrices = {};
+	std::vector<glm::mat4> jointMatrices = {};
 };
 
 struct FAFSubMeshLoaded
@@ -169,8 +174,10 @@ struct FAFSubMeshLoaded
 
 struct FAFMeshLoaded
 {
-	std::vector<FAFSubMeshLoaded> subMeshesLoaded;
-	std::shared_ptr<AFBone> rootbone = nullptr;
+	std::vector<FAFSubMeshLoaded> subMeshesLoaded = {};
+	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
+	std::vector<glm::mat4> inverseBindMatrices = {};
+	std::vector<glm::mat4> jointMatrices = {};
 };
 
 enum class EAFDrawType : uint8_t

@@ -10,6 +10,7 @@
 #include <ostream>
 #include <glm/ext/matrix_clip_space.hpp>
 
+#include "AFSkeletalMeshComponent.h"
 #include "AFTextRender.h"
 #include "IAFPickerInterface.h"
 
@@ -162,6 +163,13 @@ void AFRenderer::Draw(const FAFSceneData& sceneData, const FAFAppData& appData)
 
 			// Upload the model matrix.
 			m_uniformBuffer.UploadTransform(renderComponent->GetWorldTransform());
+
+			// Upload the joints matrices.
+			std::shared_ptr<AFSkeletalMeshComponent> skeletalMeshComponent = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(component);
+			if(skeletalMeshComponent)
+			{
+				m_uniformBuffer.UploadJointsMatrices(skeletalMeshComponent->GetJointsMatrices());
+			}
 
 			// Draw.
 			renderComponent->Draw();
