@@ -81,5 +81,5 @@ void AFVertexBuffer::Cleanup()
 {
 	glDeleteBuffers(1, &m_vertexVBO);
 	glDeleteBuffers(1, &m_indexEBO);
-	glDeleteVertexArrays(1, &m_VAO);
+	glDeleteVertexArrays(1, &m_VAO);;
 }

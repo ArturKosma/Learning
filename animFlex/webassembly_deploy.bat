@@ -1,7 +1,12 @@
 set DEST_PATH=C:\_programming\Learning\docs
 
-cd "%DEST_PATH%\"
+cd /d "%DEST_PATH%"
 
-call git add .
-call git commit -m "bat deploy"
-call git push
+rmdir /s /q .git
+git init
+git remote add origin https://github.com/ArturKosma/Learning.git
+git checkout -b gh-pages
+
+git add .
+git commit -m "Deploy to GitHub Pages"
+git push origin gh-pages --force
