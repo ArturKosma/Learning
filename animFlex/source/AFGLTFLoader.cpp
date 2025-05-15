@@ -142,6 +142,8 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 	//rootNode->PrintTree();
 
 	// Fill bones info for the loaded mesh temp object.
+	loadedMesh.rootJoint = rootNode;
+	loadedMesh.nodeToJoint = nodeToJoint;
 	loadedMesh.idxToJoint = idxToJoint;
 	loadedMesh.inverseBindMatrices = inverseBindMatrices;
 	loadedMesh.jointMatrices = jointMatrices;

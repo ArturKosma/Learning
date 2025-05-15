@@ -10,6 +10,7 @@ class AFScene
 
 public:
 
+	std::shared_ptr<AFActor> FindActor(const std::string& actorName);
 	void AddActor(std::shared_ptr<AFActor> newActor);
 	void AddUI(std::shared_ptr<AFUI> newUI);
 

@@ -1,9 +1,14 @@
 #include "AFGame.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 #include "AFApp.h"
 #include "AFCamera.h"
 #include "AFContent.h"
 #include "AFInput.h"
+#include "AFSkeletalMeshComponent.h"
+#include "AFTimerManager.h"
 #include "AFUIComponent.h"
 #include "AFUtility.h"
 #include "IAFPickerInterface.h"
@@ -37,6 +42,25 @@ void AFGame::Tick(float deltaTime)
 	for (std::shared_ptr<AFUI> ui : m_scene.GetSceneData().uis)
 	{
 		ui->Tick(deltaTime);
+	}
+
+	placeholderAccum += deltaTime;
+
+	std::shared_ptr<AFActor> mannequinActor = m_scene.FindActor("mannequin actor");
+	if (mannequinActor)
+	{
+		std::shared_ptr<AFSkeletalMeshComponent> mannequinMesh = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(mannequinActor->GetComponentByName("mannequin mesh component"));
+		if (mannequinMesh)
+		{
+			const glm::vec3 oldLoc = mannequinMesh->GetBoneLocation(5);
+			const glm::quat oldRot = mannequinMesh->GetBoneRotation(5);
+			const glm::vec3 oldScale = mannequinMesh->GetBoneScale(5);
+
+			const float sinAlpha = glm::sin(placeholderAccum * 3.0f);
+			const glm::quat& newRot = glm::quat(glm::radians(glm::vec3(sinAlpha * 45.0f, 0.0f, 0.0f)));
+
+			mannequinMesh->SetBoneTransform(5, oldLoc, newRot, oldScale);
+		}
 	}
 }
 

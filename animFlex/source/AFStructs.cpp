@@ -31,6 +31,21 @@ void AFNode::SetScale(const glm::vec3& newScale)
 	scale = newScale;
 }
 
+glm::vec3 AFNode::GetLocation() const
+{
+	return location;
+}
+
+glm::quat AFNode::GetRotation() const
+{
+	return rotation;
+}
+
+glm::vec3 AFNode::GetScale() const
+{
+	return scale;
+}
+
 std::shared_ptr<AFNode> AFNode::CreateRoot(int rootBoneIdx)
 {
 	std::shared_ptr<AFNode> parentBone = std::make_shared<AFNode>();
@@ -51,6 +66,11 @@ void AFNode::CalculateLocalTRSMatrix()
 void AFNode::CalculateNodeMatrix(const glm::mat4& parentNodeMatrix)
 {
 	nodeMatrix = parentNodeMatrix * localTRSMatrix;
+}
+
+glm::mat4 AFNode::GetLocalTRSMatrix() const
+{
+	return localTRSMatrix;
 }
 
 int AFNode::GetNodeID() const
@@ -124,9 +144,18 @@ unsigned long long FAFSubMesh::GetVertexCount() const
 	return vertices.size();
 }
 
-void FAFMesh::SetJointTransform(int jointIdx, const glm::mat4& newTransform)
+void FAFMesh::SetJointTransform(int jointIdx, const glm::vec3& newLocation, const glm::quat& newRotation,
+	const glm::vec3& newScale)
 {
+	std::shared_ptr<AFNode> joint = idxToJoint[jointIdx];
 
+	joint->SetLocation(newLocation);
+	joint->SetRotation(newRotation);
+	joint->SetScale(newScale);
+
+	joint->CalculateLocalTRSMatrix();
+
+	jointsDirty = true;
 }
 
 bool FAFMesh::LoadExisting()
@@ -162,6 +191,8 @@ bool FAFMesh::LoadImpl(const char* filepath, bool binary)
 		}
 
 		// Pass bones info. #hack Not every mesh is a skinned mesh.
+		rootJoint = meshLoaded.rootJoint;
+		nodeToJoint = meshLoaded.nodeToJoint;
 		idxToJoint = meshLoaded.idxToJoint;
 		inverseBindMatrices = meshLoaded.inverseBindMatrices;
 		jointMatrices = meshLoaded.jointMatrices;
@@ -181,4 +212,38 @@ unsigned long long FAFMesh::GetVertexCount() const
 	}
 
 	return vertexCount;
+}
+
+void FAFMesh::RecalculateSkeleton()
+{
+	RecalculateBone(rootJoint, glm::mat4(1.0f));
+	jointsDirty = false;
+}
+
+void FAFMesh::RecalculateBone(std::shared_ptr<AFNode> bone, const glm::mat4& parentMatrix)
+{
+	const int boneID = bone->GetNodeID();
+
+	bone->CalculateNodeMatrix(parentMatrix);
+	jointMatrices.at(nodeToJoint.at(boneID)) = bone->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(boneID));
+
+	for(std::shared_ptr<AFNode> childBone : bone->GetChildren())
+	{
+		RecalculateBone(childBone, bone->GetNodeMatrix());
+	}
+}
+
+glm::vec3 FAFMesh::GetJointLocation(int boneIdx) const
+{
+	return idxToJoint[boneIdx]->GetLocation();
+}
+
+glm::quat FAFMesh::GetJointRotation(int boneIdx) const
+{
+	return idxToJoint[boneIdx]->GetRotation();
+}
+
+glm::vec3 FAFMesh::GetJointScale(int boneIdx) const
+{
+	return idxToJoint[boneIdx]->GetScale();
 }

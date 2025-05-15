@@ -15,6 +15,22 @@
 #include "AFUtility.h"
 #include "AFVertexBuffer.h"
 
+std::shared_ptr<AFActor> AFScene::FindActor(const std::string& actorName)
+{
+	auto it = std::find_if(m_sceneData.sceneActors.begin(), m_sceneData.sceneActors.end(),
+		[actorName](std::shared_ptr<AFActor> actor)
+		{
+			return actor && actor->GetDisplayName() == actorName;
+		});
+
+	if(it != m_sceneData.sceneActors.end())
+	{
+		return *it;
+	}
+
+	return nullptr;
+}
+
 void AFScene::AddActor(std::shared_ptr<AFActor> newActor)
 {
 	if(!newActor)

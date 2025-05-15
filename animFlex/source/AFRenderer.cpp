@@ -168,6 +168,11 @@ void AFRenderer::Draw(const FAFSceneData& sceneData, const FAFAppData& appData)
 			std::shared_ptr<AFSkeletalMeshComponent> skeletalMeshComponent = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(component);
 			if(skeletalMeshComponent)
 			{
+				if(skeletalMeshComponent->GetStateDirty())
+				{
+					skeletalMeshComponent->RecalculateSkeleton();
+				}
+
 				m_uniformBuffer.UploadJointsMatrices(skeletalMeshComponent->GetJointsMatrices());
 			}
 

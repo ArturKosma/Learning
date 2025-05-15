@@ -16,6 +16,7 @@ public:
 
 	void AddComponent(std::shared_ptr<AFComponent> newComponent);
 	const std::vector<std::shared_ptr<AFComponent>>& GetComponents() const;
+	std::shared_ptr<AFComponent> GetComponentByName(const std::string& compName) const;
 
 protected:
 

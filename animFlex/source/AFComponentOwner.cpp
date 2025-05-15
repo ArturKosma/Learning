@@ -24,3 +24,19 @@ const std::vector<std::shared_ptr<AFComponent>>& AFComponentOwner::GetComponents
 {
     return m_components;
 }
+
+std::shared_ptr<AFComponent> AFComponentOwner::GetComponentByName(const std::string& compName) const
+{
+    auto it = std::find_if(m_components.begin(), m_components.end(),
+        [compName](std::shared_ptr<AFComponent> comp)
+        {
+            return comp && comp->GetDisplayName() == compName;
+        });
+
+    if (it != m_components.end())
+    {
+        return *it;
+    }
+
+    return nullptr;
+}

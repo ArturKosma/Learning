@@ -96,12 +96,17 @@ public:
 	void SetRotation(const glm::quat newRotation);
 	void SetScale(const glm::vec3& newScale);
 
+	glm::vec3 GetLocation() const;
+	glm::quat GetRotation() const;
+	glm::vec3 GetScale() const;
+
 	static std::shared_ptr<AFNode> CreateRoot(int rootBoneIdx);
 	void AddChildren(const std::vector<int>& newChildBones);
 
 	void CalculateLocalTRSMatrix();
 	void CalculateNodeMatrix(const glm::mat4& parentNodeMatrix);
 
+	glm::mat4 GetLocalTRSMatrix() const;
 	glm::mat4 GetNodeMatrix() const;
 
 	int GetNodeID() const;
@@ -150,8 +155,6 @@ struct FAFSubMesh
 
 struct FAFMesh : public FAFAsset
 {
-	void SetJointTransform(int jointIdx, const glm::mat4& newTransform);
-
 	std::vector<FAFSubMesh> subMeshes = {};
 
 	bool LoadExisting() override;
@@ -159,6 +162,20 @@ struct FAFMesh : public FAFAsset
 
 	unsigned long long GetVertexCount() const;
 
+	void RecalculateSkeleton();
+	void RecalculateBone(std::shared_ptr<AFNode> bone, const glm::mat4& parentMatrix);
+
+	glm::vec3 GetJointLocation(int boneIdx) const;
+	glm::quat GetJointRotation(int boneIdx) const;
+	glm::vec3 GetJointScale(int boneIdx) const;
+
+	void SetJointTransform(int jointIdx, const glm::vec3& newLocation = glm::vec3(0.0f), const glm::quat& newRotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+		const glm::vec3& newScale = glm::vec3(1.0f));
+
+	bool jointsDirty = false;
+
+	std::shared_ptr<AFNode> rootJoint = nullptr;
+	std::vector<int> nodeToJoint = {};
 	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
 	std::vector<glm::mat4> inverseBindMatrices = {};
 	std::vector<glm::mat4> jointMatrices = {};
@@ -175,6 +192,8 @@ struct FAFSubMeshLoaded
 struct FAFMeshLoaded
 {
 	std::vector<FAFSubMeshLoaded> subMeshesLoaded = {};
+	std::shared_ptr<AFNode> rootJoint = nullptr;
+	std::vector<int> nodeToJoint = {};
 	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
 	std::vector<glm::mat4> inverseBindMatrices = {};
 	std::vector<glm::mat4> jointMatrices = {};

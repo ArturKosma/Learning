@@ -25,4 +25,6 @@ private:
 
 	std::shared_ptr<AFObject> m_currentHover = nullptr;
 	uint8_t m_currentHoverElement = -1;
+
+	float placeholderAccum = 0.0f;
 };
