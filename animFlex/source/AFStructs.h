@@ -44,7 +44,7 @@ struct FAFVertex
 	glm::vec2 uv;
 	glm::uint8_t faceID;
 	glm::vec2 uvCenter;
-	glm::vec4 jointNum;
+	glm::uvec4 jointNum;
 	glm::vec4 jointWeight;
 };
 

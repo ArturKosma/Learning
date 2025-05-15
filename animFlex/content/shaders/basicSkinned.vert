@@ -20,7 +20,7 @@ layout (std140) uniform JointMatrices
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aUV;
-layout (location = 3) in vec4 aJointNum;
+layout (location = 3) in uvec4 aJointNum;
 layout (location = 4) in vec4 aJointWeight;
 
 out vec4 Pos;
@@ -33,10 +33,10 @@ void main()
 	vec3 worldNormal = normalize(normalMatrix * aNormal);
 
 	mat4 skinMat = 
-	aJointWeight.x * jointMat[int(aJointNum.x)] +
-	aJointWeight.y * jointMat[int(aJointNum.y)] +
-	aJointWeight.z * jointMat[int(aJointNum.z)] +
-	aJointWeight.w * jointMat[int(aJointNum.w)];
+	aJointWeight.x * jointMat[aJointNum.x] +
+	aJointWeight.y * jointMat[aJointNum.y] +
+	aJointWeight.z * jointMat[aJointNum.z] +
+	aJointWeight.w * jointMat[aJointNum.w];
 
 	vec4 worldPos = modelTransform * skinMat * vec4(aPos, 1.0f);
 
