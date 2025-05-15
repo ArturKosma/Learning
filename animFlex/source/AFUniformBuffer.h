@@ -19,6 +19,7 @@ public:
 	void UploadRenderProperties(glm::mat4 renderProperties);
 	void UploadUITransform(glm::mat4 uiTransform);
 	void UploadJointsMatrices(const std::vector<glm::mat4>& jointsMatrices);
+	void UploadJointsDualQuatMatrices(const std::vector<glm::mat4>& jointsDualQuatMatrices);
 
 	void Cleanup();
 
@@ -34,4 +35,5 @@ private:
 	GLuint m_orthoProjectionBuffer = 0;
 	GLuint m_orthoPixelProjectionBuffer = 0;
 	GLuint m_jointMatricesBuffer = 0;
+	GLuint m_jointDualQuatMatricesBuffer = 0;
 };

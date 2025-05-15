@@ -174,6 +174,7 @@ void AFRenderer::Draw(const FAFSceneData& sceneData, const FAFAppData& appData)
 				}
 
 				m_uniformBuffer.UploadJointsMatrices(skeletalMeshComponent->GetJointsMatrices());
+				m_uniformBuffer.UploadJointsDualQuatMatrices(skeletalMeshComponent->GetJointsDualQuatMatrices());
 			}
 
 			// Draw.

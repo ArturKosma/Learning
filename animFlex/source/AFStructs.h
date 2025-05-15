@@ -179,6 +179,7 @@ struct FAFMesh : public FAFAsset
 	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
 	std::vector<glm::mat4> inverseBindMatrices = {};
 	std::vector<glm::mat4> jointMatrices = {};
+	std::vector<glm::mat4> jointDualQuats = {};
 };
 
 struct FAFSubMeshLoaded
@@ -197,6 +198,7 @@ struct FAFMeshLoaded
 	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
 	std::vector<glm::mat4> inverseBindMatrices = {};
 	std::vector<glm::mat4> jointMatrices = {};
+	std::vector<glm::mat4> jointDualQuats = {};
 };
 
 enum class EAFDrawType : uint8_t

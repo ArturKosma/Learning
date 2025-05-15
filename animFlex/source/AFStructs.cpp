@@ -1,5 +1,10 @@
 #include "AFStructs.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/dual_quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 #include "AFContent.h"
 #include "AFGLTFLoader.h"
 #include "AFUtility.h"
@@ -196,6 +201,7 @@ bool FAFMesh::LoadImpl(const char* filepath, bool binary)
 		idxToJoint = meshLoaded.idxToJoint;
 		inverseBindMatrices = meshLoaded.inverseBindMatrices;
 		jointMatrices = meshLoaded.jointMatrices;
+		jointDualQuats = meshLoaded.jointDualQuats;
 
 		return true;
 	}
@@ -226,6 +232,25 @@ void FAFMesh::RecalculateBone(std::shared_ptr<AFNode> bone, const glm::mat4& par
 
 	bone->CalculateNodeMatrix(parentMatrix);
 	jointMatrices.at(nodeToJoint.at(boneID)) = bone->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(boneID));
+
+	// Compose dual quat.
+	glm::vec3 translation;
+	glm::quat rotation;
+	glm::vec3 scale;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::dualquat dq;
+	glm::decompose(bone->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(boneID)),
+		scale, rotation, translation, skew, perspective);
+
+	// Fill dual quaternions. @see C++ Game Animation Programming by Dunsky & Szauer.
+	dq[0] = rotation;
+	dq[1] = glm::quat(0.0f, translation.x, translation.y, translation.z) * rotation * 0.5f;
+	glm::mat2x4 dualQuatJoint = glm::mat2x4_cast(dq);
+	glm::mat4 paddedMat(0.0f); // Web-GL doesn't accept 2x4.
+	paddedMat[0] = dualQuatJoint[0];
+	paddedMat[1] = dualQuatJoint[1];
+	jointDualQuats.at(nodeToJoint.at(boneID)) = paddedMat;
 
 	for(std::shared_ptr<AFNode> childBone : bone->GetChildren())
 	{

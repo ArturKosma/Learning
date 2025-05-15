@@ -31,6 +31,11 @@ const std::vector<glm::mat4>& AFSkeletalMeshComponent::GetJointsMatrices() const
 	return m_mesh->jointMatrices;
 }
 
+const std::vector<glm::mat4>& AFSkeletalMeshComponent::GetJointsDualQuatMatrices() const
+{
+	return m_mesh->jointDualQuats;
+}
+
 bool AFSkeletalMeshComponent::GetStateDirty() const
 {
 	return m_mesh->jointsDirty;

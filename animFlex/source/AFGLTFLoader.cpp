@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/dual_quaternion.hpp>
 
 #include "third_party/tiny_gltf.h"
 
@@ -48,8 +49,9 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 	// Fill the inverse bind matrices.
 	std::vector<glm::mat4> inverseBindMatrices = {};
 	std::vector<glm::mat4> jointMatrices = {};
+	std::vector<glm::mat4> jointDualQuats = {};
 	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
-	auto GetInvBindMatrices = [model, &inverseBindMatrices, &jointMatrices, &idxToJoint]() -> void
+	auto GetInvBindMatrices = [model, &inverseBindMatrices, &jointMatrices, &idxToJoint, &jointDualQuats]() -> void
 		{
 			const tinygltf::Skin& skin = model.skins.at(0);
 			const int invBindMatAccessor = skin.inverseBindMatrices;
@@ -61,51 +63,67 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 			inverseBindMatrices.resize(skin.joints.size());
 			jointMatrices.resize(skin.joints.size());
 			idxToJoint.resize(skin.joints.size());
+			jointDualQuats.resize(skin.joints.size());
 
 			std::memcpy(inverseBindMatrices.data(), &buffer.data.at(0) + bufferView.byteOffset, bufferView.byteLength);
 		};
 	GetInvBindMatrices();
 
-	auto GetNodeData = [model, &jointMatrices, &inverseBindMatrices, &nodeToJoint, &idxToJoint](std::shared_ptr<AFNode> nodeToCalculate, const glm::mat4& nodeMatrix) -> void
+	auto GetNodeData = [model, &jointMatrices, &inverseBindMatrices, &nodeToJoint, &idxToJoint, &jointDualQuats](std::shared_ptr<AFNode> nodeToCalculate, const glm::mat4& nodeMatrix) -> void
 		{
 			int nodeID = nodeToCalculate->GetNodeID();
 			const tinygltf::Node& node = model.nodes.at(nodeID);
 			nodeToCalculate->SetNodeName(node.name);
 
+			glm::vec3 translation = glm::vec3(0.0f), scale = glm::vec3(1.0f), skew;
+			glm::vec4 perspective;
+			glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			glm::dualquat dq;
+
 			if (!node.matrix.empty())
 			{
 				const glm::mat4& mat = glm::make_mat4(node.matrix.data());
 
-				glm::vec3 translation, scale, skew;
-				glm::vec4 perspective;
-				glm::quat rotation;
-
 				if (glm::decompose(mat, scale, rotation, translation, skew, perspective))
 				{
-					nodeToCalculate->SetLocation(translation);
-					nodeToCalculate->SetRotation(rotation);
-					nodeToCalculate->SetScale(scale);
+					
 				}
 			}
 			else
 			{
 				if (!node.translation.empty())
 				{
-					nodeToCalculate->SetLocation(glm::make_vec3(node.translation.data()));
+					translation = glm::make_vec3(node.translation.data());
 				}
 				if (!node.rotation.empty())
 				{
-					nodeToCalculate->SetRotation(glm::make_quat(node.rotation.data()));
+					rotation = glm::make_quat(node.rotation.data());
 				}
 				if (!node.scale.empty())
 				{
-
-					nodeToCalculate->SetScale(glm::make_vec3(node.scale.data()));
+					scale = glm::make_vec3(node.scale.data());
 				}
 			}
 
+			nodeToCalculate->SetLocation(translation);
+			nodeToCalculate->SetRotation(rotation);
+			nodeToCalculate->SetScale(scale);
+
 			nodeToCalculate->CalculateLocalTRSMatrix();
 			nodeToCalculate->CalculateNodeMatrix(nodeMatrix);
+
+			if (glm::decompose(nodeToCalculate->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(nodeID)), 
+				scale, rotation, translation, skew, perspective))
+			{
+				// Fill dual quaternions. @see C++ Game Animation Programming by Dunsky & Szauer.
+				dq[0] = rotation;
+				dq[1] = glm::quat(0.0f, translation.x, translation.y, translation.z) * rotation * 0.5f;
+				glm::mat2x4 dualQuatJoint = glm::mat2x4_cast(dq);
+				glm::mat4 paddedMat(0.0f); // Web-GL doesn't accept 2x4.
+				paddedMat[0] = dualQuatJoint[0];
+				paddedMat[1] = dualQuatJoint[1];
+				jointDualQuats.at(nodeToJoint.at(nodeID)) = paddedMat;
+			}
 
 			idxToJoint.at(nodeToJoint.at(nodeID)) = nodeToCalculate;
 			jointMatrices.at(nodeToJoint.at(nodeID)) = nodeToCalculate->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(nodeID));
@@ -147,6 +165,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 	loadedMesh.idxToJoint = idxToJoint;
 	loadedMesh.inverseBindMatrices = inverseBindMatrices;
 	loadedMesh.jointMatrices = jointMatrices;
+	loadedMesh.jointDualQuats = jointDualQuats;
 
 	// Create VAO for each sub-mesh.
 	for(int meshIdx = 0; meshIdx < model.meshes.size(); ++meshIdx)

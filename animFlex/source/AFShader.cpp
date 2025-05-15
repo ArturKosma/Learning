@@ -165,6 +165,7 @@ void AFShader::UniformBinding()
 	GLint orthoProjectionIndex = glGetUniformBlockIndex(m_shaderProgram, "OrthoProjection");
 	GLint orthoPixelProjectionIndex = glGetUniformBlockIndex(m_shaderProgram, "OrthoPixelProjection");
 	GLint jointMatricesIndex = glGetUniformBlockIndex(m_shaderProgram, "JointMatrices");
+	GLint jointDualQuatMatricesIndex = glGetUniformBlockIndex(m_shaderProgram, "JointDualQuats");
 
 	if (viewProjectionIndex != -1)
 	{
@@ -214,6 +215,11 @@ void AFShader::UniformBinding()
 	if (jointMatricesIndex != -1)
 	{
 		glUniformBlockBinding(m_shaderProgram, jointMatricesIndex, 9);
+	}
+
+	if (jointDualQuatMatricesIndex != -1)
+	{
+		glUniformBlockBinding(m_shaderProgram, jointDualQuatMatricesIndex, 10);
 	}
 
 	glUseProgram(0);
