@@ -15,7 +15,7 @@ void AFAnimationClip::SetAnimationFrame(const std::vector<std::shared_ptr<AFNode
 {
 	for(auto& channel : m_animationChannels)
 	{
-		int targetNode = channel->GetTargetNode();
+		int targetNode = channel->GetTargetNode() - 1; // #hack The -1 is due to some problems that I have with construction of the skeleton tree. Temporary hack.
 
 		switch(channel->GetTargetPath())
 		{

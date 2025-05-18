@@ -1,5 +1,6 @@
 #include "AFContent.h"
 
+#include "AFAnimationClip.h"
 #include "AFPostprocessShader.h"
 #include "AFVertexBuffer.h"
 #include "AFTexture.h"
@@ -173,6 +174,9 @@ bool AFContent::Init()
 
 	// Meshes
 	std::shared_ptr<FAFMesh> mannequin = AddAsset<FAFMesh>("sm_mannequin", "content/models/mannequin.gltf", false);
+
+	// Anims.
+	AddAsset<AFAnimationClip>("anim_idle", "content/anims/anim_idle.gltf");
 
 	// -------------------------------------------------
 	// Apply fallback properties post load.

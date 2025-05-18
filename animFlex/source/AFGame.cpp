@@ -52,14 +52,21 @@ void AFGame::Tick(float deltaTime)
 		std::shared_ptr<AFSkeletalMeshComponent> mannequinMesh = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(mannequinActor->GetComponentByName("mannequin mesh component"));
 		if (mannequinMesh)
 		{
-			const glm::vec3 oldLoc = mannequinMesh->GetBoneLocation(5);
+			/*const glm::vec3 oldLoc = mannequinMesh->GetBoneLocation(5);
 			const glm::quat oldRot = mannequinMesh->GetBoneRotation(5);
 			const glm::vec3 oldScale = mannequinMesh->GetBoneScale(5);
 
 			const float sinAlpha = glm::sin(placeholderAccum * 3.0f);
 			const glm::quat& newRot = glm::quat(glm::radians(glm::vec3(sinAlpha * 45.0f, 0.0f, 0.0f)));
 
-			mannequinMesh->SetBoneTransform(5, oldLoc, newRot, oldScale);
+			mannequinMesh->SetBoneTransform(5, oldLoc, newRot, oldScale);*/
+
+			std::shared_ptr<AFAnimationClip> idleClip = AFContent::Get().FindAsset<AFAnimationClip>("anim_idle");
+			if(idleClip)
+			{
+				mannequinMesh->SetAnimation(idleClip);
+				mannequinMesh->PlayAnimation();
+			}
 		}
 	}
 }
