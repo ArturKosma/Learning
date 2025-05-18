@@ -307,3 +307,42 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 
 	return true;
 }
+
+bool AFGLTFLoader::LoadAnim(const std::string& filename, AFAnimationClip* loadedClip, bool binary)
+{
+	std::shared_ptr<tinygltf::Model> model = std::make_shared<tinygltf::Model>();
+	tinygltf::TinyGLTF loader;
+	std::string err;
+	std::string warn;
+
+	bool ret = binary ?
+		loader.LoadBinaryFromFile(&*model, &err, &warn, filename) :
+		loader.LoadASCIIFromFile(&*model, &err, &warn, filename);
+
+	if (!ret)
+	{
+		printf("Failed to parse glTF.\n");
+		return false;
+	}
+
+	if (model->animations.empty())
+	{
+		printf("No animations in file.\n");
+		return false;
+	}
+
+	if(!loadedClip)
+	{
+		return false;
+	}
+
+	// #hack. This assumes we have only 1 animation per file.
+	auto& anim = model->animations[0];
+	loadedClip->SetClipName(anim.name);
+	for (const auto& channel : anim.channels)
+	{
+		loadedClip->AddChannel(model, anim, channel);
+	}
+
+	return true;
+}

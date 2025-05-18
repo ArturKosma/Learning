@@ -1,5 +1,32 @@
 #include "AFSkeletalMeshComponent.h"
 
+#include <chrono>
+
+void AFSkeletalMeshComponent::SetAnimation(std::shared_ptr<AFAnimationClip> newAnimation)
+{
+	m_animation = newAnimation;
+}
+
+void AFSkeletalMeshComponent::PlayAnimation(float playrate)
+{
+	const double currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()
+	).count();
+
+	SetAnimationFrame(std::fmod(currentTime / 1000.0 * playrate, m_animation->GetClipEndTime()));
+}
+
+void AFSkeletalMeshComponent::SetAnimationFrame(float time)
+{
+	m_animation->SetAnimationFrame(m_mesh->GetJoints(), time);
+	m_mesh->jointsDirty = true;
+}
+
+std::shared_ptr<AFAnimationClip> AFSkeletalMeshComponent::GetAnimation() const
+{
+	return m_animation;
+}
+
 void AFSkeletalMeshComponent::RecalculateSkeleton()
 {
 	m_mesh->RecalculateSkeleton();

@@ -32,7 +32,7 @@ void AFCameraMovementComponent::BlendTo(const glm::vec3& targetLocation, float t
 		}, length, [this]()
 		{
 				m_cameraMovementMode = EAFCameraMovementMode::Normal;
-		}, EAFAlphaInterp::CubicHermite);
+		}, EAFInterpolationType::CubicHermite);
 }
 
 void AFCameraMovementComponent::AddControlRotation(const glm::vec3& eulerToAdd)

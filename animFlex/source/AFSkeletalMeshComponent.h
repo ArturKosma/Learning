@@ -1,9 +1,14 @@
 #pragma once
+#include "AFAnimationClip.h"
 #include "AFStaticMeshComponent.h"
 
 class AFSkeletalMeshComponent : public AFStaticMeshComponent
 {
 public:
+
+	void SetAnimation(std::shared_ptr<AFAnimationClip> newAnimation);
+	void PlayAnimation(float playrate = 1.0f);
+	std::shared_ptr<AFAnimationClip> GetAnimation() const;
 
 	void RecalculateSkeleton();
 
@@ -16,4 +21,9 @@ public:
 	const std::vector<glm::mat4>& GetJointsMatrices() const;
 	const std::vector<glm::mat4>& GetJointsDualQuatMatrices() const;
 	bool GetStateDirty() const;
+
+private:
+
+	void SetAnimationFrame(float time);
+	std::shared_ptr<AFAnimationClip> m_animation = nullptr;
 };

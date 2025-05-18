@@ -22,7 +22,7 @@ void AFAlphaTimer::Tick(float deltaTime)
 
 	float interpAlpha = m_alpha;
 
-	if(m_alphaInterpMethod == EAFAlphaInterp::CubicHermite)
+	if(m_alphaInterpMethod == EAFInterpolationType::CubicHermite)
 	{
 		interpAlpha = (-2.0f * glm::pow(m_alpha, 3.0f)) + (3.0f * glm::pow(m_alpha, 2.0f));
 	}
@@ -31,7 +31,7 @@ void AFAlphaTimer::Tick(float deltaTime)
 }
 
 std::shared_ptr<AFAlphaTimer> AFTimerManager::SetAlphaTimer(const AlphaFunctor& functor, float length, 
-	const AlphaFunctorFin& functorFin, EAFAlphaInterp interpMethod, bool inverse)
+	const AlphaFunctorFin& functorFin, EAFInterpolationType interpMethod, bool inverse)
 {
 	std::shared_ptr<AFAlphaTimer> newAlphaTimer = std::make_shared<AFAlphaTimer>();
 	newAlphaTimer->m_alphaFunctor = functor;

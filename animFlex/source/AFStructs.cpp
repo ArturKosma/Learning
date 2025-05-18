@@ -272,3 +272,8 @@ glm::vec3 FAFMesh::GetJointScale(int boneIdx) const
 {
 	return idxToJoint[boneIdx]->GetScale();
 }
+
+std::vector<std::shared_ptr<AFNode>> FAFMesh::GetJoints() const
+{
+	return idxToJoint;
+}

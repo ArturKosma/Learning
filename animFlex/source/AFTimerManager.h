@@ -22,7 +22,7 @@ private:
 	AlphaFunctor m_alphaFunctor = {};
 	AlphaFunctorFin m_alphaFunctorFin = {};
 
-	EAFAlphaInterp m_alphaInterpMethod = {};
+	EAFInterpolationType m_alphaInterpMethod = {};
 
 	float m_timeElapsed = 0.0f;
 	float m_alpha = 0.0f;
@@ -37,7 +37,7 @@ class AFTimerManager
 public:
 
 	static std::shared_ptr<AFAlphaTimer> SetAlphaTimer(const AlphaFunctor& functor, float length, 
-		const AlphaFunctorFin& functorFin = {}, EAFAlphaInterp interpMethod = EAFAlphaInterp::Linear, bool inverse = false);
+		const AlphaFunctorFin& functorFin = {}, EAFInterpolationType interpMethod = EAFInterpolationType::Linear, bool inverse = false);
 
 	static AFTimerManager& GetInstance();
 	static float GetDeltaTime();

@@ -48,6 +48,13 @@ struct FAFVertex
 	glm::vec4 jointWeight;
 };
 
+enum class EAFTargetPath : uint8_t
+{
+	Rotation,
+	Translation,
+	Scale
+};
+
 struct FAFAsset
 {
 	friend class AFContent;
@@ -169,6 +176,8 @@ struct FAFMesh : public FAFAsset
 	glm::quat GetJointRotation(int boneIdx) const;
 	glm::vec3 GetJointScale(int boneIdx) const;
 
+	std::vector<std::shared_ptr<AFNode>> GetJoints() const;
+
 	void SetJointTransform(int jointIdx, const glm::vec3& newLocation = glm::vec3(0.0f), const glm::quat& newRotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
 		const glm::vec3& newScale = glm::vec3(1.0f));
 
@@ -233,9 +242,11 @@ enum class EAFCameraMovementMode : uint8_t
 	Blending
 };
 
-enum class EAFAlphaInterp : uint8_t
+enum class EAFInterpolationType : uint8_t
 {
+	Step,
 	Linear,
+	CubicSpline,
 	CubicHermite
 };
 
