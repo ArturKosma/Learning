@@ -48,13 +48,11 @@
 </head>
 <body>
     <div class="emscripten_border" style="display: flex; flex-direction: column;">
-        <div id="topPane" style="height: 60%; min-height: 100px;">
+        <div id="topPane" style="height: 75%; min-height: 30vh;;">
             <canvas class="emscripten" id="canvas" style="width: 100%; height: 100%;" oncontextmenu="event.preventDefault()" tabindex="0" data-antialias="true"></canvas>
         </div>
         <div id="splitter" style="height: 5px; background: #444; cursor: row-resize;"></div>
-        <div id="rete" style="flex: 1; min-height: 100px; background: #202020; overflow: hidden;">
-            Hello from the Rete side
-        </div>
+        <div id="rete" style="flex: 1; min-height: 10vh; background: #202020; overflow: hidden;"></div>
     </div>
     <textarea class="emscripten" id="output" rows="8"></textarea>
 
@@ -101,20 +99,18 @@
         };
     </script>
     <script>
-        Module.onRuntimeInitialized = function () 
-        {
+        Module.onRuntimeInitialized = function () {
             console.log("Emscripten runtime initialized");
             resizeCanvasToContainer();
         };
 
-        function resizeCanvasToContainer() 
-        {
+        function resizeCanvasToContainer() {
             const canvas = document.getElementById("canvas");
 
             const width = canvas.clientWidth;
             const height = canvas.clientHeight;
 
-           // console.log("Resizing to:", width, height);
+            // console.log("Resizing to:", width, height);
 
             Module._OnResizeCanvas(width, height); // Call the exported C++ function.
         }
@@ -130,21 +126,18 @@
 
         let isDragging = false;
 
-        splitter.addEventListener('mousedown', (e) => 
-        {
+        splitter.addEventListener('mousedown', (e) => {
             isDragging = true;
             document.body.style.cursor = 'row-resize';
             e.preventDefault();
         });
 
-        document.addEventListener('mouseup', () => 
-        {
+        document.addEventListener('mouseup', () => {
             isDragging = false;
             document.body.style.cursor = '';
         });
 
-        document.addEventListener('mousemove', (e) => 
-        {
+        document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
 
             const container = document.querySelector('.emscripten_border');
@@ -164,6 +157,21 @@
             resizeCanvasToContainer();
         });
     </script>
+    <script type="module">
+          import { createEditor } from "../../nodejs/rete/animFlexGraph/rete.ts";
+
+          const container = document.getElementById('rete');
+          if (container) 
+          {
+            createEditor(container);
+          } 
+          else 
+          {
+            console.error('Could not find #rete container');
+          }
+
+    </script>
+    <!-- @vite-ignore -->
     {{{ SCRIPT }}}
 </body>
 </html>

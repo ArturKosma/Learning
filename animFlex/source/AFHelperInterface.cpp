@@ -34,7 +34,7 @@ void AFHelperInterface::Draw(const FAFSceneData& sceneData, FAFAppData& appData)
 
 	// Manually inject events to ImGUI due to having touch events which are not supported.
 	const bool bIsMobile = AFUtility::IsMobile();
-	if(bIsMobile)
+	if (bIsMobile)
 	{
 		const bool touchDown = AFInput::GetInstance().GetTouchDown(0);
 		const glm::vec2& touchPos = AFInput::GetInstance().GetTouchPos(0);
@@ -48,7 +48,7 @@ void AFHelperInterface::Draw(const FAFSceneData& sceneData, FAFAppData& appData)
 		const glm::vec2& cursorPos = AFInput::GetInstance().GetCursorPos();
 
 		io.MouseDown[0] = mouseDown;
-		io.MousePos = {cursorPos.x, cursorPos.y};
+		io.MousePos = { cursorPos.x, cursorPos.y };
 	}
 
 	CreateFrame(sceneData, appData);

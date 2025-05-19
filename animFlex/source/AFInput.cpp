@@ -4,6 +4,7 @@
 #include "AFUtility.h"
 #include <algorithm>
 #include <imgui_impl_glfw.h>
+#include <imgui_internal.h>
 #include <GLFW/glfw3.h>
 
 void AFInput::OnKeyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods)
@@ -99,9 +100,9 @@ void AFInput::Tick()
 	UpdateCursorPosState();
 	UpdateStrokeState();
 
-	// Don't send any axis events when IMGui wants the input.
+	// Don't send any axis events when IMGui wants the input, unless it's FreeView mode.
 	ImGuiIO& io = ImGui::GetIO();
-	if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+	if ((io.WantCaptureMouse || io.WantCaptureKeyboard) && !m_freeView)
 	{
 		return;
 	}

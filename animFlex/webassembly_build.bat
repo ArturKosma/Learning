@@ -17,6 +17,12 @@ REM Cache paths.
 set PROJ_PATH=C:\_programming\Learning\animFlex
 set BUILD_PATH=C:\_programming\Learning\animFlex\cmake\build
 set DEST_PATH=C:\_programming\Learning\docs
+set RETE_PATH=C:\_programming\nodejs\rete\animFlexGraph
+
+REM Clean up old Vite assets
+if exist "%DEST_PATH%\assets" (
+    rmdir /S /Q "%DEST_PATH%\assets"
+)
 
 REM Copy build.
 cd "%BUILD_PATH%\"
@@ -31,6 +37,10 @@ cd "%DEST_PATH%\"
 
 del index.html
 rename animFlex.html index.html
+
+REM Build rete.
+cd "%RETE_PATH%\"
+call npx vite build
 
 REM @echo Build completed!
 pause
