@@ -37,11 +37,24 @@
             font-family: Consolas;
             resize: none;
         }
+
+        #topPane > canvas 
+        {
+            height: 100%;
+            width: 100%;
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <div class="emscripten_border">
-        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0" data-antialias="true"></canvas>
+    <div class="emscripten_border" style="display: flex; flex-direction: column;">
+        <div id="topPane" style="height: 60%; min-height: 100px;">
+            <canvas class="emscripten" id="canvas" style="width: 100%; height: 100%;" oncontextmenu="event.preventDefault()" tabindex="0" data-antialias="true"></canvas>
+        </div>
+        <div id="splitter" style="height: 5px; background: #444; cursor: row-resize;"></div>
+        <div id="rete" style="flex: 1; min-height: 100px; background: #202020; overflow: hidden;">
+            Hello from the Rete side
+        </div>
     </div>
     <textarea class="emscripten" id="output" rows="8"></textarea>
 
@@ -94,16 +107,62 @@
             resizeCanvasToContainer();
         };
 
-        function resizeCanvasToContainer() {
-            const container = document.querySelector('.emscripten_border');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+        function resizeCanvasToContainer() 
+        {
+            const canvas = document.getElementById("canvas");
+
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+
+           // console.log("Resizing to:", width, height);
 
             Module._OnResizeCanvas(width, height); // Call the exported C++ function.
         }
 
         // Call this function on window resize.
         window.addEventListener('resize', resizeCanvasToContainer);
+
+    </script>
+    <script>
+        const topPane = document.getElementById('topPane');
+        const splitter = document.getElementById('splitter');
+        const rete = document.getElementById('rete');
+
+        let isDragging = false;
+
+        splitter.addEventListener('mousedown', (e) => 
+        {
+            isDragging = true;
+            document.body.style.cursor = 'row-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mouseup', () => 
+        {
+            isDragging = false;
+            document.body.style.cursor = '';
+        });
+
+        document.addEventListener('mousemove', (e) => 
+        {
+            if (!isDragging) return;
+
+            const container = document.querySelector('.emscripten_border');
+            const containerTop = container.getBoundingClientRect().top;
+            const newTopHeight = e.clientY - containerTop;
+
+            // Minimum heights.
+            const minTop = 100;
+            const minBottom = 100;
+            const totalHeight = container.clientHeight;
+
+            if (newTopHeight < minTop || (totalHeight - newTopHeight) < minBottom) return;
+
+            topPane.style.height = `${newTopHeight}px`;
+            rete.style.height = `${totalHeight - newTopHeight - splitter.offsetHeight}px`;
+
+            resizeCanvasToContainer();
+        });
     </script>
     {{{ SCRIPT }}}
 </body>

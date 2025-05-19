@@ -156,7 +156,6 @@ void AFApp::SetWindowCallbacks()
 
 void AFApp::OnWindowResize(int newWidth, int newHeight)
 {
-	// Update the frame buffers.
 
 #ifdef __EMSCRIPTEN__
 	glfwSetWindowSize(m_window->GetGLFWWindow(), newWidth, newHeight);

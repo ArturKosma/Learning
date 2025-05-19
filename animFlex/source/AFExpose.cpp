@@ -8,6 +8,7 @@ extern "C"
 	inline void OnResizeCanvas(int newWidth, int newHeight)
 	{
 		AFApp& app = AFApp::GetInstance();
+		//printf("%d\n", newHeight);
 		app.OnWindowResize(newWidth, newHeight);
 	}
 }
