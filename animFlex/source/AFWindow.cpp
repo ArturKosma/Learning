@@ -129,7 +129,7 @@ int AFWindow::GetWidth() const
 {
 	int width = 0;
 	int height = 0;
-	glfwGetWindowSize(m_window, &width, &height);
+	glfwGetWindowSize(m_window, &width, &height);;
 
 	return width;
 }

@@ -24,3 +24,16 @@
 # Allow shaders
 !*.vert
 !*.frag
+
+# Allow graph source files
+!graph/*.ts
+
+# Disallow RETE modules
+graph/node_modules/*
+
+# Disallow RETE package jsons
+graph/package-lock.json
+graph/package.json
+
+# Disallow RETE config
+graph/tsconfig.json

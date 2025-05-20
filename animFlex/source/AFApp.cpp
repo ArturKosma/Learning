@@ -114,6 +114,11 @@ AFApp& AFApp::GetInstance()
 	return appInstance;
 }
 
+glm::ivec2 AFApp::GetWindowSize()
+{
+	return { GetInstance().m_window->GetWidth(), GetInstance().m_window->GetHeight() };
+}
+
 void AFApp::Tick()
 {
 	AFTimerManager::GetInstance().DeltaCalc();
@@ -128,7 +133,7 @@ void AFApp::Tick()
 	CollectAppData(*m_appData);
 
 	m_renderer->Draw(sceneData, *m_appData);
-	m_helperInterface->Draw(sceneData, *m_appData);
+	//m_helperInterface->Draw(sceneData, *m_appData);
 
 	m_window->SwapBuffers();
 

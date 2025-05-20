@@ -1,13 +1,16 @@
 #include "AFScene.h"
 
+#include "AFApp.h"
 #include "AFUI.h"
 #include "AFBackgroundComponent.h"
 #include "AFBoxComponent.h"
 #include "AFContent.h"
 #include "AFGridComponent.h"
+#include "AFMath.h"
 #include "AFOrientationBoxUIComponent.h"
 #include "AFOrientationGizmoUIComponent.h"
 #include "AFOrientationGlyph.h"
+#include "AFOrientGizmo.h"
 #include "AFSkeletalMeshComponent.h"
 #include "AFStaticMeshComponent.h"
 #include "AFTextComponent.h"
@@ -147,7 +150,7 @@ void AFScene::CreateDefaultSceneActors()
 void AFScene::CreateDefaultUIs()
 {
 	// Orientation gizmo.
-	std::shared_ptr<AFUI> orientationGizmo = CreateObject<AFUI>();
+	std::shared_ptr<AFOrientGizmo> orientationGizmo = CreateObject<AFOrientGizmo>();
 	orientationGizmo->SetDisplayName("orientation gizmo ui");
 	std::shared_ptr<AFOrientationGizmoUIComponent> orientationGizmoComponent = CreateObject<AFOrientationGizmoUIComponent>();
 	orientationGizmoComponent->SetDisplayName("orientation gizmo component");
@@ -156,7 +159,7 @@ void AFScene::CreateDefaultUIs()
 	orientationGizmoComponent->SetMesh(orientationGizmoMesh);
 	orientationGizmo->AddComponent(orientationGizmoComponent);
 	orientationGizmoComponent->SetLocation(glm::vec2(-0.85f, -0.80f));
-	orientationGizmoComponent->SetScale(glm::vec2(0.15f, 0.15f));
+	orientationGizmoComponent->SetScale({ 0.15f,  0.15f });
 
 	// Orientation gizmo letters.
 	const glm::vec2 textGlyphLocation = glm::vec2(-0.85f, -0.80f);

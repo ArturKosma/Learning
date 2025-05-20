@@ -1,6 +1,7 @@
 #include "AFOrientationBoxUIComponent.h"
 #include <glm/gtc/type_ptr.inl>
 
+#include "AFApp.h"
 #include "AFCamera.h"
 #include "AFContent.h"
 #include "AFGame.h"
@@ -12,7 +13,7 @@
 
 std::vector<uint8_t> AFOrientationBoxUIComponent::GetDisabledElements()
 {
-	return { 3 };
+	return { 3 };;
 }
 
 AFOrientationBoxUIComponent::AFOrientationBoxUIComponent()
@@ -22,6 +23,11 @@ AFOrientationBoxUIComponent::AFOrientationBoxUIComponent()
 
 void AFOrientationBoxUIComponent::Tick(float deltaTime)
 {
+	glm::ivec2 dims = AFApp::GetWindowSize();
+	const float counterScale = AFMath::MapRangeClamped(static_cast<float>(dims.y), 300.0f, 1000.0f, 0.002f, 0.001f); // #hack. Scale up the orient box when window get smaller.
+
+	SetScale({ counterScale, counterScale });
+
 	AFUIRenderComponent::Tick(deltaTime);
 }
 

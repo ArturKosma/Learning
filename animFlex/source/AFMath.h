@@ -25,7 +25,15 @@ public:
 
 		const float mappedValue = (value - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
 
-		return glm::clamp(mappedValue, outMin, outMax);
+		// Handle reversed output range.
+		if (outMin < outMax)
+		{
+			return glm::clamp(mappedValue, outMin, outMax);
+		}
+		else
+		{
+			return glm::clamp(mappedValue, outMax, outMin);
+		}
 	}
 
 	static glm::mat4 TLerp(const glm::mat4& a, const glm::mat4& b, float alpha)
