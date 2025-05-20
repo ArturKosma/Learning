@@ -162,30 +162,25 @@
             resizeCanvasToContainer();
         };
 
-        let resizeTimeout;
         function resizeCanvasToContainer() {
-            clearTimeout(resizeTimeout);
+            const canvas = document.getElementById("canvas");
 
-            resizeTimeout = setTimeout(() => {
-                const canvas = document.getElementById("canvas");
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
 
-                const width = canvas.clientWidth;
-                const height = canvas.clientHeight;
+            // Enforce correct layout on fullscreen
+            const container = document.querySelector('.emscripten_border');
+            const totalHeight = container.clientHeight;
+            const splitterHeight = splitter.offsetHeight;
 
-                // Enforce correct layout on fullscreen
-                const container = document.querySelector('.emscripten_border');
-                const totalHeight = container.clientHeight;
-                const splitterHeight = splitter.offsetHeight;
+            if (isReteMinimized) {
+                topPane.style.height = `${totalHeight - splitterHeight}px`;
+                rete.style.height = `0px`;
+            } else {
+                rete.style.height = `${totalHeight - topPane.offsetHeight - splitterHeight}px`;
+            }
 
-                if (isReteMinimized) {
-                    topPane.style.height = `${totalHeight - splitterHeight}px`;
-                    rete.style.height = `0px`;
-                } else {
-                    rete.style.height = `${totalHeight - topPane.offsetHeight - splitterHeight}px`;
-                }
-
-                Module._OnResizeCanvas(width, height); // Call the exported C++ function.
-            }, 20);
+            Module._OnResizeCanvas(width, height); // Call the exported C++ function.
         }
 
         // Call this function on window resize.
