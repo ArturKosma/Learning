@@ -1,9 +1,12 @@
 ﻿import { createRoot } from "react-dom/client";
 import { NodeEditor, GetSchemes, ClassicPreset } from "rete";
-import { AreaPlugin, AreaExtensions, Zoom } from "rete-area-plugin";
+import { AreaPlugin, AreaExtensions, Drag } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
-import { Drag } from 'rete-area-plugin';
+import { SmoothZoom } from './zoom';
+import { addCustomBackground } from "./custom-background";
+import { AFAnimGraphNode } from './afanimgraphnode';
+import { AFNode } from './afnode';
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes>;
@@ -22,6 +25,8 @@ export async function createEditor(container: HTMLElement) {
     accumulating: AreaExtensions.accumulateOnCtrl(),
   });
 
+    AreaExtensions.snapGrid(area, {size: 80, dynamic: false});
+
   // Limit the zoom.
   AreaExtensions.restrictor(area, {
       scaling: {
@@ -32,8 +37,15 @@ export async function createEditor(container: HTMLElement) {
   });
 
   // Visual and behavior presets.
-  render.addPreset(Presets.classic.setup());
-  connection.addPreset(ConnectionPresets.classic.setup());
+    render.addPreset(Presets.classic.setup({
+        customize: {
+            node(context) {
+                return AFAnimGraphNode;
+            } }}));
+    connection.addPreset(ConnectionPresets.classic.setup());
+
+  // Custom grid background.
+  addCustomBackground(area);
 
   // Register plugins.
   editor.use(area);
@@ -43,23 +55,18 @@ export async function createEditor(container: HTMLElement) {
   // Nodes layering.
   AreaExtensions.simpleNodesOrder(area);
 
-  // Nodes creation.
-  const a = new ClassicPreset.Node("A");
-  a.addControl("a", new ClassicPreset.InputControl("text", { initial: "a" }));
-  a.addOutput("a", new ClassicPreset.Output(socket));
-  await editor.addNode(a);
-
-  const b = new ClassicPreset.Node("B");
-  b.addControl("b", new ClassicPreset.InputControl("text", { initial: "b" }));
-  b.addInput("b", new ClassicPreset.Input(socket));
-  await editor.addNode(b);
+  // Output pose node creation.
+  //const b = new ClassicPreset.Node("B");
+  //b.addInput("b", new ClassicPreset.Input(socket));
+  //await editor.addNode(b);
 
   // Default connection.
-  await editor.addConnection(new ClassicPreset.Connection(a, "a", b, "b"));
+ // await editor.addConnection(new ClassicPreset.Connection(a, "a", b, "b"));
 
   // Default positions.
-  await area.translate(a.id, { x: 0, y: 0 });
-  await area.translate(b.id, { x: 270, y: 0 });
+  //await area.translate(b.id, { x: 270, y: 0 });
+
+  const outputPoseNode = await AFNode.create("OutputPose", editor);
 
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
@@ -116,6 +123,10 @@ export async function createEditor(container: HTMLElement) {
   }
 });
 resizeObserver.observe(container);
+
+/*area.area.setZoomHandler(
+    new SmoothZoom(0.5, 200, "cubicBezier(.45,.91,.49,.98)", area)
+  );*/
   
   return {
     destroy: () => area.destroy(),

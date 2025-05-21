@@ -30,6 +30,11 @@ copy animFlex.data "%DEST_PATH%\"
 REM Paste build.
 cd "%DEST_PATH%\"
 
+REM Remove any previously generated assets by vite.
+if exist "assets" (
+    rmdir /s /q "assets"
+)
+
 del index.html
 rename animFlex.html index.html
 

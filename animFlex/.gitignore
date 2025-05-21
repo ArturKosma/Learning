@@ -27,6 +27,8 @@
 
 # Allow graph source files
 !graph/*.ts
+!graph/*.tsx
+!graph/*.css
 
 # Disallow RETE modules
 graph/node_modules/*
