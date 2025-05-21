@@ -8,10 +8,17 @@ const { RefSocket, RefControl } = Presets.classic;
 type NodeExtraData = { width?: number; height?: number };
 
 export const NodeStyles = styled.div<
-  NodeExtraData & { selected: boolean; styles?: (props: any) => any }
+  NodeExtraData & { 
+      selected: boolean; 
+      styles?: (props: any) => any; 
+      showTitle?: boolean;
+      title?: string;
+      showSubTitle?: boolean;
+      subTitle?: string;
+  }
 >`
-  background: #191919;
-  opacity: 0.7;
+  background: #121212;
+  opacity: 0.9;
   border: 1px solid black;
   border-radius: 10px;
   cursor: pointer;
@@ -25,18 +32,35 @@ export const NodeStyles = styled.div<
   user-select: none;
   &:hover {
     background: #282828;
-    opacity: 0.8;
+    opacity: 0.9;
   }
   ${(props) =>
     props.selected &&
     css`
       border-color: white;
     `}
-  .title {
+  .titleBar {
+    background-image: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3));
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    z-index: 0;
+    height: ${(props) => (props.showSubTitle ? "40px" : "25px")};
+  }
+  .titleText {
     color: white;
-    font-family: sans-serif;
-    font-size: 18px;
-    padding: 8px;
+    font-family: "Segoe UI", sans-serif;
+    font-weight: bold;
+    font-style: normal;
+    font-size: 12px;
+    padding: 2px 10px
+  }
+   .subTitleText {
+    color: #AAAAAA;
+    font-family: "Segoe UI", sans-serif;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 12px;
+    padding: 2px 10px
   }
   .output {
     text-align: right;
@@ -103,6 +127,11 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
   const controls = Object.entries(props.data.controls);
   const selected = props.data.selected || false;
   const { id, label, width, height } = props.data;
+  const meta = (props.data as any).meta ?? {};
+  const showTitle = meta.showTitle ?? true;
+  const title = showTitle ? meta.title ?? "" : ""
+  const showSubTitle = meta.showSubTitle ?? false;
+  const subTitle = showSubTitle ? meta.subTitle ?? "" : ""
 
   sortByIndex(inputs);
   sortByIndex(outputs);
@@ -114,17 +143,19 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
       width={width}
       height={height}
       styles={props.styles}
+      showTitle={showTitle}
+      title={title}
+      showSubTitle={showSubTitle}
+      subTitle={subTitle}
       data-testid="node"
     >
-      <div
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          console.log(">>>");
-        }}
-        className="title"
-        data-testid="title"
-      >
-        {label}
+      <div className="titleBar" data-testid="titleBar" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div className="titleText" data-testid="titleText">
+            {title}
+        </div>
+        <div className="subTitleText" data-testid="subTitleText">
+            {subTitle}
+        </div>
       </div>
       {/* Outputs */}
       {outputs.map(

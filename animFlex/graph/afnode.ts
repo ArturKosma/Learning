@@ -1,4 +1,5 @@
 import { NodeEditor, GetSchemes, ClassicPreset } from "rete";
+import { GetNodeMeta } from "./afnodevars";
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 export class AFNode {
@@ -11,9 +12,7 @@ export class AFNode {
     static async create(type: string, editor: NodeEditor<Schemes>): Promise<AFNode> {
         const node = new ClassicPreset.Node("");
 
-        node.meta = {};
-        node.meta.showTitle = true;
-        node.label = "chuj";
+        node.meta = GetNodeMeta(type);
 
         const socket = new ClassicPreset.Socket("socket");
         node.addInput("b", new ClassicPreset.Input(socket));

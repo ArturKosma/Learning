@@ -66,7 +66,10 @@ export async function createEditor(container: HTMLElement) {
   // Default positions.
   //await area.translate(b.id, { x: 270, y: 0 });
 
+  // Create default nodes.
   const outputPoseNode = await AFNode.create("OutputPose", editor);
+  const playSequenceNode = await AFNode.create("PlaySequence", editor);
+  await area.translate(playSequenceNode.node.id, {x: -320, y: 0});
 
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
@@ -123,10 +126,6 @@ export async function createEditor(container: HTMLElement) {
   }
 });
 resizeObserver.observe(container);
-
-/*area.area.setZoomHandler(
-    new SmoothZoom(0.5, 200, "cubicBezier(.45,.91,.49,.98)", area)
-  );*/
   
   return {
     destroy: () => area.destroy(),
