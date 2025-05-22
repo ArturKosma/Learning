@@ -5,28 +5,19 @@ import * as AFNodeVars from './afnodevars';
 
 const { RefSocket, RefControl } = Presets.classic;
 
-type NodeExtraData = { width?: number; height?: number };
-
-export const NodeStyles = styled.div<
-  NodeExtraData & { 
-      selected: boolean; 
+export const NodeStyles = styled.div <{
+  selected: boolean; 
       styles?: (props: any) => any; 
-      showTitle?: boolean;
-      title?: string;
-      showSubTitle?: boolean;
-      subTitle?: string;
-  }
->`
+      meta?: any;
+}>`
   background: #121212;
   opacity: 0.9;
   border: 1px solid black;
   border-radius: 10px;
   cursor: pointer;
   box-sizing: border-box;
-  width: ${(props) =>
-    Number.isFinite(props.width) ? `${props.width}px` : `${AFNodeVars.$nodewidth}px`};
-  height: ${(props) =>
-    Number.isFinite(props.height) ? `${props.height}px` : `${AFNodeVars.$nodeheight}px`};
+  width: ${(props) => `${props.meta.nodeWidth}px`};
+  height: ${(props) => `${props.meta.nodeHeight}px`};
   padding-bottom: 6px;
   position: relative;
   user-select: none;
@@ -34,20 +25,38 @@ export const NodeStyles = styled.div<
     background: #282828;
     opacity: 0.9;
   }
+  display: flex;
+  flex-direction: column;
   ${(props) =>
     props.selected &&
     css`
       border-color: white;
     `}
+  .node-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1
+    }
+  .node-big-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    pointer-events: none;
+    opacity: 0.8
+  }
   .titleBar {
     background-image: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3));
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     z-index: 0;
-    height: ${(props) => (props.showSubTitle ? "40px" : "25px")};
+    height: ${(props) => (props.meta.showSubTitle ? "40px" : "25px")};
   }
   .titleText {
-    color: white;
+    color: rgba(235, 235, 235, 0.93);
     font-family: "Segoe UI", sans-serif;
     font-weight: bold;
     font-style: normal;
@@ -55,7 +64,7 @@ export const NodeStyles = styled.div<
     padding: 2px 10px
   }
    .subTitleText {
-    color: #AAAAAA;
+    color: rgba(170, 170, 170, 0.8);
     font-family: "Segoe UI", sans-serif;
     font-weight: normal;
     font-style: italic;
@@ -143,20 +152,26 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
       width={width}
       height={height}
       styles={props.styles}
-      showTitle={showTitle}
-      title={title}
-      showSubTitle={showSubTitle}
-      subTitle={subTitle}
+      meta={meta}
       data-testid="node"
     >
       <div className="titleBar" data-testid="titleBar" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div className="titleText" data-testid="titleText">
-            {title}
+            {meta.title}
         </div>
         <div className="subTitleText" data-testid="subTitleText">
-            {subTitle}
+            {meta.subTitle}
         </div>
       </div>
+      <div className="node-body">
+      {/* Optional Big Icon */}
+      {meta.bigIcon && meta.bigIcon_path && (
+      <img
+      src={meta.bigIcon_path}
+      alt="node icon"
+      className="node-big-icon"
+      />
+      )}
       {/* Outputs */}
       {outputs.map(
         ([key, output]) =>
@@ -218,6 +233,7 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
             </div>
           )
       )}
+      </div>
     </NodeStyles>
   );
 }

@@ -1,7 +1,6 @@
 import { ClassicPreset } from "rete";
+import resultPoseIcon from './resultPose.png';
 
-export const $nodewidth = 240;
-export const $nodeheight = 160;
 export const $socketmargin = 6;
 export const $socketsize = 16;
 export function GetNodeMeta(type: string): any {
@@ -11,14 +10,21 @@ export function GetNodeMeta(type: string): any {
                 showTitle: true,
                 title: "Output Pose",
                 showSubTitle: true,
-                subTitle: "AnimGraph"
+                subTitle: "AnimGraph",
+                nodeWidth: 240,
+                nodeHeight: 160,
+                bigIcon: true,
+                bigIcon_path: resultPoseIcon
             };
             break;
         case "PlaySequence":
             return {
                 showTitle: true,
                 title: "Play Sequence",
-                showSubTitle: false
+                showSubTitle: false,
+                nodeWidth: 240,
+                nodeHeight: 80,
+                bigIcon: false
             }
             break;
         default:
