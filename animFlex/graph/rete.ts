@@ -7,6 +7,7 @@ import { SmoothZoom } from './zoom';
 import { addCustomBackground } from "./custom-background";
 import { AFAnimGraphNode } from './afanimgraphnode';
 import { AFNode } from './afnode';
+import { AFSocket } from './afsocket';
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes>;
@@ -41,7 +42,10 @@ export async function createEditor(container: HTMLElement) {
         customize: {
             node(context) {
                 return AFAnimGraphNode;
-            } }}));
+            },
+            socket(context) {
+                return AFSocket;
+            }}}));
     connection.addPreset(ConnectionPresets.classic.setup());
 
   // Custom grid background.
