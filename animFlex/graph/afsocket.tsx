@@ -4,21 +4,33 @@ import styled from "styled-components";
 import * as AFNodeVars from './afnodevars';
 
 const Styles = styled.div`
-  display: inline-block;
+  display: block;
   cursor: pointer;
-  border: 1px solid grey;
   width: ${AFNodeVars.$socketsize}px;
   height: ${AFNodeVars.$socketsize * 2}px;
   vertical-align: middle;
-  background: #fff;
   z-index: 2;
-  box-sizing: border-box;
-  &:hover {
-    background: #ddd;
-  }
+  margin-top: auto;
+  margin-down: auto;
+  display: flex; 
+  justify-content: center;    
+  align-items: center;              
 `;
 export function AFSocket<T extends ClassicPreset.Socket>(props: {
   data: T;
 }) {
-  return <Styles title={props.data.name} />;
+
+  const meta = (props.data as any).meta ?? {};
+
+  return (
+      <Styles title={props.data.name} 
+      meta={meta}
+      >
+       <img
+          src={meta.socketIconDisconnected_path}
+          alt="socket icon"
+          className="socket-icon"
+          />
+       </Styles>
+  );
 }

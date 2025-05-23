@@ -1,5 +1,7 @@
 import { ClassicPreset } from "rete";
 import resultPoseIcon from './resultPose.png';
+import poseIcon_connected from './pinPose_connected.png';
+import poseIcon_disconnected from './pinPose_disconnected.png';
 
 export const $socketmargin = 6;
 export const $socketsize = 16;
@@ -14,7 +16,7 @@ export function GetNodeMeta(type: string): any {
                 nodeWidth: 240,
                 nodeHeight: 160,
                 bigIcon: true,
-                bigIcon_path: resultPoseIcon
+                bigIcon_path: resultPoseIcon,
             };
             break;
         case "PlaySequence":
@@ -24,7 +26,7 @@ export function GetNodeMeta(type: string): any {
                 showSubTitle: false,
                 nodeWidth: 240,
                 nodeHeight: 80,
-                bigIcon: false
+                bigIcon: false,
             }
             break;
         default:
@@ -33,15 +35,27 @@ export function GetNodeMeta(type: string): any {
 } 
 
 export function CreateSockets(type: string, node: ClassicPreset.Node) {
+
+    const socket = new ClassicPreset.Socket("socket");
+
+    // Socket meta.
+    socket.meta = {
+         socketIconConnected_path: poseIcon_connected,
+         socketIconDisconnected_path: poseIcon_disconnected
+    }
+
     switch (type) {
         case "OutputPose":
 
-           node.addInput("inputPose", new ClassicPreset.Input(new ClassicPreset.Socket("socket")));
+           const input = new ClassicPreset.Input(socket);
+           input.label = "Result";
+           node.addInput("inputPose", input);
            break;
 
         case "PlaySequence":
             
-           node.addOutput("outputPose", new ClassicPreset.Input(new ClassicPreset.Socket("socket")));
+           const output = new ClassicPreset.Output(socket);
+           node.addOutput("outputPose", output);
            break;
 
         default:

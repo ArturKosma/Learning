@@ -2,6 +2,7 @@ import * as React from "react";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import styled, { css } from "styled-components";
 import * as AFNodeVars from './afnodevars';
+import { AFSocket } from './afsocket';
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -14,17 +15,13 @@ export const NodeStyles = styled.div <{
   opacity: 0.9;
   border: 1px solid black;
   border-radius: 10px;
-  cursor: pointer;
+  cursor: move;
   box-sizing: border-box;
   width: ${(props) => `${props.meta.nodeWidth}px`};
   height: ${(props) => `${props.meta.nodeHeight}px`};
   padding-bottom: 6px;
   position: relative;
   user-select: none;
-  &:hover {
-    background: #282828;
-    opacity: 0.9;
-  }
   display: flex;
   flex-direction: column;
   ${(props) =>
@@ -73,29 +70,41 @@ export const NodeStyles = styled.div <{
   }
   .output {
     text-align: right;
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 10px;
+  }
+  .output.socketHovered {
+    background: linear-gradient(to left, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3));
   }
   .input {
     text-align: left;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+  }
+  .input.socketHovered {
+    background: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3));
   }
   .output-socket {
     text-align: right;
-    margin-right: -1px;
+    margin-right: 10px;
     display: inline-block;
   }
   .input-socket {
     text-align: left;
-    margin-left: -1px;
+    margin-left: 10px;
     display: inline-block;
   }
   .input-title,
   .output-title {
     vertical-align: middle;
-    color: white;
-    display: inline-block;
-    font-family: sans-serif;
-    font-size: 14px;
-    margin: ${AFNodeVars.$socketmargin}px;
+    color: rgba(235, 235, 235, 0.93);
+    font-size: 12px;
     line-height: ${AFNodeVars.$socketsize}px;
+    font-family: "Segoe UI", Tahoma;
+    margin-top: auto;
+    margin-bottom: auto;
   }
   .input-control {
     z-index: 1;
@@ -137,10 +146,6 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
   const selected = props.data.selected || false;
   const { id, label, width, height } = props.data;
   const meta = (props.data as any).meta ?? {};
-  const showTitle = meta.showTitle ?? true;
-  const title = showTitle ? meta.title ?? "" : ""
-  const showSubTitle = meta.showSubTitle ?? false;
-  const subTitle = showSubTitle ? meta.subTitle ?? "" : ""
 
   sortByIndex(inputs);
   sortByIndex(outputs);
@@ -174,22 +179,32 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
       )}
       {/* Outputs */}
       {outputs.map(
-        ([key, output]) =>
-          output && (
-            <div className="output" key={key} data-testid={`output-${key}`}>
-              <div className="output-title" data-testid="output-title">
-                {output?.label}
-              </div>
-              <RefSocket
+          ([key, output]) => {
+              const [hovered, setHovered] = React.useState(false);
+
+              return output ? (
+               <div className={`output ${hovered ? 'socketHovered' : ''}`} 
+               key={key} 
+               data-testid={`output-${key}`}
+               >
+               <div
+               style={{ display: 'inline-block' }}
+               >
+               <RefSocket
                 name="output-socket"
                 side="output"
                 emit={props.emit}
                 socketKey={key}
                 nodeId={id}
                 payload={output.socket}
-              />
+                />
+                </div>
+              <span className="output-title" data-testid="output-title">
+                {output?.label}
+              </span>
             </div>
-          )
+          ) : null
+          }
       )}
       {/* Controls */}
       {controls.map(([key, control]) => {
@@ -204,9 +219,17 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
       })}
       {/* Inputs */}
       {inputs.map(
-        ([key, input]) =>
-          input && (
-            <div className="input" key={key} data-testid={`input-${key}`}>
+          ([key, input]) => {
+             const [hovered, setHovered] = React.useState(false);
+            
+            return input ? (
+            <div className={`input ${hovered ? 'socketHovered' : ''}`} 
+            key={key} 
+            data-testid={`input-${key}`}
+            >
+            <div
+            style={{ display: 'inline-block' }}
+            >
               <RefSocket
                 name="input-socket"
                 emit={props.emit}
@@ -215,10 +238,11 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
                 nodeId={id}
                 payload={input.socket}
               />
+              </div>
               {input && (!input.control || !input.showControl) && (
-                <div className="input-title" data-testid="input-title">
+                <span className="input-title" data-testid="input-title">
                   {input?.label}
-                </div>
+                </span>
               )}
               {input?.control && input?.showControl && (
                 <span className="input-control">
@@ -231,7 +255,8 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
                 </span>
               )}
             </div>
-          )
+          ) : null
+          }
       )}
       </div>
     </NodeStyles>
