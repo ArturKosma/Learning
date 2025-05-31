@@ -1,8 +1,7 @@
 import * as React from "react";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import styled, { css } from "styled-components";
-import * as AFNodeVars from './afnodevars';
-import { AFSocket } from './afsocket';
+import * as AFNodeVars from './affunclib';
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -75,7 +74,7 @@ export const NodeStyles = styled.div <{
     gap: 10px;
   }
   .output.socketHovered {
-    background: linear-gradient(to left, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3));
+    background: linear-gradient(to left, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 30%);
   }
   .input {
     text-align: left;
@@ -84,7 +83,7 @@ export const NodeStyles = styled.div <{
     gap: 6px;
   }
   .input.socketHovered {
-    background: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3));
+    background: linear-gradient(to right, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 30%);
   }
   .output-socket {
     text-align: right;
@@ -139,7 +138,23 @@ export type NodeComponent<Scheme extends ClassicScheme> = (
   props: Props<Scheme>
 ) => JSX.Element;
 
-export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
+type SocketHoverCallback = (socketId: string) => void;
+export const EventBus = {
+    HoverStartListeners: new Set<SocketHoverCallback>(),
+    HoverEndListeners: new Set<SocketHoverCallback>(),
+
+    OnSocketHoverStart(socketId: string) {
+        for (const listener of this.HoverStartListeners) {
+            listener(socketId);
+        }
+    },
+    OnSocketHoverEnd(socketId: string) {
+        for (const listener of this.HoverEndListeners) {
+            listener(socketId);
+        }
+    }
+}
+export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
   const inputs = Object.entries(props.data.inputs);
   const outputs = Object.entries(props.data.outputs);
   const controls = Object.entries(props.data.controls);
@@ -150,6 +165,21 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
   sortByIndex(inputs);
   sortByIndex(outputs);
   sortByIndex(controls);
+
+  // Listen for change in which socket is hovered to highlight it's input/output wrapper.
+  const [hoveredSocketId, setHoveredSocketId] = React.useState<string | null>(null);
+    React.useEffect(() => {
+        const onHoverStart = (socketId: string) => {setHoveredSocketId(socketId)};
+        const onHoverEnd = (_: string) => {setHoveredSocketId(null)};
+
+        EventBus.HoverStartListeners.add(onHoverStart);
+        EventBus.HoverEndListeners.add(onHoverEnd);
+
+        return () => {
+            EventBus.HoverStartListeners.delete(onHoverStart);
+            EventBus.HoverEndListeners.delete(onHoverEnd);
+        }
+    }, []);
 
   return (
     <NodeStyles
@@ -180,12 +210,12 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
       {/* Outputs */}
       {outputs.map(
           ([key, output]) => {
-              const [hovered, setHovered] = React.useState(false);
+            const uniqueId_output = React.useMemo(() => crypto.randomUUID(), []);
 
               return output ? (
-               <div className={`output ${hovered ? 'socketHovered' : ''}`} 
+               <div className={`output ${hoveredSocketId === uniqueId_output ? "socketHovered" : ""}`} 
                key={key} 
-               data-testid={`output-${key}`}
+               data-testid={`${uniqueId_output}`}
                >
                <div
                style={{ display: 'inline-block' }}
@@ -220,12 +250,12 @@ export function AFAnimGraphNode<Scheme extends ClassicScheme>(props: Props<Schem
       {/* Inputs */}
       {inputs.map(
           ([key, input]) => {
-             const [hovered, setHovered] = React.useState(false);
-            
+            const uniqueId_input = React.useMemo(() => crypto.randomUUID(), []);
+
             return input ? (
-            <div className={`input ${hovered ? 'socketHovered' : ''}`} 
+            <div className={`input ${hoveredSocketId === uniqueId_input ? "socketHovered" : ""}`} 
             key={key} 
-            data-testid={`input-${key}`}
+            data-testid={`${uniqueId_input}`}
             >
             <div
             style={{ display: 'inline-block' }}

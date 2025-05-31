@@ -1,7 +1,8 @@
 import * as React from "react";
 import { ClassicPreset } from "rete";
 import styled from "styled-components";
-import * as AFNodeVars from './afnodevars';
+import * as AFNodeVars from './affunclib';
+import { EventBus } from "./afnode";
 
 const Styles = styled.div`
   display: block;
@@ -21,10 +22,42 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
 }) {
 
   const meta = (props.data as any).meta ?? {};
+  const editor = meta?.editor;
+
+  // Listen for connections to occur to change the socket icon.
+  const [connected, setConnected] = React.useState(false);
+    React.useEffect(() => {
+        if(!editor) return;
+
+        const removePipe = editor.addPipe(context => {
+            if (context.type === 'connectioncreated') {
+                console.log(`${context.data.input.socket.title, context.data.output.socket.title}`);
+            }
+
+            return context
+        })
+
+        return () => {
+            removePipe();
+        }
+             
+    }, []);
 
   return (
-      <Styles title={props.data.name} 
-      meta={meta}
+      <Styles title={props.data.name}
+          meta={meta}
+          onMouseEnter={(e) => {
+              const socketWrapper = e.currentTarget.closest('.input, .output');
+              const socketWrapperId = socketWrapper?.getAttribute('data-testid');
+              EventBus.OnSocketHoverStart(socketWrapperId);
+          }}
+        onMouseLeave={(e) => {
+            const socketWrapper = e.currentTarget.closest('.input, .output');
+            const socketWrapperId = socketWrapper?.getAttribute('data-testid')
+            EventBus.OnSocketHoverEnd(socketWrapperId);
+        }}
+        
+            
       >
        <img
           src={meta.socketIconDisconnected_path}

@@ -3,11 +3,11 @@ import { NodeEditor, GetSchemes, ClassicPreset } from "rete";
 import { AreaPlugin, AreaExtensions, Drag } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
-import { SmoothZoom } from './zoom';
 import { addCustomBackground } from "./custom-background";
-import { AFAnimGraphNode } from './afanimgraphnode';
+import { AFNodeFactory } from './afnodefactory';
 import { AFNode } from './afnode';
 import { AFSocket } from './afsocket';
+import { AFConnection } from './afconnection';
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes>;
@@ -41,11 +41,15 @@ export async function createEditor(container: HTMLElement) {
     render.addPreset(Presets.classic.setup({
         customize: {
             node(context) {
-                return AFAnimGraphNode;
+                return AFNode;
             },
             socket(context) {
                 return AFSocket;
-            }}}));
+            },
+            connection(context) {
+                return AFConnection;
+            }
+            }}));
     connection.addPreset(ConnectionPresets.classic.setup());
 
   // Custom grid background.
@@ -71,9 +75,11 @@ export async function createEditor(container: HTMLElement) {
   //await area.translate(b.id, { x: 270, y: 0 });
 
   // Create default nodes.
-  const outputPoseNode = await AFNode.create("OutputPose", editor);
-  const playSequenceNode = await AFNode.create("PlaySequence", editor);
+  const outputPoseNode = await AFNodeFactory.create("OutputPose", editor);
+  const playSequenceNode = await AFNodeFactory.create("PlaySequence", editor);
+  const fake = await AFNodeFactory.create("PlaySequence", editor);
   await area.translate(playSequenceNode.node.id, {x: -320, y: 0});
+  await area.translate(fake.node.id, {x: -320, y: -200});
 
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
@@ -112,11 +118,11 @@ export async function createEditor(container: HTMLElement) {
     return context
   })
 
-  // Zoom the view to fit all nodes after 10ms.
+  // Zoom the view to fit all nodes after 100ms.
   setTimeout(() => 
   {
-    AreaExtensions.zoomAt(area, editor.getNodes(), { scale: 0.3 });
-  }, 10);
+    AreaExtensions.zoomAt(area, editor.getNodes(), { scale: 0.7 });
+  }, 100);
 
   // Wait for the first render (initially rete is hidden) to call zoom.
   const resizeObserver = new ResizeObserver((entries) => {
@@ -124,8 +130,8 @@ export async function createEditor(container: HTMLElement) {
     const { width, height } = entry.contentRect;
 
     if (width > 0 && height > 0) {
-      AreaExtensions.zoomAt(area, editor.getNodes(), { scale: 0.3 });
-      resizeObserver.disconnect(); // one-time setup
+      AreaExtensions.zoomAt(area, editor.getNodes(), { scale: 0.7 });
+      resizeObserver.disconnect();
     }
   }
 });
