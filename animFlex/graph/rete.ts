@@ -26,7 +26,8 @@ export async function createEditor(container: HTMLElement) {
     accumulating: AreaExtensions.accumulateOnCtrl(),
   });
 
-    AreaExtensions.snapGrid(area, {size: 80, dynamic: false});
+  // Grid snapping.
+  AreaExtensions.snapGrid(area, {size: 16, dynamic: true});
 
   // Limit the zoom.
   AreaExtensions.restrictor(area, {
@@ -79,7 +80,7 @@ export async function createEditor(container: HTMLElement) {
   const playSequenceNode = await AFNodeFactory.create("PlaySequence", editor);
   const fake = await AFNodeFactory.create("PlaySequence", editor);
   await area.translate(playSequenceNode.node.id, {x: -320, y: 0});
-  await area.translate(fake.node.id, {x: -320, y: -200});
+  await area.translate(fake.node.id, {x: -320, y: -160});
 
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
