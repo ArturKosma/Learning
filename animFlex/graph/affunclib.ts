@@ -39,11 +39,13 @@ export function GetNodeMeta(type: string): any {
 
 export function CreateSockets(type: string, node: ClassicPreset.Node, editor: NodeEditor<Schemes>) {
 
-    const socket = new ClassicPreset.Socket(crypto.randomUUID());
+    const uid = crypto.randomUUID();
+    const socket = new ClassicPreset.Socket(uid);
 
     // Socket meta.
     socket.meta = {
          editor,
+         node,
          socketIconConnected_path: poseIcon_connected,
          socketIconDisconnected_path: poseIcon_disconnected
     }
@@ -53,13 +55,13 @@ export function CreateSockets(type: string, node: ClassicPreset.Node, editor: No
 
            const input = new ClassicPreset.Input(socket);
            input.label = "Result";
-           node.addInput("inputPose", input);
+           node.addInput(uid, input);
            break;
 
         case "PlaySequence":
             
            const output = new ClassicPreset.Output(socket);
-           node.addOutput("outputPose", output);
+           node.addOutput(uid, output);
            break;
 
         default:

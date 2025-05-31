@@ -1,8 +1,9 @@
 import * as React from "react";
-import { ClassicPreset } from "rete";
+import { ClassicPreset, NodeEditor } from "rete";
 import styled from "styled-components";
 import * as AFNodeVars from './affunclib';
 import { EventBus } from "./afnode";
+import { ClassicScheme } from "rete-react-plugin";
 
 const Styles = styled.div`
   display: block;
@@ -22,7 +23,8 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
 }) {
 
   const meta = (props.data as any).meta ?? {};
-  const editor = meta?.editor;
+  const port = props.data as unknown as ClassicPreset.Socket;
+  const editor = meta?.editor as NodeEditor<ClassicScheme>;
 
   // Listen for connections to occur to change the socket icon.
   const [connected, setConnected] = React.useState(false);
@@ -31,7 +33,15 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
 
         const removePipe = editor.addPipe(context => {
             if (context.type === 'connectioncreated') {
-                console.log(`${context.data.input.socket.title, context.data.output.socket.title}`);
+                if (port.name === context.data.sourceOutput || port.name === context.data.targetInput) {
+                    setConnected(true);
+                 }
+            }
+
+            if (context.type === 'connectionremoved') {
+                 if (port.name === context.data.sourceOutput || port.name === context.data.targetInput) {
+                    setConnected(false);
+                 }
             }
 
             return context
@@ -60,7 +70,7 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
             
       >
        <img
-          src={meta.socketIconDisconnected_path}
+          src={`${connected ? meta.socketIconConnected_path : meta.socketIconDisconnected_path}`}
           alt="socket icon"
           className="socket-icon"
           />

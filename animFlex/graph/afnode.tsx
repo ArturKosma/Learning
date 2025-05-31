@@ -139,9 +139,13 @@ export type NodeComponent<Scheme extends ClassicScheme> = (
 ) => JSX.Element;
 
 type SocketHoverCallback = (socketId: string) => void;
+type ConnectCallback = (sourceNodeId: string, targetNodeId: string) => void;
+
 export const EventBus = {
     HoverStartListeners: new Set<SocketHoverCallback>(),
     HoverEndListeners: new Set<SocketHoverCallback>(),
+    ConnectListeners: new Set<ConnectCallback>(),
+    DisconnectListeners: new Set<ConnectCallback>(),
 
     OnSocketHoverStart(socketId: string) {
         for (const listener of this.HoverStartListeners) {
@@ -151,6 +155,16 @@ export const EventBus = {
     OnSocketHoverEnd(socketId: string) {
         for (const listener of this.HoverEndListeners) {
             listener(socketId);
+        }
+    },
+    OnConnect(sourceNodeId: string, targetNodeId: string) {
+        for (const listener of this.ConnectListeners) {
+            listener(sourceNodeId, targetNodeId);
+        }
+    },
+    OnDisconnect(sourceNodeId: string, targetNodeId: string) {
+        for (const listener of this.DisconnectListeners) {
+            listener(sourceNodeId, targetNodeId);
         }
     }
 }

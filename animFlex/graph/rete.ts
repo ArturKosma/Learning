@@ -7,7 +7,7 @@ import { addCustomBackground } from "./custom-background";
 import { AFNodeFactory } from './afnodefactory';
 import { AFNode } from './afnode';
 import { AFSocket } from './afsocket';
-import { AFConnection } from './afconnection';
+import { AFConnection, AFFlow } from './afconnection';
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes>;
@@ -50,7 +50,7 @@ export async function createEditor(container: HTMLElement) {
                 return AFConnection;
             }
             }}));
-    connection.addPreset(ConnectionPresets.classic.setup());
+    connection.addPreset(() => new AFFlow());
 
   // Custom grid background.
   addCustomBackground(area);

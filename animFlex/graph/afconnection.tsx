@@ -1,6 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
 import { ClassicScheme, Presets } from "rete-react-plugin";
+import { ClassicFlow } from "rete-connection-plugin";
 
 const { useConnection } = Presets.classic;
 
@@ -33,4 +34,7 @@ export function AFConnection(props: {
       <Path styles={props.styles} d={path} />
     </Svg>
   );
+}
+export class AFFlow extends ClassicFlow<ClassicScheme, any[]> {
+
 }
