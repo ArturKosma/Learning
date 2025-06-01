@@ -4,30 +4,41 @@ import { AreaPlugin, AreaExtensions, Drag } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
 import { addCustomBackground } from "./custom-background";
-import { AFNodeFactory } from './afnodefactory';
+import { AFNodeFactory } from './afnodeFactory';
 import { AFNode } from './afnode';
 import { AFSocket } from './afsocket';
 import { AFConnection, AFFlow } from './afconnection';
+import {
+  ContextMenuExtra,
+  ContextMenuPlugin,
+  Presets as ContextMenuPresets
+} from "rete-context-menu-plugin";
+import styled from "styled-components";
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
-type AreaExtra = ReactArea2D<Schemes>;
+type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 
 export async function createEditor(container: HTMLElement) {
 
   // Create plugins.
-  const socket = new ClassicPreset.Socket("socket");
   const editor = new NodeEditor<Schemes>();
   const area = new AreaPlugin<Schemes, AreaExtra>(container);
   const connection = new ConnectionPlugin<Schemes, AreaExtra>();
   const render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
+  const selector = AreaExtensions.selector();
+  const contextMenu = new ContextMenuPlugin<Schemes>({
+    items: ContextMenuPresets.classic.setup([
+      ["Play Sequence", () => AFNodeFactory.create("PlaySequence", editor, true).node]
+    ])
+  });
 
   // Enables node selection in the editor area.
-  AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
+  AreaExtensions.selectableNodes(area, selector, {
     accumulating: AreaExtensions.accumulateOnCtrl(),
   });
 
   // Grid snapping.
-  AreaExtensions.snapGrid(area, {size: 16, dynamic: true});
+  AreaExtensions.snapGrid(area, {size: 16, dynamic: false});
 
   // Limit the zoom.
   AreaExtensions.restrictor(area, {
@@ -51,7 +62,51 @@ export async function createEditor(container: HTMLElement) {
                 return AFConnection;
             }
             }}));
-    connection.addPreset(() => new AFFlow());
+    connection.addPreset(() => new AFFlow(editor));
+
+  // Context menu stylized.
+  const { Menu, Common, Search, Item, Subitems } = Presets.contextMenu
+  const CustomMenu = styled(Menu)`
+  width: 180px;
+  background:rgba(18, 18, 18, 0);
+  border: none;
+`
+  const CustomItem = styled(Item)`
+    background:rgb(18, 18, 18);
+    &:hover {
+      background:rgb(35, 35, 35);
+    }
+    border: 1px solid rgb(24, 24, 24);
+    font-family: "Segoe UI", sans-serif;
+    font-size: 12px;
+  `
+  const CustomCommon = styled(Common)`
+    background: rgba(65, 65, 65, 1.0);
+    &:hover {
+      background: rgba(85, 85, 85, 1.0);
+    }
+    border: none;
+  `
+  const CustomSearch = styled(Search)`
+    background:rgb(18, 18, 18);
+    border: 1px rgb(24, 24, 24)
+  `
+  const CustomSubitems = styled(Subitems)`
+    background:rgb(18, 18, 18);
+    &:hover {
+      background-image: linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(18, 18, 18, 1.0));
+    }
+    border: none;
+  `
+  render.addPreset(Presets.contextMenu.setup({
+    customize: {
+      main: () => CustomMenu,
+      item: () => CustomItem,
+      common: () => CustomCommon,
+      search: () => CustomSearch,
+      subitems: () => CustomSubitems
+    }
+  }));
 
   // Custom grid background.
   addCustomBackground(area);
@@ -60,27 +115,13 @@ export async function createEditor(container: HTMLElement) {
   editor.use(area);
   area.use(connection);
   area.use(render);
+  area.use(contextMenu);
 
   // Nodes layering.
   AreaExtensions.simpleNodesOrder(area);
 
-  // Output pose node creation.
-  //const b = new ClassicPreset.Node("B");
-  //b.addInput("b", new ClassicPreset.Input(socket));
-  //await editor.addNode(b);
-
-  // Default connection.
- // await editor.addConnection(new ClassicPreset.Connection(a, "a", b, "b"));
-
-  // Default positions.
-  //await area.translate(b.id, { x: 270, y: 0 });
-
   // Create default nodes.
   const outputPoseNode = await AFNodeFactory.create("OutputPose", editor);
-  const playSequenceNode = await AFNodeFactory.create("PlaySequence", editor);
-  const fake = await AFNodeFactory.create("PlaySequence", editor);
-  await area.translate(playSequenceNode.node.id, {x: -320, y: 0});
-  await area.translate(fake.node.id, {x: -320, y: -160});
 
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
@@ -93,8 +134,27 @@ export async function createEditor(container: HTMLElement) {
     move: () => true
   }))
 
-  // Don't show browser context menu ie. RMB.
-  container.addEventListener('contextmenu', (e) => e.preventDefault());
+  // Prevent context menu when dragging.
+  let currentMouse = { x: 0, y: 0 };
+  document.addEventListener("pointermove", (e) => {
+    currentMouse = { x: e.clientX, y: e.clientY };
+  });
+  let dragStart: { x: number; y: number } | null = null;
+  container.addEventListener('pointerdown', (e) => {
+    if (e.button === 2) {
+      dragStart = { x: e.clientX, y: e.clientY };
+    }
+  });
+  container.addEventListener('contextmenu', (e) => {
+  const dx = Math.abs(currentMouse.x - dragStart.x);
+  const dy = Math.abs(currentMouse.y - dragStart.y);
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance > 40) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, {capture: true});
 
   // Disable double click zoom.
   area.addPipe(context => {
@@ -117,6 +177,22 @@ export async function createEditor(container: HTMLElement) {
           document.body.style.cursor = "default";
       }
     return context
+  })
+
+  // Bind custom keys.
+  window.addEventListener('keydown', async (e) => {
+
+    // Delete for nodes deletion.
+    if(e.key === 'Delete') {
+      for (const selectedEntity of selector.entities.values()) {
+      const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
+        meta?: {isRemovable?: boolean}
+      };
+      if(node?.meta?.isRemovable) {
+        await editor.removeNode(selectedEntity.id);
+      }
+    }
+    }
   })
 
   // Zoom the view to fit all nodes after 100ms.

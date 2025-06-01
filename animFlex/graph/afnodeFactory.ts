@@ -6,11 +6,23 @@ export class AFNodeFactory {
     node: ClassicPreset.Node;
 
     private constructor(node: ClassicPreset.Node) {
-        this.node = node;
+        this.node = node
     }
 
-    static async create(type: string, editor: NodeEditor<Schemes>): Promise<AFNodeFactory> {
-        const node = new ClassicPreset.Node("");
+    static create(type: string, editor: NodeEditor<Schemes>, contextMenu: boolean = false): AFNodeFactory {
+        const node = new ClassicPreset.Node("") as ClassicPreset.Node & {
+            meta: {
+                isRemovable: boolean,
+                showTitle: boolean,
+                title: string,
+                showSubTitle: boolean,
+                subTitle: string,
+                nodeWidth: number,
+                nodeHeight: number,
+                bigIcon: boolean,
+                bigIcon_path: string,
+            }
+        };
 
         // Fill meta like color, title.
         node.meta = GetNodeMeta(type);
@@ -18,7 +30,9 @@ export class AFNodeFactory {
         // Fill sockets like input, output.
         CreateSockets(type, node, editor);
 
-        await editor.addNode(node);
+        if(!contextMenu) {
+            editor.addNode(node);
+        }
         return new AFNodeFactory(node);
   }
 }

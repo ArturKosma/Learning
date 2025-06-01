@@ -4,12 +4,14 @@ import styled from "styled-components";
 import * as AFNodeVars from './affunclib';
 import { EventBus } from "./afnode";
 import { ClassicScheme } from "rete-react-plugin";
+import { Drag } from "rete-react-plugin";
 
 const Styles = styled.div`
+  pointer-events: auto;
   display: block;
   cursor: pointer;
-  width: ${AFNodeVars.$socketsize}px;
-  height: ${AFNodeVars.$socketsize * 2}px;
+  width: ${AFNodeVars.$socketsize * 1.15}px;
+  height: ${AFNodeVars.$socketsize}px;
   vertical-align: middle;
   z-index: 2;
   margin-top: auto;
@@ -31,7 +33,8 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
     React.useEffect(() => {
         if(!editor) return;
 
-        const removePipe = editor.addPipe(context => {
+        editor.addPipe(context => {
+
             if (context.type === 'connectioncreated') {
                 if (port.name === context.data.sourceOutput || port.name === context.data.targetInput) {
                     setConnected(true);
@@ -47,26 +50,32 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
             return context
         })
 
-        return () => {
-            removePipe();
-        }
+        // Hacky way to prevent RMB-creation of connection when clicking on a socket.
+        document.addEventListener("pointerdown", (e) => {
+          if(e.button !== 0 && (e.target as HTMLElement)?.closest('.input, .output')) {
+            e.stopPropagation();
+            e.preventDefault();
+          }
+        }, {capture: true});
+
+        return;
              
     }, []);
 
   return (
-      <Styles title={props.data.name}
+      <Styles 
+          title={props.data.name}
           meta={meta}
           onMouseEnter={(e) => {
               const socketWrapper = e.currentTarget.closest('.input, .output');
               const socketWrapperId = socketWrapper?.getAttribute('data-testid');
               EventBus.OnSocketHoverStart(socketWrapperId);
           }}
-        onMouseLeave={(e) => {
+          onMouseLeave={(e) => {
             const socketWrapper = e.currentTarget.closest('.input, .output');
             const socketWrapperId = socketWrapper?.getAttribute('data-testid')
             EventBus.OnSocketHoverEnd(socketWrapperId);
-        }}
-        
+          }}
             
       >
        <img
@@ -74,6 +83,6 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
           alt="socket icon"
           className="socket-icon"
           />
-       </Styles>
+       </Styles> 
   );
 }

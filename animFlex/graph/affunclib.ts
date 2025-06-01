@@ -2,16 +2,17 @@ import { ClassicPreset, NodeEditor, GetSchemes } from "rete";
 import resultPoseIcon from './resultPose.png';
 import poseIcon_connected from './pinPose_connected.png';
 import poseIcon_disconnected from './pinPose_disconnected.png';
-import * as React from "react";
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
 export const $socketmargin = 6;
-export const $socketsize = 16;
+export const $socketsize = 32;
+
 export function GetNodeMeta(type: string): any {
     switch (type) {
         case "OutputPose":
             return {
+                isRemovable: false,
                 showTitle: true,
                 title: "Output Pose",
                 showSubTitle: true,
@@ -24,6 +25,7 @@ export function GetNodeMeta(type: string): any {
             break;
         case "PlaySequence":
             return {
+                isRemovable: true,
                 showTitle: true,
                 title: "Play Sequence",
                 showSubTitle: false,
@@ -40,7 +42,14 @@ export function GetNodeMeta(type: string): any {
 export function CreateSockets(type: string, node: ClassicPreset.Node, editor: NodeEditor<Schemes>) {
 
     const uid = crypto.randomUUID();
-    const socket = new ClassicPreset.Socket(uid);
+    const socket = new ClassicPreset.Socket(uid) as ClassicPreset.Socket & {
+        meta?: {
+            editor: NodeEditor<Schemes>,
+            node: ClassicPreset.Node,
+            socketIconConnected_path: string,
+            socketIconDisconnected_path: string
+        }
+    };
 
     // Socket meta.
     socket.meta = {

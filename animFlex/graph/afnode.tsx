@@ -65,13 +65,12 @@ export const NodeStyles = styled.div <{
     font-weight: normal;
     font-style: italic;
     font-size: 12px;
-    padding: 2px 10px
+    padding: ${(props) => (props.meta.showSubTitle ? "2px 10px" : "0px 10px")};
   }
   .output {
     text-align: right;
     display: flex;
     flex-direction: row-reverse;
-    gap: 10px;
   }
   .output.socketHovered {
     background: linear-gradient(to left, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 30%);
@@ -80,19 +79,18 @@ export const NodeStyles = styled.div <{
     text-align: left;
     display: flex;
     flex-direction: row;
-    gap: 6px;
   }
   .input.socketHovered {
     background: linear-gradient(to right, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 30%);
   }
   .output-socket {
     text-align: right;
-    margin-right: 10px;
+    margin-right: 0px;
     display: inline-block;
   }
   .input-socket {
     text-align: left;
-    margin-left: 10px;
+    margin-left: 0px;
     display: inline-block;
   }
   .input-title,
