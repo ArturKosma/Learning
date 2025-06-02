@@ -4,7 +4,6 @@ import styled from "styled-components";
 import * as AFNodeVars from './affunclib';
 import { EventBus } from "./afnode";
 import { ClassicScheme } from "rete-react-plugin";
-import { Drag } from "rete-react-plugin";
 
 const Styles = styled.div`
   pointer-events: auto;
@@ -72,9 +71,9 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
               EventBus.OnSocketHoverStart(socketWrapperId);
           }}
           onMouseLeave={(e) => {
-            const socketWrapper = e.currentTarget.closest('.input, .output');
-            const socketWrapperId = socketWrapper?.getAttribute('data-testid')
-            EventBus.OnSocketHoverEnd(socketWrapperId);
+              const socketWrapper = e.currentTarget.closest('.input, .output');
+              const socketWrapperId = socketWrapper?.getAttribute('data-testid')
+              EventBus.OnSocketHoverEnd(socketWrapperId);
           }}
             
       >

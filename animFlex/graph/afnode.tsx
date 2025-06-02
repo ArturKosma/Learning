@@ -30,9 +30,9 @@ export const NodeStyles = styled.div <{
     `}
   .node-body {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    flex: 1
+    flex-direction: row;
+    justify-content: space-between;
+    flex: 1;
     }
   .node-big-icon {
     position: absolute;
@@ -71,9 +71,22 @@ export const NodeStyles = styled.div <{
     text-align: right;
     display: flex;
     flex-direction: row-reverse;
+    align-items: center;
+    align-self: flex-end;
+    width: auto;
   }
   .output.socketHovered {
-    background: linear-gradient(to left, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 30%);
+    background: linear-gradient(to left, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 100%);
+  }
+  .inputs-column {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+  }
+  .outputs-column {
+    justify-content: center;
+    display: flex;
+    flex-direction: column
   }
   .input {
     text-align: left;
@@ -81,7 +94,7 @@ export const NodeStyles = styled.div <{
     flex-direction: row;
   }
   .input.socketHovered {
-    background: linear-gradient(to right, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 30%);
+    background: linear-gradient(to right, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 100%);
   }
   .output-socket {
     text-align: right;
@@ -219,46 +232,9 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
       className="node-big-icon"
       />
       )}
-      {/* Outputs */}
-      {outputs.map(
-          ([key, output]) => {
-            const uniqueId_output = React.useMemo(() => crypto.randomUUID(), []);
 
-              return output ? (
-               <div className={`output ${hoveredSocketId === uniqueId_output ? "socketHovered" : ""}`} 
-               key={key} 
-               data-testid={`${uniqueId_output}`}
-               >
-               <div
-               style={{ display: 'inline-block' }}
-               >
-               <RefSocket
-                name="output-socket"
-                side="output"
-                emit={props.emit}
-                socketKey={key}
-                nodeId={id}
-                payload={output.socket}
-                />
-                </div>
-              <span className="output-title" data-testid="output-title">
-                {output?.label}
-              </span>
-            </div>
-          ) : null
-          }
-      )}
-      {/* Controls */}
-      {controls.map(([key, control]) => {
-        return control ? (
-          <RefControl
-            key={key}
-            name="control"
-            emit={props.emit}
-            payload={control}
-          />
-        ) : null;
-      })}
+      {inputs.length > 0 && (
+        <div className="inputs-column">
       {/* Inputs */}
       {inputs.map(
           ([key, input]) => {
@@ -299,6 +275,58 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
             </div>
           ) : null
           }
+      )}
+      </div>
+      )}
+
+       {controls.length > 0 && (
+        <div className="inputs-column">
+      {/* Controls */}
+      {controls.map(([key, control]) => {
+        return control ? (
+          <RefControl
+            key={key}
+            name="control"
+            emit={props.emit}
+            payload={control}
+          />
+        ) : null;
+      })}
+      </div>
+      )}
+
+      {outputs.length > 0 && (
+        <div className="outputs-column">
+      {/* Outputs */}
+      {outputs.map(
+          ([key, output]) => {
+            const uniqueId_output = React.useMemo(() => crypto.randomUUID(), []);
+
+              return output ? (
+               <div className={`output ${hoveredSocketId === uniqueId_output ? "socketHovered" : ""}`} 
+               key={key} 
+               data-testid={`${uniqueId_output}`}
+               >
+               <div
+               style={{ display: 'inline-block' }}
+               >
+               <RefSocket
+                name="output-socket"
+                side="output"
+                emit={props.emit}
+                socketKey={key}
+                nodeId={id}
+                payload={output.socket}
+                />
+                </div>
+              <span className="output-title" data-testid="output-title">
+                {output?.label}
+              </span>
+            </div>
+          ) : null
+          }
+      )}
+      </div>
       )}
       </div>
     </NodeStyles>

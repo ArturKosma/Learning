@@ -1,4 +1,5 @@
 import { ClassicPreset, NodeEditor, GetSchemes } from "rete";
+import {DropdownControl} from './afdropdown'; 
 import resultPoseIcon from './resultPose.png';
 import poseIcon_connected from './pinPose_connected.png';
 import poseIcon_disconnected from './pinPose_disconnected.png';
@@ -71,6 +72,7 @@ export function CreateSockets(type: string, node: ClassicPreset.Node, editor: No
             
            const output = new ClassicPreset.Output(socket);
            node.addOutput(uid, output);
+           node.addControl("sequence-dropdown", new DropdownControl())
            break;
 
         default:

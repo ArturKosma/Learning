@@ -27,7 +27,7 @@ export class AFNodeFactory {
         // Fill meta like color, title.
         node.meta = GetNodeMeta(type);
 
-        // Fill sockets like input, output.
+        // Fill sockets like input, output, dropdowns.
         CreateSockets(type, node, editor);
 
         if(!contextMenu) {

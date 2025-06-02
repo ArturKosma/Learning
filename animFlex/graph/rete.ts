@@ -14,6 +14,7 @@ import {
   Presets as ContextMenuPresets
 } from "rete-context-menu-plugin";
 import styled from "styled-components";
+import {DropdownControl, CustomDropdown} from './afdropdown'; 
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
@@ -60,6 +61,11 @@ export async function createEditor(container: HTMLElement) {
             },
             connection(context) {
                 return AFConnection;
+            },
+            control(data) {
+                if(data.payload instanceof DropdownControl) {
+                  return CustomDropdown;
+                }
             }
             }}));
     connection.addPreset(() => new AFFlow(editor));
@@ -177,6 +183,11 @@ export async function createEditor(container: HTMLElement) {
           document.body.style.cursor = "default";
       }
     return context
+  })
+
+  editor.addPipe(context => {
+    console.log(context.type);
+    return context;
   })
 
   // Bind custom keys.
