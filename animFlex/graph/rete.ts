@@ -74,31 +74,55 @@ export async function createEditor(container: HTMLElement) {
   const { Menu, Common, Search, Item, Subitems } = Presets.contextMenu
   const CustomMenu = styled(Menu)`
   width: 180px;
-  background:rgba(18, 18, 18, 0);
-  border: none;
+  opacity: 0.9;
+  background-image: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(18, 18, 18, 0.9));
+  border: 1px solid black;
+  border-radius: 10px;
 `
   const CustomItem = styled(Item)`
     background:rgb(18, 18, 18);
+    transition: background 0.2s ease;
+    opacity: 0.9;
     &:hover {
       background:rgb(35, 35, 35);
     }
-    border: 1px solid rgb(24, 24, 24);
+    border: 1px solid black;
     font-family: "Segoe UI", sans-serif;
-    font-size: 12px;
+    font-size: 10px;
+    color: rgba(235, 235, 235, 0.93);
   `
   const CustomCommon = styled(Common)`
-    background: rgba(65, 65, 65, 1.0);
+    background:rgb(18, 18, 18);
+    opacity: 0.9;
+    border: 1px solid black;
     &:hover {
-      background: rgba(85, 85, 85, 1.0);
+      background:rgb(18, 18, 18);
     }
-    border: none;
   `
   const CustomSearch = styled(Search)`
     background:rgb(18, 18, 18);
-    border: 1px rgb(24, 24, 24)
+    opacity: 0.9;
+    border: 1px solid rgb(78, 78, 78);
+    transition: border 0.2s ease;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 10px;
+    min-height: 28px;
+    border-radius: 6px;
+
+    &:hover,
+    & input:hover {
+      border: 1px solid rgb(67, 150, 238);
+    }
+
+    &:focus,
+    & input:focus {
+      outline: none;
+      border: 1px solid rgb(67, 150, 238);
+    }
   `
   const CustomSubitems = styled(Subitems)`
     background:rgb(18, 18, 18);
+    opacity: 0.9;
     &:hover {
       background-image: linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(18, 18, 18, 1.0));
     }
