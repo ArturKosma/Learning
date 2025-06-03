@@ -55,7 +55,7 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
             e.stopPropagation();
             e.preventDefault();
           }
-        }, {capture: true});
+        }, {capture: true});;
 
         return;
              

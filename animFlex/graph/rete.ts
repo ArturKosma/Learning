@@ -26,7 +26,7 @@ export async function createEditor(container: HTMLElement) {
   const area = new AreaPlugin<Schemes, AreaExtra>(container);
   const connection = new ConnectionPlugin<Schemes, AreaExtra>();
   const render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
-  const selector = AreaExtensions.selector();
+  const selector = AreaExtensions.selector();;
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
       ["Play Sequence", () => AFNodeFactory.create("PlaySequence", editor, true).node]
@@ -185,26 +185,46 @@ export async function createEditor(container: HTMLElement) {
     return context
   })
 
-  editor.addPipe(context => {
-    console.log(context.type);
-    return context;
-  })
-
   // Bind custom keys.
   window.addEventListener('keydown', async (e) => {
 
-    // Delete for nodes deletion.
-    if(e.key === 'Delete') {
-      for (const selectedEntity of selector.entities.values()) {
-      const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
-        meta?: {isRemovable?: boolean}
-      };
-      if(node?.meta?.isRemovable) {
-        await editor.removeNode(selectedEntity.id);
+      // Delete for nodes deletion.
+      if(e.key === 'Delete') {
+        for (const selectedEntity of selector.entities.values()) {
+        const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
+          meta?: {isRemovable?: boolean}
+        };
+        if(node?.meta?.isRemovable) {
+          await editor.removeNode(selectedEntity.id);
+        }
       }
+      }
+
+      // Pass backspace to text editor in order to delete characters.
+      if(e.key === "Backspace") {
+
+        const el = document.activeElement as HTMLInputElement | HTMLTextAreaElement;
+        if(!el) {
+          return;
+        }
+
+        if (el.tagName === 'INPUT') {
+        
+          const start = el.selectionStart ?? 0;
+          const end = el.selectionEnd ?? 0;
+
+          if (start === end && start > 0) {
+            el.value = el.value.slice(0, start - 1) + el.value.slice(end);
+            el.selectionStart = el.selectionEnd = start - 1;
+          } else {
+            el.value = el.value.slice(0, start) + el.value.slice(end);
+            el.selectionStart = el.selectionEnd = start;
+          }
+
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
     }
-    }
-  })
+  }, {capture: true})
 
   // Zoom the view to fit all nodes after 100ms.
   setTimeout(() => 

@@ -1,4 +1,5 @@
 import { Select, ConfigProvider, theme } from 'antd';
+import { useState } from 'react';
 import type { ThemeConfig } from 'antd/es/config-provider/context';
 import { ClassicPreset } from "rete";
 import * as React from "react";
@@ -18,8 +19,21 @@ export class DropdownControl extends ClassicPreset.Control {
 
 export function CustomDropdown(props: {data: DropdownControl}) {
 
+    const [searchValue, setSearchValue] = useState('');
+
     const stopEventPropagation = (e: React.SyntheticEvent) => {
         e.stopPropagation();
+    };
+
+    const handleSearch = (value: string) => {
+    setSearchValue(value);
+    };
+
+    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      setSearchValue((prev) => prev.slice(0, -1));
+    }
     };
 
     return (
@@ -31,9 +45,9 @@ export function CustomDropdown(props: {data: DropdownControl}) {
                 onDoubleClick={stopEventPropagation}
                 onMouseDown={stopEventPropagation}
                 onMouseUp={stopEventPropagation}
-                onKeyDown={stopEventPropagation}
-                onKeyUp={stopEventPropagation}
-                onKeyPress={stopEventPropagation}
+                //onKeyDown={stopEventPropagation}
+                //onKeyUp={stopEventPropagation}
+                //onKeyPress={stopEventPropagation}
             >
                 <Select 
                     showSearch
@@ -48,6 +62,9 @@ export function CustomDropdown(props: {data: DropdownControl}) {
                         {value: 'sonia', label: 'Sonia'}
                     ]}
                     style={{ minWidth: 150 }}
+                    searchValue={searchValue}
+                    onSearch={handleSearch}
+                    onInputKeyDown={handleInputKeyDown}
                     >
                 </Select>
             </div>
