@@ -1,30 +1,33 @@
 #include "AFSkeletalMeshComponent.h"
+#include "AFAnimState.h"
 
-#include <chrono>
+AFSkeletalMeshComponent::AFSkeletalMeshComponent()
+	: AFStaticMeshComponent()
+{
+	m_animState = std::make_shared<AFAnimState>();
+	m_animState->SetOwnerMesh(this);
+}
+
+void AFSkeletalMeshComponent::Tick(float deltaTime)
+{
+	AFStaticMeshComponent::Tick(deltaTime);
+
+	m_animState->Tick(deltaTime);
+}
 
 void AFSkeletalMeshComponent::SetAnimation(std::shared_ptr<AFAnimationClip> newAnimation)
 {
-	m_animation = newAnimation;
+	m_animState->SetAnimation(newAnimation);
 }
 
-void AFSkeletalMeshComponent::PlayAnimation(float playrate)
+void AFSkeletalMeshComponent::AnimationPlay()
 {
-	const double currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-		std::chrono::steady_clock::now().time_since_epoch()
-	).count();
-
-	SetAnimationFrame(std::fmod(currentTime / 1000.0 * playrate, m_animation->GetClipEndTime()));
+	m_animState->SetEvaluationState(EAFAnimEvaluationState::Playing);
 }
 
-void AFSkeletalMeshComponent::SetAnimationFrame(float time)
+void AFSkeletalMeshComponent::AnimationStop()
 {
-	m_animation->SetAnimationFrame(m_mesh->GetJoints(), time);
-	m_mesh->jointsDirty = true;
-}
-
-std::shared_ptr<AFAnimationClip> AFSkeletalMeshComponent::GetAnimation() const
-{
-	return m_animation;
+	m_animState->SetEvaluationState(EAFAnimEvaluationState::Idle);
 }
 
 void AFSkeletalMeshComponent::RecalculateSkeleton()

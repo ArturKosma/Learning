@@ -178,11 +178,11 @@ bool FAFMesh::LoadExisting()
 	return true;
 }
 
-bool FAFMesh::LoadImpl(const char* filepath, bool binary)
+bool FAFMesh::LoadImpl(const char* filepath)
 {
 	FAFMeshLoaded meshLoaded;
 
-	if(AFGLTFLoader::Load(filepath, meshLoaded, binary))
+	if(AFGLTFLoader::Load(filepath, meshLoaded))
 	{
 		// Resize this object's submeshes to match the number of loaded submeshes.
 		subMeshes.resize(meshLoaded.subMeshesLoaded.size());
@@ -273,7 +273,12 @@ glm::vec3 FAFMesh::GetJointScale(int boneIdx) const
 	return idxToJoint[boneIdx]->GetScale();
 }
 
-std::vector<std::shared_ptr<AFNode>> FAFMesh::GetJoints() const
+const std::vector<std::shared_ptr<AFNode>>& FAFMesh::GetJoints() const
 {
 	return idxToJoint;
+}
+
+const std::vector<int>& FAFMesh::GetNodeToJoint() const
+{
+	return nodeToJoint;
 }

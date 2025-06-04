@@ -98,7 +98,7 @@ void main()
 
 	mat4 skinMatDq = DualQuatSkinMat();
 
-	mat3 normalMatrix = mat3(transpose(inverse(mat3(skinMatDq))));
+	mat3 normalMatrix = mat3(transpose(inverse(mat3(modelTransform * skinMatDq))));
 	vec3 worldNormal = normalize(normalMatrix * aNormal);
 
 	vec4 worldPos = modelTransform * skinMatDq * vec4(aPos, 1.0f);

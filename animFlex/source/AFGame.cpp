@@ -29,6 +29,26 @@ bool AFGame::Init()
 	initCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
 	m_scene.SetActiveCamera(initCamera);
 
+	// Start playing single anim on the mannequin.
+	std::shared_ptr<AFActor> mannequinActor = m_scene.FindActor("mannequin actor");
+	if (mannequinActor)
+	{
+		std::shared_ptr<AFSkeletalMeshComponent> mannequinMesh = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(mannequinActor->GetComponentByName("mannequin mesh component"));
+		if (mannequinMesh)
+		{
+			std::shared_ptr<AFAnimationClip> idle = AFContent::Get().FindAsset<AFAnimationClip>("anim_idle");
+			std::shared_ptr<AFAnimationClip> runF = AFContent::Get().FindAsset<AFAnimationClip>("anim_runF");
+			std::shared_ptr<AFAnimationClip> runF2idle = AFContent::Get().FindAsset<AFAnimationClip>("anim_runF2idle");
+
+			std::shared_ptr<AFAnimationClip> clip = runF2idle;
+			if (clip)
+			{
+				mannequinMesh->SetAnimation(clip);
+				mannequinMesh->AnimationPlay();
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -42,32 +62,6 @@ void AFGame::Tick(float deltaTime)
 	for (std::shared_ptr<AFUI> ui : m_scene.GetSceneData().uis)
 	{
 		ui->Tick(deltaTime);
-	}
-
-	placeholderAccum += deltaTime;
-
-	std::shared_ptr<AFActor> mannequinActor = m_scene.FindActor("mannequin actor");
-	if (mannequinActor)
-	{
-		std::shared_ptr<AFSkeletalMeshComponent> mannequinMesh = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(mannequinActor->GetComponentByName("mannequin mesh component"));
-		if (mannequinMesh)
-		{
-			/*const glm::vec3 oldLoc = mannequinMesh->GetBoneLocation(5);
-			const glm::quat oldRot = mannequinMesh->GetBoneRotation(5);
-			const glm::vec3 oldScale = mannequinMesh->GetBoneScale(5);
-
-			const float sinAlpha = glm::sin(placeholderAccum * 3.0f);
-			const glm::quat& newRot = glm::quat(glm::radians(glm::vec3(sinAlpha * 45.0f, 0.0f, 0.0f)));
-
-			mannequinMesh->SetBoneTransform(5, oldLoc, newRot, oldScale);*/
-
-			std::shared_ptr<AFAnimationClip> idleClip = AFContent::Get().FindAsset<AFAnimationClip>("anim_idle");
-			if(idleClip)
-			{
-				mannequinMesh->SetAnimation(idleClip);
-				mannequinMesh->PlayAnimation();
-			}
-		}
 	}
 }
 

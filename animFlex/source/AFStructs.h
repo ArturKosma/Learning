@@ -165,7 +165,7 @@ struct FAFMesh : public FAFAsset
 	std::vector<FAFSubMesh> subMeshes = {};
 
 	bool LoadExisting() override;
-	bool LoadImpl(const char* filepath, bool binary) override;
+	bool LoadImpl(const char* filepath) override;
 
 	unsigned long long GetVertexCount() const;
 
@@ -176,7 +176,8 @@ struct FAFMesh : public FAFAsset
 	glm::quat GetJointRotation(int boneIdx) const;
 	glm::vec3 GetJointScale(int boneIdx) const;
 
-	std::vector<std::shared_ptr<AFNode>> GetJoints() const;
+	const std::vector<std::shared_ptr<AFNode>>& GetJoints() const;
+	const std::vector<int>& GetNodeToJoint() const;
 
 	void SetJointTransform(int jointIdx, const glm::vec3& newLocation = glm::vec3(0.0f), const glm::quat& newRotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
 		const glm::vec3& newScale = glm::vec3(1.0f));

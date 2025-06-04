@@ -2,13 +2,19 @@
 #include "AFAnimationClip.h"
 #include "AFStaticMeshComponent.h"
 
+class AFAnimState;
+
 class AFSkeletalMeshComponent : public AFStaticMeshComponent
 {
 public:
 
+	AFSkeletalMeshComponent();
+
+	void Tick(float deltaTime) override;
+
 	void SetAnimation(std::shared_ptr<AFAnimationClip> newAnimation);
-	void PlayAnimation(float playrate = 1.0f);
-	std::shared_ptr<AFAnimationClip> GetAnimation() const;
+	void AnimationPlay();
+	void AnimationStop();
 
 	void RecalculateSkeleton();
 
@@ -24,6 +30,5 @@ public:
 
 private:
 
-	void SetAnimationFrame(float time);
-	std::shared_ptr<AFAnimationClip> m_animation = nullptr;
+	std::shared_ptr<AFAnimState> m_animState = nullptr;
 };

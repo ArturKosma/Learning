@@ -11,8 +11,7 @@ class AFAnimationClip : public FAFAsset
 public:
 
 	void AddChannel(std::shared_ptr<tinygltf::Model> model, tinygltf::Animation anim, tinygltf::AnimationChannel channel);
-
-	void SetAnimationFrame(const std::vector<std::shared_ptr<AFNode>>& nodes, float time);
+	const std::vector<std::shared_ptr<AFAnimationChannel>>& GetAnimationChannels() const;
 
 	float GetClipEndTime() const;
 

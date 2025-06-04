@@ -7,16 +7,18 @@
 
 #include "third_party/tiny_gltf.h"
 
-bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, bool binary)
+bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 {
 	tinygltf::Model model;
 	tinygltf::TinyGLTF loader;
 	std::string err;
 	std::string warn;
 
-	bool ret = binary ? 
-		loader.LoadBinaryFromFile(&model, &err, &warn, filename) :
-		loader.LoadASCIIFromFile(&model, &err, &warn, filename);
+	bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename);
+	if(!ret)
+	{
+		ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename);
+	}		
 
 	if (!ret)
 	{
@@ -240,9 +242,14 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 					dataType = GL_UNSIGNED_SHORT;
 					break;
 				}
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+				{
+					dataType = GL_UNSIGNED_BYTE;
+					break;
+				}
 				default:
 				{
-					printf("glTF error, accessor %i uses unkown data type %i\n", accessorNum, dataType);
+					printf("glTF error, accessor %i uses unkown data type %i\n", accessorNum, accessor.componentType);
 					break;
 				}
 				}
@@ -252,7 +259,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 				glBindBuffer(GL_ARRAY_BUFFER, VBO[attributes[attribType]]);
 
 				// Configure VAO.
-				if(dataType == GL_UNSIGNED_SHORT) // #hack. Allow nicer check if we talk about integers.
+				if(dataType == GL_UNSIGNED_SHORT || dataType == GL_UNSIGNED_BYTE) // #hack. Allow nicer check if we talk about integers.
 				{
 					glVertexAttribIPointer(attributes[attribType], dataSize, dataType, 0, nullptr);
 				}
@@ -308,20 +315,22 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh, 
 	return true;
 }
 
-bool AFGLTFLoader::LoadAnim(const std::string& filename, AFAnimationClip* loadedClip, bool binary)
+bool AFGLTFLoader::LoadAnim(const std::string& filename, AFAnimationClip* loadedClip)
 {
 	std::shared_ptr<tinygltf::Model> model = std::make_shared<tinygltf::Model>();
 	tinygltf::TinyGLTF loader;
 	std::string err;
 	std::string warn;
 
-	bool ret = binary ?
-		loader.LoadBinaryFromFile(&*model, &err, &warn, filename) :
-		loader.LoadASCIIFromFile(&*model, &err, &warn, filename);
+	bool ret = loader.LoadASCIIFromFile(&*model, &err, &warn, filename);
+	if(!ret)
+	{
+		ret = loader.LoadBinaryFromFile(&*model, &err, &warn, filename);
+	}
 
 	if (!ret)
 	{
-		printf("Failed to parse glTF.\n");
+		printf("Failed to parse glTF anim.\n");
 		return false;
 	}
 
