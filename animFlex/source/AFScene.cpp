@@ -139,6 +139,7 @@ void AFScene::CreateDefaultSceneActors()
 	std::shared_ptr<AFSkeletalMeshComponent> mannequinMeshComponent = CreateObject<AFSkeletalMeshComponent>();
 	mannequinMeshComponent->SetDisplayName("mannequin mesh component");
 	std::shared_ptr<FAFMesh> mannequinMesh = AFContent::Get().FindAsset<FAFMesh>("sm_mannequin");
+
 	mannequinMeshComponent->SetMesh(mannequinMesh);
 	mannequinActor->AddComponent(mannequinMeshComponent);
 	mannequinMeshComponent->SetLocalRotation({ 0.0f, 0.0f, 0.0f });

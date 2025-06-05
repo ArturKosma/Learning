@@ -14,11 +14,13 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 	std::string err;
 	std::string warn;
 
-	bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename);
+	bool ret = false;
+
+	ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename);
 	if(!ret)
 	{
-		ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename);
-	}		
+		ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename);
+	}
 
 	if (!ret)
 	{
@@ -322,10 +324,10 @@ bool AFGLTFLoader::LoadAnim(const std::string& filename, AFAnimationClip* loaded
 	std::string err;
 	std::string warn;
 
-	bool ret = loader.LoadASCIIFromFile(&*model, &err, &warn, filename);
+	bool ret = loader.LoadBinaryFromFile(&*model, &err, &warn, filename);
 	if(!ret)
 	{
-		ret = loader.LoadBinaryFromFile(&*model, &err, &warn, filename);
+		ret = loader.LoadASCIIFromFile(&*model, &err, &warn, filename);
 	}
 
 	if (!ret)
