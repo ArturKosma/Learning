@@ -60,11 +60,7 @@ void AFAnimState::EvaluateSingleAnim()
 
 	for (auto& channel : m_singleAnim->GetAnimationChannels())
 	{
-		int targetJoint = nodes[channel->GetTargetNode()] - 1;
-		if(targetJoint < 0)
-		{
-			continue;
-		}
+		int targetJoint = nodes[channel->GetTargetNode()];
 
 		switch (channel->GetTargetPath())
 		{

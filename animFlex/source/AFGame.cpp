@@ -39,8 +39,9 @@ bool AFGame::Init()
 			std::shared_ptr<AFAnimationClip> idle = AFContent::Get().FindAsset<AFAnimationClip>("anim_idle");
 			std::shared_ptr<AFAnimationClip> runF = AFContent::Get().FindAsset<AFAnimationClip>("anim_runF");
 			std::shared_ptr<AFAnimationClip> runF2idle = AFContent::Get().FindAsset<AFAnimationClip>("anim_runF2idle");
+			std::shared_ptr<AFAnimationClip> idle2runF = AFContent::Get().FindAsset<AFAnimationClip>("anim_idle2runF");
 
-			std::shared_ptr<AFAnimationClip> clip = runF2idle;
+			std::shared_ptr<AFAnimationClip> clip = idle2runF;
 			if (clip)
 			{
 				mannequinMesh->SetAnimation(clip);

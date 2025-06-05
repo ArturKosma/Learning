@@ -211,10 +211,10 @@ glm::quat AFAnimationChannel::GetRotation(float time) const
 			(time - m_timings.at(prevTimeIndex)) /
 			(m_timings.at(nextTimeIndex) - m_timings.at(prevTimeIndex));
 
-		const glm::quat& prevScale = m_rotations.at(prevTimeIndex);
-		const glm::quat& nextScale = m_rotations.at(nextTimeIndex);
+		const glm::quat& prevRot = m_rotations.at(prevTimeIndex);
+		const glm::quat& nextRot = m_rotations.at(nextTimeIndex);
 
-		finalRotation = prevScale + interpolatedTime * (nextScale - prevScale);
+		finalRotation = glm::slerp(prevRot, nextRot, interpolatedTime);
 		break;
 	}
 	case EAFInterpolationType::CubicSpline:
@@ -245,6 +245,7 @@ glm::quat AFAnimationChannel::GetRotation(float time) const
 				3 * interpolatedTimeSq) * nextPoint +
 			(interpolatedTimeCub - interpolatedTimeSq) *
 			nextTangent;
+		finalRotation = glm::normalize(finalRotation);
 		break;
 	}
 	default:
