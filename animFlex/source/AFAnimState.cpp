@@ -61,6 +61,10 @@ void AFAnimState::EvaluateSingleAnim()
 	for (auto& channel : m_singleAnim->GetAnimationChannels())
 	{
 		int targetJoint = nodes[channel->GetTargetNode()];
+		if(targetJoint == 88)
+		{
+			printf("%s\n", joints.at(targetJoint)->GetNodeName().c_str());
+		}
 
 		switch (channel->GetTargetPath())
 		{

@@ -161,7 +161,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 	// Fill info for the rest of nodes recurrently, essentially creating the default pose and whole skeleton tree.
 	GetNodes(rootNode);
 
-	//rootNode->PrintTree();
+	rootNode->PrintTree();
 
 	// Fill bones info for the loaded mesh temp object.
 	loadedMesh.rootJoint = rootNode;
