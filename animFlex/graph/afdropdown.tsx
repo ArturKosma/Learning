@@ -59,7 +59,8 @@ export function CustomDropdown(props: {data: DropdownControl}) {
                     options={[
                         {value: 'jack', label: 'Jack'},
                         {value: 'lucy', label: 'Lucy'},
-                        {value: 'sonia', label: 'Sonia'}
+                        {value: 'sonia', label: 'Sonia'},
+                        {value: 'stan', label: 'Stan'}
                     ]}
                     style={{ minWidth: 150 }}
                     searchValue={searchValue}
