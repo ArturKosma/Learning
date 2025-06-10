@@ -35,45 +35,38 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 	GLuint EBO = 0;
 	std::map<std::string, GLint> attributes = { {"POSITION", 0}, {"NORMAL", 1}, {"TEXCOORD_0", 2}, {"JOINTS_0", 3}, {"WEIGHTS_0", 4} };
 
-	// Build node tree.
-	const size_t nodeCount = model.nodes.size();
-	const size_t rootNodeID = model.scenes.at(0).nodes.at(0);
-	std::shared_ptr<AFNode> rootNode = AFNode::CreateRoot(static_cast<int>(rootNodeID));
-
-	// Create node to joint mapping.
-	std::vector<int> nodeToJoint = {};
-	nodeToJoint.resize(model.nodes.size());
-	const tinygltf::Skin& skin = model.skins.at(0);
-	for (int i = 0; i < skin.joints.size(); ++i)
-	{
-		const int destinationNode = skin.joints.at(i);
-		nodeToJoint.at(destinationNode) = i;
-	}
-
-	// Fill the inverse bind matrices.
+	// Create the necessary containers.
+	std::vector<int> nodeToJoint = {}; // Maps node to a joint in a simple way for quick access of different vectors.
+	std::vector<std::shared_ptr<AFNode>> joints = {}; // Main map containing whole skeleton.
 	std::vector<glm::mat4> inverseBindMatrices = {};
 	std::vector<glm::mat4> jointMatrices = {};
 	std::vector<glm::mat4> jointDualQuats = {};
-	std::vector<std::shared_ptr<AFNode>> idxToJoint = {};
-	auto GetInvBindMatrices = [model, &inverseBindMatrices, &jointMatrices, &idxToJoint, &jointDualQuats]() -> void
-		{
-			const tinygltf::Skin& skin = model.skins.at(0);
-			const int invBindMatAccessor = skin.inverseBindMatrices;
 
-			const tinygltf::Accessor& accessor = model.accessors.at(invBindMatAccessor);
-			const tinygltf::BufferView& bufferView = model.bufferViews.at(accessor.bufferView);
-			const tinygltf::Buffer& buffer = model.buffers.at(bufferView.buffer);
+	const tinygltf::Skin& skin = model.skins.at(0); // We assume single skin files.
 
-			inverseBindMatrices.resize(skin.joints.size());
-			jointMatrices.resize(skin.joints.size());
-			idxToJoint.resize(skin.joints.size());
-			jointDualQuats.resize(skin.joints.size());
+	nodeToJoint.resize(model.nodes.size(), -1);
+	joints.resize(skin.joints.size());
+	inverseBindMatrices.resize(skin.joints.size());
+	jointMatrices.resize(skin.joints.size());
+	jointDualQuats.resize(skin.joints.size());
 
-			std::memcpy(inverseBindMatrices.data(), &buffer.data.at(0) + bufferView.byteOffset, bufferView.byteLength);
-		};
-	GetInvBindMatrices();
+	// Fetch the inverse bind matrices from buffer.	
+	const int invBindMatAccessor = skin.inverseBindMatrices;
 
-	auto GetNodeData = [model, &jointMatrices, &inverseBindMatrices, &nodeToJoint, &idxToJoint, &jointDualQuats](std::shared_ptr<AFNode> nodeToCalculate, const glm::mat4& nodeMatrix) -> void
+	const tinygltf::Accessor& accessor = model.accessors.at(invBindMatAccessor);
+	const tinygltf::BufferView& bufferView = model.bufferViews.at(accessor.bufferView);
+	const tinygltf::Buffer& buffer = model.buffers.at(bufferView.buffer);
+
+	std::memcpy(inverseBindMatrices.data(), &buffer.data.at(0) + bufferView.byteOffset, bufferView.byteLength);
+
+	// Create a mapping from nodes to joints.
+	for(size_t i = 0; i < skin.joints.size(); ++i)
+	{
+		const int targetNode = skin.joints.at(i);
+		nodeToJoint.at(targetNode) = static_cast<int>(i);
+	}
+
+	auto GetNodeData = [model, &jointMatrices, &inverseBindMatrices, &nodeToJoint, &jointDualQuats, &joints](std::shared_ptr<AFNode> nodeToCalculate, const glm::mat4& nodeMatrix) -> void
 		{
 			int nodeID = nodeToCalculate->GetNodeID();
 			const tinygltf::Node& node = model.nodes.at(nodeID);
@@ -129,18 +122,18 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 				jointDualQuats.at(nodeToJoint.at(nodeID)) = paddedMat;
 			}
 
-			idxToJoint.at(nodeToJoint.at(nodeID)) = nodeToCalculate;
+			joints.at(nodeToJoint.at(nodeID)) = nodeToCalculate;
 			jointMatrices.at(nodeToJoint.at(nodeID)) = nodeToCalculate->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(nodeID));
 		};
 
 	std::function<void(std::shared_ptr<AFNode>)> GetNodes;
-	GetNodes = [model, GetNodeData, &GetNodes](std::shared_ptr<AFNode> nodeToFill) -> void
+	GetNodes = [model, GetNodeData, &GetNodes, &joints](std::shared_ptr<AFNode> nodeToFill) -> void
 		{
 			int nodeID = nodeToFill->GetNodeID();
+
 			std::vector<int> childNodes = model.nodes.at(nodeID).children;
 
-			// ? - book quirks.
-			// Remove the child node without skin/mesh metadata, confuses skeleton.
+			// Remove the child nodes with the skin metadata, it's not part of the skeleton - it could be a mesh, or a mistake in export.
 			auto removeIt = std::remove_if(childNodes.begin(), childNodes.end(),
 				[&](int num) {return model.nodes.at(num).skin != -1; });
 			childNodes.erase(removeIt, childNodes.end());
@@ -155,6 +148,10 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 			}
 		};
 
+	// Find the root bone node ID.
+	const size_t rootNodeID = skin.joints.at(0);
+	std::shared_ptr<AFNode> rootNode = AFNode::CreateRoot(static_cast<int>(rootNodeID));
+
 	// Fill info for the root node.
 	GetNodeData(rootNode, glm::mat4(1.0f));
 
@@ -166,7 +163,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 	// Fill bones info for the loaded mesh temp object.
 	loadedMesh.rootJoint = rootNode;
 	loadedMesh.nodeToJoint = nodeToJoint;
-	loadedMesh.idxToJoint = idxToJoint;
+	loadedMesh.joints = joints;
 	loadedMesh.inverseBindMatrices = inverseBindMatrices;
 	loadedMesh.jointMatrices = jointMatrices;
 	loadedMesh.jointDualQuats = jointDualQuats;
@@ -347,12 +344,15 @@ bool AFGLTFLoader::LoadAnim(const std::string& filename, AFAnimationClip* loaded
 		return false;
 	}
 
-	// #hack. This assumes we have only 1 animation per file.
-	auto& anim = model->animations[0];
-	loadedClip->SetClipName(anim.name);
-	for (const auto& channel : anim.channels)
+	loadedClip->SetClipName(model->buffers[0].uri);
+
+	// We assume to have only 1 animation per file.
+	for (const auto& anim : model->animations)
 	{
-		loadedClip->AddChannel(model, anim, channel);
+		for (const auto& channel : anim.channels)
+		{
+			loadedClip->AddChannel(model, anim, channel);
+		}
 	}
 
 	return true;

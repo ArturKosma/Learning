@@ -36,12 +36,11 @@ bool AFGame::Init()
 		std::shared_ptr<AFSkeletalMeshComponent> mannequinMesh = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(mannequinActor->GetComponentByName("mannequin mesh component"));
 		if (mannequinMesh)
 		{
-			std::shared_ptr<AFAnimationClip> idle = AFContent::Get().FindAsset<AFAnimationClip>("anim_idle");
-			std::shared_ptr<AFAnimationClip> runF = AFContent::Get().FindAsset<AFAnimationClip>("anim_runF");
-			std::shared_ptr<AFAnimationClip> runF2idle = AFContent::Get().FindAsset<AFAnimationClip>("anim_runF2idle");
-			std::shared_ptr<AFAnimationClip> idle2runF = AFContent::Get().FindAsset<AFAnimationClip>("anim_idle2runF");
+			std::shared_ptr<AFAnimationClip> startBL = AFContent::Get().FindAsset<AFAnimationClip>("startBL");
+			std::shared_ptr<AFAnimationClip> startF = AFContent::Get().FindAsset<AFAnimationClip>("startF");
+			std::shared_ptr<AFAnimationClip> startBR = AFContent::Get().FindAsset<AFAnimationClip>("startBR");
 
-			std::shared_ptr<AFAnimationClip> clip = idle2runF;
+			std::shared_ptr<AFAnimationClip> clip = startBR;
 			if (clip)
 			{
 				mannequinMesh->SetAnimation(clip);

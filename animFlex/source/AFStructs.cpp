@@ -149,20 +149,6 @@ unsigned long long FAFSubMesh::GetVertexCount() const
 	return vertices.size();
 }
 
-void FAFMesh::SetJointTransform(int jointIdx, const glm::vec3& newLocation, const glm::quat& newRotation,
-	const glm::vec3& newScale)
-{
-	std::shared_ptr<AFNode> joint = idxToJoint[jointIdx];
-
-	joint->SetLocation(newLocation);
-	joint->SetRotation(newRotation);
-	joint->SetScale(newScale);
-
-	joint->CalculateLocalTRSMatrix();
-
-	jointsDirty = true;
-}
-
 bool FAFMesh::LoadExisting()
 {
 	for(FAFSubMesh& sub : subMeshes)
@@ -198,7 +184,7 @@ bool FAFMesh::LoadImpl(const char* filepath)
 		// Pass bones info. #hack Not every mesh is a skinned mesh.
 		rootJoint = meshLoaded.rootJoint;
 		nodeToJoint = meshLoaded.nodeToJoint;
-		idxToJoint = meshLoaded.idxToJoint;
+		joints = meshLoaded.joints;
 		inverseBindMatrices = meshLoaded.inverseBindMatrices;
 		jointMatrices = meshLoaded.jointMatrices;
 		jointDualQuats = meshLoaded.jointDualQuats;
@@ -228,10 +214,10 @@ void FAFMesh::RecalculateSkeleton()
 
 void FAFMesh::RecalculateBone(std::shared_ptr<AFNode> bone, const glm::mat4& parentMatrix)
 {
-	const int boneID = bone->GetNodeID();
+	const int nodeID = bone->GetNodeID();
 
 	bone->CalculateNodeMatrix(parentMatrix);
-	jointMatrices.at(nodeToJoint.at(boneID)) = bone->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(boneID));
+	jointMatrices.at(nodeToJoint.at(nodeID)) = bone->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(nodeID));
 
 	// Compose dual quat.
 	glm::vec3 translation;
@@ -240,7 +226,7 @@ void FAFMesh::RecalculateBone(std::shared_ptr<AFNode> bone, const glm::mat4& par
 	glm::vec3 skew;
 	glm::vec4 perspective;
 	glm::dualquat dq;
-	glm::decompose(bone->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(boneID)),
+	glm::decompose(bone->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(nodeID)),
 		scale, rotation, translation, skew, perspective);
 
 	// Fill dual quaternions. @see C++ Game Animation Programming by Dunsky & Szauer.
@@ -250,7 +236,7 @@ void FAFMesh::RecalculateBone(std::shared_ptr<AFNode> bone, const glm::mat4& par
 	glm::mat4 paddedMat(0.0f); // Web-GL doesn't accept 2x4.
 	paddedMat[0] = dualQuatJoint[0];
 	paddedMat[1] = dualQuatJoint[1];
-	jointDualQuats.at(nodeToJoint.at(boneID)) = paddedMat;
+	jointDualQuats.at(nodeToJoint.at(nodeID)) = paddedMat;
 
 	for(std::shared_ptr<AFNode> childBone : bone->GetChildren())
 	{
@@ -258,27 +244,12 @@ void FAFMesh::RecalculateBone(std::shared_ptr<AFNode> bone, const glm::mat4& par
 	}
 }
 
-glm::vec3 FAFMesh::GetJointLocation(int boneIdx) const
+const std::vector<int> FAFMesh::GetNodeToJoint() const
 {
-	return idxToJoint[boneIdx]->GetLocation();
-}
-
-glm::quat FAFMesh::GetJointRotation(int boneIdx) const
-{
-	return idxToJoint[boneIdx]->GetRotation();
-}
-
-glm::vec3 FAFMesh::GetJointScale(int boneIdx) const
-{
-	return idxToJoint[boneIdx]->GetScale();
+	return nodeToJoint;
 }
 
 const std::vector<std::shared_ptr<AFNode>>& FAFMesh::GetJoints() const
 {
-	return idxToJoint;
-}
-
-const std::vector<int>& FAFMesh::GetNodeToJoint() const
-{
-	return nodeToJoint;
+	return joints;
 }

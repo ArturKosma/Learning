@@ -55,16 +55,12 @@ void AFAnimState::EvaluateSingleAnim()
 	).count();
 	const float time = std::fmod(static_cast<float>(currentTime) / 1000.0f, m_singleAnim->GetClipEndTime());
 
+	const std::vector<int>& nodeToJoint = m_ownerMesh->GetMesh()->GetNodeToJoint();
 	const std::vector<std::shared_ptr<AFNode>>& joints = m_ownerMesh->GetMesh()->GetJoints();
-	const std::vector<int>& nodes = m_ownerMesh->GetMesh()->GetNodeToJoint();
 
 	for (auto& channel : m_singleAnim->GetAnimationChannels())
 	{
-		int targetJoint = nodes[channel->GetTargetNode()];
-		if(targetJoint == 88)
-		{
-			printf("%s\n", joints.at(targetJoint)->GetNodeName().c_str());
-		}
+		const int targetJoint = channel->GetTargetJoint();
 
 		switch (channel->GetTargetPath())
 		{

@@ -35,27 +35,6 @@ void AFSkeletalMeshComponent::RecalculateSkeleton()
 	m_mesh->RecalculateSkeleton();
 }
 
-glm::vec3 AFSkeletalMeshComponent::GetBoneLocation(int boneIdx) const
-{
-	return m_mesh->GetJointLocation(boneIdx);
-}
-
-glm::quat AFSkeletalMeshComponent::GetBoneRotation(int boneIdx) const
-{
-	return m_mesh->GetJointRotation(boneIdx);
-}
-
-glm::vec3 AFSkeletalMeshComponent::GetBoneScale(int boneIdx) const
-{
-	return m_mesh->GetJointScale(boneIdx);
-}
-
-void AFSkeletalMeshComponent::SetBoneTransform(int boneIdx, const glm::vec3& location, const glm::quat& rotation,
-                                               const glm::vec3& scale)
-{
-	m_mesh->SetJointTransform(boneIdx, location, rotation, scale);
-}
-
 const std::vector<glm::mat4>& AFSkeletalMeshComponent::GetJointsMatrices() const
 {
 	return m_mesh->jointMatrices;

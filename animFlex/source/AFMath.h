@@ -78,4 +78,9 @@ public:
 
 		return translationMatrix * rotationMatrix * scaleMatrix;
 	}
+
+	static glm::quat Vec4ToQuat(const glm::vec4& vec4)
+	{
+		return glm::quat(vec4.w, vec4.x, vec4.y, vec4.z);
+	}
 };

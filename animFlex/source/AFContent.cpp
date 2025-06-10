@@ -173,13 +173,12 @@ bool AFContent::Init()
 	AddAsset<AFPostprocessShader>("shader_gaussianVertical", "content/shaders/gaussianVertical.vert", "content/shaders/gaussianVertical.frag");
 
 	// Meshes
-	std::shared_ptr<FAFMesh> mannequin = AddAsset<FAFMesh>("sm_mannequin", "content/models/sk_mannequin.glb");
+	std::shared_ptr<FAFMesh> mannequin = AddAsset<FAFMesh>("sk_mannequin", "content/models/sk_mannequin.gltf");
 
 	// Anims.
-	//AddAsset<AFAnimationClip>("anim_idle", "content/anims/anim_mannequin_idle.glb");
-	AddAsset<AFAnimationClip>("anim_idle2runF", "content/anims/anim_mannequin_idle2runF.glb");
-	//AddAsset<AFAnimationClip>("anim_runF", "content/anims/anim_mannequin_runF.glb");
-	//AddAsset<AFAnimationClip>("anim_runF2idle", "content/anims/anim_mannequin_runF2idle.glb");
+	AddAsset<AFAnimationClip>("startBL", "content/anims/M_Neutral_Run_Start_BL_Rfoot.gltf");
+	AddAsset<AFAnimationClip>("startF", "content/anims/M_Neutral_Run_Start_F_Lfoot.gltf");
+	AddAsset<AFAnimationClip>("startBR", "content/anims/M_Neutral_Run_Start_BR_Rfoot.gltf");
 
 	// -------------------------------------------------
 	// Apply fallback properties post load.
