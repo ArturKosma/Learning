@@ -1,4 +1,7 @@
 import clr
+print("CLR path:", getattr(clr, "__file__", "virtual module"))
+print("CLR dir:", dir(clr))  # Should include AddReference
+
 import bpy 
 clr.AddReference('System.Windows.Forms')
 clr.AddReference("System")
@@ -8,11 +11,11 @@ import System
 
 # Cleaning the scene.
 def full_cleanup():
-    # Delete all objects from scene
+    # Delete all objects from scene.
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete()
 
-    # Manually remove leftover data blocks
+    # Manually remove leftover data blocks.
     data_blocks = [
         bpy.data.meshes,
         bpy.data.armatures,
