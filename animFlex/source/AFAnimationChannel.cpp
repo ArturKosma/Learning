@@ -81,6 +81,16 @@ void AFAnimationChannel::LoadChannelData(std::shared_ptr<tinygltf::Model> model,
 	}
 }
 
+void AFAnimationChannel::LoadChannelData(const FAFAnimationChannelData& channelData)
+{
+	m_channelData = channelData;
+}
+
+const FAFAnimationChannelData& AFAnimationChannel::GetChannelData() const
+{
+	return m_channelData;
+}
+
 int AFAnimationChannel::GetTargetJoint() const
 {
 	return m_channelData.targetJoint;

@@ -11,6 +11,10 @@ set(STB_DIR ../../../stb)
 set(IMGUI_DIR ../../../imgui/imgui)
 set(IMGUI_BCK_DIR ../../../imgui/imgui/backends)
 set(TRUETYPE_DIR ../../../freetype/freetype-2.10.0/include)
+set(ZSTD_DIR ../../../zstd/lib)
+
+# ZSTD library.
+set(ZSTD_LIB_PATH "${CMAKE_SOURCE_DIR}/../libraries/libzstd.a")
 
 # Collect source files.
 file(GLOB_RECURSE SOURCES 
@@ -29,6 +33,7 @@ include_directories(
 	${IMGUI_DIR}									# IMGUI header.
 	${IMGUI_BCK_DIR}								# IMGUI backends header.
 	${TRUETYPE_DIR}									# TRUETYPE headers.
+	${ZSTD_DIR}										# ZSTD headers.
 )
 
 # Specify output file and target properties.
@@ -39,6 +44,9 @@ get_filename_component(PARENT_DIR "${CMAKE_SOURCE_DIR}" DIRECTORY)
 set(CUSTOM_SHELL_FILE "${PARENT_DIR}/webassembly/template.html")
 
 add_executable(animFlex ${SOURCES})
+
+# Link zstd.
+target_link_libraries(animFlex ${ZSTD_LIB_PATH})
 
 # Apply flags to targets.
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \

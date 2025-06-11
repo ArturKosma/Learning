@@ -18,9 +18,14 @@ public:
 	void SetClipName(const std::string& newName);
 	std::string GetClipName() const;
 
+
+
 protected:
 
 	bool LoadImpl(const char* filepath) override;
+
+	bool SerializeImpl(const char* filepath) override;
+	bool DeserializeImpl(const char* filepath) override;
 
 private:
 

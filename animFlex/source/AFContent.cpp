@@ -176,9 +176,9 @@ bool AFContent::Init()
 	std::shared_ptr<FAFMesh> mannequin = AddAsset<FAFMesh>("sk_mannequin", "content/models/sk_mannequin.gltf");
 
 	// Anims.
-	AddAsset<AFAnimationClip>("startBL", "content/anims/M_Neutral_Run_Start_BL_Rfoot.gltf");
+	//AddAsset<AFAnimationClip>("startBL", "content/anims/M_Neutral_Run_Start_BL_Rfoot.gltf");
 	AddAsset<AFAnimationClip>("startF", "content/anims/M_Neutral_Run_Start_F_Lfoot.gltf");
-	AddAsset<AFAnimationClip>("startBR", "content/anims/M_Neutral_Run_Start_BR_Rfoot.gltf");
+	//AddAsset<AFAnimationClip>("startBR", "content/anims/M_Neutral_Run_Start_BR_Rfoot.gltf");
 
 	// -------------------------------------------------
 	// Apply fallback properties post load.

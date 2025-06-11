@@ -4,6 +4,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/dual_quaternion.hpp>
+#include <filesystem>
 
 #include "third_party/tiny_gltf.h"
 
@@ -158,7 +159,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 	// Fill info for the rest of nodes recurrently, essentially creating the default pose and whole skeleton tree.
 	GetNodes(rootNode);
 
-	rootNode->PrintTree();
+	//rootNode->PrintTree();
 
 	// Fill bones info for the loaded mesh temp object.
 	loadedMesh.rootJoint = rootNode;
@@ -344,7 +345,9 @@ bool AFGLTFLoader::LoadAnim(const std::string& filename, AFAnimationClip* loaded
 		return false;
 	}
 
-	loadedClip->SetClipName(model->buffers[0].uri);
+	// Save just the filename, without extension nor directory.
+	std::filesystem::path p(filename);
+	loadedClip->SetClipName(p.filename().stem().string());
 
 	// We assume to have only 1 animation per file.
 	for (const auto& anim : model->animations)

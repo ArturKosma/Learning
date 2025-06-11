@@ -7,12 +7,18 @@
 #include "AFCamera.h"
 #include "AFContent.h"
 #include "AFInput.h"
+#include "AFSerializer.h"
 #include "AFSkeletalMeshComponent.h"
 #include "AFTimerManager.h"
 #include "AFUIComponent.h"
 #include "AFUtility.h"
 #include "IAFPickerInterface.h"
 #include "AFUI.h"
+
+#ifdef __EMSCRIPTEN__
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
 
 bool AFGame::Init()
 {
@@ -29,6 +35,7 @@ bool AFGame::Init()
 	initCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
 	m_scene.SetActiveCamera(initCamera);
 
+#ifdef __EMSCRIPTEN__
 	// Start playing single anim on the mannequin.
 	std::shared_ptr<AFActor> mannequinActor = m_scene.FindActor("mannequin actor");
 	if (mannequinActor)
@@ -36,11 +43,21 @@ bool AFGame::Init()
 		std::shared_ptr<AFSkeletalMeshComponent> mannequinMesh = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(mannequinActor->GetComponentByName("mannequin mesh component"));
 		if (mannequinMesh)
 		{
-			std::shared_ptr<AFAnimationClip> startBL = AFContent::Get().FindAsset<AFAnimationClip>("startBL");
-			std::shared_ptr<AFAnimationClip> startF = AFContent::Get().FindAsset<AFAnimationClip>("startF");
-			std::shared_ptr<AFAnimationClip> startBR = AFContent::Get().FindAsset<AFAnimationClip>("startBR");
+			EM_ASM(
+				if (!FS.analyzePath('/export').exists) FS.mkdir('/export');
+			if (!FS.analyzePath('/export/anims').exists) FS.mkdir('/export/anims');
+				);
 
-			std::shared_ptr<AFAnimationClip> clip = startBR;
+			mkdir("/export", 0777);
+			mkdir("/export/anims", 0777);
+
+			std::shared_ptr<AFAnimationClip> startF = AFContent::Get().FindAsset<AFAnimationClip>("startF");
+			AFSerializer::Serialize<AFAnimationClip>("export/anims/M_Neutral_Run_Start_F_Lfoot.afanim", startF.get());
+
+			std::shared_ptr<AFAnimationClip> startFDeserialized = std::make_shared<AFAnimationClip>();
+			AFSerializer::Deserialize<AFAnimationClip>("export/anims/M_Neutral_Run_Start_F_Lfoot.afanim", startFDeserialized.get());
+
+			std::shared_ptr<AFAnimationClip> clip = startFDeserialized;
 			if (clip)
 			{
 				mannequinMesh->SetAnimation(clip);
@@ -48,6 +65,7 @@ bool AFGame::Init()
 			}
 		}
 	}
+#endif
 
 	return true;
 }
