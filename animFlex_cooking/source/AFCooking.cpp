@@ -1,7 +1,8 @@
-#include "AFCooking.h"
+﻿#include "AFCooking.h"
 #include "third_party/tiny_gltf.h"
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include "zstd.h"
@@ -32,7 +33,7 @@ std::string AFCooking::CookAnim(const std::string& sourcePath, const std::string
 
 	if (!ret)
 	{
-		printf("Failed to parse glTF anim.\n");
+		printf("Failed to parse glTF: %s\n", sourcePath.c_str());
 		return "";
 	}
 
