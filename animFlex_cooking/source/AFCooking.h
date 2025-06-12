@@ -33,9 +33,9 @@ class AFCooking
 {
 public:
 
-	static bool CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath);
+	static std::string CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath);
 
 private:
 
-	static bool CookAnim(const std::string& sourcePath, const std::string& targetPath);
+	static std::string CookAnim(const std::string& sourcePath, const std::string& targetPath);
 };

@@ -6,17 +6,17 @@
 #include <sstream>
 #include "zstd.h"
 
-bool AFCooking::CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath)
+std::string AFCooking::CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath)
 {
 	if (type == "anim")
 	{
 		return CookAnim(sourcePath, targetPath);
 	}
 
-	return false;
+	return "";
 }
 
-bool AFCooking::CookAnim(const std::string& sourcePath, const std::string& targetPath)
+std::string AFCooking::CookAnim(const std::string& sourcePath, const std::string& targetPath)
 {
 	// Load via TinyGLTF.
 	std::shared_ptr<tinygltf::Model> model = std::make_shared<tinygltf::Model>();
@@ -33,13 +33,13 @@ bool AFCooking::CookAnim(const std::string& sourcePath, const std::string& targe
 	if (!ret)
 	{
 		printf("Failed to parse glTF anim.\n");
-		return false;
+		return "";
 	}
 
 	if (model->animations.empty())
 	{
 		printf("No animations in file.\n");
-		return false;
+		return "";
 	}
 
 	// Save just the filename, without extension nor directory.
@@ -192,5 +192,5 @@ bool AFCooking::CookAnim(const std::string& sourcePath, const std::string& targe
 
 	outfile.close();
 
-	return false;
+	return animName;
 }

@@ -1,5 +1,7 @@
 #include <filesystem>
+#include <fstream>
 #include <string>
+#include "json.hpp"
 
 #include "AFCooking.h"
 
@@ -18,6 +20,9 @@ int main(int argc, char* argv[])
         const std::string source = argv[i + 1];
         const std::string target = argv[i + 2];
 
+        // Create json array manifest.
+        nlohmann::json manifest = nlohmann::json::array();
+
         // Go through every file in source directory.
         for (const auto& file : std::filesystem::directory_iterator(source))
         {
@@ -25,9 +30,24 @@ int main(int argc, char* argv[])
             if (file.is_regular_file() && (file.path().extension() == ".gltf" || file.path().extension() == ".glb"))
             {
                 // CookFile this file.
-                AFCooking::CookFile(type, file.path().string(), target);
+                const std::string& cookedName = AFCooking::CookFile(type, file.path().string(), target);
+
+                // Add it to the current manifest.
+                if (!cookedName.empty())
+                {
+                    nlohmann::json entry;
+                    entry["name"] = cookedName;
+                    manifest.push_back(entry);
+                }
             }
         }
+
+        // Create json manifest at the target directory.
+        const std::string& manifestPath = (std::filesystem::path(target) / "manifest.json").string();
+        std::ofstream outJson(manifestPath);
+        outJson << manifest.dump(2);
+        printf("json manifest -> %s\n", manifestPath.c_str());
+        outJson.close();
     }
 }
 
