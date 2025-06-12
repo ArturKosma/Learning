@@ -61,7 +61,7 @@ bool AFGame::Init()
 			clip = startFDeserialized;
 #else
 			std::shared_ptr<AFAnimationClip> startFDeserialized = std::make_shared<AFAnimationClip>();
-			AFSerializer::Deserialize<AFAnimationClip>("export/anims/M_Neutral_Run_Start_F_Lfoot.afanim", startFDeserialized.get());
+			AFSerializer::Deserialize<AFAnimationClip>("export/anims/M_Neutral_Run_Reface_Start_F_L_090.afanim", startFDeserialized.get());
 			clip = startFDeserialized;
 #endif
 			if (clip)
