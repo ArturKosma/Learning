@@ -13,6 +13,8 @@ public:
 	static AFGame* GetGame();
 	const AFScene& GetScene();
 
+	void OnGraphUpdate(const char* graphState);
+
 private:
 
 	void OnSelect(const FAFPickID& pickID);

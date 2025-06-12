@@ -15,11 +15,14 @@ import {
 } from "rete-context-menu-plugin";
 import styled from "styled-components";
 import {DropdownControl, CustomDropdown} from './afdropdown'; 
+import {GraphUpdate} from './affunclib'
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 
 export async function createEditor(container: HTMLElement) {
+
+  await GraphUpdate(); 
 
   // Create plugins.
   const editor = new NodeEditor<Schemes>();
@@ -249,6 +252,15 @@ export async function createEditor(container: HTMLElement) {
         }
     }
   }, {capture: true})
+
+  // Listen for new connections/disconnections.
+  editor.addPipe(context => {
+  if (context.type === 'connectioncreated' || context.type === 'connectionremoved') {
+      GraphUpdate();
+  }
+
+  return context;
+});
 
   // Zoom the view to fit all nodes after 100ms.
   setTimeout(() => 

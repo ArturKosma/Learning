@@ -4,6 +4,7 @@ import styled from "styled-components";
 import * as AFNodeVars from './affunclib';
 import { EventBus } from "./afnode";
 import { ClassicScheme } from "rete-react-plugin";
+import { GraphUpdate } from './affunclib';
 
 const Styles = styled.div`
   pointer-events: auto;
@@ -55,7 +56,7 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
             e.stopPropagation();
             e.preventDefault();
           }
-        }, {capture: true});;
+        }, {capture: true});
 
         return;
              

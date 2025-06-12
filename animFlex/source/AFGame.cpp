@@ -35,43 +35,6 @@ bool AFGame::Init()
 	initCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
 	m_scene.SetActiveCamera(initCamera);
 
-	// Start playing single anim on the mannequin.
-	std::shared_ptr<AFActor> mannequinActor = m_scene.FindActor("mannequin actor");
-	if (mannequinActor)
-	{
-		std::shared_ptr<AFSkeletalMeshComponent> mannequinMesh = std::dynamic_pointer_cast<AFSkeletalMeshComponent>(mannequinActor->GetComponentByName("mannequin mesh component"));
-		if (mannequinMesh)
-		{
-			std::shared_ptr<AFAnimationClip> clip = nullptr;
-#ifdef __EMSCRIPTEN__
-			EM_ASM(
-				if (!FS.analyzePath('/export').exists) FS.mkdir('/export');
-			if (!FS.analyzePath('/export/anims').exists) FS.mkdir('/export/anims');
-				);
-
-			mkdir("/export", 0777);
-			mkdir("/export/anims", 0777);
-
-			std::shared_ptr<AFAnimationClip> startF = AFContent::Get().FindAsset<AFAnimationClip>("startF");
-			AFSerializer::Serialize<AFAnimationClip>("export/anims/M_Neutral_Run_Start_F_Lfoot.afanim", startF.get());
-
-			std::shared_ptr<AFAnimationClip> startFDeserialized = std::make_shared<AFAnimationClip>();
-			AFSerializer::Deserialize<AFAnimationClip>("export/anims/M_Neutral_Run_Start_F_Lfoot.afanim", startFDeserialized.get());
-
-			clip = startFDeserialized;
-#else
-			std::shared_ptr<AFAnimationClip> startFDeserialized = std::make_shared<AFAnimationClip>();
-			AFSerializer::Deserialize<AFAnimationClip>("export/anims/M_Neutral_Run_Reface_Start_F_L_090.afanim", startFDeserialized.get());
-			clip = startFDeserialized;
-#endif
-			if (clip)
-			{
-				mannequinMesh->SetAnimation(clip);
-				mannequinMesh->AnimationPlay();
-			}
-		}
-	}
-
 	return true;
 }
 
@@ -96,6 +59,11 @@ AFGame* AFGame::GetGame()
 const AFScene& AFGame::GetScene()
 {
 	return m_scene;
+}
+
+void AFGame::OnGraphUpdate(const char* graphState)
+{
+	printf("%s\n", graphState);
 }
 
 void AFGame::OnSelect(const FAFPickID& pickID)

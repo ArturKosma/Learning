@@ -79,3 +79,25 @@ export function CreateSockets(type: string, node: ClassicPreset.Node, editor: No
             return {}
     }
 }
+
+declare const Module: any;
+export async function GraphUpdate() {
+
+    // Wait until Emscripten runtime is ready.
+    if (!Module.calledRun) {
+        await new Promise<void>((resolve) => {
+        const prevInit = Module.onRuntimeInitialized;
+        Module.onRuntimeInitialized = function () {
+            if (typeof prevInit === 'function') prevInit();
+            resolve();
+        };
+        });
+    }
+
+    Module.ccall(
+        'OnGraphUpdate',   
+        null,              
+        ['string'],       
+        ["graph update called"]
+    );   
+}
