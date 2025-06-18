@@ -39,3 +39,6 @@ graph/package.json
 
 # Disallow RETE config
 graph/tsconfig.json
+
+# Allow python.
+!*.py
