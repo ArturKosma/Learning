@@ -1,0 +1,82 @@
+{
+    "Nodes": [
+        {
+            "class_id": "AFGraphNode_Blend",
+            "node_name": "Blend",
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "inputPoseA",
+                    "label": "A",
+                    "direction": "Input"
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "inputPoseB",
+                    "label": "B",
+                    "direction": "Input"
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "alpha",
+                    "label": "Alpha",
+                    "direction": "Input"
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "outputPose",
+                    "label": "",
+                    "direction": "Output"
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_BlendByBool",
+            "node_name": "Blend By Bool",
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "inputPoseA",
+                    "label": "A",
+                    "direction": "Input"
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "inputPoseB",
+                    "label": "B",
+                    "direction": "Input"
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "useA",
+                    "label": "Use A",
+                    "direction": "Input"
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "outpusePose",
+                    "label": "",
+                    "direction": "Output"
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_PlaySequence",
+            "node_name": "Play Sequence",
+            "params": [
+                {
+                    "var_type": "std::string",
+                    "var_name": "animName",
+                    "label": "",
+                    "direction": "Input"
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "outputPose",
+                    "label": "",
+                    "direction": "Output"
+                }
+            ]
+        }
+    ]
+}
