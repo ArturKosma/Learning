@@ -1,5 +1,6 @@
 #include "AFScene.h"
 
+#include "AFAnimState.h"
 #include "AFApp.h"
 #include "AFUI.h"
 #include "AFBackgroundComponent.h"
@@ -11,12 +12,14 @@
 #include "AFOrientationGizmoUIComponent.h"
 #include "AFOrientationGlyph.h"
 #include "AFOrientGizmo.h"
+#include "AFPlayerPawn.h"
 #include "AFSkeletalMeshComponent.h"
 #include "AFStaticMeshComponent.h"
 #include "AFTextComponent.h"
 #include "AFUIRenderComponent.h"
 #include "AFUtility.h"
 #include "AFVertexBuffer.h"
+#include "AFCamera.h"
 
 std::shared_ptr<AFActor> AFScene::FindActor(const std::string& actorName)
 {
@@ -62,6 +65,16 @@ void AFScene::SetActiveCamera(std::shared_ptr<AFCamera> newActiveCamera)
 std::shared_ptr<AFCamera> AFScene::GetActiveCamera() const
 {
 	return m_sceneData.activeCamera;
+}
+
+void AFScene::SetPlayerPawn(std::shared_ptr<AFPlayerPawn> newPlayerPawn)
+{
+	m_sceneData.playerPawn = newPlayerPawn;
+}
+
+std::shared_ptr<AFPlayerPawn> AFScene::GetPlayerPawn() const
+{
+	return m_sceneData.playerPawn;
 }
 
 const FAFSceneData& AFScene::GetSceneData() const
@@ -133,20 +146,25 @@ void AFScene::CreateDefaultSceneActors()
 	AddActor(testBoxActor2);
 	testBoxActor2->AddOffsetLocation({ -350.0f, 50.0f, 50.0f });*/
 
-	// Mannequin.
-	std::shared_ptr<AFActor> mannequinActor = CreateObject<AFActor>();
-	mannequinActor->SetDisplayName("mannequin actor");
-	std::shared_ptr<AFSkeletalMeshComponent> mannequinMeshComponent = CreateObject<AFSkeletalMeshComponent>();
-	mannequinMeshComponent->SetDisplayName("mannequin mesh component");
-	std::shared_ptr<FAFMesh> mannequinMesh = AFContent::Get().FindAsset<FAFMesh>("sk_mannequin");
+	// Create default camera.
+	std::shared_ptr<AFCamera> initCamera = CreateObject<AFCamera>();
+	initCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
+	SetActiveCamera(initCamera);
+	AddActor(initCamera);
 
-	mannequinMeshComponent->SetMesh(mannequinMesh);
-	mannequinActor->AddComponent(mannequinMeshComponent);
-	mannequinMeshComponent->SetLocalRotation({ 0.0f, 0.0f, 0.0f });
-	mannequinMeshComponent->SetLocalScale({ 1.0f, 1.0f, 1.0f });
-	mannequinActor->AddOffsetLocation({ 0.0f, 0.0f, 0.0f });
-	mannequinActor->AddOffsetRotation({ 0.0f, 0.0f, 0.0f });
-	AddActor(mannequinActor);
+	// Create default player.
+	std::shared_ptr<AFPlayerPawn> playerPawn = AFScene::CreateObject<AFPlayerPawn>();
+	SetPlayerPawn(playerPawn);
+	AddActor(playerPawn);
+
+	// Mannequin.
+	std::shared_ptr<AFPlayerPawn> mannequinActor = m_sceneData.playerPawn;
+	mannequinActor->SetDisplayName("mannequin actor");
+	mannequinActor->GetMeshComponent()->SetDisplayName("mannequin mesh component");
+	std::shared_ptr<FAFMesh> mannequinMesh = AFContent::Get().FindAsset<FAFMesh>("sk_mannequin");
+	mannequinActor->GetMeshComponent()->SetMesh(mannequinMesh);
+	std::shared_ptr<AFAnimGraph> playerAnimGraph = CreateObject<AFAnimGraph>();
+	mannequinActor->GetMeshComponent()->GetAnimState()->SetGraph(playerAnimGraph);
 }
 
 void AFScene::CreateDefaultUIs()

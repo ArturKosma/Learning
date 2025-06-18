@@ -49,3 +49,8 @@ bool AFSkeletalMeshComponent::GetStateDirty() const
 {
 	return m_mesh->jointsDirty;
 }
+
+std::shared_ptr<AFAnimState> AFSkeletalMeshComponent::GetAnimState() const
+{
+	return m_animState;
+}

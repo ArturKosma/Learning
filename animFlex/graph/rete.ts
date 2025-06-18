@@ -4,7 +4,7 @@ import { AreaPlugin, AreaExtensions, Drag } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
 import { addCustomBackground } from "./custom-background";
-import { AFNodeFactory } from './afnodeFactory';
+import { AFNodeFactory, classIdToName, GraphNode, GraphNodeParam, classIdToParams } from './afnodeFactory';
 import { AFNode } from './afnode';
 import { AFSocket } from './afsocket';
 import { AFConnection, AFFlow } from './afconnection';
@@ -16,24 +16,40 @@ import {
 import styled from "styled-components";
 import {DropdownControl, CustomDropdown} from './afdropdown'; 
 import {GraphUpdate} from './affunclib'
+import {SetEditorInstance} from './afeditorinstance'
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 
 export async function createEditor(container: HTMLElement) {
 
-  await GraphUpdate(); 
+  // Read and parse JSON graph manifest.
+  const res = await fetch('/graphManifest.json');
+  const data = await res.json();
+  const nodes: GraphNode[] = data.Nodes;
+
+  // Save classID -> name map.
+  for (const node of nodes) {
+    classIdToName.set(node.class_id, node.node_name);
+    classIdToParams.set(node.class_id, node.params);
+  }
 
   // Create plugins.
   const editor = new NodeEditor<Schemes>();
+  SetEditorInstance(editor); // Make it globally accessible.
   const area = new AreaPlugin<Schemes, AreaExtra>(container);
   const connection = new ConnectionPlugin<Schemes, AreaExtra>();
   const render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
-  const selector = AreaExtensions.selector();;
+  const selector = AreaExtensions.selector();
+
+  // Context menu.
   const contextMenu = new ContextMenuPlugin<Schemes>({
-    items: ContextMenuPresets.classic.setup([
-      ["Play Sequence", () => AFNodeFactory.create("PlaySequence", editor, true).node]
-    ])
+    items: ContextMenuPresets.classic.setup(
+      Array.from(classIdToName.entries()).map(([classId, nodeName]) => [
+        nodeName,
+        () => AFNodeFactory.create(classId, editor, true).node
+      ])
+    )
   });
 
   // Enables node selection in the editor area.
@@ -280,6 +296,8 @@ export async function createEditor(container: HTMLElement) {
   }
 });
 resizeObserver.observe(container);
+
+await GraphUpdate(); 
   
   return {
     destroy: () => area.destroy(),

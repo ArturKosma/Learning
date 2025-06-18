@@ -18,6 +18,7 @@ void AFAnimState::Tick(float deltaTime)
 		}
 		case EAFAnimSourceState::Graph:
 		{
+			EvaluateGraph(deltaTime);
 			break;
 		}
 		default:
@@ -36,6 +37,17 @@ void AFAnimState::SetAnimation(std::shared_ptr<AFAnimationClip> animation)
 {
 	m_singleAnim = animation;
 	m_sourceState = EAFAnimSourceState::SingleAnim;
+}
+
+void AFAnimState::SetGraph(std::shared_ptr<AFAnimGraph> animGraph)
+{
+	m_graph = animGraph;
+	m_sourceState = EAFAnimSourceState::Graph;
+}
+
+std::shared_ptr<AFAnimGraph> AFAnimState::GetGraph() const
+{
+	return m_graph;
 }
 
 void AFAnimState::SetEvaluationState(EAFAnimEvaluationState newEvaluationState)
@@ -92,4 +104,12 @@ void AFAnimState::EvaluateSingleAnim()
 	}
 
 	m_ownerMesh->GetMesh()->jointsDirty = true;
+}
+
+void AFAnimState::EvaluateGraph(float deltaTime)
+{
+	if (m_graph)
+	{
+		m_graph->Evaluate(deltaTime);
+	}
 }

@@ -17,7 +17,8 @@ export const NodeStyles = styled.div <{
   cursor: move;
   box-sizing: border-box;
   width: ${(props) => `${props.meta.nodeWidth}px`};
-  height: ${(props) => `${props.meta.nodeHeight}px`};
+  height: auto;
+  min-height: ${(props) => `${props.meta.nodeHeight}px`};
   padding-bottom: 6px;
   position: relative;
   user-select: none;
@@ -32,7 +33,8 @@ export const NodeStyles = styled.div <{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    flex: 1;
+    flex-grow: 1;
+    align-items: center;
     }
   .node-big-icon {
     position: absolute;
@@ -72,7 +74,6 @@ export const NodeStyles = styled.div <{
     display: flex;
     flex-direction: row-reverse;
     align-items: center;
-    align-self: flex-end;
     width: auto;
   }
   .output.socketHovered {
@@ -82,11 +83,17 @@ export const NodeStyles = styled.div <{
     justify-content: center;
     display: flex;
     flex-direction: column;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    gap: 6px;
   }
   .outputs-column {
     justify-content: center;
     display: flex;
-    flex-direction: column
+    flex-direction: column;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    gap: 6px;
   }
   .input {
     text-align: left;

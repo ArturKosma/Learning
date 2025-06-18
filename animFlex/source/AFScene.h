@@ -17,6 +17,9 @@ public:
 	void SetActiveCamera(std::shared_ptr<AFCamera> newActiveCamera);
 	std::shared_ptr<AFCamera> GetActiveCamera() const;
 
+	void SetPlayerPawn(std::shared_ptr<AFPlayerPawn> newPlayerPawn);
+	std::shared_ptr<AFPlayerPawn> GetPlayerPawn() const;
+
 	const FAFSceneData& GetSceneData() const;
 
 	template<typename T>

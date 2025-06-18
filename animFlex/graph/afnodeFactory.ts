@@ -1,6 +1,22 @@
 import { NodeEditor, GetSchemes, ClassicPreset } from "rete";
 import { GetNodeMeta, CreateSockets } from "./affunclib";
 
+export type GraphNodeParam = {
+  var_type: string;
+  var_name: string;
+  label: string;
+  direction: string;
+};
+
+export type GraphNode = {
+  class_id: string;
+  node_name: string;
+  params: GraphNodeParam[];
+};
+
+export const classIdToName: Map<string, string> = new Map();
+export const classIdToParams: Map<string, GraphNodeParam[]> = new Map();
+
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 export class AFNodeFactory {
     node: ClassicPreset.Node;
@@ -12,6 +28,7 @@ export class AFNodeFactory {
     static create(type: string, editor: NodeEditor<Schemes>, contextMenu: boolean = false): AFNodeFactory {
         const node = new ClassicPreset.Node("") as ClassicPreset.Node & {
             meta: {
+                type: string,
                 isRemovable: boolean,
                 showTitle: boolean,
                 title: string,
@@ -28,7 +45,7 @@ export class AFNodeFactory {
         node.meta = GetNodeMeta(type);
 
         // Fill sockets like input, output, dropdowns.
-        CreateSockets(type, node, editor);
+        CreateSockets(node, editor);
 
         if(!contextMenu) {
             editor.addNode(node);

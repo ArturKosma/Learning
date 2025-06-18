@@ -18,13 +18,11 @@ public:
 
 	void RecalculateSkeleton();
 
-	glm::vec3 GetBoneLocation(int boneIdx) const;
-	glm::quat GetBoneRotation(int boneIdx) const;
-	glm::vec3 GetBoneScale(int boneIdx) const;
-
 	const std::vector<glm::mat4>& GetJointsMatrices() const;
 	const std::vector<glm::mat4>& GetJointsDualQuatMatrices() const;
 	bool GetStateDirty() const;
+
+	std::shared_ptr<AFAnimState> GetAnimState() const;
 
 private:
 

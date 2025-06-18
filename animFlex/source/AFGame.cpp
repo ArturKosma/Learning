@@ -3,10 +3,13 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include "AFAnimGraph.h"
+#include "AFAnimState.h"
 #include "AFApp.h"
 #include "AFCamera.h"
 #include "AFContent.h"
 #include "AFInput.h"
+#include "AFPlayerPawn.h"
 #include "AFSerializer.h"
 #include "AFSkeletalMeshComponent.h"
 #include "AFTimerManager.h"
@@ -28,12 +31,6 @@ bool AFGame::Init()
 		printf("%s\n", "Scene Init() failed.");
 		return false;
 	}
-
-	// Create default camera.
-	std::shared_ptr<AFCamera> initCamera = AFScene::CreateObject<AFCamera>();
-	m_scene.AddActor(initCamera);
-	initCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
-	m_scene.SetActiveCamera(initCamera);
 
 	return true;
 }
@@ -63,7 +60,12 @@ const AFScene& AFGame::GetScene()
 
 void AFGame::OnGraphUpdate(const char* graphState)
 {
-	printf("%s\n", graphState);
+	std::shared_ptr<AFPlayerPawn> playerPawn = GetScene().GetSceneData().playerPawn;
+	std::shared_ptr<AFAnimGraph> graph = playerPawn->GetMeshComponent()->GetAnimState()->GetGraph();
+	if (graph)
+	{
+		graph->Compile(graphState);
+	}
 }
 
 void AFGame::OnSelect(const FAFPickID& pickID)

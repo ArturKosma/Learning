@@ -5,6 +5,7 @@ set PROJ_PATH=C:\_programming\Learning\animFlex
 set BUILD_PATH=C:\_programming\Learning\animFlex\cmake\build
 set DEST_PATH=C:\_programming\Learning\docs
 set RETE_PATH=C:\_programming\Learning\animFlex\graph
+set SRC_PATH=C:\_programming\Learning\animFlex\source
 
 REM Navigate to the build directory.
 cd cmake\build
@@ -16,8 +17,12 @@ REM Build the project.
 call ninja -t clean
 call ninja
 
-REM Return to the project root.
-cd ..
+REM Build the graph manifest.
+cd "%PROJ_PATH%\"
+call python build_manifest.py "%SRC_PATH%"
+
+REM Copy graph manifest.
+copy graphManifest.json "%DEST_PATH%\"
 
 REM Copy build.
 cd "%BUILD_PATH%\"
