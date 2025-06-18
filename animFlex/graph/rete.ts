@@ -24,7 +24,7 @@ type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 export async function createEditor(container: HTMLElement) {
 
   // Read and parse JSON graph manifest.
-  const res = await fetch('/graphManifest.json');
+  const res = await fetch('./graphManifest.json');
   const data = await res.json();
   const nodes: GraphNode[] = data.Nodes;
 

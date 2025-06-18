@@ -43,3 +43,4 @@ cd "%RETE_PATH%\"
 call npx vite build
 
 REM @echo Build completed!
+pause

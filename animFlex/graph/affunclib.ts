@@ -3,6 +3,8 @@ import {DropdownControl} from './afdropdown';
 import resultPoseIcon from './resultPose.png';
 import poseIcon_connected from './pinPose_connected.png';
 import poseIcon_disconnected from './pinPose_disconnected.png';
+import icon_connected from './pin_connected.png';
+import icon_disconnected from './pin_disconnected.png';
 import { NodeRef } from "rete-area-plugin/_types/extensions/shared/types";
 import { editorInstance } from "./afeditorinstance";
 import { Input, Socket } from "rete/_types/presets/classic";
@@ -12,6 +14,12 @@ type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPr
 
 export const $socketmargin = 6;
 export const $socketsize = 32;
+
+export const SocketTypes: Map<string, string> = new Map();
+SocketTypes.set("AFPose", "Pose");
+SocketTypes.set("std::string", "string");
+SocketTypes.set("float", "float");
+SocketTypes.set("bool", "bool");
 
 export function GetNodeMeta(type: string): any {
 
@@ -49,109 +57,129 @@ export function GetNodeMeta(type: string): any {
     }
 } 
 
-const SocketTypes: Map<string, string> = new Map();
-SocketTypes.set("AFPose", "Pose");
-SocketTypes.set("std::string", "string");
-SocketTypes.set("float", "float");
+function GetSocketIcon(socketType: string, connected: boolean) {
+    switch (socketType) {
+        case "Pose": {
+            return connected ? poseIcon_connected : poseIcon_disconnected;
+        }
+        default: {
+            return connected ? icon_connected : icon_disconnected;
+        }
+    }
+}
+
+function CreateSocketWithMeta(
+    uid: string,
+    socketType: string,
+    editor: NodeEditor<Schemes>,
+    node: ClassicPreset.Node
+): ClassicPreset.Socket & {
+    meta?: {
+        socketType: string;
+        editor: NodeEditor<Schemes>;
+        node: ClassicPreset.Node;
+        socketIconConnected_path: string;
+        socketIconDisconnected_path: string;
+    };
+} {
+    // Create new socket object.
+    const socket = new ClassicPreset.Socket(uid) as ClassicPreset.Socket & {
+        meta?: {
+            socketType: string;
+            editor: NodeEditor<Schemes>;
+            node: ClassicPreset.Node;
+            socketIconConnected_path: string;
+            socketIconDisconnected_path: string;
+        };
+    };
+
+    // Assign meta to socket.
+    socket.meta = {
+        socketType,
+        editor,
+        node,
+        socketIconConnected_path: GetSocketIcon(socketType, true),
+        socketIconDisconnected_path: GetSocketIcon(socketType, false)
+    };
+
+    return socket;
+}
+
+function CreateAndAddSocket(
+    node: ClassicPreset.Node,
+    param: any,
+    editor: NodeEditor<Schemes>
+) {
+    // Generate unique ID for the socket.
+    const uid = crypto.randomUUID();
+
+    // Find mapped socket type string.
+    const socketType = SocketTypes.get(param.var_type) as string;
+
+    // Create meta for the socket.
+    const socket = CreateSocketWithMeta(
+        uid,
+        socketType,
+        editor,
+        node
+    );
+
+    // Create socket object casted.
+    const newSocket = param.direction === "Input"
+        ? new ClassicPreset.Input(socket)
+        : new ClassicPreset.Output(socket);
+
+    // Add it a label.
+    newSocket.label = param.label;
+
+    // Add it to the node.
+    if (param.direction === "Input") {
+        node.addInput(uid, newSocket);
+    } else {
+        node.addOutput(uid, newSocket);
+    }
+}
 
 function ReadSockets(node: ClassicPreset.Node, editor: NodeEditor<Schemes>) {
 
+    // Find node type.
     const nodeType = (node as any).meta?.type;
+
+    // Find node params.
     const nodeParams = classIdToParams.get(nodeType);
 
+    // Go through node params and add sockets for them.
     if (nodeParams) {
-
-        // Go through all sockets in node type.
         for (const param of nodeParams) {
-
-            // Generate random UID for this socket.
-            const uid = crypto.randomUUID();
-
-            // Create the socket and attach new meta to it.
-            const socket = new ClassicPreset.Socket(uid) as ClassicPreset.Socket & {
-                meta?: {
-                    socketType: string,
-                    editor: NodeEditor<Schemes>,
-                    node: ClassicPreset.Node,
-                    socketIconConnected_path: string,
-                    socketIconDisconnected_path: string
-                }
-            };
-
-            // Fill the default socket meta.
-            socket.meta = {
-                socketType: "",
-                editor,
-                node,
-                socketIconConnected_path: poseIcon_connected,
-                socketIconDisconnected_path: poseIcon_disconnected
-            }
-
-            // Map the socket type.
-            socket.meta.socketType = SocketTypes[param.var_type];
-
-            // Create the socket direction.
-            let newSocket;
-            if(param.direction == "Input") {
-                newSocket = new ClassicPreset.Input(socket);
-            }
-            else {
-                newSocket = new ClassicPreset.Output(socket);
-            }
-
-            // Add label.
-            newSocket.label = param.label;
-
-            // Add is as input or output.
-            if(param.direction == "Input") {
-                node.addInput(uid, newSocket);
-            }
-            else {
-                node.addOutput(uid, newSocket);
-            }
+            CreateAndAddSocket(node, param, editor);
         }
     }
 }
 
 export function CreateSockets(node: ClassicPreset.Node, editor: NodeEditor<Schemes>) {
 
+    // Find node type.
     const nodeType = (node as any).meta?.type;
 
-    switch (nodeType) {
-        case "OutputPose":
+    // Treat OutputPose node specially as it's not a CPP function.
+    if (nodeType === "OutputPose") {
+        const uid = crypto.randomUUID();
+        const socket = CreateSocketWithMeta(
+            uid,
+            "Pose",
+            editor,
+            node
+        );
 
-            // Generate random UID for this socket.
-            const uid = crypto.randomUUID();
+        const input = new ClassicPreset.Input(socket);
+        input.label = "Result";
+        node.addInput(uid, input);
 
-            // Create the socket and attach new meta to it.
-            const socket = new ClassicPreset.Socket(uid) as ClassicPreset.Socket & {
-                meta?: {
-                    socketType: string,
-                    editor: NodeEditor<Schemes>,
-                    node: ClassicPreset.Node,
-                    socketIconConnected_path: string,
-                    socketIconDisconnected_path: string
-                }
-            };
+    } 
 
-            // Fill the default socket meta.
-            socket.meta = {
-                socketType: "",
-                editor,
-                node,
-                socketIconConnected_path: poseIcon_connected,
-                socketIconDisconnected_path: poseIcon_disconnected
-            }
-
-            socket.meta.socketType = "Pose"
-            const input = new ClassicPreset.Input(socket);
-            input.label = "Result";
-            node.addInput(uid, input);
-
-            break;
-
-        default:
-            ReadSockets(node, editor);
+    // Create every sockets for every other node type.
+    else {
+        ReadSockets(node, editor);
     }
 }
 

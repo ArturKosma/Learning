@@ -20,6 +20,20 @@ const Styles = styled.div`
   justify-content: center;    
   align-items: center;              
 `;
+
+function GetSocketFilter(type: string): string {
+  switch (type) {
+    case "float": // green
+      return "brightness(0) saturate(100%) invert(82%) sepia(64%) saturate(527%) hue-rotate(39deg) brightness(98%) contrast(96%)";
+    case "bool": // red
+      return "brightness(0) saturate(100%) invert(26%) sepia(85%) saturate(4687%) hue-rotate(0deg) brightness(101%) contrast(102%)";
+    case "string": // violet
+      return "brightness(0) saturate(100%) invert(37%) sepia(88%) saturate(1100%) hue-rotate(279deg) brightness(95%) contrast(102%)";
+    default:
+      return "none";
+  }
+}
+
 export function AFSocket<T extends ClassicPreset.Socket>(props: {
   data: T;
 }) {
@@ -62,7 +76,7 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
              
     }, []);
 
-  return (
+   return (
       <Styles 
           title={props.data.name}
           meta={meta}
@@ -82,6 +96,9 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
           src={`${connected ? meta.socketIconConnected_path : meta.socketIconDisconnected_path}`}
           alt="socket icon"
           className="socket-icon"
+          style={{
+            filter: GetSocketFilter(meta.socketType)
+          }}
           />
        </Styles> 
   );

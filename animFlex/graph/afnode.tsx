@@ -85,7 +85,7 @@ export const NodeStyles = styled.div <{
     flex-direction: column;
     padding-top: 6px;
     padding-bottom: 6px;
-    gap: 6px;
+    gap: 2px;
   }
   .outputs-column {
     justify-content: center;
@@ -93,7 +93,7 @@ export const NodeStyles = styled.div <{
     flex-direction: column;
     padding-top: 6px;
     padding-bottom: 6px;
-    gap: 6px;
+    gap: 2px;
   }
   .input {
     text-align: left;
