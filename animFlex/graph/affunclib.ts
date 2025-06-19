@@ -9,6 +9,68 @@ import { NodeRef } from "rete-area-plugin/_types/extensions/shared/types";
 import { editorInstance } from "./afeditorinstance";
 import { Input, Socket } from "rete/_types/presets/classic";
 import { classIdToName, classIdToParams, GraphNodeParam } from './afnodeFactory';
+import { getSourceTarget } from 'rete-connection-plugin'
+
+class PoseSocket extends ClassicPreset.Socket {
+  constructor(name: string) {
+    super(name);
+  }
+  isCompatibleWith(other: ClassicPreset.Socket) {
+    return other instanceof PoseSocket;
+  }
+}
+
+class FloatSocket extends ClassicPreset.Socket {
+  constructor(name: string) {
+    super(name);
+  }
+  isCompatibleWith(other: ClassicPreset.Socket) {
+    return other instanceof FloatSocket;
+  }
+}
+
+class BoolSocket extends ClassicPreset.Socket {
+  constructor(name: string) {
+    super(name);
+  }
+  isCompatibleWith(other: ClassicPreset.Socket) {
+    return other instanceof BoolSocket;
+  }
+}
+
+class StringSocket extends ClassicPreset.Socket {
+  constructor(name: string) {
+    super(name);
+  }
+  isCompatibleWith(other: ClassicPreset.Socket) {
+    return other instanceof StringSocket;
+  }
+}
+
+export function GetConnectionSockets(
+  editor: NodeEditor<any>,
+  connection: ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>
+): {
+  source?: ClassicPreset.Socket;
+  target?: ClassicPreset.Socket;
+} {
+  const sourceNode = editor.getNode(connection.source);
+  const targetNode = editor.getNode(connection.target);
+
+  const sourceSocket = sourceNode?.outputs[connection.sourceOutput]?.socket;
+  const targetSocket = targetNode?.inputs[connection.targetInput]?.socket;
+
+  return {
+    source: sourceSocket,
+    target: targetSocket
+  };
+}
+
+export function CanCreateConnection(editor: NodeEditor<Schemes>, connection: Schemes["Connection"]) {
+  const { source, target } = GetConnectionSockets(editor, connection);
+
+  return source && target && (source as any).isCompatibleWith(target)
+}
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
@@ -83,7 +145,26 @@ function CreateSocketWithMeta(
     };
 } {
     // Create new socket object.
-    const socket = new ClassicPreset.Socket(uid) as ClassicPreset.Socket & {
+    let baseSocket: ClassicPreset.Socket;
+
+    switch (socketType) {
+        case "Pose":
+            baseSocket = new PoseSocket(uid);
+            break;
+        case "float":
+            baseSocket = new FloatSocket(uid);
+            break;
+        case "bool":
+            baseSocket = new BoolSocket(uid);
+            break;
+        case "string":
+            baseSocket = new StringSocket(uid);
+            break;
+        default:
+            baseSocket = new ClassicPreset.Socket(uid); // fallback
+    }
+
+    const socket = baseSocket as ClassicPreset.Socket & {
         meta?: {
             socketType: string;
             editor: NodeEditor<Schemes>;

@@ -1,7 +1,7 @@
 ﻿import { createRoot } from "react-dom/client";
 import { NodeEditor, GetSchemes, ClassicPreset } from "rete";
 import { AreaPlugin, AreaExtensions, Drag } from "rete-area-plugin";
-import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
+import { ConnectionPlugin, Presets as ConnectionPresets, makeConnection } from "rete-connection-plugin";
 import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
 import { addCustomBackground } from "./custom-background";
 import { AFNodeFactory, classIdToName, GraphNode, GraphNodeParam, classIdToParams } from './afnodeFactory';
@@ -15,8 +15,9 @@ import {
 } from "rete-context-menu-plugin";
 import styled from "styled-components";
 import {DropdownControl, CustomDropdown} from './afdropdown'; 
-import {GraphUpdate} from './affunclib'
+import {CanCreateConnection, GraphUpdate} from './affunclib'
 import {SetEditorInstance} from './afeditorinstance'
+import { setupSelection } from './selection';
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
@@ -52,10 +53,35 @@ export async function createEditor(container: HTMLElement) {
     )
   });
 
+  function dummyAccum() {
+    return {
+      active() {
+        return false;
+      },
+
+      destroy() {
+
+      }
+    }
+  }
+
   // Enables node selection in the editor area.
-  AreaExtensions.selectableNodes(area, selector, {
-    accumulating: AreaExtensions.accumulateOnCtrl(),
+  AreaExtensions.simpleNodesOrder(area);
+  const nodeSelector = AreaExtensions.selectableNodes(area, selector, {
+    accumulating: AreaExtensions.accumulateOnCtrl()
   });
+
+  const selection = setupSelection(area, {
+    selected(ids) {
+      selector.unselectAll();
+      ids.forEach((id, i) => {
+        nodeSelector.select(id, i !== 0);
+      });
+    },
+  });
+
+selection.setShape('marquee');
+selection.setButton(0);
 
   // Grid snapping.
   AreaExtensions.snapGrid(area, {size: 16, dynamic: false});
@@ -88,6 +114,35 @@ export async function createEditor(container: HTMLElement) {
             }
             }}));
     connection.addPreset(() => new AFFlow(editor));
+
+  // Disconnect any existing connection when picking up a socket.
+  connection.addPipe(context => {
+    if(context.type === 'connectionpick') {
+      const { socket } = context.data;
+      const nodeId = socket.nodeId;
+      const key = socket.key;
+      const isOutput = socket.side === 'output';
+
+      const node = editor.getNode(nodeId);
+
+      if (!node) return context;
+
+      const connections = editor.getConnections();
+
+      // Remove all existing connections on this socket.
+      for (const conn of connections) {
+        const match = isOutput
+          ? (conn.sourceOutput === key)
+          : (conn.targetInput === key);
+
+        if (match) {
+          editor.removeConnection(conn.id);
+        }
+      }
+    }
+
+    return context;
+  })
 
   // Context menu stylized.
   const { Menu, Common, Search, Item, Subitems } = Presets.contextMenu
@@ -199,7 +254,7 @@ export async function createEditor(container: HTMLElement) {
   const dy = Math.abs(currentMouse.y - dragStart.y);
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  if (distance > 40) {
+  if (distance > 3) {
     e.preventDefault();
     e.stopPropagation();
   }
@@ -238,6 +293,18 @@ export async function createEditor(container: HTMLElement) {
           meta?: {isRemovable?: boolean}
         };
         if(node?.meta?.isRemovable) {
+          const connections = editor.getConnections();
+          
+          // Remove all connections where this node is source or target
+          for (const conn of connections) {
+            if (
+              conn.source === node.id ||
+              conn.target === node.id  
+            ) {
+              await editor.removeConnection(conn.id);
+            }
+          }
+
           await editor.removeNode(selectedEntity.id);
         }
       }
@@ -268,6 +335,16 @@ export async function createEditor(container: HTMLElement) {
         }
     }
   }, {capture: true})
+
+  // Prevent creation when sockets are not compatible.
+  editor.addPipe((context) => {
+  if (context.type === "connectioncreate") {
+    if (!CanCreateConnection(editor, context.data)) {
+      return;
+    }
+  }
+  return context;
+});
 
   // Listen for new connections/disconnections.
   editor.addPipe(context => {
@@ -300,6 +377,6 @@ resizeObserver.observe(container);
 await GraphUpdate(); 
   
   return {
-    destroy: () => area.destroy(),
+      destroy: () => area.destroy(),
   };
 }

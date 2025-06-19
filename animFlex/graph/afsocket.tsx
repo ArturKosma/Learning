@@ -50,6 +50,9 @@ export function AFSocket<T extends ClassicPreset.Socket>(props: {
         editor.addPipe(context => {
 
             if (context.type === 'connectioncreated') {
+              console.log("portname:", port.name)
+              console.log("sourceOutput:", context.data.sourceOutput)
+              console.log("targetInput:", context.data.targetInput)
                 if (port.name === context.data.sourceOutput || port.name === context.data.targetInput) {
                     setConnected(true);
                  }
