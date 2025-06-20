@@ -6,13 +6,15 @@
 
 class AFGraphNode_PlaySequence : public AFGraphNode
 {
-	AFCLASS(AFGraphNode_PlaySequence, "Play Sequence")
-
 public:
 
-	AFPARAM(std::string, animName, "", "Input");
-	AFPARAM(AFPose, outputPose, "", "Output");
+	AFGraphNode_PlaySequence();
+	~AFGraphNode_PlaySequence() override;
+
+	AFPARAM(std::string, animName, "", "Input", "HidePin|Dropdown_Anims");
+	AFPARAM(AFPose, outputPose, "", "Output", "");
 
 	void Evaluate(float deltaTime) override;
 
 };
+AFCLASS(AFGraphNode_PlaySequence, "Play Sequence")

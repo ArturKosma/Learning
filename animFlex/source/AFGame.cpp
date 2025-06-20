@@ -68,6 +68,36 @@ void AFGame::OnGraphUpdate(const char* graphState)
 	}
 }
 
+void AFGame::OnNodeCreated(const char* msg)
+{
+	std::shared_ptr<AFPlayerPawn> playerPawn = GetScene().GetSceneData().playerPawn;
+	std::shared_ptr<AFAnimGraph> graph = playerPawn->GetMeshComponent()->GetAnimState()->GetGraph();
+	if (graph)
+	{
+		graph->OnNodeCreated(msg);
+	}
+}
+
+void AFGame::OnNodeUpdated(const char* msg)
+{
+	std::shared_ptr<AFPlayerPawn> playerPawn = GetScene().GetSceneData().playerPawn;
+	std::shared_ptr<AFAnimGraph> graph = playerPawn->GetMeshComponent()->GetAnimState()->GetGraph();
+	if (graph)
+	{
+		graph->OnNodeUpdated(msg);
+	}
+}
+
+void AFGame::OnNodeRemoved(const char* msg)
+{
+	std::shared_ptr<AFPlayerPawn> playerPawn = GetScene().GetSceneData().playerPawn;
+	std::shared_ptr<AFAnimGraph> graph = playerPawn->GetMeshComponent()->GetAnimState()->GetGraph();
+	if (graph)
+	{
+		graph->OnNodeRemoved(msg);
+	}
+}
+
 void AFGame::OnSelect(const FAFPickID& pickID)
 {
 	if(AFInput::GetFreeViewMode())

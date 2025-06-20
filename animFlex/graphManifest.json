@@ -8,55 +8,85 @@
                     "var_type": "AFPose",
                     "var_name": "inputPoseA",
                     "label": "A",
-                    "direction": "Input"
+                    "direction": "Input",
+                    "meta": []
                 },
                 {
                     "var_type": "AFPose",
                     "var_name": "inputPoseB",
                     "label": "B",
-                    "direction": "Input"
+                    "direction": "Input",
+                    "meta": []
                 },
                 {
                     "var_type": "float",
                     "var_name": "alpha",
                     "label": "Alpha",
-                    "direction": "Input"
+                    "direction": "Input",
+                    "meta": []
                 },
                 {
                     "var_type": "AFPose",
                     "var_name": "outputPose",
                     "label": "",
-                    "direction": "Output"
+                    "direction": "Output",
+                    "meta": []
                 }
             ]
         },
         {
             "class_id": "AFGraphNode_BlendByBool",
-            "node_name": "Blend By Bool",
+            "node_name": "Blend by Bool",
             "params": [
                 {
                     "var_type": "AFPose",
                     "var_name": "inputPoseA",
                     "label": "A",
-                    "direction": "Input"
+                    "direction": "Input",
+                    "meta": []
                 },
                 {
                     "var_type": "AFPose",
                     "var_name": "inputPoseB",
                     "label": "B",
-                    "direction": "Input"
+                    "direction": "Input",
+                    "meta": []
                 },
                 {
                     "var_type": "bool",
                     "var_name": "useA",
                     "label": "Use A",
-                    "direction": "Input"
+                    "direction": "Input",
+                    "meta": []
                 },
                 {
                     "var_type": "AFPose",
                     "var_name": "outpusePose",
                     "label": "",
-                    "direction": "Output"
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_MakeFloat",
+            "node_name": "Make Float",
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "Input",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin"
+                    ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "Output",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
                 }
             ]
         },
@@ -68,13 +98,18 @@
                     "var_type": "std::string",
                     "var_name": "animName",
                     "label": "",
-                    "direction": "Input"
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "Dropdown_Anims"
+                    ]
                 },
                 {
                     "var_type": "AFPose",
                     "var_name": "outputPose",
                     "label": "",
-                    "direction": "Output"
+                    "direction": "Output",
+                    "meta": []
                 }
             ]
         }

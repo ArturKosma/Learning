@@ -88,7 +88,8 @@ export const NodeStyles = styled.div <{
     gap: 2px;
   }
   .outputs-column {
-    justify-content: center;
+    justify-content: flex-start;
+    align-self: flex-start;
     display: flex;
     flex-direction: column;
     padding-top: 6px;
@@ -115,7 +116,6 @@ export const NodeStyles = styled.div <{
   }
   .input-title,
   .output-title {
-    vertical-align: middle;
     color: rgba(235, 235, 235, 0.93);
     font-size: 12px;
     line-height: ${AFNodeVars.$socketsize}px;
@@ -125,9 +125,9 @@ export const NodeStyles = styled.div <{
   }
   .input-control {
     z-index: 1;
-    width: calc(100% - ${AFNodeVars.$socketsize + 2 * AFNodeVars.$socketmargin}px);
-    vertical-align: middle;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    margin-left: 6px;
   }
   .control {
     display: block;
@@ -213,6 +213,20 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
         }
     }, []);
 
+    const [refreshFlag, setRefreshFlag] = React.useState(0);
+
+    React.useEffect(() => {
+    const rerender = () => setRefreshFlag(f => f + 1);
+
+    EventBus.ConnectListeners.add(rerender);
+    EventBus.DisconnectListeners.add(rerender);
+
+    return () => {
+      EventBus.ConnectListeners.delete(rerender);
+      EventBus.DisconnectListeners.delete(rerender);
+    };
+  }, []);
+
   return (
     <NodeStyles
       selected={selected}
@@ -245,6 +259,9 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
       {/* Inputs */}
       {inputs.map(
           ([key, input]) => {
+
+            const isHidden = input.socket.meta?.HidePin;
+
             const uniqueId_input = React.useMemo(() => crypto.randomUUID(), []);
 
             return input ? (
@@ -252,6 +269,7 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
             key={key} 
             data-testid={`${uniqueId_input}`}
             >
+          {!isHidden && (
             <div
             style={{ display: 'inline-block' }}
             >
@@ -263,13 +281,11 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
                 nodeId={id}
                 payload={input.socket}
               />
-              </div>
-              {input && (!input.control || !input.showControl) && (
-                <span className="input-title" data-testid="input-title">
-                  {input?.label}
-                </span>
+              </div>)}
+              {!isHidden && input?.label && (
+                <span className="input-title">{input.label}</span>
               )}
-              {input?.control && input?.showControl && (
+              {input?.control && input?.showControl && !input.socket.meta?.isConnected && (
                 <span className="input-control">
                   <RefControl
                     key={key}
@@ -302,6 +318,7 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
       </div>
       )}
 
+      <div style={{ flex: 1 }} /> {/* Spacer that pushes outputs to the right */}
       {outputs.length > 0 && (
         <div className="outputs-column">
       {/* Outputs */}

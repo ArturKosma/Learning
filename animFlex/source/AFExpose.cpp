@@ -18,6 +18,27 @@ extern "C"
 		AFApp& app = AFApp::GetInstance();
 		app.GetGame()->OnGraphUpdate(graphState);
 	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void OnNodeCreated(const char* msg)
+	{
+		AFApp& app = AFApp::GetInstance();
+		app.GetGame()->OnNodeCreated(msg);
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void OnNodeUpdated(const char* msg)
+	{
+		AFApp& app = AFApp::GetInstance();
+		app.GetGame()->OnNodeUpdated(msg);
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void OnNodeRemoved(const char* msg)
+	{
+		AFApp& app = AFApp::GetInstance();
+		app.GetGame()->OnNodeRemoved(msg);
+	}
 }
 
 #endif

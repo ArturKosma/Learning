@@ -1,15 +1,6 @@
 #pragma once
 
-#define AFCLASS(Class, ClassStringName)
-#define AFPARAM(Type, VarName, VarString, Direction) \
-	Type VarName
-
-/*struct FAFStaticGraphRegister
-
-class AFStaticGraphRegister
-{
-	static void Add
-};*/
+#include "AFGraphNodeRegistry.h"
 
 class AFGraphNode
 {

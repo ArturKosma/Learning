@@ -14,6 +14,9 @@ public:
 	const AFScene& GetScene();
 
 	void OnGraphUpdate(const char* graphState);
+	void OnNodeCreated(const char* msg);
+	void OnNodeUpdated(const char* msg);
+	void OnNodeRemoved(const char* msg);
 
 private:
 

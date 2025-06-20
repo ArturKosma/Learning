@@ -5,7 +5,9 @@ import json
 
 # Regex patterns.
 RE_AFCLASS = re.compile(r'\bAFCLASS\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]+)"\s*\)')
-RE_AFPARAM = re.compile(r'\bAFPARAM\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]*)"\s*,\s*"([^"]*)"\s*\)')
+RE_AFPARAM = re.compile(
+    r'\bAFPARAM\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]*)"\s*,\s*"([^"]*)"(?:\s*,\s*"([^"]*)")?\s*\)'
+)
 
 # Get all .h files from given directory.
 def fetch_headers(directory):
@@ -27,27 +29,32 @@ def extract_macros(filepath):
 
     result = []
     current_class_id = None
-    current_class_name = None
-    current_params = []
+    current_params = {}
+    class_def_stack = []
 
     for line in lines:
-        class_match = RE_AFCLASS.search(line)
-        if class_match:
-
-            if current_class_id:
-                result.append([(current_class_id, current_class_name), current_params])
-
-            current_class_id = class_match.group(1)
-            current_class_name = class_match.group(2)
-            current_params = []
-            continue
 
         param_match = RE_AFPARAM.search(line)
         if param_match and current_class_id:
-            current_params.append(param_match.groups())
+            var_type, var_name, label, direction, meta_raw = param_match.groups()
+            meta = meta_raw.split("|") if meta_raw else []
+            current_params.setdefault(current_class_id, []).append(
+                (var_type, var_name, label, direction, meta)
+            )
 
-    if current_class_id:
-        result.append([(current_class_id, current_class_name), current_params])
+        class_decl = re.match(r'\s*class\s+([a-zA-Z_][\w]*)', line)
+        if class_decl:
+            current_class_id = class_decl.group(1)
+
+        class_match = RE_AFCLASS.search(line)
+        if class_match:
+            class_id = class_match.group(1)
+            class_name = class_match.group(2)
+            params = current_params.get(class_id, [])
+            result.append([(class_id, class_name), params])
+
+            if class_id in current_params:
+                del current_params[class_id]
 
     return result
 
@@ -73,12 +80,13 @@ if __name__ == "__main__":
                     "params": []
                 }
 
-            for var_type, var_name, label, direction in params:
+            for var_type, var_name, label, direction, meta in params:
                 node["params"].append({
                             "var_type": var_type,
                             "var_name": var_name,
                             "label": label,
-                            "direction": direction
+                            "direction": direction,
+                            "meta": meta
                         })
 
             nodes.append(node)

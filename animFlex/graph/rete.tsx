@@ -6,7 +6,7 @@ import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
 import { addCustomBackground } from "./custom-background";
 import { AFNodeFactory, classIdToName, GraphNode, GraphNodeParam, classIdToParams } from './afnodeFactory';
 import { AFNode } from './afnode';
-import { AFSocket } from './afsocket';
+import { AFSocket, preloadPins} from './afsocket';
 import { AFConnection, AFFlow } from './afconnection';
 import {
   ContextMenuExtra,
@@ -15,14 +15,46 @@ import {
 } from "rete-context-menu-plugin";
 import styled from "styled-components";
 import {DropdownControl, CustomDropdown} from './afdropdown'; 
-import {CanCreateConnection, GraphUpdate} from './affunclib'
+import {CanCreateConnection, GraphUpdate, OnNodeCreated, OnNodeRemoved} from './affunclib'
 import {SetEditorInstance} from './afeditorinstance'
 import { setupSelection } from './selection';
+import { BoolControl, CustomChecker } from "./afchecker";
+import { CustomFloatField, FloatControl } from "./affloatfield";
+
+const nodeQueue: (() => Promise<void>)[] = [];
+let isProcessing = false;
+
+function enqueueNode(fn: () => Promise<void>) {
+  nodeQueue.push(fn);
+  processQueue();
+}
+
+async function processQueue() {
+  if (isProcessing || nodeQueue.length === 0) return;
+  isProcessing = true;
+
+  while (nodeQueue.length > 0) {
+    const task = nodeQueue.shift();
+    if (task) await task();
+  }
+
+  isProcessing = false;
+}
+
+// Stop any backspace keydown propagation from Rete.
+// This allows using backspace in all input fields.
+window.addEventListener('keydown', e => {
+  if (e.key === 'Backspace') {
+    e.stopImmediatePropagation();
+  }
+}, true);
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 
 export async function createEditor(container: HTMLElement) {
+
+  preloadPins();
 
   // Read and parse JSON graph manifest.
   const res = await fetch('./graphManifest.json');
@@ -38,9 +70,9 @@ export async function createEditor(container: HTMLElement) {
   // Create plugins.
   const editor = new NodeEditor<Schemes>();
   SetEditorInstance(editor); // Make it globally accessible.
-  const area = new AreaPlugin<Schemes, AreaExtra>(container);
+  let area = new AreaPlugin<Schemes, AreaExtra>(container);
   const connection = new ConnectionPlugin<Schemes, AreaExtra>();
-  const render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
+  let render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
   const selector = AreaExtensions.selector();
 
   // Context menu.
@@ -110,6 +142,12 @@ selection.setButton(0);
             control(data) {
                 if(data.payload instanceof DropdownControl) {
                   return CustomDropdown;
+                }
+                if (data.payload instanceof BoolControl) {
+                  return CustomChecker;
+                }
+                if (data.payload instanceof FloatControl) {
+                  return CustomFloatField;
                 }
             }
             }}));
@@ -287,11 +325,11 @@ selection.setButton(0);
   window.addEventListener('keydown', async (e) => {
 
       // Delete for nodes deletion.
-      if(e.key === 'Delete') {
-        for (const selectedEntity of selector.entities.values()) {
-        const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
-          meta?: {isRemovable?: boolean}
-        };
+    if(e.key === 'Delete') {
+      for (const selectedEntity of selector.entities.values()) {
+      const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
+        meta?: {isRemovable?: boolean}
+      };
         if(node?.meta?.isRemovable) {
           const connections = editor.getConnections();
           
@@ -308,31 +346,6 @@ selection.setButton(0);
           await editor.removeNode(selectedEntity.id);
         }
       }
-      }
-
-      // Pass backspace to text editor in order to delete characters.
-      if(e.key === "Backspace") {
-
-        const el = document.activeElement as HTMLInputElement | HTMLTextAreaElement;
-        if(!el) {
-          return;
-        }
-
-        if (el.tagName === 'INPUT') {
-        
-          const start = el.selectionStart ?? 0;
-          const end = el.selectionEnd ?? 0;
-
-          if (start === end && start > 0) {
-            el.value = el.value.slice(0, start - 1) + el.value.slice(end);
-            el.selectionStart = el.selectionEnd = start - 1;
-          } else {
-            el.value = el.value.slice(0, start) + el.value.slice(end);
-            el.selectionStart = el.selectionEnd = start;
-          }
-
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-        }
     }
   }, {capture: true})
 
@@ -349,7 +362,7 @@ selection.setButton(0);
   // Listen for new connections/disconnections.
   editor.addPipe(context => {
   if (context.type === 'connectioncreated' || context.type === 'connectionremoved') {
-      GraphUpdate();
+      
   }
 
   return context;
@@ -361,20 +374,38 @@ selection.setButton(0);
     AreaExtensions.zoomAt(area, editor.getNodes(), { scale: 0.7 });
   }, 100);
 
+  // Listen for node creation and inform C++ about it.
+  editor.addPipe(context => {
+  if (context.type === 'nodecreated') {
+
+    enqueueNode(() => OnNodeCreated(context.data));
+    }
+
+    return context;
+  });
+
+  // Listen for node delection and inform C++ about it.
+  editor.addPipe(context => {
+  if (context.type === 'noderemoved') {
+
+    enqueueNode(() => OnNodeRemoved(context.data));
+    }
+
+    return context;
+  });
+
   // Wait for the first render (initially rete is hidden) to call zoom.
   const resizeObserver = new ResizeObserver((entries) => {
-  for (const entry of entries) {
-    const { width, height } = entry.contentRect;
+    for (const entry of entries) {
+      const { width, height } = entry.contentRect;
 
-    if (width > 0 && height > 0) {
-      AreaExtensions.zoomAt(area, editor.getNodes(), { scale: 0.7 });
-      resizeObserver.disconnect();
+      if (width > 0 && height > 0) {
+        AreaExtensions.zoomAt(area, editor.getNodes(), { scale: 0.7 });
+        resizeObserver.disconnect();
+      }
     }
-  }
-});
-resizeObserver.observe(container);
-
-await GraphUpdate(); 
+  });
+  resizeObserver.observe(container);
   
   return {
       destroy: () => area.destroy(),
