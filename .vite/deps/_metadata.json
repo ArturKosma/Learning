@@ -1,0 +1,124 @@
+{
+  "hash": "34dadc47",
+  "configHash": "f805df5b",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "a1ad32a7",
+  "optimized": {
+    "react": {
+      "src": "../../../animFlex/graph/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "09dae2cd",
+      "needsInterop": true
+    },
+    "react-dom": {
+      "src": "../../../animFlex/graph/node_modules/react-dom/index.js",
+      "file": "react-dom.js",
+      "fileHash": "7378a67a",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../../animFlex/graph/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "8ca16995",
+      "needsInterop": true
+    },
+    "react/jsx-runtime": {
+      "src": "../../../animFlex/graph/node_modules/react/jsx-runtime.js",
+      "file": "react_jsx-runtime.js",
+      "fileHash": "ee8b0715",
+      "needsInterop": true
+    },
+    "rete": {
+      "src": "../../../animFlex/graph/node_modules/rete/rete.esm.js",
+      "file": "rete.js",
+      "fileHash": "6c4be60e",
+      "needsInterop": false
+    },
+    "rete-area-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-area-plugin/rete-area-plugin.esm.js",
+      "file": "rete-area-plugin.js",
+      "fileHash": "4e1f6089",
+      "needsInterop": false
+    },
+    "rete-connection-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-connection-plugin/rete-connection-plugin.esm.js",
+      "file": "rete-connection-plugin.js",
+      "fileHash": "d379aefb",
+      "needsInterop": false
+    },
+    "rete-react-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-react-plugin/rete-react-plugin.esm.js",
+      "file": "rete-react-plugin.js",
+      "fileHash": "ea29c5b4",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../../animFlex/graph/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "ec8d20bd",
+      "needsInterop": true
+    },
+    "styled-components": {
+      "src": "../../../animFlex/graph/node_modules/styled-components/dist/styled-components.browser.esm.js",
+      "file": "styled-components.js",
+      "fileHash": "100dc634",
+      "needsInterop": false
+    },
+    "rete-context-menu-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-context-menu-plugin/rete-context-menu-plugin.esm.js",
+      "file": "rete-context-menu-plugin.js",
+      "fileHash": "8ca447d9",
+      "needsInterop": false
+    },
+    "antd": {
+      "src": "../../../animFlex/graph/node_modules/antd/es/index.js",
+      "file": "antd.js",
+      "fileHash": "de3ff6f1",
+      "needsInterop": false
+    },
+    "rete-auto-arrange-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-auto-arrange-plugin/rete-auto-arrange-plugin.esm.js",
+      "file": "rete-auto-arrange-plugin.js",
+      "fileHash": "c4a4357b",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-PMUUN7GM": {
+      "file": "chunk-PMUUN7GM.js"
+    },
+    "chunk-HCAUJSZP": {
+      "file": "chunk-HCAUJSZP.js"
+    },
+    "chunk-P6U2SEET": {
+      "file": "chunk-P6U2SEET.js"
+    },
+    "chunk-Z2MLWJMZ": {
+      "file": "chunk-Z2MLWJMZ.js"
+    },
+    "chunk-ZRAFTZOG": {
+      "file": "chunk-ZRAFTZOG.js"
+    },
+    "chunk-RCS3RJHN": {
+      "file": "chunk-RCS3RJHN.js"
+    },
+    "chunk-HW4NKPJU": {
+      "file": "chunk-HW4NKPJU.js"
+    },
+    "chunk-EMC4PDMZ": {
+      "file": "chunk-EMC4PDMZ.js"
+    },
+    "chunk-JFY43LN3": {
+      "file": "chunk-JFY43LN3.js"
+    },
+    "chunk-CNGTRKLY": {
+      "file": "chunk-CNGTRKLY.js"
+    },
+    "chunk-RCDOGZQH": {
+      "file": "chunk-RCDOGZQH.js"
+    },
+    "chunk-PLDDJCW6": {
+      "file": "chunk-PLDDJCW6.js"
+    }
+  }
+}
