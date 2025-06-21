@@ -9,6 +9,7 @@ export const NodeStyles = styled.div <{
   selected: boolean; 
       styles?: (props: any) => any; 
       meta?: any;
+      classMeta?: string[];
 }>`
   background: #121212;
   opacity: 0.9;
@@ -16,10 +17,17 @@ export const NodeStyles = styled.div <{
   border-radius: 10px;
   cursor: move;
   box-sizing: border-box;
-  width: ${(props) => `${props.meta.nodeWidth}px`};
+  width: auto;
+  min-width: ${(props) =>
+    props.meta?.classMeta?.includes("Compact")
+      ? "80px"
+      : `${props.meta?.nodeWidth}px`};
   height: auto;
-  min-height: ${(props) => `${props.meta.nodeHeight}px`};
-  padding-bottom: 6px;
+  min-height: ${(props) =>
+    props.meta?.classMeta?.includes("Compact")
+      ? "40px"
+      : `${props.meta.nodeHeight}px`};
+  padding-bottom: 0px;
   position: relative;
   user-select: none;
   display: flex;
@@ -81,6 +89,7 @@ export const NodeStyles = styled.div <{
   }
   .inputs-column {
     justify-content: center;
+    align-self: flex-start;
     display: flex;
     flex-direction: column;
     padding-top: 6px;
@@ -236,14 +245,16 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
       meta={meta}
       data-testid="node"
     >
-      <div className="titleBar" data-testid="titleBar" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div className="titleText" data-testid="titleText">
-            {meta.title}
+      {!(meta.classMeta as string[])?.includes('Compact') && (
+        <div className="titleBar" data-testid="titleBar" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div className="titleText" data-testid="titleText">
+              {meta.title}
+          </div>
+          <div className="subTitleText" data-testid="subTitleText">
+              {meta.subTitle}
+          </div>
         </div>
-        <div className="subTitleText" data-testid="subTitleText">
-            {meta.subTitle}
-        </div>
-      </div>
+      )}
       <div className="node-body">
       {/* Optional Big Icon */}
       {meta.bigIcon && meta.bigIcon_path && (

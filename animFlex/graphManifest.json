@@ -3,6 +3,7 @@
         {
             "class_id": "AFGraphNode_Blend",
             "node_name": "Blend",
+            "meta": [],
             "params": [
                 {
                     "var_type": "AFPose",
@@ -37,6 +38,7 @@
         {
             "class_id": "AFGraphNode_BlendByBool",
             "node_name": "Blend by Bool",
+            "meta": [],
             "params": [
                 {
                     "var_type": "AFPose",
@@ -71,6 +73,10 @@
         {
             "class_id": "AFGraphNode_MakeFloat",
             "node_name": "Make Float",
+            "meta": [
+                "Compact",
+                "Color=Green"
+            ],
             "params": [
                 {
                     "var_type": "float",
@@ -93,6 +99,7 @@
         {
             "class_id": "AFGraphNode_PlaySequence",
             "node_name": "Play Sequence",
+            "meta": [],
             "params": [
                 {
                     "var_type": "std::string",

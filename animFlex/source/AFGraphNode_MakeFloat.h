@@ -10,4 +10,4 @@ public:
 
 	void Evaluate(float deltaTime) override;
 };
-AFCLASS(AFGraphNode_MakeFloat, "Make Float");
+AFCLASS(AFGraphNode_MakeFloat, "Make Float", "Compact|Color=Green");

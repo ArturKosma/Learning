@@ -14,4 +14,4 @@ public:
 
 	void Evaluate(float deltaTime) override;
 };
-AFCLASS(AFGraphNode_BlendByBool, "Blend by Bool")
+AFCLASS(AFGraphNode_BlendByBool, "Blend by Bool", "")

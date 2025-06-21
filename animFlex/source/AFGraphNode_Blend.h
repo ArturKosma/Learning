@@ -15,4 +15,4 @@ public:
 
 	void Evaluate(float deltaTime) override;
 };
-AFCLASS(AFGraphNode_Blend, "Blend")
+AFCLASS(AFGraphNode_Blend, "Blend", "")

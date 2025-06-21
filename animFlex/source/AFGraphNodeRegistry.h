@@ -25,7 +25,7 @@ struct FAFGraphNodeClassRegistrar
 	}
 };
 
-#define AFCLASS(Class, ClassStringName) \
+#define AFCLASS(Class, ClassStringName, Meta) \
 	inline static FAFGraphNodeClassRegistrar<Class> _registrar_##Class(#Class);
 
 #define AFPARAM(Type, VarName, VarString, Direction, Meta) \

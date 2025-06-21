@@ -3,26 +3,23 @@ import os
 import re
 import json
 
-# Regex patterns.
-RE_AFCLASS = re.compile(r'\bAFCLASS\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]+)"\s*\)')
+RE_AFCLASS = re.compile(
+    r'\bAFCLASS\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)'
+)
 RE_AFPARAM = re.compile(
     r'\bAFPARAM\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]*)"\s*,\s*"([^"]*)"(?:\s*,\s*"([^"]*)")?\s*\)'
 )
 
-# Get all .h files from given directory.
 def fetch_headers(directory):
     if not os.path.isdir(directory):
-        return
+        return []
 
-    header_files = []
-    for item in os.listdir(directory):
-        full_path = os.path.join(directory, item)
-        if os.path.isfile(full_path) and item.endswith(".h"):
-            header_files.append(full_path)
+    return [
+        os.path.join(directory, item)
+        for item in os.listdir(directory)
+        if os.path.isfile(os.path.join(directory, item)) and item.endswith(".h")
+    ]
 
-    return header_files
-
-# Macro extraction.
 def extract_macros(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -30,10 +27,8 @@ def extract_macros(filepath):
     result = []
     current_class_id = None
     current_params = {}
-    class_def_stack = []
 
     for line in lines:
-
         param_match = RE_AFPARAM.search(line)
         if param_match and current_class_id:
             var_type, var_name, label, direction, meta_raw = param_match.groups()
@@ -50,59 +45,46 @@ def extract_macros(filepath):
         if class_match:
             class_id = class_match.group(1)
             class_name = class_match.group(2)
+            meta_raw = class_match.group(3)
+            meta = meta_raw.split("|") if meta_raw else []
+
             params = current_params.get(class_id, [])
-            result.append([(class_id, class_name), params])
+            result.append([(class_id, class_name, meta), params])
 
             if class_id in current_params:
                 del current_params[class_id]
 
     return result
 
-# Main.
 if __name__ == "__main__":
-
-    # Get all headers.
     headers = fetch_headers(sys.argv[1])
-
-    # JSON container.
     nodes = []
 
-    # For each header.
     for file in headers:
-
-         # Get all macros defining classes and params.
         class_param_pairs = extract_macros(file)
 
-        for (class_id, class_name), params in class_param_pairs:
+        for (class_id, class_name, meta), params in class_param_pairs:
             node = {
-                    "class_id": class_id,
-                    "node_name": class_name,
-                    "params": []
-                }
+                "class_id": class_id,
+                "node_name": class_name,
+                "meta": meta,
+                "params": []
+            }
 
-            for var_type, var_name, label, direction, meta in params:
+            for var_type, var_name, label, direction, param_meta in params:
                 node["params"].append({
-                            "var_type": var_type,
-                            "var_name": var_name,
-                            "label": label,
-                            "direction": direction,
-                            "meta": meta
-                        })
+                    "var_type": var_type,
+                    "var_name": var_name,
+                    "label": label,
+                    "direction": direction,
+                    "meta": param_meta
+                })
 
             nodes.append(node)
-    
-    # Wrap nodes.
+
     outputNodes = {
         "Nodes": nodes
     }
 
-    # Write to JSON file.
     with open("graphManifest.json", "w", encoding="utf-8") as f:
         json.dump(outputNodes, f, indent=4)
-
-        
-                
-                
-
-
-        

@@ -12,10 +12,12 @@ export type GraphNode = {
   class_id: string;
   node_name: string;
   params: GraphNodeParam[];
+  meta: string[];
 };
 
 export const classIdToName: Map<string, string> = new Map();
 export const classIdToParams: Map<string, GraphNodeParam[]> = new Map();
+export const classIdToMeta: Map<string, string[]> = new Map();
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 export class AFNodeFactory {

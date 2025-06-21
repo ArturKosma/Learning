@@ -4,7 +4,7 @@ import resultPoseIcon from './resultPose.png';
 import { NodeRef } from "rete-area-plugin/_types/extensions/shared/types";
 import { editorInstance } from "./afeditorinstance";
 import { Input, Socket } from "rete/_types/presets/classic";
-import { classIdToName, classIdToParams, GraphNodeParam } from './afnodeFactory';
+import { classIdToMeta, classIdToName, classIdToParams, GraphNodeParam } from './afnodeFactory';
 import { getSourceTarget } from 'rete-connection-plugin'
 import { BoolControl } from "./afchecker";
 import { FloatControl } from "./affloatfield";
@@ -102,6 +102,7 @@ SocketTypes.set("bool", "bool");
 export function GetNodeMeta(type: string): any {
 
     const dynamicTitle = classIdToName.get(type) ?? "Unknown";
+    const classMeta = classIdToMeta.get(type);
 
     // Default shared metadata.
     const defaultMeta = {
@@ -113,6 +114,7 @@ export function GetNodeMeta(type: string): any {
         nodeHeight: 80,
         bigIcon: false,
         isRemovable: true,
+        classMeta,
     };
 
     switch (type) {

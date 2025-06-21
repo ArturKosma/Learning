@@ -17,4 +17,4 @@ public:
 	void Evaluate(float deltaTime) override;
 
 };
-AFCLASS(AFGraphNode_PlaySequence, "Play Sequence")
+AFCLASS(AFGraphNode_PlaySequence, "Play Sequence", "")

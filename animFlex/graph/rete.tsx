@@ -4,7 +4,7 @@ import { AreaPlugin, AreaExtensions, Drag } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets, makeConnection } from "rete-connection-plugin";
 import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
 import { addCustomBackground } from "./custom-background";
-import { AFNodeFactory, classIdToName, GraphNode, GraphNodeParam, classIdToParams } from './afnodeFactory';
+import { AFNodeFactory, classIdToName, GraphNode, GraphNodeParam, classIdToParams, classIdToMeta } from './afnodeFactory';
 import { AFNode } from './afnode';
 import { AFSocket, preloadPins} from './afsocket';
 import { AFConnection, AFFlow } from './afconnection';
@@ -61,10 +61,11 @@ export async function createEditor(container: HTMLElement) {
   const data = await res.json();
   const nodes: GraphNode[] = data.Nodes;
 
-  // Save classID -> name map.
+  // Cache JSON nodes manifest.
   for (const node of nodes) {
     classIdToName.set(node.class_id, node.node_name);
     classIdToParams.set(node.class_id, node.params);
+    classIdToMeta.set(node.class_id, node.meta);
   }
 
   // Create plugins.
