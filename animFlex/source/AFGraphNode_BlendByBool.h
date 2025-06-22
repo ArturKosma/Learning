@@ -2,8 +2,10 @@
 #include "AFGraphNode.h"
 #include "AFPose.h"
 
-class AFGraphNode_BlendByBool : public AFGraphNode
+class AFGraphNode_BlendByBool : public AFGraphNodeCRTP<AFGraphNode_BlendByBool>
 {
+	AFCLASS(AFGraphNode_BlendByBool, "Blend by Bool", "");
+
 public:
 	AFGraphNode_BlendByBool();
 
@@ -14,4 +16,3 @@ public:
 
 	void Evaluate(float deltaTime) override;
 };
-AFCLASS(AFGraphNode_BlendByBool, "Blend by Bool", "")

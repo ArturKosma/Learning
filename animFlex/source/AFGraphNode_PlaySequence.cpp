@@ -1,16 +1,6 @@
 #include "AFGraphNode_PlaySequence.h"
 
-AFGraphNode_PlaySequence::AFGraphNode_PlaySequence()
-{
-
-}
-
-AFGraphNode_PlaySequence::~AFGraphNode_PlaySequence()
-{
-
-}
-
 void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 {
-
+	printf("eval PlaySequence, anim: %s\n", animName.value.c_str());
 }

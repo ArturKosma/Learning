@@ -26,33 +26,37 @@ def extract_macros(filepath):
 
     result = []
     current_class_id = None
-    current_params = {}
+    current_class_name = None
+    current_class_meta = None
+    current_params = []
 
     for line in lines:
+        class_match = RE_AFCLASS.search(line)
+        if class_match:
+            # If we were processing a class, save it before starting a new one
+            if current_class_id:
+                result.append([
+                    (current_class_id, current_class_name, current_class_meta),
+                    current_params
+                ])
+            current_class_id = class_match.group(1)
+            current_class_name = class_match.group(2)
+            meta_raw = class_match.group(3)
+            current_class_meta = meta_raw.split("|") if meta_raw else []
+            current_params = []
+
         param_match = RE_AFPARAM.search(line)
         if param_match and current_class_id:
             var_type, var_name, label, direction, meta_raw = param_match.groups()
-            meta = meta_raw.split("|") if meta_raw else []
-            current_params.setdefault(current_class_id, []).append(
-                (var_type, var_name, label, direction, meta)
-            )
+            param_meta = meta_raw.split("|") if meta_raw else []
+            current_params.append((var_type, var_name, label, direction, param_meta))
 
-        class_decl = re.match(r'\s*class\s+([a-zA-Z_][\w]*)', line)
-        if class_decl:
-            current_class_id = class_decl.group(1)
-
-        class_match = RE_AFCLASS.search(line)
-        if class_match:
-            class_id = class_match.group(1)
-            class_name = class_match.group(2)
-            meta_raw = class_match.group(3)
-            meta = meta_raw.split("|") if meta_raw else []
-
-            params = current_params.get(class_id, [])
-            result.append([(class_id, class_name, meta), params])
-
-            if class_id in current_params:
-                del current_params[class_id]
+    # Final class at end of file
+    if current_class_id:
+        result.append([
+            (current_class_id, current_class_name, current_class_meta),
+            current_params
+        ])
 
     return result
 

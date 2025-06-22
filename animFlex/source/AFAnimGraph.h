@@ -1,9 +1,9 @@
 #pragma once
-#include <memory>
 #include <string>
-#include <unordered_map>
 #include "AFObject.h"
-#include "AFGraphNode.h"
+#include "third_party/json.hpp"
+
+class AFGraphNode_OutputPose;
 
 class AFAnimGraph : public AFObject
 {
@@ -16,7 +16,9 @@ public:
 	void OnNodeUpdated(const std::string& msg);
 	void OnNodeRemoved(const std::string& msg);
 
-private:
+	std::string ReadJSONSocketValue(const nlohmann::json& socket);
 
-	std::unordered_map<std::string, std::unique_ptr<AFGraphNode>> m_idToNode = {};
+protected:
+
+	std::shared_ptr<AFGraphNode_OutputPose> m_outputPoseNode = nullptr;
 };

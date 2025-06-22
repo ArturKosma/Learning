@@ -54,7 +54,7 @@ export function GetDefaultControlPerType(node: ClassicPreset.Node, socketType: s
     case "string": {
         const dropdownMeta = meta.find((m: string) => m.includes("Dropdown_"));
         if (dropdownMeta) {
-            return new DropdownControl(dropdownMeta);
+            return new DropdownControl(dropdownMeta, node);
         }
         return undefined;
     }
@@ -275,8 +275,15 @@ export function CreateSockets(node: ClassicPreset.Node, editor: NodeEditor<Schem
             node
         );
 
+        const existingMeta = (socket as any).meta ?? {};
+        (socket as any).meta = {
+            ...existingMeta,
+            var_name: "Pose"
+        };
+
         const input = new ClassicPreset.Input(socket);
         input.label = "Result";
+
         node.addInput(uid, input);
 
     } 
@@ -375,7 +382,7 @@ export async function OnNodeUpdated(node: ClassicPreset.Node) {
             const control = (input as any).control;
 
             valueField = {
-                value: control?.value
+                value: String(control?.value)
             };
         }
 
@@ -410,7 +417,7 @@ export async function OnNodeUpdated(node: ClassicPreset.Node) {
             const control = (output as any).control;
 
             valueField = {
-                value: control?.value
+                value: String(control?.value)
             };
         }
 

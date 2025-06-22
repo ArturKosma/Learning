@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ClassicPreset } from 'rete';
-import { GraphUpdate } from './affunclib';
+import { GraphUpdate, OnNodeUpdated } from './affunclib';
 import { AreaPlugin } from 'rete-area-plugin';
 import { ReactPlugin } from 'rete-react-plugin';
 
@@ -19,15 +19,18 @@ export class DropdownControl extends ClassicPreset.Control {
 
   value: string;
   onChange?: (val: string) => void;
+  node: ClassicPreset.Node;
 
-  constructor(type: string) {
+  constructor(type: string, node: ClassicPreset.Node) {
     super();
     this.value = ''
+    this.node = node;
   }
 
   setValue(val: string) {
     this.value = val;
     this.onChange?.(val);
+    OnNodeUpdated(this.node)
   }
 }
 
@@ -92,6 +95,10 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
     e.stopPropagation();
   };
 
+  const handleChange = (e: any) => {
+    handleSearch(e.target.value);
+  }
+
   return (
     <div
       ref={dropdownRef}
@@ -104,7 +111,7 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
         ref={inputRef}
         className="custom-dropdown-input"
         value={searchValue}
-        onChange={(e) => handleSearch(e.target.value)}
+        onChange={handleChange}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}
         placeholder="Choose Anim"

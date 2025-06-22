@@ -4,12 +4,11 @@
 
 #include "AFPose.h"
 
-class AFGraphNode_PlaySequence : public AFGraphNode
+class AFGraphNode_PlaySequence : public AFGraphNodeCRTP<AFGraphNode_PlaySequence>
 {
-public:
+	AFCLASS(AFGraphNode_PlaySequence, "Play Sequence", "");
 
-	AFGraphNode_PlaySequence();
-	~AFGraphNode_PlaySequence() override;
+public:
 
 	AFPARAM(std::string, animName, "", "Input", "HidePin|Dropdown_Anims");
 	AFPARAM(AFPose, outputPose, "", "Output", "");
@@ -17,4 +16,3 @@ public:
 	void Evaluate(float deltaTime) override;
 
 };
-AFCLASS(AFGraphNode_PlaySequence, "Play Sequence", "")

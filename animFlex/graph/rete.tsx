@@ -15,7 +15,7 @@ import {
 } from "rete-context-menu-plugin";
 import styled from "styled-components";
 import {DropdownControl, CustomDropdown} from './afdropdown'; 
-import {CanCreateConnection, GraphUpdate, OnNodeCreated, OnNodeRemoved} from './affunclib'
+import {CanCreateConnection, GraphUpdate, OnNodeCreated, OnNodeRemoved, OnNodeUpdated} from './affunclib'
 import {SetEditorInstance} from './afeditorinstance'
 import { setupSelection } from './selection';
 import { BoolControl, CustomChecker } from "./afchecker";
@@ -363,7 +363,8 @@ selection.setButton(0);
   // Listen for new connections/disconnections.
   editor.addPipe(context => {
   if (context.type === 'connectioncreated' || context.type === 'connectionremoved') {
-      
+      OnNodeUpdated(editor.getNode(context.data.source));
+      OnNodeUpdated(editor.getNode(context.data.target));
   }
 
   return context;

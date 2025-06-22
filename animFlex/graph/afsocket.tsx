@@ -84,7 +84,7 @@ export function AFSocket<T extends ClassicPreset.Socket>({ data }: { data: T }) 
     editor.addPipe(pipe);
 
     return () => {
-      editor.removePipe(pipe);
+      
     };
   }, [editor, port.name]);
 
