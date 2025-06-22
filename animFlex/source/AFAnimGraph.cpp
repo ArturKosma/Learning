@@ -74,20 +74,24 @@ void AFAnimGraph::OnNodeUpdated(const std::string& msg)
 	}
 
 	// Get info from the JSON for every param, and keep it as a varName to JSON map.
-	std::unordered_map<std::string, std::string> paramToMsg = {};
+	std::unordered_map<std::string, nlohmann::json> paramToValueField;
 	for (const auto& socket : node["sockets"])
 	{
 		std::string varName = socket["var_name"];
-		std::string valueStr = ReadJSONSocketValue(socket);
-		paramToMsg[varName] = valueStr;
+		const nlohmann::json& valueField = socket["valueField"];
+		paramToValueField[varName] = valueField;
 	}
 
 	// Apply the value field from JSON to every param.
 	std::vector<std::shared_ptr<FAFParamStaticPropertyBase>> staticProperties = AFGraphNodeRegistry::Get().GetStaticProperties(nodeType);
 	for (std::shared_ptr<FAFParamStaticPropertyBase> property : staticProperties)
 	{
-		// Pass the JSON message to the node. Node itself will then handle the incoming string and update its value or connection.
-		property->Apply(editedNode, paramToMsg[property->GetParamName()]);
+		const std::string& paramName = property->GetParamName();
+
+		if (paramToValueField.count(paramName))
+		{
+			property->Apply(editedNode, paramToValueField[paramName]);
+		}
 	}
 }
 
@@ -103,26 +107,4 @@ void AFAnimGraph::OnNodeRemoved(const std::string& msg)
 
 	// Remove the node from hashmap and destroy the object.
 	AFGraphNodeRegistry::Get().RemoveNode(nodeId);
-}
-
-std::string AFAnimGraph::ReadJSONSocketValue(const nlohmann::json& socket)
-{
-	const nlohmann::json& valueField = socket["valueField"];
-	std::string valueStr = "";
-
-	if (valueField.contains("value"))
-	{
-		std::string value = valueField["value"].get<std::string>();
-		valueStr = "value:" + value;
-	}
-
-	if (valueField.contains("connectedNodeId"))
-	{
-		std::string nodeID = valueField["connectedNodeId"].get<std::string>();
-		std::string socketName = valueField["connectedSocketName"].get<std::string>();
-
-		valueStr = "connection:" + nodeID + "/" + socketName;
-	}
-
-	return valueStr;
 }

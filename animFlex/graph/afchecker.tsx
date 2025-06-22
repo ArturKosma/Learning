@@ -1,18 +1,22 @@
 import React from 'react';
 import { ClassicPreset } from 'rete';
+import { OnNodeUpdated } from './affunclib';
 
 export class BoolControl extends ClassicPreset.Control {
   value: boolean;
   onChange?: (val: boolean) => void;
+  node: ClassicPreset.Node;
 
-  constructor() {
+  constructor(node: ClassicPreset.Node) {
     super();
     this.value = false;
+    this.node = node;
   }
 
   setValue(val: boolean) {
     this.value = val;
     this.onChange?.(val);
+    OnNodeUpdated(this.node);
   }
 }
 

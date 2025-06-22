@@ -48,7 +48,7 @@ class StringSocket extends ClassicPreset.Socket {
 export function GetDefaultControlPerType(node: ClassicPreset.Node, socketType: string, meta: any) {
   switch (socketType) {
     case "bool":
-      return new BoolControl();
+      return new BoolControl(node);
     case "float":
       return new FloatControl(node);
     case "string": {

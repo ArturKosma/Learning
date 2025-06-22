@@ -5,6 +5,9 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <glm/vec3.hpp>
+
+#include "AFPose.h"
 
 class AFGraphNode;
 
@@ -23,11 +26,77 @@ public:
 	std::string connectedSocketName = "";
 };
 
+template<typename T>
+struct ParamTraits;
+
+template<>
+struct ParamTraits<float>
+{
+	static bool FromJSON(const nlohmann::json& json, float& out)
+	{
+		if (!json.is_string()) return false;
+		std::istringstream iss(json.get<std::string>());
+		return static_cast<bool>(iss >> out);
+	}
+};
+
+template<>
+struct ParamTraits<glm::vec3>
+{
+	static bool FromJSON(const nlohmann::json& json, glm::vec3& out)
+	{
+		if (json.is_array() && json.size() == 3)
+		{
+			out = glm::vec3(json[0], json[1], json[2]);
+			return true;
+		}
+		return false;
+	}
+};
+
+template<>
+struct ParamTraits<AFPose>
+{
+	static bool FromJSON(const nlohmann::json& json, AFPose& out)
+	{
+		return true;
+	}
+};
+
+template<>
+struct ParamTraits<bool>
+{
+	static bool FromJSON(const nlohmann::json& json, bool& out)
+	{
+		if (!json.is_string()) return false;
+		if (json.get<std::string>() == "true")
+		{
+			out = true;
+		}
+		else
+		{
+			out = false;
+		}
+		return true;
+	}
+};
+
+template<>
+struct ParamTraits<std::string>
+{
+	static bool FromJSON(const nlohmann::json& json, std::string& out)
+	{
+		if (!json.is_string()) return false;
+		out = json.get<std::string>();
+		return true;
+	}
+};
+
 struct FAFParamStaticPropertyBase
 {
 	virtual ~FAFParamStaticPropertyBase() = default;
 
-	virtual void Apply(std::shared_ptr<AFGraphNode> node, const std::string& msg) const = 0;
+	virtual void Apply(std::shared_ptr<AFGraphNode> node, const nlohmann::json& valueField) const = 0;
 	virtual std::string GetParamName() const = 0;
 };
 
@@ -37,57 +106,34 @@ struct FAFParamStaticProperty : FAFParamStaticPropertyBase
 	FAFParam<ParamType> OwnerClassType::* ptrToMember;
 	std::string paramName = "";
 
-	void Apply(std::shared_ptr<AFGraphNode> node, const std::string& msg) const override
+	void Apply(std::shared_ptr<AFGraphNode> node, const nlohmann::json& valueField) const override
 	{
 		if (std::shared_ptr<OwnerClassType> casted = std::dynamic_pointer_cast<OwnerClassType>(node))
 		{
-			// Create actual values to assign to the param described by the msg.
-			// ptrToMember allows us to pinpoint the exact place in memory where to apply the FAFParam<ParamType>.
-			FAFParam<ParamType> valueToApply = CreateParamFromMsg(msg);
+			FAFParam<ParamType> param = {};
 
-			casted->template SetParamPropertiesTemplated<ParamType>(ptrToMember, valueToApply);
+			if (valueField.contains("value"))
+			{
+				const auto& val = valueField["value"];
+				ParamType parsed = {};
+				if (ParamTraits<ParamType>::FromJSON(val, parsed))
+				{
+					param.value = parsed;
+				}
+			}
+			else if (valueField.contains("connectedNodeId"))
+			{
+				param.connectedNodeId = valueField["connectedNodeId"];
+				param.connectedSocketName = valueField["connectedSocketName"];
+			}
+
+			casted->template SetParamPropertiesTemplated<ParamType>(ptrToMember, param);
 		}
 	}
 
 	std::string GetParamName() const override
 	{
 		return paramName;
-	}
-
-	FAFParam<ParamType> CreateParamFromMsg(const std::string& msg) const
-	{
-		FAFParam<ParamType> ret = {};
-
-		// Find the position of the first colon.
-		const size_t colonPos = msg.find(':');
-
-		// Extract the substring from the start up to the colon.
-		const std::string& edit = msg.substr(0, colonPos);
-
-		if (edit == "value")
-		{
-			const std::string& valueStr = msg.substr(colonPos + 1);
-
-			std::istringstream iss(valueStr);
-			ParamType value;
-			if (iss >> value) 
-			{
-				ret.value = value;
-			}
-		}
-		else if(edit == "connection")
-		{
-			const std::string& connectionStr = msg.substr(colonPos + 1);
-			const size_t slashPos = connectionStr.find('/');
-
-			const std::string& connectionNodeId = connectionStr.substr(0, slashPos);
-			const std::string& connectionSocketName = connectionStr.substr(slashPos + 1);
-
-			ret.connectedNodeId = connectionNodeId;
-			ret.connectedSocketName = connectionSocketName;
-		}
-
-		return ret;
 	}
 };
 

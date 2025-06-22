@@ -16,8 +16,6 @@ public:
 	void OnNodeUpdated(const std::string& msg);
 	void OnNodeRemoved(const std::string& msg);
 
-	std::string ReadJSONSocketValue(const nlohmann::json& socket);
-
 protected:
 
 	std::shared_ptr<AFGraphNode_OutputPose> m_outputPoseNode = nullptr;

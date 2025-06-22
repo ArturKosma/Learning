@@ -7,7 +7,6 @@ class AFGraphNode_BlendByBool : public AFGraphNodeCRTP<AFGraphNode_BlendByBool>
 	AFCLASS(AFGraphNode_BlendByBool, "Blend by Bool", "");
 
 public:
-	AFGraphNode_BlendByBool();
 
 	AFPARAM(AFPose, inputPoseA, "A", "Input", "");
 	AFPARAM(AFPose, inputPoseB, "B", "Input", "");
