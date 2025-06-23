@@ -3,9 +3,9 @@
 #include <string>
 #include <glad/glad.h>
 
-#include "AFStructs.h"
+#include "AFAsset.h"
 
-class AFShader : public FAFAsset
+class AFShader : public AFAsset
 {
 
 public:

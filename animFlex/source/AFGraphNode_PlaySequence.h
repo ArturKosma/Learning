@@ -13,6 +13,13 @@ public:
 	AFPARAM(std::string, animName, "", "Input", "HidePin|Dropdown_Anims");
 	AFPARAM(AFPose, outputPose, "", "Output", "");
 
+	void Init() override;
+	void OnUpdate() override;
 	void Evaluate(float deltaTime) override;
+
+private:
+
+	float m_localTime = 0.0f;
+	std::shared_ptr<AFAnimationClip> m_animClip = nullptr;
 
 };

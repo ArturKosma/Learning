@@ -2,6 +2,7 @@
 
 #include "AFApp.h"
 #include "AFContent.h"
+#include "AFMesh.h"
 #include "AFShader.h"
 #include "AFTextRender.h"
 #include "AFVertexBuffer.h"
@@ -13,7 +14,7 @@ AFTextComponent::AFTextComponent()
 
 void AFTextComponent::SetText(const std::string& text)
 {
-	m_mesh = std::make_shared<FAFMesh>();
+	m_mesh = std::make_shared<AFMesh>();
 	m_text = text;
 
 	// Get the loaded characters.
@@ -52,7 +53,7 @@ void AFTextComponent::SetText(const std::string& text)
 		const float h = (static_cast<float>(glyph.size.y) * yScale) * toNDCy;
 
 		// Add the character - every glyph is a separate sub-mesh.
-		FAFSubMesh subMesh;
+		AFSubMesh subMesh;
 		subMesh.vertices.emplace_back(glm::vec3(xpos, ypos + h, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f));
 		subMesh.vertices.emplace_back(glm::vec3(xpos, ypos, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f));
 		subMesh.vertices.emplace_back(glm::vec3(xpos + w, ypos, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f));
@@ -104,8 +105,8 @@ void AFTextComponent::Draw(const FAFDrawOverride& overrideProperties) const
 	for (std::string::const_iterator c = m_text.begin(); c != m_text.end(); ++c)
 	{
 		// Find the glyph mesh.
-		FAFSubMesh glyphSubMesh;
-		for(const FAFSubMesh& sub : m_mesh->subMeshes)
+		AFSubMesh glyphSubMesh;
+		for(const AFSubMesh& sub : m_mesh->subMeshes)
 		{
 			if(sub.metaInformation[0] == *c)
 			{

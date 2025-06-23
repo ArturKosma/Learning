@@ -3,10 +3,11 @@
 #include <string>
 
 #include "AFAnimationChannel.h"
+#include "AFAsset.h"
 #include "AFStructs.h"
 #include "third_party/tiny_gltf.h"
 
-class AFAnimationClip : public FAFAsset
+class AFAnimationClip : public AFAsset
 {
 public:
 
@@ -23,9 +24,7 @@ public:
 protected:
 
 	bool LoadImpl(const char* filepath) override;
-
-	bool SerializeImpl(const char* filepath) override;
-	bool DeserializeImpl(const char* filepath) override;
+	bool DeserializeImpl(const char* stream) override;
 
 private:
 

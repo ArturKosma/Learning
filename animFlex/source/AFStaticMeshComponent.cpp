@@ -1,5 +1,6 @@
 #include "AFStaticMeshComponent.h"
 
+#include "AFMesh.h"
 #include "AFShader.h"
 #include "AFTexture.h"
 #include "AFVertexBuffer.h"
@@ -7,7 +8,7 @@
 void AFStaticMeshComponent::Draw(bool override, const FAFDrawOverride& overrideProperties) const
 {
 	// Draw every mesh separately.
-	for(const FAFSubMesh& sub : m_mesh->subMeshes)
+	for(const AFSubMesh& sub : m_mesh->subMeshes)
 	{
 		// Tell the gpu which shader to use.
 		override ? overrideProperties.shader->Use() : sub.shader->Use();
@@ -66,12 +67,12 @@ void AFStaticMeshComponent::Draw(bool override, const FAFDrawOverride& overrideP
 	}
 }
 
-void AFStaticMeshComponent::SetMesh(std::shared_ptr<FAFMesh> newMesh)
+void AFStaticMeshComponent::SetMesh(std::shared_ptr<AFMesh> newMesh)
 {
 	m_mesh = newMesh;
 }
 
-std::shared_ptr<FAFMesh> AFStaticMeshComponent::GetMesh() const
+std::shared_ptr<AFMesh> AFStaticMeshComponent::GetMesh() const
 {
 	return m_mesh;
 }

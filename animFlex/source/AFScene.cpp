@@ -20,6 +20,7 @@
 #include "AFUtility.h"
 #include "AFVertexBuffer.h"
 #include "AFCamera.h"
+#include "AFMesh.h"
 
 std::shared_ptr<AFActor> AFScene::FindActor(const std::string& actorName)
 {
@@ -110,7 +111,7 @@ void AFScene::CreateDefaultSceneActors()
 	gridActor->SetDisplayName("grid actor");
 	std::shared_ptr<AFGridComponent> gridMeshComponent = CreateObject<AFGridComponent>();
 	gridMeshComponent->SetDisplayName("grid mesh component");
-	std::shared_ptr<FAFMesh> gridMesh = AFContent::Get().FindAsset<FAFMesh>("sm_plane");
+	std::shared_ptr<AFMesh> gridMesh = AFContent::Get().FindAsset<AFMesh>("sm_plane");
 	gridMesh->subMeshes[0].shader = AFContent::Get().FindAsset<AFShader>("shader_grid");
 	gridMeshComponent->SetMesh(gridMesh);
 	gridActor->AddComponent(gridMeshComponent);
@@ -129,7 +130,7 @@ void AFScene::CreateDefaultSceneActors()
 	testBoxMeshComponent0->SetDisplayName("testbox mesh component0");
 	testBoxMeshComponent1->SetDisplayName("testbox mesh component1");
 	testBoxMeshComponent2->SetDisplayName("testbox mesh component2");
-	std::shared_ptr<FAFMesh> testBoxMesh = AFContent::Get().FindAsset<FAFMesh>("sm_box");
+	std::shared_ptr<AFMesh> testBoxMesh = AFContent::Get().FindAsset<AFMesh>("sm_box");
 	testBoxMesh->subMeshes[0].texture = AFContent::Get().FindAsset<AFTexture>("t_box");
 	testBoxMesh->subMeshes[0].shader = AFContent::Get().FindAsset<AFShader>("shader_basic");
 	testBoxMeshComponent0->SetMesh(testBoxMesh);
@@ -161,7 +162,7 @@ void AFScene::CreateDefaultSceneActors()
 	std::shared_ptr<AFPlayerPawn> mannequinActor = m_sceneData.playerPawn;
 	mannequinActor->SetDisplayName("mannequin actor");
 	mannequinActor->GetMeshComponent()->SetDisplayName("mannequin mesh component");
-	std::shared_ptr<FAFMesh> mannequinMesh = AFContent::Get().FindAsset<FAFMesh>("sk_mannequin");
+	std::shared_ptr<AFMesh> mannequinMesh = AFContent::Get().FindAsset<AFMesh>("sk_mannequin");
 	mannequinActor->GetMeshComponent()->SetMesh(mannequinMesh);
 	std::shared_ptr<AFAnimGraph> playerAnimGraph = CreateObject<AFAnimGraph>();
 	mannequinActor->GetMeshComponent()->GetAnimState()->SetGraph(playerAnimGraph);
@@ -174,7 +175,7 @@ void AFScene::CreateDefaultUIs()
 	orientationGizmo->SetDisplayName("orientation gizmo ui");
 	std::shared_ptr<AFOrientationGizmoUIComponent> orientationGizmoComponent = CreateObject<AFOrientationGizmoUIComponent>();
 	orientationGizmoComponent->SetDisplayName("orientation gizmo component");
-	std::shared_ptr<FAFMesh> orientationGizmoMesh = AFContent::Get().FindAsset<FAFMesh>("sm_gizmo");
+	std::shared_ptr<AFMesh> orientationGizmoMesh = AFContent::Get().FindAsset<AFMesh>("sm_gizmo");
 	orientationGizmoMesh->subMeshes[0].shader = AFContent::Get().FindAsset<AFShader>("shader_gizmo");
 	orientationGizmoComponent->SetMesh(orientationGizmoMesh);
 	orientationGizmo->AddComponent(orientationGizmoComponent);
@@ -210,7 +211,7 @@ void AFScene::CreateDefaultUIs()
 	orientationBoxUI->SetDisplayName("orientation box ui");
 	std::shared_ptr<AFOrientationBoxUIComponent> orientationBoxComp = CreateObject<AFOrientationBoxUIComponent>();
 	orientationBoxComp->SetDisplayName("orientation box component");
-	std::shared_ptr<FAFMesh> orientationBoxMesh = AFContent::Get().FindAsset<FAFMesh>("sm_box");
+	std::shared_ptr<AFMesh> orientationBoxMesh = AFContent::Get().FindAsset<AFMesh>("sm_box");
 	orientationBoxMesh->subMeshes[0].texture = AFContent::Get().FindAsset<AFTexture>("t_box");
 	orientationBoxComp->SetMesh(orientationBoxMesh);
 	orientationBoxUI->AddComponent(orientationBoxComp);

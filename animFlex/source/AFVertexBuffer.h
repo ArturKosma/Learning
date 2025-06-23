@@ -3,6 +3,8 @@
 #include <glad/glad.h> 
 #include "AFStructs.h"
 
+class AFSubMesh;
+
 class AFVertexBuffer
 {
 	friend class AFRenderer;
@@ -11,7 +13,7 @@ public:
 
 	void Init();
 
-	void UploadMesh(const FAFSubMesh& newSubMesh);
+	void UploadMesh(const AFSubMesh& newSubMesh);
 	void UploadMesh(const FAFSubMeshLoaded& newSubMesh);
 
 	void SetDrawMode(GLuint newDrawMode);

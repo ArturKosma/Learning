@@ -43,90 +43,25 @@ bool AFAnimationClip::LoadImpl(const char* filepath)
 	return false;
 }
 
-bool AFAnimationClip::SerializeImpl(const char* filepath)
+bool AFAnimationClip::DeserializeImpl(const char* stream)
 {
-	// Open out stream.
-	std::ostringstream outstream(std::ios_base::out);
+	// Cast the stream to a byte pointer.
+	char* cursor = const_cast<char*>(stream);
 
-	// Write animation's string name size.
-	const uint16_t nameStringSize = static_cast<uint16_t>(m_clipName.size());
-	outstream.write(reinterpret_cast<const char*>(&nameStringSize), sizeof(uint16_t));
+	// Read compressed size.
+	uint64_t compressedSize = *reinterpret_cast<uint64_t*>(cursor);
+	cursor += sizeof(uint64_t);
 
-	// Write animation's name.
-	outstream.write(m_clipName.data(), nameStringSize);
+	// Read raw size.
+	uint64_t rawSize = *reinterpret_cast<uint64_t*>(cursor);
+	cursor += sizeof(uint64_t);
 
-	// Write key-count.
-	const FAFAnimationChannelData& anyChannel = m_animationChannels[0]->GetChannelData();
-	const uint32_t keycount = anyChannel.keyCount;
-	outstream.write(reinterpret_cast<const char*>(&keycount), sizeof(uint32_t));
-
-	// Write channel-count.
-	const uint32_t channelCount = static_cast<uint32_t>(m_animationChannels.size());
-	outstream.write(reinterpret_cast<const char*>(&channelCount), sizeof(uint32_t));
-
-	// For each channel.
-	for(uint32_t i = 0; i < channelCount; ++i)
-	{
-		// Write target joint index.
-		outstream.write(reinterpret_cast<const char*>(&m_animationChannels[i]->GetChannelData().targetJoint), sizeof(uint16_t));
-
-		// Write target path.
-		outstream.write(reinterpret_cast<const char*>(&m_animationChannels[i]->GetChannelData().targetPath), sizeof(uint8_t));
-
-		// Write interp type.
-		outstream.write(reinterpret_cast<const char*>(&m_animationChannels[i]->GetChannelData().interpType), sizeof(uint8_t));
-
-		// Write timings.
-		outstream.write(reinterpret_cast<const char*>(m_animationChannels[i]->GetChannelData().timings), static_cast<uint64_t>(sizeof(float) * keycount));
-
-		// Write values.
-		outstream.write(reinterpret_cast<const char*>(m_animationChannels[i]->GetChannelData().values), static_cast<uint64_t>(sizeof(glm::vec4) * keycount));
-	}
-
-	// Get raw buffer and max compression size.
-	std::string rawBuffer = outstream.str();
-	uint64_t rawBufferSize = rawBuffer.size();
-
-	// Compress.
-	uint64_t maxCompressedSize = static_cast<int>(ZSTD_compressBound(rawBuffer.size()));
-	std::vector<char> compressedBuffer(maxCompressedSize);
-	uint64_t compressedSize = ZSTD_compress(compressedBuffer.data(), maxCompressedSize, rawBuffer.data(), rawBufferSize, 3);
-
-	// Open file.
-	std::ofstream outfile(filepath, std::ofstream::binary);
-
-	// Write compressed and raw sizes.
-	outfile.write(reinterpret_cast<const char*>(&compressedSize), sizeof(uint64_t));
-	outfile.write(reinterpret_cast<const char*>(&rawBufferSize), sizeof(uint64_t));
-
-	// Write compressed data.
-	outfile.write(compressedBuffer.data(), compressedSize);
-
-	outfile.close();
-	
-	return false;
-}
-
-bool AFAnimationClip::DeserializeImpl(const char* filepath)
-{
-	// Open file.
-	std::ifstream infile(filepath, std::ifstream::binary);
-
-	// Read compressed and original sizes.
-	uint64_t compressedSize = 0;
-	uint64_t rawSize = 0;
-	infile.read(reinterpret_cast<char*>(&compressedSize), sizeof(uint64_t));
-	infile.read(reinterpret_cast<char*>(&rawSize), sizeof(uint64_t));
-
-	// Read compressed data.
-	std::vector<char> compressedData(compressedSize);
-	infile.read(compressedData.data(), compressedSize);
-
-	infile.close();
+	// Read compressed data directly from memory.
+	const char* compressedData = cursor;
 
 	// Decompress.
 	std::vector<char> decompressedData(rawSize);
-	ZSTD_decompress(decompressedData.data(), rawSize, compressedData.data(), compressedSize);
+	ZSTD_decompress(decompressedData.data(), rawSize, compressedData, compressedSize);
 
 	// Create a buffer for deserialization.
 	std::istringstream rawStream(std::string(decompressedData.begin(), decompressedData.end()), std::ios::binary);

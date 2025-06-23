@@ -1,4 +1,6 @@
 #include "AFVertexBuffer.h"
+
+#include "AFMesh.h"
 #include "AFStructs.h"
 #include "AFUtility.h"
 
@@ -34,7 +36,7 @@ void AFVertexBuffer::Init()
 	glBindVertexArray(0);
 }
 
-void AFVertexBuffer::UploadMesh(const FAFSubMesh& newSubMesh)
+void AFVertexBuffer::UploadMesh(const AFSubMesh& newSubMesh)
 {
 	m_drawCount = static_cast<GLsizei>(newSubMesh.indices.size());
 

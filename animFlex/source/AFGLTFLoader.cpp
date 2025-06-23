@@ -6,6 +6,7 @@
 #include <glm/gtx/dual_quaternion.hpp>
 #include <filesystem>
 
+#include "AFJoint.h"
 #include "third_party/tiny_gltf.h"
 
 bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
@@ -38,7 +39,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 
 	// Create the necessary containers.
 	std::vector<int> nodeToJoint = {}; // Maps node to a joint in a simple way for quick access of different vectors.
-	std::vector<std::shared_ptr<AFNode>> joints = {}; // Main map containing whole skeleton.
+	std::vector<std::shared_ptr<AFJoint>> joints = {}; // Main map containing whole skeleton.
 	std::vector<glm::mat4> inverseBindMatrices = {};
 	std::vector<glm::mat4> jointMatrices = {};
 	std::vector<glm::mat4> jointDualQuats = {};
@@ -67,7 +68,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 		nodeToJoint.at(targetNode) = static_cast<int>(i);
 	}
 
-	auto GetNodeData = [model, &jointMatrices, &inverseBindMatrices, &nodeToJoint, &jointDualQuats, &joints](std::shared_ptr<AFNode> nodeToCalculate, const glm::mat4& nodeMatrix) -> void
+	auto GetNodeData = [model, &jointMatrices, &inverseBindMatrices, &nodeToJoint, &jointDualQuats, &joints](std::shared_ptr<AFJoint> nodeToCalculate, const glm::mat4& nodeMatrix) -> void
 		{
 			int nodeID = nodeToCalculate->GetNodeID();
 			const tinygltf::Node& node = model.nodes.at(nodeID);
@@ -127,8 +128,8 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 			jointMatrices.at(nodeToJoint.at(nodeID)) = nodeToCalculate->GetNodeMatrix() * inverseBindMatrices.at(nodeToJoint.at(nodeID));
 		};
 
-	std::function<void(std::shared_ptr<AFNode>)> GetNodes;
-	GetNodes = [model, GetNodeData, &GetNodes, &joints](std::shared_ptr<AFNode> nodeToFill) -> void
+	std::function<void(std::shared_ptr<AFJoint>)> GetNodes;
+	GetNodes = [model, GetNodeData, &GetNodes, &joints](std::shared_ptr<AFJoint> nodeToFill) -> void
 		{
 			int nodeID = nodeToFill->GetNodeID();
 
@@ -151,7 +152,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 
 	// Find the root bone node ID.
 	const size_t rootNodeID = skin.joints.at(0);
-	std::shared_ptr<AFNode> rootNode = AFNode::CreateRoot(static_cast<int>(rootNodeID));
+	std::shared_ptr<AFJoint> rootNode = AFJoint::CreateRoot(static_cast<int>(rootNodeID));
 
 	// Fill info for the root node.
 	GetNodeData(rootNode, glm::mat4(1.0f));

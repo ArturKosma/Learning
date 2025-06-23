@@ -361,10 +361,22 @@ selection.setButton(0);
 });
 
   // Listen for new connections/disconnections.
+  let disconnectFlipFlop = false;
   editor.addPipe(context => {
-  if (context.type === 'connectioncreated' || context.type === 'connectionremoved') {
+  if (context.type === 'connectioncreated') {
       OnNodeUpdated(editor.getNode(context.data.source));
       OnNodeUpdated(editor.getNode(context.data.target));
+  }
+
+  if(context.type === 'connectionremoved') {
+    if(disconnectFlipFlop){
+       OnNodeUpdated(editor.getNode(context.data.source));
+       disconnectFlipFlop = !disconnectFlipFlop;
+    }
+    else {
+      OnNodeUpdated(editor.getNode(context.data.target));
+      disconnectFlipFlop = !disconnectFlipFlop;
+    }
   }
 
   return context;

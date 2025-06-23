@@ -59,7 +59,7 @@ struct ParamTraits<AFPose>
 {
 	static bool FromJSON(const nlohmann::json& json, AFPose& out)
 	{
-		return true;
+		return false;
 	}
 };
 
@@ -98,6 +98,7 @@ struct FAFParamStaticPropertyBase
 
 	virtual void Apply(std::shared_ptr<AFGraphNode> node, const nlohmann::json& valueField) const = 0;
 	virtual std::string GetParamName() const = 0;
+	virtual void* GetParam(std::shared_ptr<AFGraphNode> node) const = 0;
 };
 
 template<typename OwnerClassType, typename ParamType>
@@ -111,6 +112,7 @@ struct FAFParamStaticProperty : FAFParamStaticPropertyBase
 		if (std::shared_ptr<OwnerClassType> casted = std::dynamic_pointer_cast<OwnerClassType>(node))
 		{
 			FAFParam<ParamType> param = {};
+			bool applyValue = false;
 
 			if (valueField.contains("value"))
 			{
@@ -119,6 +121,7 @@ struct FAFParamStaticProperty : FAFParamStaticPropertyBase
 				if (ParamTraits<ParamType>::FromJSON(val, parsed))
 				{
 					param.value = parsed;
+					applyValue = true;
 				}
 			}
 			else if (valueField.contains("connectedNodeId"))
@@ -127,13 +130,23 @@ struct FAFParamStaticProperty : FAFParamStaticPropertyBase
 				param.connectedSocketName = valueField["connectedSocketName"];
 			}
 
-			casted->template SetParamPropertiesTemplated<ParamType>(ptrToMember, param);
+			casted->template SetParamPropertiesTemplated<ParamType>(ptrToMember, param, applyValue);
 		}
 	}
 
 	std::string GetParamName() const override
 	{
 		return paramName;
+	}
+
+	void* GetParam(std::shared_ptr<AFGraphNode> node) const override
+	{
+		if (std::shared_ptr<OwnerClassType> casted = std::dynamic_pointer_cast<OwnerClassType>(node))
+		{
+			return reinterpret_cast<void*>(casted->template GetParam<ParamType>(ptrToMember));
+		}
+
+		return nullptr;
 	}
 };
 
@@ -257,7 +270,8 @@ struct FAFGraphNodeParamRegistrar
 
 #define AFCLASS(Class, ClassStringName, Meta) \
 	inline static std::string ThisClassStringName = #Class; \
-	inline static FAFGraphNodeClassRegistrar<Class> _registrar_##Class = FAFGraphNodeClassRegistrar<Class>(#Class)
+	inline static FAFGraphNodeClassRegistrar<Class> _registrar_##Class = FAFGraphNodeClassRegistrar<Class>(#Class); \
+	std::string GetNodeType() const override {return #Class;}
 
 #define AFPARAM(Type, VarName, VarString, Direction, Meta) \
 	FAFParam<Type> VarName; \

@@ -5,6 +5,7 @@
 class AFGraphNode_OutputPose : public AFGraphNodeCRTP<AFGraphNode_OutputPose>
 {
 	inline static FAFGraphNodeClassRegistrar<AFGraphNode_OutputPose> _registrar_AFGraphNode_OutputPose = FAFGraphNodeClassRegistrar<AFGraphNode_OutputPose>("OutputPose");
+	std::string GetNodeType() const override { return "OutputPose"; }
 
 public:
 

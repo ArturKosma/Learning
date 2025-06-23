@@ -16,19 +16,29 @@ void AFAnimGraph::Evaluate(float deltaTime)
 	if (m_outputPoseNode)
 	{
 		const std::string& connectedNodeId = m_outputPoseNode->Pose.connectedNodeId;
-		if (connectedNodeId != "")
+		const std::string& connectedSocketName = m_outputPoseNode->Pose.connectedSocketName;
+		if (connectedNodeId.empty() || connectedSocketName.empty())
 		{
-			std::shared_ptr<AFGraphNode> connectedNode = AFGraphNodeRegistry::Get().GetNode(connectedNodeId);
-			if (!connectedNode)
-			{
-				return;
-			}
-
-			connectedNode->Evaluate(deltaTime);
+			return;
 		}
-		else
+
+		std::shared_ptr<AFGraphNode> connectedNode = AFGraphNodeRegistry::Get().GetNode(connectedNodeId);
+		if (!connectedNode)
 		{
-			printf("output pose not connected :(\n");
+			return;
+		}
+
+		connectedNode->Evaluate(deltaTime);
+
+		// Go through the static properties in order to find value of the connected socket.
+		std::vector<std::shared_ptr<FAFParamStaticPropertyBase>> staticProperties = AFGraphNodeRegistry::Get().GetStaticProperties(connectedNode->GetNodeType());
+		for (std::shared_ptr<FAFParamStaticPropertyBase> property : staticProperties)
+		{
+			const std::string& paramName = property->GetParamName();
+			if (paramName == connectedSocketName)
+			{
+				m_finalPose = *reinterpret_cast<FAFParam<AFPose>*>(property->GetParam(connectedNode));
+			}
 		}
 	}
 }
@@ -45,6 +55,7 @@ void AFAnimGraph::OnNodeCreated(const std::string& msg)
 
 	// Construct a node - it will be now accessible via m_idToNode hashmap.
 	std::shared_ptr<AFGraphNode> newNode = AFGraphNodeRegistry::Get().CreateNode(nodeType, nodeId);
+	newNode->Init();
 
 	// #hack
 	// Cache OutputPose node, which will be the start of evaluation for the whole graph.
@@ -93,6 +104,9 @@ void AFAnimGraph::OnNodeUpdated(const std::string& msg)
 			property->Apply(editedNode, paramToValueField[paramName]);
 		}
 	}
+
+	// Inform the node instance it was edited.
+	editedNode->OnUpdate();
 }
 
 void AFAnimGraph::OnNodeRemoved(const std::string& msg)
@@ -107,4 +121,9 @@ void AFAnimGraph::OnNodeRemoved(const std::string& msg)
 
 	// Remove the node from hashmap and destroy the object.
 	AFGraphNodeRegistry::Get().RemoveNode(nodeId);
+}
+
+const AFPose& AFAnimGraph::GetFinalPose() const
+{
+	return m_finalPose;
 }

@@ -1,5 +1,6 @@
 #include "AFSkeletalMeshComponent.h"
 #include "AFAnimState.h"
+#include "AFMesh.h"
 
 AFSkeletalMeshComponent::AFSkeletalMeshComponent()
 	: AFStaticMeshComponent()

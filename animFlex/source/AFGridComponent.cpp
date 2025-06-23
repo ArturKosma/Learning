@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 
+#include "AFMesh.h"
 #include "AFShader.h"
 #include "AFVertexBuffer.h"
 

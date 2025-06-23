@@ -8,7 +8,11 @@ public:
 
 	virtual ~AFGraphNode() = default;
 
+	virtual void Init();
+	virtual void OnUpdate();
 	virtual void Evaluate(float deltaTime) = 0;
+
+	virtual std::string GetNodeType() const = 0;
 };
 
 template<typename Derived>
@@ -21,12 +25,26 @@ public:
 	using ThisClass = Derived;
 
 	template<typename T>
-	void SetParamPropertiesTemplated(FAFParam<T> ThisClass::* ptrToMember, const FAFParam<T>& valueToApply)
+	void SetParamPropertiesTemplated(FAFParam<T> ThisClass::* ptrToMember, const FAFParam<T>& paramProps, bool applyValue)
 	{
 		ThisClass* self = static_cast<ThisClass*>(this);
 
 		FAFParam<T>& param = self->*ptrToMember;
-		param = valueToApply;
+
+		if (applyValue)
+		{
+			param.value = paramProps.value;
+		}
+
+		param.connectedNodeId = paramProps.connectedNodeId;
+		param.connectedSocketName = paramProps.connectedSocketName;
+	}
+
+	template<typename T>
+	FAFParam<T>* GetParam(FAFParam<T> ThisClass::* ptrToMember)
+	{
+		ThisClass* self = static_cast<ThisClass*>(this);
+		return &(self->*ptrToMember);
 	}
 };
 

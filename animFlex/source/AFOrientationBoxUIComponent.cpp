@@ -6,6 +6,7 @@
 #include "AFContent.h"
 #include "AFGame.h"
 #include "AFMath.h"
+#include "AFMesh.h"
 #include "AFTexture.h"
 #include "AFTimerManager.h"
 #include "AFUtility.h"

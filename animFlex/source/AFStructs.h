@@ -56,166 +56,6 @@ enum class EAFTargetPath : uint8_t
 	Scale
 };
 
-struct FAFAsset
-{
-	friend class AFContent;
-
-	virtual ~FAFAsset() = default;
-
-	unsigned int GetUniqueID() const;
-
-	template<typename T, typename... Args>
-	bool Load(Args&&... args);
-
-	template<typename T, typename... Args>
-	bool Serialize(Args&&... args);
-
-	template<typename T, typename... Args>
-	bool Deserialize(Args&&... args);
-
-	virtual bool LoadExisting();
-
-protected:
-
-	virtual bool LoadImpl(const char* filepath)
-	{
-		printf("loadimpl base char*\n");
-		return false;
-	}
-	virtual bool LoadImpl(const char* filepath1, const char* filepath2)
-	{
-		printf("loadimpl base char* char*\n");
-		return false;
-	}
-	virtual bool LoadImpl(const char* filepath, bool boolean)
-	{
-		printf("loadimpl base char* bool\n");
-		return false;
-	}
-
-	virtual bool SerializeImpl(const char* filepath)
-	{
-		printf("serializeImpl base char*\n");
-		return false;
-	}
-
-	virtual bool DeserializeImpl(const char* filepath)
-	{
-		printf("deserializeImpl base char*\n");
-		return false;
-	}
-
-	unsigned int m_uniqueID = 0;
-};
-
-template <typename T, typename ... Args>
-bool FAFAsset::Load(Args&&... args)
-{
-	return LoadImpl(std::forward<Args>(args)...);
-}
-
-template <typename T, typename ... Args>
-bool FAFAsset::Serialize(Args&&... args)
-{
-	return SerializeImpl(std::forward<Args>(args)...);
-}
-
-template <typename T, typename ... Args>
-bool FAFAsset::Deserialize(Args&&... args)
-{
-	return DeserializeImpl(std::forward<Args>(args)...);
-}
-
-struct AFNode
-{
-public:
-
-	void SetLocation(const glm::vec3& newLocation);
-	void SetRotation(const glm::quat newRotation);
-	void SetScale(const glm::vec3& newScale);
-
-	glm::vec3 GetLocation() const;
-	glm::quat GetRotation() const;
-	glm::vec3 GetScale() const;
-
-	static std::shared_ptr<AFNode> CreateRoot(int rootBoneIdx);
-	void AddChildren(const std::vector<int>& newChildBones);
-
-	void CalculateLocalTRSMatrix();
-	void CalculateNodeMatrix(const glm::mat4& parentNodeMatrix);
-
-	glm::mat4 GetLocalTRSMatrix() const;
-	glm::mat4 GetNodeMatrix() const;
-
-	int GetNodeID() const;
-
-	std::vector<std::shared_ptr<AFNode>> GetChildren() const;
-
-	void SetNodeName(const std::string& newName);
-	std::string GetNodeName() const;
-
-	void PrintTree() const;
-	static void PrintNodes(std::shared_ptr<AFNode> bone, int indent);
-
-private:
-
-	int nodeID = 0;
-	std::string nodeName = {};
-
-	glm::vec3 location = glm::vec3(0.0f);
-	glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	glm::vec3 scale = glm::vec3(1.0f);
-
-	glm::mat4 localTRSMatrix = glm::mat4(1.0f);
-	glm::mat4 nodeMatrix = glm::mat4(1.0f);
-
-	std::vector<std::shared_ptr<AFNode>> childNodes = {};
-};
-
-struct FAFSubMesh
-{
-	std::vector<FAFVertex> vertices = {};
-	std::vector<unsigned int> indices = {};
-
-	std::shared_ptr<class AFVertexBuffer> vertexBuffer = nullptr;
-	std::shared_ptr<class AFTexture> texture = nullptr;
-	std::shared_ptr<class AFShader> shader = nullptr;
-
-	bool depthTest = true;
-	bool stencilTest = true;
-
-	// Various additional info that might help identifying this sub-mesh.
-	// For example a single character defining what glyph this is in text rendering.
-	std::string metaInformation = {};
-
-	unsigned long long GetVertexCount() const;
-};
-
-struct FAFMesh : public FAFAsset
-{
-	std::vector<FAFSubMesh> subMeshes = {};
-
-	bool LoadExisting() override;
-	bool LoadImpl(const char* filepath) override;
-
-	unsigned long long GetVertexCount() const;
-
-	void RecalculateSkeleton();
-	void RecalculateBone(std::shared_ptr<AFNode> bone, const glm::mat4& parentMatrix);
-
-	const std::vector<int> GetNodeToJoint() const;
-	const std::vector<std::shared_ptr<AFNode>>& GetJoints() const;
-
-	bool jointsDirty = false;
-
-	std::shared_ptr<AFNode> rootJoint = nullptr;
-	std::vector<int> nodeToJoint = {};
-	std::vector<std::shared_ptr<AFNode>> joints = {};
-	std::vector<glm::mat4> inverseBindMatrices = {};
-	std::vector<glm::mat4> jointMatrices = {};
-	std::vector<glm::mat4> jointDualQuats = {};
-};
-
 struct FAFSubMeshLoaded
 {
 	GLuint vao;
@@ -227,9 +67,9 @@ struct FAFSubMeshLoaded
 struct FAFMeshLoaded
 {
 	std::vector<FAFSubMeshLoaded> subMeshesLoaded = {};
-	std::shared_ptr<AFNode> rootJoint = nullptr;
+	std::shared_ptr<class AFJoint> rootJoint = nullptr;
 	std::vector<int> nodeToJoint = {};
-	std::vector<std::shared_ptr<AFNode>> joints = {};
+	std::vector<std::shared_ptr<AFJoint>> joints = {};
 	std::vector<glm::mat4> inverseBindMatrices = {};
 	std::vector<glm::mat4> jointMatrices = {};
 	std::vector<glm::mat4> jointDualQuats = {};
@@ -281,4 +121,14 @@ struct FAFGlyph
 	glm::ivec2 size = glm::ivec2(0);
 	glm::ivec2 bearing = glm::ivec2(0);
 	unsigned int advance = 0;
+};
+
+template <typename T>
+struct FAFFetchContext
+{
+	std::string fullPath;
+	std::string assetName;
+	std::shared_ptr<T> ret;
+	class AFContent* content;
+	std::function<void(std::shared_ptr<T>)> onComplete;
 };

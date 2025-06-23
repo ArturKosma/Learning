@@ -2,6 +2,8 @@
 #include "AFSkeletalMeshComponent.h"
 #include <chrono>
 
+#include "AFMesh.h"
+
 void AFAnimState::Tick(float deltaTime)
 {
 	if(m_evaluationState == EAFAnimEvaluationState::Idle)
@@ -67,8 +69,7 @@ void AFAnimState::EvaluateSingleAnim()
 	).count();
 	const float time = std::fmod(static_cast<float>(currentTime) / 1000.0f, m_singleAnim->GetClipEndTime());
 
-	const std::vector<int>& nodeToJoint = m_ownerMesh->GetMesh()->GetNodeToJoint();
-	const std::vector<std::shared_ptr<AFNode>>& joints = m_ownerMesh->GetMesh()->GetJoints();
+	const std::vector<std::shared_ptr<AFJoint>>& joints = m_ownerMesh->GetMesh()->GetJoints();
 
 	for (auto& channel : m_singleAnim->GetAnimationChannels())
 	{
@@ -108,8 +109,29 @@ void AFAnimState::EvaluateSingleAnim()
 
 void AFAnimState::EvaluateGraph(float deltaTime)
 {
-	if (m_graph)
+	if (!m_graph || !m_ownerMesh)
 	{
-		m_graph->Evaluate(deltaTime);
+		return;
 	}
+
+	m_graph->Evaluate(deltaTime);
+
+	const std::vector<std::shared_ptr<AFJoint>>& calculatedJoints = m_graph->GetFinalPose().GetJoints();
+	const std::vector<std::shared_ptr<AFJoint>>& currentJoints = m_ownerMesh->GetMesh()->GetJoints();
+
+	if (calculatedJoints.size() != currentJoints.size())
+	{
+		return;
+	}
+
+	for (int i = 0; i < currentJoints.size(); ++i)
+	{
+		currentJoints[i]->SetLocation(calculatedJoints[i]->GetLocation());
+		currentJoints[i]->SetRotation(calculatedJoints[i]->GetRotation());
+		currentJoints[i]->SetScale(calculatedJoints[i]->GetScale());
+
+		currentJoints[i]->CalculateLocalTRSMatrix();
+	}
+
+	m_ownerMesh->GetMesh()->jointsDirty = true;
 }

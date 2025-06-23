@@ -1,10 +1,11 @@
 #include "AFUIRenderComponent.h"
 
+#include "AFMesh.h"
 #include "AFShader.h"
 #include "AFTexture.h"
 #include "AFVertexBuffer.h"
 
-void AFUIRenderComponent::SetMesh(std::shared_ptr<FAFMesh> newMesh)
+void AFUIRenderComponent::SetMesh(std::shared_ptr<AFMesh> newMesh)
 {
 	m_mesh = newMesh;
 }

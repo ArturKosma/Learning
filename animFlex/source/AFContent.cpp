@@ -1,6 +1,7 @@
 #include "AFContent.h"
 
 #include "AFAnimationClip.h"
+#include "AFMesh.h"
 #include "AFPostprocessShader.h"
 #include "AFVertexBuffer.h"
 #include "AFTexture.h"
@@ -23,8 +24,8 @@ bool AFContent::Init()
 	// Basic 100x100x100 units box.
 	// ---------------
 
-	std::shared_ptr<FAFMesh> boxMesh = CreateAsset<FAFMesh>();
-	FAFSubMesh boxSubMesh = FAFSubMesh();
+	std::shared_ptr<AFMesh> boxMesh = CreateAsset<AFMesh>();
+	AFSubMesh boxSubMesh = AFSubMesh();
 
 	// Front.
 	boxSubMesh.vertices.emplace_back(glm::vec3(-50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f), 0, glm::vec2(0.125f, 0.875f)); // 0.
@@ -105,8 +106,8 @@ bool AFContent::Init()
 	// Basic 2x2 units plane.
 	// ---------------
 
-	std::shared_ptr<FAFMesh> planeMesh = CreateAsset<FAFMesh>();
-	FAFSubMesh planeSubMesh = FAFSubMesh();
+	std::shared_ptr<AFMesh> planeMesh = CreateAsset<AFMesh>();
+	AFSubMesh planeSubMesh = AFSubMesh();
 
 	planeSubMesh.vertices.emplace_back(glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f)); // 0.
 	planeSubMesh.vertices.emplace_back(glm::vec3(-1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 0.0f)); // 1.
@@ -126,8 +127,8 @@ bool AFContent::Init()
 	// Three-directional gizmo.
 	// ---------------
 
-	std::shared_ptr<FAFMesh> gizmoMesh = CreateAsset<FAFMesh>();
-	FAFSubMesh gizmoSubMesh;
+	std::shared_ptr<AFMesh> gizmoMesh = CreateAsset<AFMesh>();
+	AFSubMesh gizmoSubMesh;
 
 	gizmoSubMesh.vertices.emplace_back(glm::vec3(0.0f, 0.0f, 0.0f)); // 0 - Middle.
 	gizmoSubMesh.vertices.emplace_back(glm::vec3(0.0f, 1.0f, 0.0f)); // 1 - Up.
@@ -173,7 +174,7 @@ bool AFContent::Init()
 	AddAsset<AFPostprocessShader>("shader_gaussianVertical", "content/shaders/gaussianVertical.vert", "content/shaders/gaussianVertical.frag");
 
 	// Meshes
-	std::shared_ptr<FAFMesh> mannequin = AddAsset<FAFMesh>("sk_mannequin", "content/models/sk_mannequin.gltf");
+	std::shared_ptr<AFMesh> mannequin = AddAsset<AFMesh>("sk_mannequin", "content/models/sk_mannequin.gltf");
 
 	// Anims.
 	//AddAsset<AFAnimationClip>("startBL", "content/anims/M_Neutral_Run_Start_BL_Rfoot.gltf");

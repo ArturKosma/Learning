@@ -3,9 +3,9 @@
 #include <string>
 #include <glad/glad.h>
 
-#include "AFStructs.h"
+#include "AFAsset.h"
 
-class AFTexture : public FAFAsset
+class AFTexture : public AFAsset
 {
 	friend class AFRenderer;
 

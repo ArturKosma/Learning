@@ -61,5 +61,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
 --preload-file ../../config \
 --shell-file=${CUSTOM_SHELL_FILE} \
 -s EXPORTED_RUNTIME_METHODS=['ccall'] \
--s USE_FREETYPE=1"
+-s USE_FREETYPE=1 \ 
+-sFETCH"
 )
