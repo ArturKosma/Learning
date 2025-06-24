@@ -15,8 +15,9 @@ void AFAnimGraph::Evaluate(float deltaTime)
 {
 	if (m_outputPoseNode)
 	{
-		const std::string& connectedNodeId = m_outputPoseNode->Pose.connectedNodeId;
-		const std::string& connectedSocketName = m_outputPoseNode->Pose.connectedSocketName;
+		std::string connectedNodeId = "";
+		std::string connectedSocketName = "";
+		m_outputPoseNode->Pose.GetConnection(connectedNodeId, connectedSocketName);
 		if (connectedNodeId.empty() || connectedSocketName.empty())
 		{
 			return;

@@ -2,7 +2,7 @@
 
 void AFGraphNode_BlendByBool::Evaluate(float deltaTime)
 {
-	if (useA.value)
+	if (useA.GetValue())
 	{
 		printf("evaluating blend by bool: true\n");
 	}

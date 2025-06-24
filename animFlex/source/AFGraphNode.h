@@ -33,11 +33,13 @@ public:
 
 		if (applyValue)
 		{
-			param.value = paramProps.value;
+			param.SetValue(paramProps.GetValue());
 		}
 
-		param.connectedNodeId = paramProps.connectedNodeId;
-		param.connectedSocketName = paramProps.connectedSocketName;
+		std::string connectedNodeId = "";
+		std::string connectedSocketName = "";
+		paramProps.GetConnection(connectedNodeId, connectedSocketName);
+		param.SetConnection(connectedNodeId, connectedSocketName);
 	}
 
 	template<typename T>

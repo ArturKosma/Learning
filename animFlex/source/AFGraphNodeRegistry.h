@@ -21,6 +21,35 @@ public:
 		return value;
 	}
 
+	void SetValue(const T& newValue)
+	{
+		value = newValue;
+	}
+	const T& GetValue() const
+	{
+		return value;
+	}
+
+	void SetConnection(const std::string& newConnectedNodeId, const std::string& newConnectedSocketName)
+	{
+		connectedNodeId = newConnectedNodeId;
+		connectedSocketName = newConnectedSocketName;
+	}
+	bool GetConnection(std::string& outConnectedNodeId, std::string& outConnectedSocketName) const
+	{
+		if (connectedNodeId.empty() || connectedSocketName.empty())
+		{
+			return false;
+		}
+
+		outConnectedNodeId = connectedNodeId;
+		outConnectedSocketName = connectedSocketName;
+
+		return true;
+	}
+
+protected:
+
 	T value = {};
 	std::string connectedNodeId = "";
 	std::string connectedSocketName = "";
@@ -120,14 +149,13 @@ struct FAFParamStaticProperty : FAFParamStaticPropertyBase
 				ParamType parsed = {};
 				if (ParamTraits<ParamType>::FromJSON(val, parsed))
 				{
-					param.value = parsed;
+					param.SetValue(parsed);
 					applyValue = true;
 				}
 			}
 			else if (valueField.contains("connectedNodeId"))
 			{
-				param.connectedNodeId = valueField["connectedNodeId"];
-				param.connectedSocketName = valueField["connectedSocketName"];
+				param.SetConnection(valueField["connectedNodeId"], valueField["connectedSocketName"]);
 			}
 
 			casted->template SetParamPropertiesTemplated<ParamType>(ptrToMember, param, applyValue);
