@@ -6,5 +6,7 @@ AFGraphNode_Blend::AFGraphNode_Blend()
 
 void AFGraphNode_Blend::Evaluate(float deltaTime)
 {
-	printf("eval Blend, alpha: %f\n", alpha.GetValue());
+	const AFPose& a = inputPoseA.GetValue();
+
+	outputPose.SetValue(a);
 }

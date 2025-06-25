@@ -7,29 +7,14 @@
 #include <string>
 #include <glm/vec3.hpp>
 
+#include "AFEvaluator.h"
 #include "AFPose.h"
+#include "AFTimerManager.h"
 
 class AFGraphNode;
 
-template<typename T>
-struct FAFParam
+struct FAFParamBase
 {
-public:
-
-	operator T()
-	{
-		return value;
-	}
-
-	void SetValue(const T& newValue)
-	{
-		value = newValue;
-	}
-	const T& GetValue() const
-	{
-		return value;
-	}
-
 	void SetConnection(const std::string& newConnectedNodeId, const std::string& newConnectedSocketName)
 	{
 		connectedNodeId = newConnectedNodeId;
@@ -48,11 +33,29 @@ public:
 		return true;
 	}
 
+	std::string connectedNodeId = "";
+	std::string connectedSocketName = "";
+};
+
+template<typename T>
+struct FAFParam : FAFParamBase
+{
+public:
+
+	operator T()
+	{
+		return GetValue();
+	}
+
+	void SetValue(const T& newValue)
+	{
+		value = newValue;
+	}
+	const T& GetValue() const;
+
 protected:
 
 	T value = {};
-	std::string connectedNodeId = "";
-	std::string connectedSocketName = "";
 };
 
 template<typename T>
@@ -128,6 +131,7 @@ struct FAFParamStaticPropertyBase
 	virtual void Apply(std::shared_ptr<AFGraphNode> node, const nlohmann::json& valueField) const = 0;
 	virtual std::string GetParamName() const = 0;
 	virtual void* GetParam(std::shared_ptr<AFGraphNode> node) const = 0;
+	virtual bool GetIsInput() const = 0;
 };
 
 template<typename OwnerClassType, typename ParamType>
@@ -135,6 +139,7 @@ struct FAFParamStaticProperty : FAFParamStaticPropertyBase
 {
 	FAFParam<ParamType> OwnerClassType::* ptrToMember;
 	std::string paramName = "";
+	bool isInput = false;
 
 	void Apply(std::shared_ptr<AFGraphNode> node, const nlohmann::json& valueField) const override
 	{
@@ -175,6 +180,11 @@ struct FAFParamStaticProperty : FAFParamStaticPropertyBase
 		}
 
 		return nullptr;
+	}
+
+	bool GetIsInput() const override
+	{
+		return isInput;
 	}
 };
 
@@ -217,6 +227,7 @@ public:
 		GraphNodeConstructorFun ctor = it->second;
 		std::shared_ptr<AFGraphNode> newNode = ctor();
 		GetIdToNode()[nodeID] = newNode;
+		GetIdToType()[nodeID] = nodeType;
 
 		return newNode;
 	}
@@ -227,6 +238,17 @@ public:
 		if (it == GetIdToNode().end())
 		{
 			return nullptr;
+		}
+
+		return it->second;
+	}
+
+	std::string NodeIDToType(const std::string& nodeID)
+	{
+		const auto it = GetIdToType().find(nodeID);
+		if (it == GetIdToType().end())
+		{
+			return "";
 		}
 
 		return it->second;
@@ -269,6 +291,12 @@ private:
 		static std::unordered_map<std::string, std::vector<std::shared_ptr<FAFParamStaticPropertyBase>>> map;
 		return map;
 	}
+
+	std::unordered_map<std::string, std::string>& GetIdToType()
+	{
+		static std::unordered_map<std::string, std::string> map;
+		return map;
+	}
 };
 
 template<typename T>
@@ -286,15 +314,67 @@ struct FAFGraphNodeClassRegistrar
 template<typename OwnerClassType, typename ParamType>
 struct FAFGraphNodeParamRegistrar
 {
-	FAFGraphNodeParamRegistrar(const std::string& classStringName, const std::string& paramName, FAFParam<ParamType> OwnerClassType::* ptrToMember)
+	FAFGraphNodeParamRegistrar(const std::string& classStringName, const std::string& paramName, FAFParam<ParamType> OwnerClassType::* ptrToMember, const std::string& direction)
 	{
 		std::shared_ptr<FAFParamStaticProperty<OwnerClassType, ParamType>> prop = std::make_shared<FAFParamStaticProperty<OwnerClassType, ParamType>>();
 		prop->ptrToMember = ptrToMember;
 		prop->paramName = paramName;
+		prop->isInput = direction == "Input";
 
 		AFGraphNodeRegistry::Get().RegisterProperty(classStringName, prop);
 	}
 };
+
+template <typename T>
+const T& FAFParam<T>::GetValue() const
+{
+	// If this socket is connected to something.
+	std::string connectedNodeId = "";
+	std::string connectedSocketName = "";
+	const bool connected = GetConnection(connectedNodeId, connectedSocketName);
+	if (!connected)
+	{
+		// It's not connected, so just any value there currently is.
+		return value;
+	}
+
+	// What direction is our target?
+	bool iAmInput = false;
+
+	// Pointer to the target socket.
+	std::shared_ptr<FAFParamStaticPropertyBase> targetSocket = nullptr;
+
+	std::shared_ptr<AFGraphNode> connection = AFGraphNodeRegistry::Get().GetNode(connectedNodeId);
+	const std::string& connectionNodeType = AFGraphNodeRegistry::Get().NodeIDToType(connectedNodeId);
+	const std::vector<std::shared_ptr<FAFParamStaticPropertyBase>>& properties = AFGraphNodeRegistry::Get().GetStaticProperties(connectionNodeType);
+	for (std::shared_ptr<FAFParamStaticPropertyBase> property : properties)
+	{
+		if (property->GetParamName() == connectedSocketName)
+		{
+			// I am the opposite of my target.
+			iAmInput = !property->GetIsInput();
+
+			// Save the pointer.
+			targetSocket = property;
+		}
+	}
+
+	if (iAmInput)
+	{
+		// If I am an input, we might need to ask our target node to evaluate itself.
+		// If target was already evaluated we don't re-evaluate.
+		// Evaluation of a node triggers its own AFParams::GetValue(), which triggers whole chain of graph evaluations.
+		AFEvaluator::Get().EvaluateNode(connection);
+
+		// Now we can fetch the value from target socket.
+		return static_cast<FAFParam<T>*>(targetSocket->GetParam(connection))->GetValue();
+	}
+	else
+	{
+		// If I am an output I just return whatever I have currently assigned.
+		return value;
+	}
+}
 
 #define AFCLASS(Class, ClassStringName, Meta) \
 	inline static std::string ThisClassStringName = #Class; \
@@ -303,5 +383,5 @@ struct FAFGraphNodeParamRegistrar
 
 #define AFPARAM(Type, VarName, VarString, Direction, Meta) \
 	FAFParam<Type> VarName; \
-	inline static FAFGraphNodeParamRegistrar<ThisClass, Type> _registrar_##VarName = FAFGraphNodeParamRegistrar<ThisClass, Type>(ThisClassStringName, #VarName, &ThisClass::VarName)
+	inline static FAFGraphNodeParamRegistrar<ThisClass, Type> _registrar_##VarName = FAFGraphNodeParamRegistrar<ThisClass, Type>(ThisClassStringName, #VarName, &ThisClass::VarName, Direction)
 	

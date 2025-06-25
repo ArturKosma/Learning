@@ -1,9 +1,13 @@
 #include "AFAnimGraph.h"
+
+#include "AFEvaluator.h"
 #include "AFGraphNode.h"
 #include "AFGraphNodeRegistry.h"
 #include "AFGraphNode_OutputPose.h"
 
 #include "third_party/json.hpp"
+
+nlohmann::json AFAnimGraph::lastActiveSockets = nlohmann::json::array();
 
 void AFAnimGraph::Compile(const std::string& graphString)
 {
@@ -15,6 +19,9 @@ void AFAnimGraph::Evaluate(float deltaTime)
 {
 	if (m_outputPoseNode)
 	{
+		// Mark all nodes dirty. This will allow for new evaluation of each of them.
+		AFEvaluator::Get().ClearEvaluationState();
+
 		std::string connectedNodeId = "";
 		std::string connectedSocketName = "";
 		m_outputPoseNode->Pose.GetConnection(connectedNodeId, connectedSocketName);
@@ -29,7 +36,8 @@ void AFAnimGraph::Evaluate(float deltaTime)
 			return;
 		}
 
-		connectedNode->Evaluate(deltaTime);
+		// Evaluate the connected node.
+		AFEvaluator::Get().EvaluateNode(connectedNode);
 
 		// Go through the static properties in order to find value of the connected socket.
 		std::vector<std::shared_ptr<FAFParamStaticPropertyBase>> staticProperties = AFGraphNodeRegistry::Get().GetStaticProperties(connectedNode->GetNodeType());
@@ -38,7 +46,7 @@ void AFAnimGraph::Evaluate(float deltaTime)
 			const std::string& paramName = property->GetParamName();
 			if (paramName == connectedSocketName)
 			{
-				m_finalPose = *reinterpret_cast<FAFParam<AFPose>*>(property->GetParam(connectedNode));
+				m_finalPose = *static_cast<FAFParam<AFPose>*>(property->GetParam(connectedNode));
 			}
 		}
 	}
@@ -127,4 +135,20 @@ void AFAnimGraph::OnNodeRemoved(const std::string& msg)
 const AFPose& AFAnimGraph::GetFinalPose() const
 {
 	return m_finalPose;
+}
+
+void AFAnimGraph::AddLastActiveSocket(const nlohmann::json& newSocket)
+{
+	lastActiveSockets.push_back(newSocket);
+}
+
+const std::string& AFAnimGraph::GetLastActiveSockets()
+{
+	static std::string json = lastActiveSockets.dump();
+	return json;
+}
+
+void AFAnimGraph::ClearLastActiveSockets()
+{
+	lastActiveSockets = nlohmann::json::array();
 }

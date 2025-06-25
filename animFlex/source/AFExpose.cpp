@@ -1,6 +1,11 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #include "AFApp.h"
+#include <cstring>
+#include <cstdlib>
+
+#include "AFAnimState.h"
+#include "AFPlayerPawn.h"
 
 extern "C"
 {
@@ -39,6 +44,22 @@ extern "C"
 		AFApp& app = AFApp::GetInstance();
 		app.GetGame()->OnNodeRemoved(msg);
 	}
-}
 
+	EMSCRIPTEN_KEEPALIVE
+	const char* GetLastActiveSockets()
+	{
+		const std::string lastActiveSockets = AFAnimGraph::GetLastActiveSockets();
+
+		char* buffer = (char*)malloc(lastActiveSockets.length() + 1);
+		strcpy(buffer, lastActiveSockets.c_str());
+
+		return buffer;
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void FreeLastActiveSockets(char* ptr)
+	{
+		free(ptr);
+	}
+}
 #endif

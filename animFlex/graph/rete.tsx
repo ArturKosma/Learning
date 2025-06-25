@@ -21,6 +21,8 @@ import { setupSelection } from './selection';
 import { BoolControl, CustomChecker } from "./afchecker";
 import { CustomFloatField, FloatControl } from "./affloatfield";
 
+declare const Module: any;
+
 const nodeQueue: (() => Promise<void>)[] = [];
 let isProcessing = false;
 
@@ -407,6 +409,40 @@ selection.setButton(0);
 
     return context;
   });
+
+  // Keep getting last active sockets from C++ to highlight them.
+  async function GetLastActiveSockets() {
+    // Wait until Emscripten runtime is ready.
+    if (!Module.calledRun) {
+        await new Promise<void>((resolve) => {
+        const prevInit = Module.onRuntimeInitialized;
+        Module.onRuntimeInitialized = function () {
+            if (typeof prevInit === 'function') prevInit();
+            resolve();
+        };
+        });
+    }
+
+    const ptr = Module.ccall(
+        'GetLastActiveSockets',   
+        'number',              
+        [],       
+        []
+    );
+
+    // Convert the pointer to a JavaScript string.
+    const socketString = UTF8ToString(ptr);
+    console.log('Active sockets:', socketString);
+
+    // Free the allocated memory
+    Module.ccall(
+        'FreeLastActiveSockets',
+        null,                    
+        ['number'],              
+        [ptr]                    
+    );
+  }
+  const intervalId = setInterval(GetLastActiveSockets, 1000 / 30);
 
   // Wait for the first render (initially rete is hidden) to call zoom.
   const resizeObserver = new ResizeObserver((entries) => {

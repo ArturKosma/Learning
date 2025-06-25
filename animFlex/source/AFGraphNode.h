@@ -13,6 +13,11 @@ public:
 	virtual void Evaluate(float deltaTime) = 0;
 
 	virtual std::string GetNodeType() const = 0;
+
+	bool operator==(const AFGraphNode& other) const
+	{
+		return GetNodeType() == other.GetNodeType();
+	}
 };
 
 template<typename Derived>
