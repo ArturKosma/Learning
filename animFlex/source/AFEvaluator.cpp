@@ -18,6 +18,21 @@ void AFEvaluator::EvaluateNode(std::shared_ptr<AFGraphNode> node)
 	}
 }
 
+void AFEvaluator::AddLastActiveSocket(const nlohmann::json& newSocket)
+{
+	m_lastActiveSockets.push_back(newSocket);
+}
+
+std::string AFEvaluator::GetLastActiveSockets()
+{
+	return m_lastActiveSockets.dump();
+}
+
+void AFEvaluator::ClearLastActiveSockets()
+{
+	m_lastActiveSockets = nlohmann::json::array();
+}
+
 void AFEvaluator::ClearEvaluationState()
 {
 	m_evaluated.clear();

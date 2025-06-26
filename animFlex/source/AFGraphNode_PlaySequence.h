@@ -10,8 +10,8 @@ class AFGraphNode_PlaySequence : public AFGraphNodeCRTP<AFGraphNode_PlaySequence
 
 public:
 
-	AFPARAM(std::string, animName, "", "Input", "HidePin|Dropdown_Anims");
-	AFPARAM(AFPose, outputPose, "", "Output", "");
+	AFPARAM(std::string, playseq_animName, "", "Input", "HidePin|Dropdown_Anims");
+	AFPARAM(AFPose, playseq_outputPose, "", "Output", "");
 
 	void Init() override;
 	void OnUpdate() override;

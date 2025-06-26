@@ -6,6 +6,7 @@
 
 #include "AFAnimState.h"
 #include "AFPlayerPawn.h"
+#include "AFEvaluator.h"
 
 extern "C"
 {
@@ -48,7 +49,7 @@ extern "C"
 	EMSCRIPTEN_KEEPALIVE
 	const char* GetLastActiveSockets()
 	{
-		const std::string lastActiveSockets = AFAnimGraph::GetLastActiveSockets();
+		const std::string lastActiveSockets = AFEvaluator::Get().GetLastActiveSockets();
 
 		char* buffer = (char*)malloc(lastActiveSockets.length() + 1);
 		strcpy(buffer, lastActiveSockets.c_str());

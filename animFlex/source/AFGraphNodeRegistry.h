@@ -6,7 +6,9 @@
 #include <sstream>
 #include <string>
 #include <glm/vec3.hpp>
+#include <type_traits>
 
+#include "AFAnimGraph.h"
 #include "AFEvaluator.h"
 #include "AFPose.h"
 #include "AFTimerManager.h"
@@ -42,6 +44,11 @@ struct FAFParam : FAFParamBase
 {
 public:
 
+	FAFParam(const std::string& paramName)
+	{
+		name = paramName;
+	}
+
 	operator T()
 	{
 		return GetValue();
@@ -56,6 +63,7 @@ public:
 protected:
 
 	T value = {};
+	std::string name = "";
 };
 
 template<typename T>
@@ -68,7 +76,8 @@ struct ParamTraits<float>
 	{
 		if (!json.is_string()) return false;
 		std::istringstream iss(json.get<std::string>());
-		return static_cast<bool>(iss >> out);
+		const bool streamApplied = static_cast<bool>(iss >> out);
+		return streamApplied;
 	}
 };
 
@@ -145,7 +154,7 @@ struct FAFParamStaticProperty : FAFParamStaticPropertyBase
 	{
 		if (std::shared_ptr<OwnerClassType> casted = std::dynamic_pointer_cast<OwnerClassType>(node))
 		{
-			FAFParam<ParamType> param = {};
+			FAFParam<ParamType> param = FAFParam<ParamType>(paramName);
 			bool applyValue = false;
 
 			if (valueField.contains("value"))
@@ -359,15 +368,26 @@ const T& FAFParam<T>::GetValue() const
 		}
 	}
 
+	// Mark this socket as last active.
+	// Used for debug.
+	if constexpr (std::is_same_v<T, AFPose>)
+	{
+		nlohmann::json lastActiveEntry;
+		lastActiveEntry["nodeId"] = connectedNodeId;
+		lastActiveEntry["socketName"] = connectedSocketName;
+		AFEvaluator::Get().AddLastActiveSocket(lastActiveEntry);
+	}
+
 	if (iAmInput)
 	{
 		// If I am an input, we might need to ask our target node to evaluate itself.
 		// If target was already evaluated we don't re-evaluate.
 		// Evaluation of a node triggers its own AFParams::GetValue(), which triggers whole chain of graph evaluations.
+
 		AFEvaluator::Get().EvaluateNode(connection);
 
 		// Now we can fetch the value from target socket.
-		return static_cast<FAFParam<T>*>(targetSocket->GetParam(connection))->GetValue();
+		return (static_cast<FAFParam<T>*>(targetSocket->GetParam(connection)))->GetValue();
 	}
 	else
 	{
@@ -382,6 +402,6 @@ const T& FAFParam<T>::GetValue() const
 	std::string GetNodeType() const override {return #Class;}
 
 #define AFPARAM(Type, VarName, VarString, Direction, Meta) \
-	FAFParam<Type> VarName; \
+	FAFParam<Type> VarName = FAFParam<Type>(#VarName); \
 	inline static FAFGraphNodeParamRegistrar<ThisClass, Type> _registrar_##VarName = FAFGraphNodeParamRegistrar<ThisClass, Type>(ThisClassStringName, #VarName, &ThisClass::VarName, Direction)
 	

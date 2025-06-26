@@ -8,10 +8,10 @@ class AFGraphNode_BlendByBool : public AFGraphNodeCRTP<AFGraphNode_BlendByBool>
 
 public:
 
-	AFPARAM(AFPose, inputPoseA, "A", "Input", "");
-	AFPARAM(AFPose, inputPoseB, "B", "Input", "");
-	AFPARAM(bool, useA, "Use A", "Input", "");
-	AFPARAM(AFPose, outpusePose, "", "Output", "");
+	AFPARAM(AFPose, blendBool_inputPoseA, "A", "Input", "");
+	AFPARAM(AFPose, blendBool_inputPoseB, "B", "Input", "");
+	AFPARAM(bool, blendBool_useA, "Use A", "Input", "");
+	AFPARAM(AFPose, blendBool_outputPose, "", "Output", "");
 
 	void Evaluate(float deltaTime) override;
 };

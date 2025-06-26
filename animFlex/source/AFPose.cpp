@@ -1,11 +1,34 @@
 #include "AFPose.h"
 #include <chrono>
 
+#include "AFApp.h"
+#include "AFContent.h"
 #include "AFJoint.h"
+#include "AFMesh.h"
+#include "AFPlayerPawn.h"
+
+AFPose::AFPose()
+{
+	ApplyJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
+}
 
 void AFPose::ApplyJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
 {
-	m_joints = joints;
+	m_joints.clear();
+	m_joints.resize(joints.size());
+
+	for (size_t i = 0; i < m_joints.size(); ++i)
+	{
+		std::shared_ptr<AFJoint> newJoint = std::make_shared<AFJoint>();
+
+		newJoint->SetLocation(joints[i]->GetLocation());
+		newJoint->SetRotation(joints[i]->GetRotation());
+		newJoint->SetScale(joints[i]->GetScale());
+
+		newJoint->CalculateLocalTRSMatrix();
+
+		m_joints[i] = newJoint;
+	}
 }
 
 void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time)

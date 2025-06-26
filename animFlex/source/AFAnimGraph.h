@@ -19,14 +19,8 @@ public:
 
 	const AFPose& GetFinalPose() const;
 
-	static void AddLastActiveSocket(const nlohmann::json& newSocket);
-	static const std::string& GetLastActiveSockets();
-	static void ClearLastActiveSockets();
-
 protected:
 
 	std::shared_ptr<AFGraphNode_OutputPose> m_outputPoseNode = nullptr;
 	AFPose m_finalPose = {};
-
-	static nlohmann::json lastActiveSockets;
 };

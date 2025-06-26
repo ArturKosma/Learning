@@ -15,7 +15,7 @@ import {
 } from "rete-context-menu-plugin";
 import styled from "styled-components";
 import {DropdownControl, CustomDropdown} from './afdropdown'; 
-import {CanCreateConnection, GraphUpdate, OnNodeCreated, OnNodeRemoved, OnNodeUpdated} from './affunclib'
+import {CanCreateConnection, GetConnectionSockets, GraphUpdate, OnNodeCreated, OnNodeRemoved, OnNodeUpdated} from './affunclib'
 import {SetEditorInstance} from './afeditorinstance'
 import { setupSelection } from './selection';
 import { BoolControl, CustomChecker } from "./afchecker";
@@ -140,7 +140,21 @@ selection.setButton(0);
                 return AFSocket;
             },
             connection(context) {
-                return AFConnection;
+                return (props) => {
+
+                  const { source: sourceSocket, target: targetSocket } = GetConnectionSockets(editor, props.data);
+                  const sourceSocketType = (sourceSocket as any)?.meta?.socketType;
+                  const targetSocketType = (targetSocket as any)?.meta?.socketType;
+                  const socketType = sourceSocketType || targetSocketType;
+
+                  return (
+                    <AFConnection
+                        {...props}
+                        highlighted={highlightedConnectionIds.has(props.data.id)}
+                        socketType={socketType}
+                    />
+                  );
+                }
             },
             control(data) {
                 if(data.payload instanceof DropdownControl) {
@@ -363,26 +377,16 @@ selection.setButton(0);
 });
 
   // Listen for new connections/disconnections.
-  let disconnectFlipFlop = false;
   editor.addPipe(context => {
-  if (context.type === 'connectioncreated') {
-      OnNodeUpdated(editor.getNode(context.data.source));
-      OnNodeUpdated(editor.getNode(context.data.target));
-  }
 
-  if(context.type === 'connectionremoved') {
-    if(disconnectFlipFlop){
-       OnNodeUpdated(editor.getNode(context.data.source));
-       disconnectFlipFlop = !disconnectFlipFlop;
-    }
-    else {
-      OnNodeUpdated(editor.getNode(context.data.target));
-      disconnectFlipFlop = !disconnectFlipFlop;
-    }
-  }
+    if (context.type === 'connectioncreated' || context.type === 'connectionremoved') {
+      const { source, target } = context.data;
 
-  return context;
-});
+      enqueueNode(() => OnNodeUpdated(editor.getNode(source)!));
+      enqueueNode(() => OnNodeUpdated(editor.getNode(target)!));
+    }
+    return context;
+  });
 
   // Zoom the view to fit all nodes after 100ms.
   setTimeout(() => 
@@ -410,6 +414,48 @@ selection.setButton(0);
     return context;
   });
 
+  function FindMatchingConnections(editor, json) {
+    const matchingConnections = [];
+
+    for (let connection of editor.connections) {
+
+        const inputNodeId = connection.source;
+        const outputNodeId = connection.target;
+
+        const { source: sourceSocket, target: targetSocket } = GetConnectionSockets(editor, connection);
+
+        const sourceVarName = (sourceSocket as any)?.meta?.var_name;
+        const targetVarName = (targetSocket as any)?.meta?.var_name;
+
+        // Check if the input or output matches any target socket.
+        const isMatch = json.some(target =>
+          (target.nodeId === inputNodeId && target.socketName === sourceVarName) ||
+          (target.nodeId === outputNodeId && target.socketName === targetVarName)
+        );
+
+        if (isMatch) {
+            matchingConnections.push(connection);
+        }
+    }
+
+    return matchingConnections;
+  } 
+
+function HashString(str) {
+    let hash = 0;
+    if (str.length === 0) return hash;
+
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0;
+    }
+    return hash;
+}
+
+  let lastHash : number = 0;
+  let highlightedConnectionIds = new Set<string>();
+
   // Keep getting last active sockets from C++ to highlight them.
   async function GetLastActiveSockets() {
     // Wait until Emscripten runtime is ready.
@@ -432,9 +478,36 @@ selection.setButton(0);
 
     // Convert the pointer to a JavaScript string.
     const socketString = UTF8ToString(ptr);
-    console.log('Active sockets:', socketString);
 
-    // Free the allocated memory
+    if (!socketString) return;
+
+    // If the string didn't change, don't update highlighted connections.
+    const hash = HashString(socketString);
+    if(hash == lastHash) {
+      return;
+    } else {
+      lastHash = hash;
+    }
+
+    try {
+        const socketStringJson = JSON.parse(socketString);
+
+        // Find matching connections in the Rete editor.
+        const matchingConnections = FindMatchingConnections(editor, socketStringJson);
+
+        // Update the global set of highlighted connection IDs.
+        highlightedConnectionIds = new Set(matchingConnections.map(conn => conn.id));
+        
+        // Re-render the connections.
+        for (const conn of editor.getConnections()) {
+          area.update('connection', conn.id);
+        }
+
+    } catch (error) {
+        console.error('Failed to parse active sockets JSON:', error);
+    }
+
+    // Free the allocated memory.
     Module.ccall(
         'FreeLastActiveSockets',
         null,                    

@@ -70,8 +70,10 @@ export function AFSocket<T extends ClassicPreset.Socket>({ data }: { data: T }) 
       }
 
       if (
-        context.type === 'connectionremoved' &&
-        (port.name === context.data.sourceOutput || port.name === context.data.targetInput)
+        (context.type === 'connectionremove' ||
+        context.type === 'connectionremoved') &&
+        (port.name === context.data.sourceOutput ||
+        port.name === context.data.targetInput)
       ) {
         setConnected(false);
         meta.isConnected = false;
@@ -84,7 +86,7 @@ export function AFSocket<T extends ClassicPreset.Socket>({ data }: { data: T }) 
     editor.addPipe(pipe);
 
     return () => {
-      
+      //editor.removePipe(pipe);
     };
   }, [editor, port.name]);
 

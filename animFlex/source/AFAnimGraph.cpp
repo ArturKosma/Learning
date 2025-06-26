@@ -7,8 +7,6 @@
 
 #include "third_party/json.hpp"
 
-nlohmann::json AFAnimGraph::lastActiveSockets = nlohmann::json::array();
-
 void AFAnimGraph::Compile(const std::string& graphString)
 {
 	printf("%s\n", "Compiling graph.");
@@ -21,6 +19,7 @@ void AFAnimGraph::Evaluate(float deltaTime)
 	{
 		// Mark all nodes dirty. This will allow for new evaluation of each of them.
 		AFEvaluator::Get().ClearEvaluationState();
+		AFEvaluator::Get().ClearLastActiveSockets();
 
 		std::string connectedNodeId = "";
 		std::string connectedSocketName = "";
@@ -36,19 +35,9 @@ void AFAnimGraph::Evaluate(float deltaTime)
 			return;
 		}
 
-		// Evaluate the connected node.
-		AFEvaluator::Get().EvaluateNode(connectedNode);
-
-		// Go through the static properties in order to find value of the connected socket.
-		std::vector<std::shared_ptr<FAFParamStaticPropertyBase>> staticProperties = AFGraphNodeRegistry::Get().GetStaticProperties(connectedNode->GetNodeType());
-		for (std::shared_ptr<FAFParamStaticPropertyBase> property : staticProperties)
-		{
-			const std::string& paramName = property->GetParamName();
-			if (paramName == connectedSocketName)
-			{
-				m_finalPose = *static_cast<FAFParam<AFPose>*>(property->GetParam(connectedNode));
-			}
-		}
+		// Get value for the output pose node.
+		// This should trigger whole chain of node evaluations.
+		m_finalPose = m_outputPoseNode->Pose.GetValue();
 	}
 }
 
@@ -64,6 +53,7 @@ void AFAnimGraph::OnNodeCreated(const std::string& msg)
 
 	// Construct a node - it will be now accessible via m_idToNode hashmap.
 	std::shared_ptr<AFGraphNode> newNode = AFGraphNodeRegistry::Get().CreateNode(nodeType, nodeId);
+	newNode->m_nodeId = nodeId;
 	newNode->Init();
 
 	// #hack
@@ -135,20 +125,4 @@ void AFAnimGraph::OnNodeRemoved(const std::string& msg)
 const AFPose& AFAnimGraph::GetFinalPose() const
 {
 	return m_finalPose;
-}
-
-void AFAnimGraph::AddLastActiveSocket(const nlohmann::json& newSocket)
-{
-	lastActiveSockets.push_back(newSocket);
-}
-
-const std::string& AFAnimGraph::GetLastActiveSockets()
-{
-	static std::string json = lastActiveSockets.dump();
-	return json;
-}
-
-void AFAnimGraph::ClearLastActiveSockets()
-{
-	lastActiveSockets = nlohmann::json::array();
 }

@@ -2,12 +2,12 @@
 
 void AFGraphNode_BlendByBool::Evaluate(float deltaTime)
 {
-	if (useA.GetValue())
+	if (blendBool_useA.GetValue())
 	{
-		printf("evaluating blend by bool: true\n");
+		blendBool_outputPose.SetValue(blendBool_inputPoseA.GetValue());
 	}
 	else
 	{
-		printf("evaluating blend by bool: false\n");
+		blendBool_outputPose.SetValue(blendBool_inputPoseB.GetValue());
 	}
 }

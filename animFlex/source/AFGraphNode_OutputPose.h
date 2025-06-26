@@ -9,7 +9,7 @@ class AFGraphNode_OutputPose : public AFGraphNodeCRTP<AFGraphNode_OutputPose>
 
 public:
 
-	FAFParam<AFPose> Pose = {};
+	FAFParam<AFPose> Pose = FAFParam<AFPose>("Pose");
 	inline static FAFGraphNodeParamRegistrar<AFGraphNode_OutputPose, AFPose> _registrar_Pose = FAFGraphNodeParamRegistrar<AFGraphNode_OutputPose, AFPose>("OutputPose", "Pose", &AFGraphNode_OutputPose::Pose, "Input");
 
 

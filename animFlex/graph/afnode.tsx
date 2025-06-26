@@ -87,9 +87,18 @@ export const NodeStyles = styled.div <{
   .output.socketHovered {
     background: linear-gradient(to left, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 100%);
   }
+
+  .output.socketHovered.float {
+    background: linear-gradient(to left, rgba(134, 249, 52, 0.7) 0%, rgba(0, 185, 30, 0.0) 100%);
+  }
+
+  .output.socketHovered.bool {
+    background: linear-gradient(to left, rgba(255, 0, 0, 0.7) 0%, rgba(255, 0, 0, 0.0) 100%);
+  }
+
   .inputs-column {
-    justify-content: center;
-    align-self: flex-start;
+    justify-content: flex-start;
+    align-self: center;
     display: flex;
     flex-direction: column;
     padding-top: 6px;
@@ -109,10 +118,21 @@ export const NodeStyles = styled.div <{
     text-align: left;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    width: auto;
   }
   .input.socketHovered {
     background: linear-gradient(to right, rgba(85, 85, 85, 0.9) 0%, rgba(85, 85, 85, 0.0) 100%);
   }
+  
+  .input.socketHovered.float {
+    background: linear-gradient(to right, rgba(134, 249, 52, 0.7) 0%, rgba(0, 140, 20, 0.0) 100%);
+  }
+
+  .input.socketHovered.bool {
+    background: linear-gradient(to right, rgba(255, 0, 0, 0.7) 0%, rgba(255, 0, 0, 0.0) 100%);
+  }
+
   .output-socket {
     text-align: right;
     margin-right: 0px;
@@ -133,14 +153,8 @@ export const NodeStyles = styled.div <{
     margin-bottom: auto;
   }
   .input-control {
-    z-index: 1;
-    display: flex;
-    align-items: center;
     margin-left: 6px;
-  }
-  .control {
-    display: block;
-    padding: ${AFNodeVars.$socketmargin}px ${AFNodeVars.$socketsize / 2 + AFNodeVars.$socketmargin}px;
+    display: inline-block;
   }
   ${(props) => props.styles && props.styles(props)}
 `;
@@ -272,11 +286,12 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
           ([key, input]) => {
 
             const isHidden = input.socket.meta?.HidePin;
+            const socketType = input.socket.meta?.socketType;
 
             const uniqueId_input = React.useMemo(() => crypto.randomUUID(), []);
 
             return input ? (
-            <div className={`input ${hoveredSocketId === uniqueId_input ? "socketHovered" : ""}`} 
+            <div className={`input ${hoveredSocketId === uniqueId_input ? "socketHovered" : ""} ${socketType ?? ''}`} 
             key={key} 
             data-testid={`${uniqueId_input}`}
             >
@@ -313,32 +328,36 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
       </div>
       )}
 
-       {controls.length > 0 && (
+      {controls.length > 0 && (
         <div className="inputs-column">
-      {/* Controls */}
-      {controls.map(([key, control]) => {
-        return control ? (
-          <RefControl
-            key={key}
-            name="control"
-            emit={props.emit}
-            payload={control}
-          />
-        ) : null;
-      })}
-      </div>
-      )}
-
-      <div style={{ flex: 1 }} /> {/* Spacer that pushes outputs to the right */}
+        {/* Controls */}
+          {controls.map(([key, control]) => {
+            return control ? (
+              <div className="input" key={key}>
+                <span className="input-control">
+                  <RefControl
+                    key={key}
+                    name="input-control"
+                    emit={props.emit}
+                    payload={control}
+                  />
+                </span>
+              </div>
+            ) : null;
+          })}
+        </div>
+        )}
+      <div style={{ flex: 1 }} />
       {outputs.length > 0 && (
         <div className="outputs-column">
       {/* Outputs */}
       {outputs.map(
           ([key, output]) => {
-            const uniqueId_output = React.useMemo(() => crypto.randomUUID(), []);
+              const uniqueId_output = React.useMemo(() => crypto.randomUUID(), []);
+              const socketType = output.socket.meta?.socketType;
 
               return output ? (
-               <div className={`output ${hoveredSocketId === uniqueId_output ? "socketHovered" : ""}`} 
+               <div className={`output ${hoveredSocketId === uniqueId_output ? "socketHovered" : ""} ${socketType ?? ''}`} 
                key={key} 
                data-testid={`${uniqueId_output}`}
                >

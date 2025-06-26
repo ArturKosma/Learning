@@ -15,21 +15,25 @@ const Svg = styled.svg`
   z-index: 0;
 `;
 
-let highlighted = false;
-
-const Path = styled.path<{ highlighted: boolean }>`
+const Path = styled.path<{ highlighted: boolean, socketType: string }>`
   fill: none;
   stroke-width: ${(p) => (p.highlighted ? "3px" : "2px")};
-  stroke: ${(p) =>
-    p.highlighted
-      ? "rgb(255, 255, 255)"
-      : "rgba(190, 190, 190, 0.8)"};
+  stroke: ${(p) => {
+    if(p.highlighted) return "rgb(255, 255, 255)";
+
+    if(p.socketType === "float") return "rgba(134, 249, 52, 0.8)";
+    if(p.socketType === "bool") return "rgba(255, 0, 0, 0.8)";
+
+    return "rgba(190, 190, 190, 0.8)";
+  }};
   pointer-events: none;
 `;
 
 export function AFConnection(props: {
   data: ClassicScheme["Connection"] & { isLoop?: boolean };
   styles?: () => any;
+  highlighted: boolean;
+  socketType: string;
 }) {
   const { path } = useConnection();
   const pathRef = React.useRef<SVGPathElement>(null);
@@ -88,10 +92,11 @@ export function AFConnection(props: {
         ref={pathRef}
         d={path}
         styles={props.styles}
-        highlighted={highlighted}
+        highlighted={props.highlighted}
+        socketType={props.socketType}
       />
 
-      {highlighted &&
+      {props.highlighted &&
         Array.from({ length: dotCount }).map((_, i) => (
           <circle
             key={i}

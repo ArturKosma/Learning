@@ -3,7 +3,7 @@
 
 class AFGraphNode_MakeFloat : public AFGraphNodeCRTP<AFGraphNode_MakeFloat>
 {
-	AFCLASS(AFGraphNode_MakeFloat, "Make Float", "Compact|Color=Green");
+	AFCLASS(AFGraphNode_MakeFloat, "Make Float", "Compact")
 
 public:
 

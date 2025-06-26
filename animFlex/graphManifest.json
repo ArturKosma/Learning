@@ -7,28 +7,28 @@
             "params": [
                 {
                     "var_type": "AFPose",
-                    "var_name": "inputPoseA",
+                    "var_name": "blend_inputPoseA",
                     "label": "A",
                     "direction": "Input",
                     "meta": []
                 },
                 {
                     "var_type": "AFPose",
-                    "var_name": "inputPoseB",
+                    "var_name": "blend_inputPoseB",
                     "label": "B",
                     "direction": "Input",
                     "meta": []
                 },
                 {
                     "var_type": "float",
-                    "var_name": "alpha",
+                    "var_name": "blend_alpha",
                     "label": "Alpha",
                     "direction": "Input",
                     "meta": []
                 },
                 {
                     "var_type": "AFPose",
-                    "var_name": "outputPose",
+                    "var_name": "blend_outputPose",
                     "label": "",
                     "direction": "Output",
                     "meta": []
@@ -42,28 +42,53 @@
             "params": [
                 {
                     "var_type": "AFPose",
-                    "var_name": "inputPoseA",
+                    "var_name": "blendBool_inputPoseA",
                     "label": "A",
                     "direction": "Input",
                     "meta": []
                 },
                 {
                     "var_type": "AFPose",
-                    "var_name": "inputPoseB",
+                    "var_name": "blendBool_inputPoseB",
                     "label": "B",
                     "direction": "Input",
                     "meta": []
                 },
                 {
                     "var_type": "bool",
-                    "var_name": "useA",
+                    "var_name": "blendBool_useA",
                     "label": "Use A",
                     "direction": "Input",
                     "meta": []
                 },
                 {
                     "var_type": "AFPose",
-                    "var_name": "outpusePose",
+                    "var_name": "blendBool_outputPose",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_MakeBool",
+            "node_name": "Make Bool",
+            "meta": [
+                "Compact"
+            ],
+            "params": [
+                {
+                    "var_type": "bool",
+                    "var_name": "Input",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin"
+                    ]
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "Output",
                     "label": "",
                     "direction": "Output",
                     "meta": []
@@ -74,8 +99,7 @@
             "class_id": "AFGraphNode_MakeFloat",
             "node_name": "Make Float",
             "meta": [
-                "Compact",
-                "Color=Green"
+                "Compact"
             ],
             "params": [
                 {
@@ -103,7 +127,7 @@
             "params": [
                 {
                     "var_type": "std::string",
-                    "var_name": "animName",
+                    "var_name": "playseq_animName",
                     "label": "",
                     "direction": "Input",
                     "meta": [
@@ -113,7 +137,7 @@
                 },
                 {
                     "var_type": "AFPose",
-                    "var_name": "outputPose",
+                    "var_name": "playseq_outputPose",
                     "label": "",
                     "direction": "Output",
                     "meta": []

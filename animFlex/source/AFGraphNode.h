@@ -4,6 +4,8 @@
 
 class AFGraphNode
 {
+	friend class AFAnimGraph;
+
 public:
 
 	virtual ~AFGraphNode() = default;
@@ -12,12 +14,17 @@ public:
 	virtual void OnUpdate();
 	virtual void Evaluate(float deltaTime) = 0;
 
+	std::string GetNodeID() const;
 	virtual std::string GetNodeType() const = 0;
 
 	bool operator==(const AFGraphNode& other) const
 	{
 		return GetNodeType() == other.GetNodeType();
 	}
+
+protected:
+
+	std::string m_nodeId = "";
 };
 
 template<typename Derived>
