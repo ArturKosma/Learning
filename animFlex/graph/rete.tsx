@@ -531,6 +531,6 @@ function HashString(str) {
   resizeObserver.observe(container);
   
   return {
-      destroy: () => area.destroy(),
+      editor, destroy: () => area.destroy(),
   };
 }

@@ -107,8 +107,11 @@ export function GetNodeMeta(type: string): any {
     // Default shared metadata.
     const defaultMeta = {
         type,
+        color: "#121212",
+        titleBarColor: 'linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3))',
         title: dynamicTitle,
         showTitle: true,
+        titleEditable: false,
         showSubTitle: false,
         nodeWidth: 240,
         nodeHeight: 80,
@@ -130,6 +133,17 @@ export function GetNodeMeta(type: string): any {
                 bigIcon_path: resultPoseIcon,
             };
             break;
+        case "AFGraphNode_Graph":
+            return {
+                ...defaultMeta,
+                showSubTitle: true,
+                subTitle: "Graph",
+                title: "New Graph",
+                titleEditable: true,
+                nodeWidth: 160,
+                color: 'linear-gradient(to right, rgba(12, 12, 12, 1.0), rgba(28, 28, 28, 0.9))',
+                titleBarColor: "rgba(0, 0, 0, 0.0)",
+            }
         default:
             return {
                 ...defaultMeta,

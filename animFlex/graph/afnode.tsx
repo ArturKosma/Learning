@@ -3,6 +3,39 @@ import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import styled, { css } from "styled-components";
 import * as AFNodeVars from './affunclib';
 
+export const StyledInput = styled.input`
+  width: 100%;
+  background: transparent;
+  color: rgba(235, 235, 235, 0.93);
+  border: none;
+  outline: none;
+  font-family: "Segoe UI", sans-serif;
+  font-weight: bold;
+  font-size: 12px;
+  user-select: text;
+  caret-color: rgba(235, 235, 235, 0.93);
+
+  &::placeholder {
+    color: rgba(235, 235, 235, 0.2);
+  }
+  
+  &::-webkit-input-placeholder {
+    color: rgba(235, 235, 235, 0.2);
+  }
+  
+  &::-moz-placeholder {
+    color: rgba(235, 235, 235, 0.2);
+  }
+  
+  &:-ms-input-placeholder {
+    color: rgba(235, 235, 235, 0.2);
+  }
+  
+  &::-ms-input-placeholder {
+    color: rgba(235, 235, 235, 0.2);
+  }
+`;
+
 const { RefSocket, RefControl } = Presets.classic;
 
 export const NodeStyles = styled.div <{
@@ -11,7 +44,7 @@ export const NodeStyles = styled.div <{
       meta?: any;
       classMeta?: string[];
 }>`
-  background: #121212;
+  background: ${(props) => (props.meta.color)};
   opacity: 0.9;
   border: 1px solid black;
   border-radius: 10px;
@@ -55,11 +88,12 @@ export const NodeStyles = styled.div <{
     opacity: 0.8
   }
   .titleBar {
-    background-image: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3));
+    background-image: ${(props) => (props.meta.titleBarColor)};
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     z-index: 0;
     height: ${(props) => (props.meta.showSubTitle ? "40px" : "25px")};
+    pointer-events: auto;
   }
   .titleText {
     color: rgba(235, 235, 235, 0.93);
@@ -67,7 +101,11 @@ export const NodeStyles = styled.div <{
     font-weight: bold;
     font-style: normal;
     font-size: 12px;
-    padding: 2px 10px
+    padding: 2px 10px;
+    user-select: text;
+    cursor: ${(props) =>
+       props.meta?.titleEditable ? 'text' : 'move'};
+    pointer-events: auto;
   }
    .subTitleText {
     color: rgba(170, 170, 170, 0.8);
@@ -250,6 +288,34 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
     };
   }, []);
 
+  const [isEditing, setIsEditing] = React.useState(meta.titleEditable ? true : false);
+  const [title, setTitle] = React.useState(meta.titleEditable ? '' : meta.title);
+
+  React.useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'F2' && selected && !isEditing && meta.titleEditable) {
+      setIsEditing(true);
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, [selected, isEditing, meta.titleEditable]);
+
+const inputRef = React.useRef<HTMLInputElement>(null);
+
+React.useEffect(() => {
+  if (isEditing && inputRef.current) {
+    const input = inputRef.current;  
+    input.focus();
+    const len = input.value.length;
+    input.setSelectionRange(len, len);
+  }
+}, [isEditing]);
+
   return (
     <NodeStyles
       selected={selected}
@@ -260,9 +326,43 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
       data-testid="node"
     >
       {!(meta.classMeta as string[])?.includes('Compact') && (
-        <div className="titleBar" data-testid="titleBar" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div className="titleText" data-testid="titleText">
-              {meta.title}
+        <div className="titleBar" 
+        data-testid="titleBar"
+        {...(meta.titleEditable && {
+          onPointerDownCapture: (e: React.PointerEvent) => e.stopPropagation(),
+          onMouseDownCapture:   (e: React.MouseEvent)   => e.stopPropagation(),
+        })} 
+        style={{ display: "flex", 
+        flexDirection: "column", 
+        justifyContent: "center",}}>
+          <div 
+            className="titleText" 
+            data-testid="titleText"
+            {...(meta.titleEditable && {
+              onMouseDown: (e: React.MouseEvent) => e.stopPropagation(),
+              onClick:      () => setIsEditing(true),
+            })}
+            >
+              {isEditing && meta.titleEditable ? (
+                  <StyledInput
+                    ref={inputRef}
+                    type="text"
+                    value={title}
+                    placeholder="Graph Title"
+                    onChange={(e) => setTitle(e.target.value)}
+                    onBlur={() => {
+                      setIsEditing(false);
+                      meta.title = title;
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setIsEditing(false);
+                        meta.title = title;
+                      }
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  />
+                ) : meta.title}
           </div>
           <div className="subTitleText" data-testid="subTitleText">
               {meta.subTitle}

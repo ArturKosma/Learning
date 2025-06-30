@@ -71,6 +71,20 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_Graph",
+            "node_name": "Graph",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "GraphOutput",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_MakeBool",
             "node_name": "Make Bool",
             "meta": [
