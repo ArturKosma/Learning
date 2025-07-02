@@ -145,10 +145,11 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 
 		// Free fetch memory.
 		emscripten_fetch_close(fetch);
-		delete userContext;
 
 		// Call complete.
 		userContext->onComplete(userContext->ret);
+
+		delete userContext;
 	};
 
 	attr.onerror = [](emscripten_fetch_t* fetch)
@@ -158,10 +159,11 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 
 		// Free fetch memory.
 		emscripten_fetch_close(fetch);
-		delete userContext;
 
 		// Call complete.
 		userContext->onComplete(userContext->ret);
+
+		delete userContext;
 	};
 
 	emscripten_fetch(&attr, fullPath.c_str());

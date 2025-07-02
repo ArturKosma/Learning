@@ -2,6 +2,7 @@
 #include "AFSkeletalMeshComponent.h"
 #include <chrono>
 
+#include "AFEvaluator.h"
 #include "AFMesh.h"
 
 void AFAnimState::Tick(float deltaTime)
@@ -114,6 +115,11 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 		return;
 	}
 
+	// Mark all nodes dirty. This will allow for new evaluation of each of them.
+	AFEvaluator::Get().ClearEvaluationState();
+	AFEvaluator::Get().ClearLastActiveSockets();
+
+	//printf("%s\n", "main eval!");
 	m_graph->Evaluate(deltaTime);
 
 	const std::vector<std::shared_ptr<AFJoint>>& calculatedJoints = m_graph->GetFinalPose().GetJoints();

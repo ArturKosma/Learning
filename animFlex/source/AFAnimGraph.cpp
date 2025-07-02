@@ -7,31 +7,23 @@
 
 #include "third_party/json.hpp"
 
-void AFAnimGraph::Compile(const std::string& graphString)
-{
-	printf("%s\n", "Compiling graph.");
-	printf("%s\n", graphString.c_str());
-}
-
 void AFAnimGraph::Evaluate(float deltaTime)
 {
 	if (m_outputPoseNode)
 	{
-		// Mark all nodes dirty. This will allow for new evaluation of each of them.
-		AFEvaluator::Get().ClearEvaluationState();
-		AFEvaluator::Get().ClearLastActiveSockets();
-
 		std::string connectedNodeId = "";
 		std::string connectedSocketName = "";
 		m_outputPoseNode->Pose.GetConnection(connectedNodeId, connectedSocketName);
 		if (connectedNodeId.empty() || connectedSocketName.empty())
 		{
+			//printf("%s\n", "empty!");
 			return;
 		}
 
 		std::shared_ptr<AFGraphNode> connectedNode = AFGraphNodeRegistry::Get().GetNode(connectedNodeId);
 		if (!connectedNode)
 		{
+			//printf("%s\n", "no connected node id!");
 			return;
 		}
 
@@ -43,6 +35,7 @@ void AFAnimGraph::Evaluate(float deltaTime)
 
 void AFAnimGraph::OnNodeCreated(const std::string& msg)
 {
+	//printf("%s\n", msg.c_str());
 	nlohmann::json nodes = nlohmann::json::parse(msg);
 
 	// @todo Enable multiple nodes creation.
@@ -61,6 +54,7 @@ void AFAnimGraph::OnNodeCreated(const std::string& msg)
 	// @todo Don't check this upon every node creation.
 	if (nodeType == "OutputPose")
 	{
+		//printf("%s\n", "output pose created!");
 		m_outputPoseNode = std::dynamic_pointer_cast<AFGraphNode_OutputPose>(newNode);
 	}
 }
@@ -75,6 +69,8 @@ void AFAnimGraph::OnNodeUpdated(const std::string& msg)
 	// Fetch edited node ID.
 	const std::string& nodeId = node["nodeId"];
 	const std::string& nodeType = node["nodeType"];
+
+	//printf("%s\n", msg.c_str());
 
 	// Find the node to edit.
 	std::shared_ptr<AFGraphNode> editedNode = AFGraphNodeRegistry::Get().GetNode(nodeId);

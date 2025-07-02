@@ -9,5 +9,12 @@ public:
 
 	AFPARAM(AFPose, GraphOutput, "", "Output", "");
 
+	void Init() override;
+
 	void Evaluate(float deltaTime) override;
+	std::shared_ptr<AFAnimGraph> GetGraph() const;
+
+protected:
+
+	std::shared_ptr<AFAnimGraph> m_graph = nullptr;
 };

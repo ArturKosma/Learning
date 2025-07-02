@@ -76,6 +76,7 @@ export const NodeStyles = styled.div <{
     justify-content: space-between;
     flex-grow: 1;
     align-items: center;
+    pointer-events: auto;
     }
   .node-big-icon {
     position: absolute;
@@ -114,6 +115,7 @@ export const NodeStyles = styled.div <{
     font-style: italic;
     font-size: 12px;
     padding: ${(props) => (props.meta.showSubTitle ? "2px 10px" : "0px 10px")};
+    pointer-events: none;
   }
   .output {
     text-align: right;
@@ -369,7 +371,17 @@ React.useEffect(() => {
           </div>
         </div>
       )}
-      <div className="node-body">
+      <div 
+      className="node-body"
+      onMouseDownCapture={e => {
+          if (e.detail === 2) {
+            e.stopPropagation();
+            if (typeof meta.onDoubleClick === "function") {
+              meta.onDoubleClick(meta.title, props.data.id);
+            }
+          }
+        }}
+      >
       {/* Optional Big Icon */}
       {meta.bigIcon && meta.bigIcon_path && (
       <img

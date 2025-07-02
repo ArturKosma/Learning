@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ClassicPreset } from 'rete';
-import { GraphUpdate, OnNodeUpdated } from './affunclib';
+import { ClassicPreset, GetSchemes, NodeEditor } from 'rete';
+import { OnNodeUpdated } from './affunclib';
 import { AreaPlugin } from 'rete-area-plugin';
 import { ReactPlugin } from 'rete-react-plugin';
 
@@ -15,22 +15,26 @@ async function loadManifest(): Promise<{ name: string }[]> {
   return animNamesManifest;
 }
 
+type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
+
 export class DropdownControl extends ClassicPreset.Control {
 
   value: string;
   onChange?: (val: string) => void;
   node: ClassicPreset.Node;
+  editor: NodeEditor<Schemes>;
 
-  constructor(type: string, node: ClassicPreset.Node) {
+  constructor(type: string, editor: NodeEditor<Schemes>, node: ClassicPreset.Node) {
     super();
-    this.value = ''
+    this.value = '';
     this.node = node;
+    this.editor = editor;
   }
 
   setValue(val: string) {
     this.value = val;
     this.onChange?.(val);
-    OnNodeUpdated(this.node)
+    OnNodeUpdated(this.editor, this.node)
   }
 }
 

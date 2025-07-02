@@ -96,6 +96,16 @@
             background: linear-gradient(to bottom, #888, #666);
         }
 
+        #view-label .crumb {
+            background: rgba(32, 32, 32, 0.6);
+            padding: 3px 3px;
+            border-radius: 4px;
+        }
+
+        #view-label .crumb:hover {
+            background: rgba(87, 87, 0, 0.6);
+        }
+
     </style>
 </head>
 <body>
@@ -112,18 +122,15 @@
         <div id="rete" style="flex: 1; min-height: 0vh; background: #202020; overflow: hidden; position: relative;">
             <div id="view-label" style="
                 position: absolute;
-                padding: 3px 3px;
-                border-radius: 4px;
-                pointer-events: none;
+                pointer-events: auto;
                 z-index: 9999;
                 font-family: 'Roboto', sans-serif;
                 font-weight: 400;
                 font-size: 14px;
                 letter-spacing: 0.5px;
                 color: #dadada9c;
-                background: rgba(32, 32, 32, 0.6);
             ">
-                MAIN
+                Main
             </div>
         </div>
     </div>
@@ -341,25 +348,7 @@
         import { createView, switchToView } from "../animFlex/graph/afmanager.tsx";
 
         (async () => {
-            const inst0 = await createView("MAIN");
-            switchToView("MAIN");
-            //const inst1 = await createView("SUB");
-
-            /*let flipFlopTab = true;
-
-            // Bind TAB for temporary editor view jumping.
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'Tab') {
-                    if (container) {
-                        if (flipFlopTab) {
-                            switchToView("SUB");
-                        } else {
-                            switchToView("MAIN");
-                        }
-                    }
-                    flipFlopTab = !flipFlopTab;
-                }
-            });*/
+            const inst0 = await createView("Main", "0");
         })();
     </script>
     <!-- @vite-ignore -->

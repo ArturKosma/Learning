@@ -9,10 +9,10 @@
 
 AFPose::AFPose()
 {
-	ApplyJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
+	CreateJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
 }
 
-void AFPose::ApplyJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
+void AFPose::CreateJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
 {
 	m_joints.clear();
 	m_joints.resize(joints.size());

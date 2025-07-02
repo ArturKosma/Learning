@@ -10,12 +10,11 @@ class AFAnimGraph : public AFObject
 {
 public:
 
-	void Compile(const std::string& graphString);
 	void Evaluate(float deltaTime);
 
 	void OnNodeCreated(const std::string& msg);
-	void OnNodeUpdated(const std::string& msg);
-	void OnNodeRemoved(const std::string& msg);
+	static void OnNodeUpdated(const std::string& msg);
+	static void OnNodeRemoved(const std::string& msg);
 
 	const AFPose& GetFinalPose() const;
 

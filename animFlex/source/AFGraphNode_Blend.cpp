@@ -23,10 +23,9 @@ void AFGraphNode_Blend::Evaluate(float deltaTime)
 		return;
 	}
 
-	AFPose a = blend_inputPoseA.GetValue();
-	AFPose b = blend_inputPoseB.GetValue();
-	AFPose finalPose;
-	finalPose.ApplyJoints(a.GetJoints());
+	const AFPose& a = blend_inputPoseA.GetValue();
+	const AFPose& b = blend_inputPoseB.GetValue();
+	const AFPose& finalPose = blend_outputPose.GetValue();
 
 	for (size_t i = 0; i < a.GetJoints().size(); ++i)
 	{
@@ -40,6 +39,4 @@ void AFGraphNode_Blend::Evaluate(float deltaTime)
 
 		finalPose.GetJoints()[i]->CalculateLocalTRSMatrix();
 	}
-
-	blend_outputPose.SetValue(finalPose);
 }

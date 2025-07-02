@@ -1,14 +1,10 @@
 #include "AFGraphNode_PlaySequence.h"
 
 #include "AFContent.h"
-#include "AFMesh.h"
 
 void AFGraphNode_PlaySequence::Init()
 {
-	// #hack.
-	// In normal situation this would fetch the skeleton that the anim blueprint was created for.
-	std::shared_ptr<AFMesh> mannequinMesh = AFContent::Get().FindAsset<AFMesh>("sk_mannequin");
-	const_cast<AFPose&>(playseq_outputPose.GetValue()).ApplyJoints(mannequinMesh->GetJoints());
+
 }
 
 void AFGraphNode_PlaySequence::OnUpdate()

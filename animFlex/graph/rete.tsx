@@ -15,11 +15,11 @@ import {
 } from "rete-context-menu-plugin";
 import styled from "styled-components";
 import {DropdownControl, CustomDropdown} from './afdropdown'; 
-import {CanCreateConnection, GetConnectionSockets, GraphUpdate, OnNodeCreated, OnNodeRemoved, OnNodeUpdated} from './affunclib'
-import {SetEditorInstance} from './afeditorinstance'
+import {CanCreateConnection, GetConnectionSockets, OnNodeCreated, OnNodeRemoved, OnNodeUpdated} from './affunclib'
 import { setupSelection } from './selection';
 import { BoolControl, CustomChecker } from "./afchecker";
 import { CustomFloatField, FloatControl } from "./affloatfield";
+import { getCurrentView } from "./afmanager";
 
 declare const Module: any;
 
@@ -54,8 +54,9 @@ window.addEventListener('keydown', e => {
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 
-export async function createEditor(container: HTMLElement) {
+export async function createEditor(container: HTMLElement, id: string) {
 
+  const viewId = id;
   preloadPins();
 
   // Read and parse JSON graph manifest.
@@ -72,7 +73,6 @@ export async function createEditor(container: HTMLElement) {
 
   // Create plugins.
   const editor = new NodeEditor<Schemes>();
-  SetEditorInstance(editor); // Make it globally accessible.
   let area = new AreaPlugin<Schemes, AreaExtra>(container);
   const connection = new ConnectionPlugin<Schemes, AreaExtra>();
   let render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
@@ -169,35 +169,7 @@ selection.setButton(0);
             }
             }}));
     connection.addPreset(() => new AFFlow(editor));
-
-  // Disconnect any existing connection when picking up a socket.
-  connection.addPipe(context => {
-    if(context.type === 'connectionpick') {
-      const { socket } = context.data;
-      const nodeId = socket.nodeId;
-      const key = socket.key;
-      const isOutput = socket.side === 'output';
-
-      const node = editor.getNode(nodeId);
-
-      if (!node) return context;
-
-      const connections = editor.getConnections();
-
-      // Remove all existing connections on this socket.
-      for (const conn of connections) {
-        const match = isOutput
-          ? (conn.sourceOutput === key)
-          : (conn.targetInput === key);
-
-        if (match) {
-          editor.removeConnection(conn.id);
-        }
-      }
-    }
-
-    return context;
-  })
+    connection.addPreset(() => new ConnectionPresets.single(editor));
 
   // Context menu stylized.
   const { Menu, Common, Search, Item, Subitems } = Presets.contextMenu
@@ -343,6 +315,9 @@ selection.setButton(0);
 
       // Delete for nodes deletion.
     if(e.key === 'Delete') {
+
+      if (getCurrentView().id !== viewId) return;
+
       for (const selectedEntity of selector.entities.values()) {
       const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
         meta?: {isRemovable?: boolean}
@@ -382,8 +357,8 @@ selection.setButton(0);
     if (context.type === 'connectioncreated' || context.type === 'connectionremoved') {
       const { source, target } = context.data;
 
-      enqueueNode(() => OnNodeUpdated(editor.getNode(source)!));
-      enqueueNode(() => OnNodeUpdated(editor.getNode(target)!));
+      enqueueNode(() => OnNodeUpdated(editor, editor.getNode(source)!));
+      enqueueNode(() => OnNodeUpdated(editor, editor.getNode(target)!));
     }
     return context;
   });
@@ -398,7 +373,7 @@ selection.setButton(0);
   editor.addPipe(context => {
   if (context.type === 'nodecreated') {
 
-    enqueueNode(() => OnNodeCreated(context.data));
+    enqueueNode(() => OnNodeCreated(context.data, viewId));
     }
 
     return context;
@@ -458,6 +433,9 @@ function HashString(str) {
 
   // Keep getting last active sockets from C++ to highlight them.
   async function GetLastActiveSockets() {
+
+    if (getCurrentView().id != viewId) return;
+
     // Wait until Emscripten runtime is ready.
     if (!Module.calledRun) {
         await new Promise<void>((resolve) => {
@@ -531,6 +509,9 @@ function HashString(str) {
   resizeObserver.observe(container);
   
   return {
-      editor, destroy: () => area.destroy(),
+      editor, selector, destroy: () => {
+        clearInterval(intervalId);
+        area.destroy()
+      },
   };
 }

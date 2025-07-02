@@ -2,12 +2,12 @@ import { ClassicPreset, NodeEditor, GetSchemes } from "rete";
 import {DropdownControl} from './afdropdown'; 
 import resultPoseIcon from './resultPose.png';
 import { NodeRef } from "rete-area-plugin/_types/extensions/shared/types";
-import { editorInstance } from "./afeditorinstance";
 import { Input, Socket } from "rete/_types/presets/classic";
 import { classIdToMeta, classIdToName, classIdToParams, GraphNodeParam } from './afnodeFactory';
 import { getSourceTarget } from 'rete-connection-plugin'
 import { BoolControl } from "./afchecker";
 import { FloatControl } from "./affloatfield";
+import { createView, switchToView } from "./afmanager";
 
 class PoseSocket extends ClassicPreset.Socket {
   constructor(name: string) {
@@ -45,16 +45,16 @@ class StringSocket extends ClassicPreset.Socket {
   }
 }
 
-export function GetDefaultControlPerType(node: ClassicPreset.Node, socketType: string, meta: any) {
+export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: ClassicPreset.Node, socketType: string, meta: any) {
   switch (socketType) {
     case "bool":
-      return new BoolControl(node);
+      return new BoolControl(editor, node);
     case "float":
-      return new FloatControl(node);
+      return new FloatControl(editor, node);
     case "string": {
         const dropdownMeta = meta.find((m: string) => m.includes("Dropdown_"));
         if (dropdownMeta) {
-            return new DropdownControl(dropdownMeta, node);
+            return new DropdownControl(dropdownMeta, editor, node);
         }
         return undefined;
     }
@@ -143,6 +143,9 @@ export function GetNodeMeta(type: string): any {
                 nodeWidth: 160,
                 color: 'linear-gradient(to right, rgba(12, 12, 12, 1.0), rgba(28, 28, 28, 0.9))',
                 titleBarColor: "rgba(0, 0, 0, 0.0)",
+                onDoubleClick: (currentTitle: string, nodeId: string) => {
+                    createView(currentTitle, nodeId);
+                }
             }
         default:
             return {
@@ -247,7 +250,7 @@ function CreateAndAddSocket(
         node.addInput(uid, newSocket);
 
         // Create default control and assign it to the input.
-        const defaultControl = GetDefaultControlPerType(node, socketType, meta);
+        const defaultControl = GetDefaultControlPerType(editor, node, socketType, meta);
         if (defaultControl) {
             (newSocket as ClassicPreset.Input).control = defaultControl;
             (newSocket as ClassicPreset.Input).showControl = true;
@@ -310,7 +313,7 @@ export function CreateSockets(node: ClassicPreset.Node, editor: NodeEditor<Schem
 
 declare const Module: any;
 
-export async function OnNodeCreated(node: ClassicPreset.Node) {
+export async function OnNodeCreated(node: ClassicPreset.Node, context: string) {
 
     // Wait until Emscripten runtime is ready.
     if (!Module.calledRun) {
@@ -333,6 +336,7 @@ export async function OnNodeCreated(node: ClassicPreset.Node) {
     graphJSON.push({
         nodeType: nodeType,
         nodeId: node.id,
+        nodeContext: context
     });
 
     // Stringify JSON.
@@ -347,7 +351,9 @@ export async function OnNodeCreated(node: ClassicPreset.Node) {
     );  
 }
 
-export async function OnNodeUpdated(node: ClassicPreset.Node) {
+export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPreset.Node) {
+
+    //console.log("updating: " + node.id);
 
     // Wait until Emscripten runtime is ready.
     if (!Module.calledRun) {
@@ -361,7 +367,7 @@ export async function OnNodeUpdated(node: ClassicPreset.Node) {
     }
 
     // Get all connections.
-    const allConnections = editorInstance?.getConnections?.() ?? [];
+    const allConnections = editor.getConnections?.() ?? [];
 
     // Container for JSON.
     const graphJSON: any[] = [];
@@ -386,7 +392,7 @@ export async function OnNodeUpdated(node: ClassicPreset.Node) {
             const conn = inputConnection[0];
             valueField = {
                 connectedNodeId: conn.source,
-                connectedSocketName: (editorInstance?.getNode(conn.source)?.outputs[conn.sourceOutput]?.socket as any)?.meta?.var_name
+                connectedSocketName: (editor.getNode(conn.source)?.outputs[conn.sourceOutput]?.socket as any)?.meta?.var_name
             }
         }
         //.. or has a plain value
@@ -421,7 +427,7 @@ export async function OnNodeUpdated(node: ClassicPreset.Node) {
             const conn = outputConnection[0];
             valueField = {
                 connectedNodeId: conn.target,
-                connectedSocketName: (editorInstance?.getNode(conn.target)?.inputs[conn.targetInput]?.socket as any)?.meta?.var_name
+                connectedSocketName: (editor.getNode(conn.target)?.inputs[conn.targetInput]?.socket as any)?.meta?.var_name
             }
         }
         //.. or has a plain value
@@ -496,99 +502,4 @@ export async function OnNodeRemoved(node: ClassicPreset.Node) {
         ['string'],       
         [graphString]
     );  
-}
-
-export async function GraphUpdate() {
-
-    // Wait until Emscripten runtime is ready.
-    if (!Module.calledRun) {
-        await new Promise<void>((resolve) => {
-        const prevInit = Module.onRuntimeInitialized;
-        Module.onRuntimeInitialized = function () {
-            if (typeof prevInit === 'function') prevInit();
-            resolve();
-        };
-        });
-    }
-
-    // Get all nodes.
-    const nodes = editorInstance?.getNodes() ?? [];
-
-    // Get all connections.
-    const allConnections = editorInstance?.getConnections?.() ?? [];
-
-    // Container for JSON.
-    const graphJSON: any[] = [];
-
-    // Go through each node.
-    for (const node of nodes) {
-
-        // Casted node type to any, to prevent lack of meta errors.
-        const nodeType = (node as any).meta?.type;
-
-        // Container for sockets.
-        const sockets: any[] = [];
-
-        // Go through all inputs.
-        for (const [key, input] of Object.entries(node.inputs)) {
-
-            // Get connection for this input.
-            const inputConnection = allConnections.filter(conn => {
-                return conn.target === node.id && conn.targetInput === key;
-            });
-
-            // The socket is either connected..
-            let valueField;
-            if(inputConnection.length == 1) {
-                const conn = inputConnection[0];
-                valueField = {
-                    connectedNodeId: conn.source,
-                    connectedSocketId: conn.sourceOutput
-                }
-            }
-            //.. or has a plain value
-            else {
-                valueField = {
-                    value: "None"
-                }
-            }
-
-            // Add input.
-            sockets.push({
-                sockedId: key,
-                direction: "input",
-                type: (input?.socket as any)?.meta?.socketType,
-                valueField
-            });
-        }
-
-        // Go through all outputs.
-        for (const [key, output] of Object.entries(node.outputs)) {
-
-            // Add output.
-            sockets.push({
-                sockedId: key,
-                direction: "output",
-                type: (output?.socket as any)?.meta?.socketType
-            });
-        }
-
-        // Add this node to JSON.
-        graphJSON.push({
-            nodeId: node.id,
-            nodeType: nodeType,
-            sockets
-        });
-    }
-
-    // Stringify the JSON.
-    const graphString = JSON.stringify(graphJSON);
-
-    // Pass the JSON to C++.
-    Module.ccall(
-        'OnGraphUpdate',   
-        null,              
-        ['string'],       
-        [graphString]
-    );   
 }

@@ -1,22 +1,26 @@
 import React from 'react';
-import { ClassicPreset } from 'rete';
+import { ClassicPreset, GetSchemes, NodeEditor } from 'rete';
 import { OnNodeUpdated } from './affunclib';
+
+type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
 export class BoolControl extends ClassicPreset.Control {
   value: boolean;
   onChange?: (val: boolean) => void;
   node: ClassicPreset.Node;
+  editor: NodeEditor<Schemes>
 
-  constructor(node: ClassicPreset.Node) {
+  constructor(editor: NodeEditor<Schemes>, node: ClassicPreset.Node) {
     super();
     this.value = false;
     this.node = node;
+    this.editor = editor;
   }
 
   setValue(val: boolean) {
     this.value = val;
     this.onChange?.(val);
-    OnNodeUpdated(this.node);
+    OnNodeUpdated(this.editor, this.node);
   }
 }
 
