@@ -1,0 +1,133 @@
+{
+  "hash": "34dadc47",
+  "configHash": "f805df5b",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "8cc15d0d",
+  "optimized": {
+    "react": {
+      "src": "../../../animFlex/graph/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "d6e92a4a",
+      "needsInterop": true
+    },
+    "react-dom": {
+      "src": "../../../animFlex/graph/node_modules/react-dom/index.js",
+      "file": "react-dom.js",
+      "fileHash": "8bbc47f7",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../../animFlex/graph/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "722062f5",
+      "needsInterop": true
+    },
+    "react/jsx-runtime": {
+      "src": "../../../animFlex/graph/node_modules/react/jsx-runtime.js",
+      "file": "react_jsx-runtime.js",
+      "fileHash": "becf77f1",
+      "needsInterop": true
+    },
+    "rete": {
+      "src": "../../../animFlex/graph/node_modules/rete/rete.esm.js",
+      "file": "rete.js",
+      "fileHash": "ede0a68a",
+      "needsInterop": false
+    },
+    "rete-area-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-area-plugin/rete-area-plugin.esm.js",
+      "file": "rete-area-plugin.js",
+      "fileHash": "df6d7f5b",
+      "needsInterop": false
+    },
+    "rete-connection-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-connection-plugin/rete-connection-plugin.esm.js",
+      "file": "rete-connection-plugin.js",
+      "fileHash": "69403801",
+      "needsInterop": false
+    },
+    "rete-react-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-react-plugin/rete-react-plugin.esm.js",
+      "file": "rete-react-plugin.js",
+      "fileHash": "8e56d0e8",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../../animFlex/graph/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "45616ca3",
+      "needsInterop": true
+    },
+    "styled-components": {
+      "src": "../../../animFlex/graph/node_modules/styled-components/dist/styled-components.browser.esm.js",
+      "file": "styled-components.js",
+      "fileHash": "e2992a3f",
+      "needsInterop": false
+    },
+    "rete-context-menu-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-context-menu-plugin/rete-context-menu-plugin.esm.js",
+      "file": "rete-context-menu-plugin.js",
+      "fileHash": "d7412783",
+      "needsInterop": false
+    },
+    "antd": {
+      "src": "../../../animFlex/graph/node_modules/antd/es/index.js",
+      "file": "antd.js",
+      "fileHash": "8fea2301",
+      "needsInterop": false
+    },
+    "rete-auto-arrange-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-auto-arrange-plugin/rete-auto-arrange-plugin.esm.js",
+      "file": "rete-auto-arrange-plugin.js",
+      "fileHash": "b172546b",
+      "needsInterop": false
+    },
+    "intersects": {
+      "src": "../../../animFlex/graph/node_modules/intersects/index.js",
+      "file": "intersects.js",
+      "fileHash": "ac6952a8",
+      "needsInterop": true
+    },
+    "poly-decomp": {
+      "src": "../../../animFlex/graph/node_modules/poly-decomp/src/index.js",
+      "file": "poly-decomp.js",
+      "fileHash": "94ffe0fb",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-KTQQQ4GN": {
+      "file": "chunk-KTQQQ4GN.js"
+    },
+    "chunk-HCAUJSZP": {
+      "file": "chunk-HCAUJSZP.js"
+    },
+    "chunk-XB4SY35X": {
+      "file": "chunk-XB4SY35X.js"
+    },
+    "chunk-4LE5KZDT": {
+      "file": "chunk-4LE5KZDT.js"
+    },
+    "chunk-YIYNUNGK": {
+      "file": "chunk-YIYNUNGK.js"
+    },
+    "chunk-HW4NKPJU": {
+      "file": "chunk-HW4NKPJU.js"
+    },
+    "chunk-HEBRAWWK": {
+      "file": "chunk-HEBRAWWK.js"
+    },
+    "chunk-JFY43LN3": {
+      "file": "chunk-JFY43LN3.js"
+    },
+    "chunk-ZHE56U7I": {
+      "file": "chunk-ZHE56U7I.js"
+    },
+    "chunk-WYQODRND": {
+      "file": "chunk-WYQODRND.js"
+    },
+    "chunk-PLDDJCW6": {
+      "file": "chunk-PLDDJCW6.js"
+    }
+  }
+}
