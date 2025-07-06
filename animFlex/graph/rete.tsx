@@ -344,6 +344,11 @@ selection.setButton(0);
   // Prevent creation when sockets are not compatible.
   editor.addPipe((context) => {
   if (context.type === "connectioncreate") {
+
+    // Force rehash whenever a new connection is created.
+    // This is to prevent a bug where you reconnect the exact same connection and the hash is being the same.
+    lastHash = 0;
+
     if (!CanCreateConnection(editor, context.data)) {
       return;
     }
@@ -379,7 +384,7 @@ selection.setButton(0);
     return context;
   });
 
-  // Listen for node delection and inform C++ about it.
+  // Listen for node deletion and inform C++ about it.
   editor.addPipe(context => {
   if (context.type === 'noderemoved') {
 

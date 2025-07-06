@@ -239,8 +239,8 @@ function CreateAndAddSocket(
 
     // Create socket object casted.
     const newSocket = param.direction === "Input"
-        ? new ClassicPreset.Input(socket)
-        : new ClassicPreset.Output(socket);
+        ? new ClassicPreset.Input(socket, undefined, false)
+        : new ClassicPreset.Output(socket, undefined, false);
 
     // Add it a label.
     newSocket.label = param.label;
