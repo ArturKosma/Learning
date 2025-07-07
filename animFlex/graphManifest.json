@@ -157,6 +157,20 @@
                     "meta": []
                 }
             ]
+        },
+        {
+            "class_id": "AFGraphNode_StateMachine",
+            "node_name": "State Machine",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "StateMachineOutput",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
         }
     ]
 }

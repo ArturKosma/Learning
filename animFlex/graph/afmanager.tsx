@@ -1,4 +1,7 @@
 import { createEditor } from "./rete";
+import { createEditorSM } from "./retesm";
+import { createEditorCond } from "./reteCond";
+import { ReteViewType } from "./aftypes";
 
 let currentView : any;
 
@@ -42,7 +45,13 @@ function updateLabel() {
     });
 }
 
-export async function createView(name: string, id: string) {
+interface EditorInstance {
+    editor: any, 
+    selector: any,
+    destroy: () => void 
+}
+
+export async function createView(name: string, id: string, type: ReteViewType) {
 
     const entry = editors.find(e => e.id === id);
     if(entry) {
@@ -63,7 +72,24 @@ export async function createView(name: string, id: string) {
         `;
         parentContainer?.appendChild(container);
 
-        const editorInstance = await createEditor(container, id);
+        let editorInstance: EditorInstance;
+
+        switch(type) {
+            case ReteViewType.Graph: {
+                editorInstance = await createEditor(container, id);
+                break;
+            }
+            case ReteViewType.StateMachine: {
+                editorInstance = await createEditorSM(container, id);
+                break;
+            }
+            case ReteViewType.ConditionalGraph: {
+                editorInstance = await createEditorCond(container, id);
+                break;
+            }
+
+        }
+
         editors.push({name: name, id: id, container, ...editorInstance });
     }
 

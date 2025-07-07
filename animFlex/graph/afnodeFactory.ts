@@ -1,5 +1,6 @@
 import { NodeEditor, GetSchemes, ClassicPreset } from "rete";
 import { GetNodeMeta, CreateSockets } from "./affunclib";
+import { ReteViewType } from "./afmanager";
 
 export type GraphNodeParam = {
   var_type: string;
@@ -27,7 +28,7 @@ export class AFNodeFactory {
         this.node = node
     }
 
-    static create(type: string, editor: NodeEditor<Schemes>, contextMenu: boolean = false): AFNodeFactory {
+    static create(type: string, editor: NodeEditor<Schemes>, contextMenu: boolean = false, graphType: ReteViewType): AFNodeFactory {
         const node = new ClassicPreset.Node("") as ClassicPreset.Node & {
             meta: {
                 type: string,
@@ -44,7 +45,7 @@ export class AFNodeFactory {
         };
 
         // Fill meta like color, title.
-        node.meta = GetNodeMeta(type);
+        node.meta = GetNodeMeta(type, graphType);
 
         // Fill sockets like input, output, dropdowns.
         CreateSockets(node, editor);

@@ -8,6 +8,7 @@ import { getSourceTarget } from 'rete-connection-plugin'
 import { BoolControl } from "./afchecker";
 import { FloatControl } from "./affloatfield";
 import { createView, switchToView } from "./afmanager";
+import { ReteViewType } from "./aftypes";
 
 class PoseSocket extends ClassicPreset.Socket {
   constructor(name: string) {
@@ -99,26 +100,66 @@ SocketTypes.set("std::string", "string");
 SocketTypes.set("float", "float");
 SocketTypes.set("bool", "bool");
 
-export function GetNodeMeta(type: string): any {
+export function GetNodeMeta(type: string, graphType: ReteViewType): any {
 
     const dynamicTitle = classIdToName.get(type) ?? "Unknown";
     const classMeta = classIdToMeta.get(type);
 
-    // Default shared metadata.
-    const defaultMeta = {
-        type,
-        color: "#121212",
-        titleBarColor: 'linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3))',
-        title: dynamicTitle,
-        showTitle: true,
-        titleEditable: false,
-        showSubTitle: false,
-        nodeWidth: 240,
-        nodeHeight: 80,
-        bigIcon: false,
-        isRemovable: true,
-        classMeta,
-    };
+    let defaultMeta: any;
+
+    switch(graphType) {
+        case ReteViewType.StateMachine: {
+            defaultMeta = {
+                type,
+                color: "#121212",
+                titleBarColor: 'linear-gradient(to right, rgba(85, 85, 85, 0.0), rgba(85, 85, 85, 0.0))',
+                title: dynamicTitle,
+                showTitle: true,
+                titleEditable: true,
+                showSubTitle: false,
+                nodeWidth: 80,
+                nodeHeight: 80,
+                bigIcon: false,
+                isRemovable: true,
+                classMeta,
+            };
+            break;
+        }
+        case ReteViewType.Graph: {
+            defaultMeta = {
+                type,
+                color: "#121212",
+                titleBarColor: 'linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3))',
+                title: dynamicTitle,
+                showTitle: true,
+                titleEditable: false,
+                showSubTitle: false,
+                nodeWidth: 240,
+                nodeHeight: 80,
+                bigIcon: false,
+                isRemovable: true,
+                classMeta,
+            };
+            break;
+        }
+        default: {
+             defaultMeta = {
+                type,
+                color: "#121212",
+                titleBarColor: 'linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(85, 85, 85, 0.3))',
+                title: dynamicTitle,
+                showTitle: true,
+                titleEditable: false,
+                showSubTitle: false,
+                nodeWidth: 240,
+                nodeHeight: 80,
+                bigIcon: false,
+                isRemovable: true,
+                classMeta,
+            };
+            break;
+        }
+    }
 
     switch (type) {
         case "OutputPose":
@@ -132,7 +173,6 @@ export function GetNodeMeta(type: string): any {
                 bigIcon: true,
                 bigIcon_path: resultPoseIcon,
             };
-            break;
         case "AFGraphNode_Graph":
             return {
                 ...defaultMeta,
@@ -144,8 +184,33 @@ export function GetNodeMeta(type: string): any {
                 color: 'linear-gradient(to right, rgba(12, 12, 12, 1.0), rgba(28, 28, 28, 0.9))',
                 titleBarColor: "rgba(0, 0, 0, 0.0)",
                 onDoubleClick: (currentTitle: string, nodeId: string) => {
-                    createView(currentTitle, nodeId);
+                    createView(currentTitle, nodeId, ReteViewType.Graph);
                 }
+            };
+        case "AFGraphNode_StateMachine":
+            return {
+                ...defaultMeta,
+                showSubTitle: true,
+                subTitle: "State Machine",
+                title: "New Graph",
+                titleEditable: true,
+                nodeWidth: 160,
+                color: 'linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(70, 70, 70, 0.9))',
+                titleBarColor: "rgba(0, 0, 0, 0.0)",
+                onDoubleClick: (currentTitle: string, nodeId: string) => {
+                    createView(currentTitle, nodeId, ReteViewType.StateMachine);
+                }
+            };
+        case "StateStart":
+            return {
+                ...defaultMeta,
+                showSubTitle: false,
+                subTitle: "",
+                title: "",
+                titleEditable: false,
+                nodeWidth: 80,
+                color: 'linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(70, 70, 70, 0.9))',
+                titleBarColor: "rgba(0, 0, 0, 0.0)",
             }
         default:
             return {

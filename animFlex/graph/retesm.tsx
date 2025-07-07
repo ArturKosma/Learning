@@ -55,7 +55,7 @@ window.addEventListener('keydown', e => {
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 
-export async function createEditor(container: HTMLElement, id: string) {
+export async function createEditorSM(container: HTMLElement, id: string) {
 
   const viewId = id;
   preloadPins();
@@ -84,7 +84,7 @@ export async function createEditor(container: HTMLElement, id: string) {
     items: ContextMenuPresets.classic.setup(
       Array.from(classIdToName.entries()).map(([classId, nodeName]) => [
         nodeName,
-        () => AFNodeFactory.create(classId, editor, true, ReteViewType.Graph).node
+        () => AFNodeFactory.create(classId, editor, true, ReteViewType.StateMachine).node
       ])
     )
   });
@@ -253,7 +253,7 @@ selection.setButton(0);
   AreaExtensions.simpleNodesOrder(area);
 
   // Create default nodes.
-  const outputPoseNode = await AFNodeFactory.create("OutputPose", editor, false, ReteViewType.Graph);
+  const stateMachineStart = await AFNodeFactory.create("StateStart", editor, false, ReteViewType.StateMachine);
 
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
@@ -379,7 +379,7 @@ selection.setButton(0);
   editor.addPipe(context => {
   if (context.type === 'nodecreated') {
 
-    enqueueNode(() => OnNodeCreated(context.data, viewId));
+    //enqueueNode(() => OnNodeCreated(context.data, viewId));
     }
 
     return context;

@@ -345,10 +345,11 @@
         });
     </script>
     <script type="module">
-        import { createView, switchToView } from "../animFlex/graph/afmanager.tsx";
+        import { createView, switchToView} from "../animFlex/graph/afmanager.tsx";
+        import { ReteViewType } from "../animFlex/graph/aftypes.tsx";
 
         (async () => {
-            const inst0 = await createView("Main", "0");
+            const inst0 = await createView("Main", "0", ReteViewType.Graph);
         })();
     </script>
     <!-- @vite-ignore -->
