@@ -1,48 +1,22 @@
-﻿import { createRoot } from "react-dom/client";
-import { NodeEditor, GetSchemes, ClassicPreset } from "rete";
-import { AreaPlugin, AreaExtensions, Drag } from "rete-area-plugin";
-import { ConnectionPlugin, Presets as ConnectionPresets, makeConnection } from "rete-connection-plugin";
-import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
-import { addCustomBackground } from "./custom-background";
-import { AFNodeFactory, classIdToName, GraphNode, GraphNodeParam, classIdToParams, classIdToMeta } from './afnodeFactory';
-import { AFNode } from './afnode';
-import { AFSocket, preloadPins} from './afsocket';
-import { AFConnection, AFFlow } from './afconnection';
-import {
-  ContextMenuExtra,
-  ContextMenuPlugin,
-  Presets as ContextMenuPresets
-} from "rete-context-menu-plugin";
-import styled from "styled-components";
-import {DropdownControl, CustomDropdown} from './afdropdown'; 
-import {CanCreateConnection, GetConnectionSockets, OnNodeCreated, OnNodeRemoved, OnNodeUpdated} from './affunclib'
+﻿import { ClassicPreset as Classic, ClassicPreset, GetSchemes, NodeEditor } from 'rete';
+import { Area2D, AreaExtensions, AreaPlugin, Drag } from 'rete-area-plugin';
+import { ConnectionPlugin } from 'rete-connection-plugin';
+import { ReactPlugin, ReactArea2D, Presets as ReactPresets } from 'rete-react-plugin';
+import { createRoot } from 'react-dom/client';
+import { AutoArrangePlugin, Presets as ArrangePresets } from 'rete-auto-arrange-plugin';
+import { ContextMenuPlugin, ContextMenuExtra, Presets as ContextMenuPresets } from 'rete-context-menu-plugin';
+import { ConnectionPathPlugin } from "rete-connection-path-plugin";
+import { curveNatural } from "d3-shape";
+import { ComputedSocketPosition } from './circle-socket';
+import { CircleNode } from './editor/Node';
+import { CircleSocket } from './editor/Socket';
+import { CustomConnection } from './editor/Connection';
+import { createSelector } from './selector';
+import { UniPortConnector } from './connector';
+import { Shape, ShapeProps } from './types';
+import { pathTransformer, useTransformerUpdater } from './path';
 import { setupSelection } from './selection';
-import { BoolControl, CustomChecker } from "./afchecker";
-import { CustomFloatField, FloatControl } from "./affloatfield";
-import { getCurrentView } from "./afmanager";
-import { ReteViewType } from "./aftypes";
-
-declare const Module: any;
-
-const nodeQueue: (() => Promise<void>)[] = [];
-let isProcessing = false;
-
-function enqueueNode(fn: () => Promise<void>) {
-  nodeQueue.push(fn);
-  processQueue();
-}
-
-async function processQueue() {
-  if (isProcessing || nodeQueue.length === 0) return;
-  isProcessing = true;
-
-  while (nodeQueue.length > 0) {
-    const task = nodeQueue.shift();
-    if (task) await task();
-  }
-
-  isProcessing = false;
-}
+import { addCustomBackground } from "./custom-background";
 
 // Stop any backspace keydown propagation from Rete.
 // This allows using backspace in all input fields.
@@ -52,72 +26,67 @@ window.addEventListener('keydown', e => {
   }
 }, true);
 
-type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
-type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
+type Schemes = GetSchemes<Node, Connection<Node, Node>>;
+
+class Connection<A extends Node, B extends Node> extends Classic.Connection<
+  A,
+  B
+> {
+  selected?: boolean
+  click: (data: Connection<A, B>) => void
+  remove: (data: Connection<A, B>) => void
+
+  constructor(events: { click: (data: Connection<A, B>) => void, remove: (data: Connection<A, B>) => void }, source: A, target: B, public isLoop?: boolean) {
+    super(source, 'default', target, 'default')
+    this.click = events.click
+    this.remove = events.remove
+  }
+}
+
+class Node extends Classic.Node {
+  width = 80;
+  height = 80;
+
+  constructor(label: string, public shape: Shape = 'rect') {
+    super(label);
+
+    this.addInput('default', new Classic.Input(socket));
+    this.addOutput('default', new Classic.Output(socket));
+  }
+}
+
+type AreaExtra = Area2D<Schemes> | ReactArea2D<Schemes> | ContextMenuExtra;
+
+const socket = new Classic.Socket('socket');
 
 export async function createEditorSM(container: HTMLElement, id: string) {
 
   const viewId = id;
-  preloadPins();
 
-  // Read and parse JSON graph manifest.
-  const res = await fetch('./graphManifest.json');
-  const data = await res.json();
-  const nodes: GraphNode[] = data.Nodes;
-
-  // Cache JSON nodes manifest.
-  for (const node of nodes) {
-    classIdToName.set(node.class_id, node.node_name);
-    classIdToParams.set(node.class_id, node.params);
-    classIdToMeta.set(node.class_id, node.meta);
-  }
-
-  // Create plugins.
-  const editor = new NodeEditor<Schemes>();
-  let area = new AreaPlugin<Schemes, AreaExtra>(container);
-  const connection = new ConnectionPlugin<Schemes, AreaExtra>();
-  let render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
+  const editor      = new NodeEditor<Schemes>();
+  const area        = new AreaPlugin<Schemes, AreaExtra>(container);
+  const connection  = new ConnectionPlugin<Schemes, AreaExtra>();
+  const reactRender = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
   const selector = AreaExtensions.selector();
 
-  // Context menu.
-  const contextMenu = new ContextMenuPlugin<Schemes>({
-    items: ContextMenuPresets.classic.setup(
-      Array.from(classIdToName.entries()).map(([classId, nodeName]) => [
-        nodeName,
-        () => AFNodeFactory.create(classId, editor, true, ReteViewType.StateMachine).node
-      ])
-    )
-  });
+  // Custom grid background.
+  addCustomBackground(area);
 
-  function dummyAccum() {
-    return {
-      active() {
-        return false;
-      },
+  // Install Rete plugins.
+  editor.use(area);
+  area.use(reactRender);
+  area.use(connection);
 
-      destroy() {
+  // Make sockets circle-positioned.
+  const socketPositionWatcher = new ComputedSocketPosition('circle');
 
-      }
-    }
-  }
-
-  // Enables node selection in the editor area.
-  AreaExtensions.simpleNodesOrder(area);
-  const nodeSelector = AreaExtensions.selectableNodes(area, selector, {
-    accumulating: AreaExtensions.accumulateOnCtrl()
-  });
-
-  const selection = setupSelection(area, {
-    selected(ids) {
-      selector.unselectAll();
-      ids.forEach((id, i) => {
-        nodeSelector.select(id, i !== 0);
-      });
-    },
-  });
-
-selection.setShape('marquee');
-selection.setButton(0);
+  // Hook up custom connection-highlight selector.
+  const connectionSelector = createSelector(area);
+  const connectionEvents = {
+    click:   data => connectionSelector.selectConnection(data),
+    remove:  data => editor.removeConnection(data.id),
+  };
+  connection.addPreset(() => new UniPortConnector(connectionEvents));
 
   // Grid snapping.
   AreaExtensions.snapGrid(area, {size: 16, dynamic: false});
@@ -131,129 +100,30 @@ selection.setButton(0);
       translation: false
   });
 
-  // Visual and behavior presets.
-    render.addPreset(Presets.classic.setup({
-        customize: {
-            node(context) {
-                return AFNode;
-            },
-            socket(context) {
-                return AFSocket;
-            },
-            connection(context) {
-                return (props) => {
-
-                  const { source: sourceSocket, target: targetSocket } = GetConnectionSockets(editor, props.data);
-                  const sourceSocketType = (sourceSocket as any)?.meta?.socketType;
-                  const targetSocketType = (targetSocket as any)?.meta?.socketType;
-                  const socketType = sourceSocketType || targetSocketType;
-
-                  return (
-                    <AFConnection
-                        {...props}
-                        highlighted={highlightedConnectionIds.has(props.data.id)}
-                        socketType={socketType}
-                    />
-                  );
-                }
-            },
-            control(data) {
-                if(data.payload instanceof DropdownControl) {
-                  return CustomDropdown;
-                }
-                if (data.payload instanceof BoolControl) {
-                  return CustomChecker;
-                }
-                if (data.payload instanceof FloatControl) {
-                  return CustomFloatField;
-                }
-            }
-            }}));
-    connection.addPreset(() => new AFFlow(editor));
-    connection.addPreset(() => new ConnectionPresets.single(editor));
-
-  // Context menu stylized.
-  const { Menu, Common, Search, Item, Subitems } = Presets.contextMenu
-  const CustomMenu = styled(Menu)`
-  width: 180px;
-  opacity: 0.9;
-  background-image: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(18, 18, 18, 0.9));
-  border: 1px solid black;
-  border-radius: 10px;
-`
-  const CustomItem = styled(Item)`
-    background:rgb(18, 18, 18);
-    transition: background 0.2s ease;
-    opacity: 0.9;
-    &:hover {
-      background:rgb(35, 35, 35);
-    }
-    border: 1px solid black;
-    font-family: "Segoe UI", sans-serif;
-    font-size: 10px;
-    color: rgba(235, 235, 235, 0.93);
-  `
-  const CustomCommon = styled(Common)`
-    background:rgb(18, 18, 18);
-    opacity: 0.9;
-    border: 1px solid black;
-    &:hover {
-      background:rgb(18, 18, 18);
-    }
-  `
-  const CustomSearch = styled(Search)`
-    background:rgb(18, 18, 18);
-    opacity: 0.9;
-    border: 1px solid rgb(78, 78, 78);
-    transition: border 0.2s ease;
-    font-family: "Segoe UI", sans-serif;
-    font-size: 10px;
-    min-height: 28px;
-    border-radius: 6px;
-
-    &:hover,
-    & input:hover {
-      border: 1px solid rgb(67, 150, 238);
-    }
-
-    &:focus,
-    & input:focus {
-      outline: none;
-      border: 1px solid rgb(67, 150, 238);
-    }
-  `
-  const CustomSubitems = styled(Subitems)`
-    background:rgb(18, 18, 18);
-    opacity: 0.9;
-    &:hover {
-      background-image: linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(18, 18, 18, 1.0));
-    }
-    border: none;
-  `
-  render.addPreset(Presets.contextMenu.setup({
-    customize: {
-      main: () => CustomMenu,
-      item: () => CustomItem,
-      common: () => CustomCommon,
-      search: () => CustomSearch,
-      subitems: () => CustomSubitems
-    }
-  }));
-
-  // Custom grid background.
-  addCustomBackground(area);
-
-  // Register plugins.
-  editor.use(area);
-  area.use(connection);
-  area.use(render);
-  area.use(contextMenu);
-
-  // Nodes layering.
+  // Enable node selection.
+  const reteSelector   = AreaExtensions.selector();
   AreaExtensions.simpleNodesOrder(area);
+  const nodeSelector   = AreaExtensions.selectableNodes(area, reteSelector, {
+    accumulating: AreaExtensions.accumulateOnCtrl()
+  });
+  const selection = setupSelection(area, {
+    selected(ids) {
+      reteSelector.unselectAll();
+      ids.forEach((id,i) => nodeSelector.select(id, i!==0));
+    }
+  });
+  selection.setShape('marquee');
+  selection.setButton(0);
 
-  // Create default nodes.
-  const stateMachineStart = await AFNodeFactory.create("StateStart", editor, false, ReteViewType.StateMachine);
+  // Register React presets.
+  reactRender.addPreset(ReactPresets.classic.setup({
+    socketPositionWatcher,
+    customize: { node:()=>CircleNode,
+                 socket:()=>CircleSocket,
+                 connection:()=>CustomConnection }
+  }));
+  reactRender.addPreset(ReactPresets.classic.setup());
+  reactRender.addPreset(ReactPresets.contextMenu.setup());
 
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
@@ -265,6 +135,23 @@ selection.setButton(0);
     },
     move: () => true
   }))
+
+  // Show dragging hand when dragging around.
+  let dragging = false;
+  area.addPipe(context => {
+      if (context.type === 'translated') {
+          dragging = true;
+          document.body.style.cursor = "grabbing";
+      }
+    return context
+  })
+  area.addPipe(context => {
+      if (context.type === 'pointerup') {
+          dragging = false;
+          document.body.style.cursor = "default";
+      }
+    return context
+  })
 
   // Prevent context menu when dragging.
   let currentMouse = { x: 0, y: 0 };
@@ -294,212 +181,41 @@ selection.setButton(0);
     return context
   })
 
-  // Show dragging hand when dragging around.
-  let dragging = false;
-  area.addPipe(context => {
-      if (context.type === 'translated') {
-          dragging = true;
-          document.body.style.cursor = "grabbing";
-      }
-    return context
-  })
-  area.addPipe(context => {
-      if (context.type === 'pointerup') {
-          dragging = false;
-          document.body.style.cursor = "default";
-      }
-    return context
-  })
+  const pathPlugin = new ConnectionPathPlugin<Schemes, AreaExtra>({
+    transformer: (connection) => pathTransformer(editor, connection),
+    curve: () => curveNatural,
+    arrow: () => true
+  });
 
-  // Bind custom keys.
-  window.addEventListener('keydown', async (e) => {
+  useTransformerUpdater(editor, area);
+  reactRender.use(pathPlugin);
 
-      // Delete for nodes deletion.
-    if(e.key === 'Delete') {
+  const a = new Node('A');
+  const b = new Node('B');
+  const c = new Node('C');
 
-      if (getCurrentView().id !== viewId) return;
+  await editor.addNode(a);
+  await editor.addNode(b);
+  await editor.addNode(c);
 
-      for (const selectedEntity of selector.entities.values()) {
-      const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
-        meta?: {isRemovable?: boolean}
-      };
-        if(node?.meta?.isRemovable) {
-          const connections = editor.getConnections();
-          
-          // Remove all connections where this node is source or target
-          for (const conn of connections) {
-            if (
-              conn.source === node.id ||
-              conn.target === node.id  
-            ) {
-              await editor.removeConnection(conn.id);
-            }
-          }
+  await editor.addConnection(new Connection(connectionEvents, a, c));
+  await editor.addConnection(new Connection(connectionEvents, b, c));
+  await editor.addConnection(new Connection(connectionEvents, c, c, true));
 
-          await editor.removeNode(selectedEntity.id);
-        }
-      }
-    }
-  }, {capture: true})
-
-  // Prevent creation when sockets are not compatible.
-  editor.addPipe((context) => {
-  if (context.type === "connectioncreate") {
-
-    // Force rehash whenever a new connection is created.
-    // This is to prevent a bug where you reconnect the exact same connection and the hash is being the same.
-    lastHash = 0;
-
-    if (!CanCreateConnection(editor, context.data)) {
-      return;
-    }
+  const arrange = new AutoArrangePlugin<Schemes>();
+  const arrangeOptions = {
+    top: 35,
   }
-  return context;
-});
 
-  // Listen for new connections/disconnections.
-  editor.addPipe(context => {
-
-    if (context.type === 'connectioncreated' || context.type === 'connectionremoved') {
-      const { source, target } = context.data;
-
-      enqueueNode(() => OnNodeUpdated(editor, editor.getNode(source)!));
-      enqueueNode(() => OnNodeUpdated(editor, editor.getNode(target)!));
+  arrange.addPreset(ArrangePresets.classic.setup({
+    get top() {
+      return arrangeOptions.top
     }
-    return context;
-  });
+  }));
 
-  // Zoom the view to fit all nodes after 100ms.
-  setTimeout(() => 
-  {
-    AreaExtensions.zoomAt(area, editor.getNodes(), { scale: 0.7 });
-  }, 100);
-
-  // Listen for node creation and inform C++ about it.
-  editor.addPipe(context => {
-  if (context.type === 'nodecreated') {
-
-    //enqueueNode(() => OnNodeCreated(context.data, viewId));
-    }
-
-    return context;
-  });
-
-  // Listen for node deletion and inform C++ about it.
-  editor.addPipe(context => {
-  if (context.type === 'noderemoved') {
-
-    enqueueNode(() => OnNodeRemoved(context.data));
-    }
-
-    return context;
-  });
-
-  function FindMatchingConnections(editor, json) {
-    const matchingConnections = [];
-
-    for (let connection of editor.connections) {
-
-        const inputNodeId = connection.source;
-        const outputNodeId = connection.target;
-
-        const { source: sourceSocket, target: targetSocket } = GetConnectionSockets(editor, connection);
-
-        const sourceVarName = (sourceSocket as any)?.meta?.var_name;
-        const targetVarName = (targetSocket as any)?.meta?.var_name;
-
-        // Check if the input or output matches any target socket.
-        const isMatch = json.some(target =>
-          (target.nodeId === inputNodeId && target.socketName === sourceVarName) ||
-          (target.nodeId === outputNodeId && target.socketName === targetVarName)
-        );
-
-        if (isMatch) {
-            matchingConnections.push(connection);
-        }
-    }
-
-    return matchingConnections;
-  } 
-
-function HashString(str) {
-    let hash = 0;
-    if (str.length === 0) return hash;
-
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash |= 0;
-    }
-    return hash;
-}
-
-  let lastHash : number = 0;
-  let highlightedConnectionIds = new Set<string>();
-
-  // Keep getting last active sockets from C++ to highlight them.
-  async function GetLastActiveSockets() {
-
-    if (getCurrentView().id != viewId) return;
-
-    // Wait until Emscripten runtime is ready.
-    if (!Module.calledRun) {
-        await new Promise<void>((resolve) => {
-        const prevInit = Module.onRuntimeInitialized;
-        Module.onRuntimeInitialized = function () {
-            if (typeof prevInit === 'function') prevInit();
-            resolve();
-        };
-        });
-    }
-
-    const ptr = Module.ccall(
-        'GetLastActiveSockets',   
-        'number',              
-        [],       
-        []
-    );
-
-    // Convert the pointer to a JavaScript string.
-    const socketString = UTF8ToString(ptr);
-
-    if (!socketString) return;
-
-    // If the string didn't change, don't update highlighted connections.
-    const hash = HashString(socketString);
-    if(hash == lastHash) {
-      return;
-    } else {
-      lastHash = hash;
-    }
-
-    try {
-        const socketStringJson = JSON.parse(socketString);
-
-        // Find matching connections in the Rete editor.
-        const matchingConnections = FindMatchingConnections(editor, socketStringJson);
-
-        // Update the global set of highlighted connection IDs.
-        highlightedConnectionIds = new Set(matchingConnections.map(conn => conn.id));
-        
-        // Re-render the connections.
-        for (const conn of editor.getConnections()) {
-          area.update('connection', conn.id);
-        }
-
-    } catch (error) {
-        console.error('Failed to parse active sockets JSON:', error);
-    }
-
-    // Free the allocated memory.
-    Module.ccall(
-        'FreeLastActiveSockets',
-        null,                    
-        ['number'],              
-        [ptr]                    
-    );
-  }
-  const intervalId = setInterval(GetLastActiveSockets, 1000 / 30);
+  area.use(arrange);
+  await arrange.layout();
+  AreaExtensions.simpleNodesOrder(area);
 
   // Wait for the first render (initially rete is hidden) to call zoom.
   const resizeObserver = new ResizeObserver((entries) => {
@@ -516,7 +232,6 @@ function HashString(str) {
   
   return {
       editor, selector, destroy: () => {
-        clearInterval(intervalId);
         area.destroy()
       },
   };

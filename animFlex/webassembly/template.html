@@ -344,7 +344,18 @@
             resizeCanvasToContainer();
         });
     </script>
+    <script>
+        document.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            // swallow it so Rete never sees it:
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            // don't call preventDefault() so the browser still deletes the character
+        }
+        }, { capture: true, passive: false });
+  </script>
     <script type="module">
+
         import { createView, switchToView} from "../animFlex/graph/afmanager.tsx";
         import { ReteViewType } from "../animFlex/graph/aftypes.tsx";
 

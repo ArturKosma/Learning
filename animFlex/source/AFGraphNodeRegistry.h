@@ -10,6 +10,7 @@
 
 #include "AFAnimGraph.h"
 #include "AFEvaluator.h"
+#include "AFExec.h"
 #include "AFPose.h"
 #include "AFTimerManager.h"
 
@@ -130,6 +131,15 @@ struct ParamTraits<std::string>
 		if (!json.is_string()) return false;
 		out = json.get<std::string>();
 		return true;
+	}
+};
+
+template<>
+struct ParamTraits<AFExec>
+{
+	static bool FromJSON(const nlohmann::json& json, AFExec& out)
+	{
+		return false;
 	}
 };
 

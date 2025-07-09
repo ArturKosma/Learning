@@ -67,16 +67,14 @@ void AFGame::OnNodeCreated(const char* msg)
 
 	// Try to find context for this node.
 	// Some of the nodes represent nested graphs.
-	//printf("%s\n", msg);
 	nlohmann::json json = nlohmann::json::parse(msg);
 	const auto& elem = json[0];
 
 	const std::string& nodeContext = elem["nodeContext"];
-	//printf("%s\n", nodeContext.c_str());
+
 	std::shared_ptr<AFGraphNode_Graph> graphNode = std::dynamic_pointer_cast<AFGraphNode_Graph>(AFGraphNodeRegistry::Get().GetNode(nodeContext));
 	if (graphNode)
 	{
-		//printf("%s\n", "Using context.");
 		graph = graphNode->GetGraph();
 	}
 	else

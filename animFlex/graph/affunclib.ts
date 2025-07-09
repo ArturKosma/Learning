@@ -46,6 +46,15 @@ class StringSocket extends ClassicPreset.Socket {
   }
 }
 
+class ExecSocket extends ClassicPreset.Socket {
+  constructor(name: string) {
+    super(name);
+  }
+  isCompatibleWith(other: ClassicPreset.Socket) {
+    return other instanceof ExecSocket;
+  }
+}
+
 export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: ClassicPreset.Node, socketType: string, meta: any) {
   switch (socketType) {
     case "bool":
@@ -99,6 +108,7 @@ SocketTypes.set("AFPose", "Pose");
 SocketTypes.set("std::string", "string");
 SocketTypes.set("float", "float");
 SocketTypes.set("bool", "bool");
+SocketTypes.set("AFExec", "Exec");
 
 export function GetNodeMeta(type: string, graphType: ReteViewType): any {
 
@@ -204,6 +214,7 @@ export function GetNodeMeta(type: string, graphType: ReteViewType): any {
         case "StateStart":
             return {
                 ...defaultMeta,
+                isRemovable: false,
                 showSubTitle: false,
                 subTitle: "",
                 title: "",
@@ -247,6 +258,9 @@ function CreateSocketWithMeta(
         case "string":
             baseSocket = new StringSocket(uid);
             break;
+        case "Exec":
+            baseSocket = new ExecSocket(uid);
+            break;    
         default:
             baseSocket = new ClassicPreset.Socket(uid); // fallback
     }
@@ -367,7 +381,28 @@ export function CreateSockets(node: ClassicPreset.Node, editor: NodeEditor<Schem
         input.label = "Result";
 
         node.addInput(uid, input);
+    } 
 
+    // Treat StateStart node specially as it's not a CPP function.
+    if (nodeType === "StateStart") {
+        const uid = crypto.randomUUID();
+        const socket = CreateSocketWithMeta(
+            uid,
+            "Exec",
+            editor,
+            node
+        );
+
+        const existingMeta = (socket as any).meta ?? {};
+        (socket as any).meta = {
+            ...existingMeta,
+            var_name: "Exec"
+        };
+
+        const output = new ClassicPreset.Output(socket);
+        output.label = "";
+
+        node.addOutput(uid, output);
     } 
 
     // Create every sockets for every other node type.
