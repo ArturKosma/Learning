@@ -17,6 +17,7 @@ import { Shape, ShapeProps } from './types';
 import { pathTransformer, useTransformerUpdater } from './path';
 import { setupSelection } from './selection';
 import { addCustomBackground } from "./custom-background";
+import { Presets as ConnectionPresets, makeConnection } from "rete-connection-plugin";
 
 // Stop any backspace keydown propagation from Rete.
 // This allows using backspace in all input fields.
@@ -27,6 +28,15 @@ window.addEventListener('keydown', e => {
 }, true);
 
 type Schemes = GetSchemes<Node, Connection<Node, Node>>;
+
+async function create(label: string, editor: NodeEditor<Schemes>, entry: boolean = false) {
+
+  const node = entry ? new StateNodeEntry(label) : new StateNode(label);  
+  (node as any).meta = { isEntry: entry };
+
+  await editor.addNode(node);
+  return node;
+}
 
 class Connection<A extends Node, B extends Node> extends Classic.Connection<
   A,
@@ -49,9 +59,24 @@ class Node extends Classic.Node {
 
   constructor(label: string, public shape: Shape = 'rect') {
     super(label);
+  }
+}
 
-    this.addInput('default', new Classic.Input(socket));
-    this.addOutput('default', new Classic.Output(socket));
+class StateNode extends Node {
+   constructor(label: string, public shape: Shape = 'rect') {
+    super(label);
+
+      this.addInput('default', new Classic.Input(socket));
+      this.addOutput('default', new Classic.Output(socket));
+  }
+}
+
+class StateNodeEntry extends Node {
+  width = 80;
+  constructor(label: string, public shape: Shape = 'rect') {
+    super(label);
+
+      this.addOutput('default', new Classic.Output(socket));
   }
 }
 
@@ -88,6 +113,31 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   };
   connection.addPreset(() => new UniPortConnector(connectionEvents));
 
+  // Allow only a single output on the Entry node.
+  editor.addPipe(async ctx => {
+    if (ctx.type === 'connectioncreate') {
+      const conn    = ctx.data as Schemes['Connection'];
+      const srcNode = editor.getNode(conn.source)!;
+      const tgtNode = editor.getNode(conn.target)!;
+
+      if (conn.source === conn.target)
+        return;
+
+      if ((tgtNode as any).meta?.isEntry)
+        return;
+
+      if ((srcNode as any).meta?.isEntry) {
+        const existing = editor.getConnections()
+                              .filter(c => c.source === conn.source && c.output === conn.output);
+        if (existing.length > 0) {
+          await editor.removeConnection(existing[0].id);
+        }
+      }
+    }
+
+    return ctx;
+  });
+
   // Grid snapping.
   AreaExtensions.snapGrid(area, {size: 16, dynamic: false});
 
@@ -100,9 +150,10 @@ export async function createEditorSM(container: HTMLElement, id: string) {
       translation: false
   });
 
+  AreaExtensions.simpleNodesOrder(area);
+
   // Enable node selection.
   const reteSelector   = AreaExtensions.selector();
-  AreaExtensions.simpleNodesOrder(area);
   const nodeSelector   = AreaExtensions.selectableNodes(area, reteSelector, {
     accumulating: AreaExtensions.accumulateOnCtrl()
   });
@@ -201,17 +252,9 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   useTransformerUpdater(editor, area);
   reactRender.use(pathPlugin);
 
-  const a = new Node('A');
-  const b = new Node('B');
-  const c = new Node('C');
-
-  await editor.addNode(a);
-  await editor.addNode(b);
-  await editor.addNode(c);
-
-  await editor.addConnection(new Connection(connectionEvents, a, c));
-  await editor.addConnection(new Connection(connectionEvents, b, c));
-  await editor.addConnection(new Connection(connectionEvents, c, c, true));
+  const entry = await create("Entry", editor, true);
+  const a = await create("A", editor);
+  const b = await create("B", editor);
 
   const arrange = new AutoArrangePlugin<Schemes>();
   const arrangeOptions = {
