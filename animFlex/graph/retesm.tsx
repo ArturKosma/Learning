@@ -44,7 +44,7 @@ class Connection<A extends Node, B extends Node> extends Classic.Connection<
 }
 
 class Node extends Classic.Node {
-  width = 80;
+  width = 160;
   height = 80;
 
   constructor(label: string, public shape: Shape = 'rect') {
@@ -181,10 +181,21 @@ export async function createEditorSM(container: HTMLElement, id: string) {
     return context
   })
 
+  // Prevent connecting node with itself.
+  editor.addPipe(ctx => {
+  if (ctx.type === 'connectioncreate') {
+      const conn = ctx.data as Schemes['Connection'];
+      if (conn.source === conn.target) {
+        return;
+      }
+    }
+    return ctx;
+  });
+
   const pathPlugin = new ConnectionPathPlugin<Schemes, AreaExtra>({
     transformer: (connection) => pathTransformer(editor, connection),
     curve: () => curveNatural,
-    arrow: () => true
+    arrow: () => false
   });
 
   useTransformerUpdater(editor, area);
