@@ -44,14 +44,6 @@ async function processQueue() {
   isProcessing = false;
 }
 
-// Stop any backspace keydown propagation from Rete.
-// This allows using backspace in all input fields.
-window.addEventListener('keydown', e => {
-  if (e.key === 'Backspace') {
-    e.stopImmediatePropagation();
-  }
-}, true);
-
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 
@@ -80,27 +72,48 @@ export async function createEditor(container: HTMLElement, id: string) {
   let render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
   const selector = AreaExtensions.selector();
 
-  // Context menu.
+  // Context menu item type
+  type Item = {
+    label: string;
+    key: string;
+    handler: () => void;
+  };
+
+  // Context menu
   const contextMenu = new ContextMenuPlugin<Schemes>({
-    items: ContextMenuPresets.classic.setup(
-      Array.from(classIdToName.entries()).map(([classId, nodeName]) => [
-        nodeName,
-        () => AFNodeFactory.create(classId, editor, true, ReteViewType.Graph).node
-      ])
-    )
-  });
-
-  function dummyAccum() {
-    return {
-      active() {
-        return false;
-      },
-
-      destroy() {
-
+    items: (context) => {
+      // If right-clicked on a node
+      if (typeof context !== "string") {
+        return {
+          list: [] // No context menu items for nodes
+        };
       }
+
+      // If right-clicked on empty space (root)
+      if (context === "root") {
+        return {
+          list: Array.from(classIdToName.entries()).map(([classId, nodeName]): Item => ({
+            label: nodeName,
+            key: classId,
+            handler: async () => {
+              const { x: screenX, y: screenY } = area.area.pointer;
+
+              const { node } = AFNodeFactory.create(classId, editor, true, ReteViewType.Graph) as {
+                node: ClassicPreset.Node;
+              };
+
+              await editor.addNode(node);
+              await area.translate(node.id, { x: screenX, y: screenY });
+            }
+          }))
+        };
+      }
+
+      return {
+        list: []
+      };
     }
-  }
+  });
 
   // Enables node selection in the editor area.
   AreaExtensions.simpleNodesOrder(area);

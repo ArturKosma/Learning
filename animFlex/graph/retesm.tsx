@@ -17,22 +17,19 @@ import { Shape, ShapeProps } from './types';
 import { pathTransformer, useTransformerUpdater } from './path';
 import { setupSelection } from './selection';
 import { addCustomBackground } from "./custom-background";
-import { Presets as ConnectionPresets, makeConnection } from "rete-connection-plugin";
-
-// Stop any backspace keydown propagation from Rete.
-// This allows using backspace in all input fields.
-window.addEventListener('keydown', e => {
-  if (e.key === 'Backspace') {
-    e.stopImmediatePropagation();
-  }
-}, true);
+import styled from 'styled-components';
+import { getCurrentView } from './afmanager';
 
 type Schemes = GetSchemes<Node, Connection<Node, Node>>;
 
 async function create(label: string, editor: NodeEditor<Schemes>, entry: boolean = false) {
 
   const node = entry ? new StateNodeEntry(label) : new StateNode(label);  
-  (node as any).meta = { isEntry: entry };
+  (node as any).meta = { 
+    isEntry: entry, 
+    titleEditable: !entry,
+    isRemovable: !entry
+  };
 
   await editor.addNode(node);
   return node;
@@ -94,6 +91,108 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   const reactRender = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
   const selector = AreaExtensions.selector();
 
+    // Context menu item type
+    type Item = {
+      label: string;
+      key: string;
+      handler: () => void;
+    };
+  
+    // Context menu.
+    const contextMenu = new ContextMenuPlugin<Schemes>({
+      items: (context) => {
+        if (context === "root") {
+          return {
+            list: [
+              {
+                label: "State",
+                key: "state",
+                handler: async () => {
+                  const { x, y } = area.area.pointer;
+                  const node = await create("State", editor);
+                  await area.translate(node.id, { x, y });
+                }
+              }
+            ]
+          };
+        }
+
+        return {
+          list: []
+        };
+      }
+    });
+
+  // Context menu stylized.
+  const { Menu, Common, Search, Item, Subitems } = ReactPresets.contextMenu;
+  const CustomMenu = styled(Menu)`
+  width: 180px;
+  opacity: 0.9;
+  background-image: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(18, 18, 18, 0.9));
+  border: 1px solid black;
+  border-radius: 10px;
+`
+  const CustomItem = styled(Item)`
+    background:rgb(18, 18, 18);
+    transition: background 0.2s ease;
+    opacity: 0.9;
+    &:hover {
+      background:rgb(35, 35, 35);
+    }
+    border: 1px solid black;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 10px;
+    color: rgba(235, 235, 235, 0.93);
+  `
+  const CustomCommon = styled(Common)`
+    background:rgb(18, 18, 18);
+    opacity: 0.9;
+    border: 1px solid black;
+    &:hover {
+      background:rgb(18, 18, 18);
+    }
+  `
+  const CustomSearch = styled(Search)`
+    background:rgb(18, 18, 18);
+    opacity: 0.9;
+    border: 1px solid rgb(78, 78, 78);
+    transition: border 0.2s ease;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 10px;
+    min-height: 28px;
+    border-radius: 6px;
+
+    &:hover,
+    & input:hover {
+      border: 1px solid rgb(67, 150, 238);
+    }
+
+    &:focus,
+    & input:focus {
+      outline: none;
+      border: 1px solid rgb(67, 150, 238);
+    }
+  `
+  const CustomSubitems = styled(Subitems)`
+    background:rgb(18, 18, 18);
+    opacity: 0.9;
+    &:hover {
+      background-image: linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(18, 18, 18, 1.0));
+    }
+    border: none;
+  `
+  reactRender.addPreset(ReactPresets.contextMenu.setup({
+    customize: {
+      main: () => CustomMenu,
+      item: () => CustomItem,
+      common: () => CustomCommon,
+      search: () => CustomSearch,
+      subitems: () => CustomSubitems
+    }
+  }));
+
+  area.use(contextMenu);
+
   // Custom grid background.
   addCustomBackground(area);
 
@@ -153,13 +252,12 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   AreaExtensions.simpleNodesOrder(area);
 
   // Enable node selection.
-  const reteSelector   = AreaExtensions.selector();
-  const nodeSelector   = AreaExtensions.selectableNodes(area, reteSelector, {
+  const nodeSelector = AreaExtensions.selectableNodes(area, selector, {
     accumulating: AreaExtensions.accumulateOnCtrl()
   });
   const selection = setupSelection(area, {
     selected(ids) {
-      reteSelector.unselectAll();
+      selector.unselectAll();
       ids.forEach((id,i) => nodeSelector.select(id, i!==0));
     }
   });
@@ -270,6 +368,24 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   area.use(arrange);
   await arrange.layout();
   AreaExtensions.simpleNodesOrder(area);
+
+  // Enable node deletion on Delete key.
+  const onDeleteKey = async (e: KeyboardEvent) => {
+    if (e.key === 'Delete') {
+      for (const selectedEntity of selector.entities.values()) {
+          const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
+            meta?: {isRemovable?: boolean}
+          }
+          if (node && node.meta?.isRemovable) {
+            await editor.removeNode(selectedEntity.id);
+          }
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    } 
+  }
+
+  window.addEventListener('keydown', onDeleteKey, {capture: true});
 
   // Wait for the first render (initially rete is hidden) to call zoom.
   const resizeObserver = new ResizeObserver((entries) => {
