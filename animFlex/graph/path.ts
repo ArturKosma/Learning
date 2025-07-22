@@ -29,12 +29,13 @@ function getSiblingInfo(
  */
 export function pathTransformer(
   editor: NodeEditor<BaseSchemes>,
+  area: AreaPlugin<BaseSchemes, A>,
   connection: Classic.Connection<Classic.Node, Classic.Node>
 ) {
   const { total, index } = getSiblingInfo(editor, connection);
   const spacing = 32;
-  const mid     = (total - 1) / 2;
-  const fanOff  = total > 1 ? (index - mid) * spacing : 0;
+  const mid = (total - 1) / 2;
+  const fanOff = total > 1 ? (index - mid) * spacing : 0;
 
   return (pts: Position[]) => {
     if (pts.length < 2) return pts;
@@ -58,18 +59,30 @@ export function pathTransformer(
       y: B.y - uy * (SOCKET_RADIUS + ARROW_MARGIN)
     };
 
-    // 4) if there's no fan‐out, return a straight line
-    if (fanOff === 0) {
-      return [A, B];
+    // 4) apply perpendicular fan-out if needed
+    let A2 = A;
+    let B2 = B;
+    if (fanOff !== 0) {
+      const perpX = uy, perpY = -ux;
+      const sign = connection.source > connection.target ? -1 : 1;
+      const off = fanOff * sign;
+
+      A2 = { x: A.x + perpX * off, y: A.y + perpY * off };
+      B2 = { x: B.x + perpX * off, y: B.y + perpY * off };
     }
 
-    // 5) otherwise shift both endpoints by the perpendicular offset
-    const perpX = uy, perpY = -ux;
-    const sign  = connection.source > connection.target ? -1 : 1;
-    const off   = fanOff * sign;
+    // 5) Find node with meta.connectionOwner === connection.id
+    const ownerNode = editor.getNodes().find(n => (n as any).meta?.connectionOwner === connection.id);
+    if (ownerNode) {
+      const x = A2.x + (B2.x - A2.x) * 0.25;
+      const y = A2.y + (B2.y - A2.y) * 0.25;
 
-    const A2 = { x: A.x + perpX * off, y: A.y + perpY * off };
-    const B2 = { x: B.x + perpX * off, y: B.y + perpY * off };
+      const centeredX = x - 20 / 2;
+      const centeredY = y - 20 / 2;
+
+      // Update its position.
+      area.translate(ownerNode.id, {x: centeredX, y: centeredY});
+    }
 
     return [A2, B2];
   };

@@ -22,13 +22,16 @@ import { getCurrentView } from './afmanager';
 
 type Schemes = GetSchemes<Node, Connection<Node, Node>>;
 
-async function create(label: string, editor: NodeEditor<Schemes>, entry: boolean = false) {
+async function create(label: string, editor: NodeEditor<Schemes>, nodeSelector: any, entry: boolean = false, connectionOwner: string = "") {
 
-  const node = entry ? new StateNodeEntry(label) : new StateNode(label);  
+  const node = connectionOwner != "" ? new ConditionNode("") : (entry ? new StateNodeEntry(label) : new StateNode(""));  
   (node as any).meta = { 
     isEntry: entry, 
-    titleEditable: !entry,
-    isRemovable: !entry
+    titleEditable: !entry && connectionOwner.length == 0,
+    isRemovable: !entry && connectionOwner.length == 0,
+    connectionOwner: connectionOwner,
+    isConditional: connectionOwner.length > 0,
+    nodeSelect: nodeSelector
   };
 
   await editor.addNode(node);
@@ -77,6 +80,15 @@ class StateNodeEntry extends Node {
   }
 }
 
+class ConditionNode extends Node {
+  height = 20;
+  width = 20;
+
+  constructor(label: string, public shape: Shape = 'rect') {
+    super(label);
+  }
+}
+
 type AreaExtra = Area2D<Schemes> | ReactArea2D<Schemes> | ContextMenuExtra;
 
 const socket = new Classic.Socket('socket');
@@ -109,7 +121,7 @@ export async function createEditorSM(container: HTMLElement, id: string) {
                 key: "state",
                 handler: async () => {
                   const { x, y } = area.area.pointer;
-                  const node = await create("State", editor);
+                  const node = await create("State", editor, nodeSelector);
                   await area.translate(node.id, { x, y });
                 }
               }
@@ -330,19 +342,89 @@ export async function createEditorSM(container: HTMLElement, id: string) {
     return context
   })
 
-  // Prevent connecting node with itself.
-  editor.addPipe(ctx => {
+  // Node remove.
+  editor.addPipe(async ctx => {
+    if(ctx.type === "noderemove") {
+
+      const node = ctx.data as Schemes['Node'];
+      const connections = editor.getConnections();
+          
+      // Remove all connections where this node is source or target.
+      for (const conn of connections) {
+        if (
+          conn.source === node.id ||
+          conn.target === node.id  
+        ) {
+            await editor.removeConnection(conn.id);
+          }
+      }
+    }
+
+    return ctx;
+  });
+
+  // Connection create.
+  editor.addPipe(async ctx => {
   if (ctx.type === 'connectioncreate') {
       const conn = ctx.data as Schemes['Connection'];
+
+       // Prevent connecting node with itself.
       if (conn.source === conn.target) {
         return;
+      }
+
+      // Connecting normal state nodes creates a condition nodes inbetween them.
+      if (editor.getNode(conn.source) instanceof StateNode && editor.getNode(conn.target) instanceof StateNode){
+        await create("C", editor, nodeSelector, false, conn.id);
       }
     }
     return ctx;
   });
 
+  // Connection remove.
+  editor.addPipe(async ctx => {
+  if (ctx.type === 'connectionremoved') {
+      const conn = ctx.data as Schemes['Connection'];
+
+      // Removing a connection between normal nodes removes the conditional node assigned to the connection.
+      if (editor.getNode(conn.source) instanceof StateNode && editor.getNode(conn.target) instanceof StateNode){
+        let nodes = editor.getNodes();
+        for(const node of nodes){
+          const nodeCasted = node as any;
+          if(nodeCasted.meta?.connectionOwner == conn.id){
+            editor.removeNode(node.id);
+          }
+        }
+      }
+    }
+    return ctx;
+  });
+
+  // Node translation.
+  /*area.addPipe(async ctx => {
+    const { id } = ctx.data as { id: string };
+    const node = editor.getNode(id);
+
+    // Prevent translation of conditional nodes.
+    if(ctx.type === 'nodetranslated'){
+
+      if((node as any).meta?.isConditional) {
+
+        console.log("dragging");
+
+        const connections = editor.getConnections();
+        for(const connection of connections) {
+          console.log("transformer");
+          pathTransformer(editor, area, connection);
+        }
+      }
+    }
+
+    return ctx;
+  })*/
+
   const pathPlugin = new ConnectionPathPlugin<Schemes, AreaExtra>({
-    transformer: (connection) => pathTransformer(editor, connection),
+    transformer: (connection) => pathTransformer(editor, area, connection),
     curve: () => curveNatural,
     arrow: () => false
   });
@@ -350,9 +432,9 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   useTransformerUpdater(editor, area);
   reactRender.use(pathPlugin);
 
-  const entry = await create("Entry", editor, true);
-  const a = await create("A", editor);
-  const b = await create("B", editor);
+  const entry = await create("Entry", editor, nodeSelector, true);
+  //const a = await create("A", editor, nodeSelector);
+  //const b = await create("B", editor, nodeSelector);
 
   const arrange = new AutoArrangePlugin<Schemes>();
   const arrangeOptions = {
