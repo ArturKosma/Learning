@@ -223,6 +223,18 @@ export function GetNodeMeta(type: string, graphType: ReteViewType): any {
                 color: 'linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(70, 70, 70, 0.9))',
                 titleBarColor: "rgba(0, 0, 0, 0.0)",
             }
+        case "OutputCond":
+            return {
+                ...defaultMeta,
+                isRemovable: false,
+                title: "Output",
+                showSubTitle: false,
+                subTitle: "",
+                nodeHeight: 80,
+                nodeWidth: 160,
+                bigIcon: false,
+                bigIcon_path: resultPoseIcon,
+            };
         default:
             return {
                 ...defaultMeta,
@@ -403,6 +415,28 @@ export function CreateSockets(node: ClassicPreset.Node, editor: NodeEditor<Schem
         output.label = "";
 
         node.addOutput(uid, output);
+    } 
+
+    // Treat OutputCond node specially as it's not a CPP function.
+    if (nodeType === "OutputCond") {
+        const uid = crypto.randomUUID();
+        const socket = CreateSocketWithMeta(
+            uid,
+            "bool",
+            editor,
+            node
+        );
+
+        const existingMeta = (socket as any).meta ?? {};
+        (socket as any).meta = {
+            ...existingMeta,
+            var_name: "OutputCond"
+        };
+
+        const input = new ClassicPreset.Input(socket);
+        input.label = "Result";
+
+        node.addInput(uid, input);
     } 
 
     // Create every sockets for every other node type.

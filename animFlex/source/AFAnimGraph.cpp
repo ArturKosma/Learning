@@ -16,14 +16,12 @@ void AFAnimGraph::Evaluate(float deltaTime)
 		m_outputPoseNode->Pose.GetConnection(connectedNodeId, connectedSocketName);
 		if (connectedNodeId.empty() || connectedSocketName.empty())
 		{
-			//printf("%s\n", "empty!");
 			return;
 		}
 
 		std::shared_ptr<AFGraphNode> connectedNode = AFGraphNodeRegistry::Get().GetNode(connectedNodeId);
 		if (!connectedNode)
 		{
-			//printf("%s\n", "no connected node id!");
 			return;
 		}
 
@@ -35,7 +33,9 @@ void AFAnimGraph::Evaluate(float deltaTime)
 
 void AFAnimGraph::OnNodeCreated(const std::string& msg)
 {
-	//printf("%s\n", msg.c_str());
+	printf("node created within regular graph\n");
+	printf("%s\n", msg.c_str());
+
 	nlohmann::json nodes = nlohmann::json::parse(msg);
 
 	// @todo Enable multiple nodes creation.
@@ -43,11 +43,21 @@ void AFAnimGraph::OnNodeCreated(const std::string& msg)
 
 	const std::string& nodeId = node["nodeId"];
 	const std::string& nodeType = node["nodeType"];
+	const std::string& nodeContext = node["nodeContext"];
 
 	// Construct a node - it will be now accessible via m_idToNode hashmap.
 	std::shared_ptr<AFGraphNode> newNode = AFGraphNodeRegistry::Get().CreateNode(nodeType, nodeId);
 	newNode->m_nodeId = nodeId;
 	newNode->Init();
+
+	if (nodeContext == "0")
+	{
+		printf("node created no context, node id: %s\n", nodeId.c_str());
+	}
+	else
+	{
+		printf("node created with context: %s, type: %s\n", nodeContext.c_str(), nodeType.c_str());
+	}
 
 	// #hack
 	// Cache OutputPose node, which will be the start of evaluation for the whole graph.

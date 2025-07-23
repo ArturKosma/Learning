@@ -18,20 +18,56 @@ import { pathTransformer, useTransformerUpdater } from './path';
 import { setupSelection } from './selection';
 import { addCustomBackground } from "./custom-background";
 import styled from 'styled-components';
-import { getCurrentView } from './afmanager';
+import { createView, getCurrentView } from './afmanager';
+import { ReteViewType } from './aftypes';
+import { OnNodeCreated, OnNodeRemoved } from './affunclib';
+
+const nodeQueue: (() => Promise<void>)[] = [];
+let isProcessing = false;
+
+function enqueueNode(fn: () => Promise<void>) {
+  nodeQueue.push(fn);
+  processQueue();
+}
+
+async function processQueue() {
+  if (isProcessing || nodeQueue.length === 0) return;
+  isProcessing = true;
+
+  while (nodeQueue.length > 0) {
+    const task = nodeQueue.shift();
+    if (task) await task();
+  }
+
+  isProcessing = false;
+}
 
 type Schemes = GetSchemes<Node, Connection<Node, Node>>;
 
 async function create(label: string, editor: NodeEditor<Schemes>, nodeSelector: any, entry: boolean = false, connectionOwner: string = "") {
 
   const node = connectionOwner != "" ? new ConditionNode("") : (entry ? new StateNodeEntry(label) : new StateNode(""));  
+
+  let nodeType = "Unknown";
+  if (node instanceof ConditionNode) nodeType = "StateCond";
+  else if (node instanceof StateNodeEntry) nodeType = "StateStart";
+  else if (node instanceof StateNode) nodeType = "AFGraphNode_Graph";
+
   (node as any).meta = { 
     isEntry: entry, 
     titleEditable: !entry && connectionOwner.length == 0,
     isRemovable: !entry && connectionOwner.length == 0,
     connectionOwner: connectionOwner,
     isConditional: connectionOwner.length > 0,
-    nodeSelect: nodeSelector
+    nodeSelect: nodeSelector,
+    onDoubleClick: (currentTitle: string, nodeId: string) => {
+       connectionOwner.length > 0 ? createView(currentTitle, nodeId, ReteViewType.ConditionalGraph) : 
+       entry ? undefined : createView(currentTitle, nodeId, ReteViewType.Graph);
+    },
+    nodeFrom: undefined,
+    nodeTo: undefined,
+    editor: editor,
+    type: nodeType
   };
 
   await editor.addNode(node);
@@ -375,7 +411,9 @@ export async function createEditorSM(container: HTMLElement, id: string) {
 
       // Connecting normal state nodes creates a condition nodes inbetween them.
       if (editor.getNode(conn.source) instanceof StateNode && editor.getNode(conn.target) instanceof StateNode){
-        await create("C", editor, nodeSelector, false, conn.id);
+        let condNode = await create("C", editor, nodeSelector, false, conn.id);
+        (condNode as any).meta.nodeFrom = conn.source;
+        (condNode as any).meta.nodeTo = conn.target;
       }
     }
     return ctx;
@@ -399,6 +437,26 @@ export async function createEditorSM(container: HTMLElement, id: string) {
     }
     return ctx;
   });
+
+    // Listen for node creation and inform C++ about it.
+    editor.addPipe(context => {
+    if (context.type === 'nodecreated') {
+  
+      enqueueNode(() => OnNodeCreated(context.data, viewId));
+      }
+  
+      return context;
+    });
+  
+    // Listen for node deletion and inform C++ about it.
+    editor.addPipe(context => {
+    if (context.type === 'noderemoved') {
+  
+      enqueueNode(() => OnNodeRemoved(context.data));
+      }
+  
+      return context;
+    });
 
   // Node translation.
   /*area.addPipe(async ctx => {
@@ -450,24 +508,6 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   area.use(arrange);
   await arrange.layout();
   AreaExtensions.simpleNodesOrder(area);
-
-  // Enable node deletion on Delete key.
-  const onDeleteKey = async (e: KeyboardEvent) => {
-    if (e.key === 'Delete') {
-      for (const selectedEntity of selector.entities.values()) {
-          const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
-            meta?: {isRemovable?: boolean}
-          }
-          if (node && node.meta?.isRemovable) {
-            await editor.removeNode(selectedEntity.id);
-          }
-        e.preventDefault();
-        e.stopImmediatePropagation();
-      }
-    } 
-  }
-
-  window.addEventListener('keydown', onDeleteKey, {capture: true});
 
   // Wait for the first render (initially rete is hidden) to call zoom.
   const resizeObserver = new ResizeObserver((entries) => {

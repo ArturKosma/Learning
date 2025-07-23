@@ -2,6 +2,9 @@ import { createEditor } from "./rete";
 import { createEditorSM } from "./retesm";
 import { createEditorCond } from "./reteCond";
 import { ReteViewType } from "./aftypes";
+import { ClassicPreset, GetSchemes, NodeEditor } from "rete";
+import { AreaExtensions } from "rete-area-plugin";
+import { SelectorEntity } from "rete-area-plugin/_types/extensions/selectable";
 
 let currentView : any;
 
@@ -121,3 +124,38 @@ export function switchToView(id: string) {
         currentView = entry;
     }
 }
+
+type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
+
+async function delKey(editor: NodeEditor<Schemes>, selector: AreaExtensions.Selector<SelectorEntity>) {
+  console.log("del in " + getCurrentView().id);
+
+  for (const selectedEntity of selector.entities.values()) {
+  const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
+    meta?: {isRemovable?: boolean}
+  };
+    if(node?.meta?.isRemovable) {
+      const connections = editor.getConnections();
+      
+      // Remove all connections where this node is source or target
+      for (const conn of connections) {
+        if (
+          conn.source === node.id ||
+          conn.target === node.id  
+        ) {
+          await editor.removeConnection(conn.id);
+        }
+      }
+
+      await editor.removeNode(selectedEntity.id);
+    }
+  }
+}
+
+window.addEventListener('keydown', async (e) => {
+    // Delete for nodes deletion.
+    const current = getCurrentView();
+    if(e.key === 'Delete') {
+        await delKey(current?.editor, current?.selector)
+    }
+  }, {capture: true})

@@ -22,6 +22,13 @@ import { CustomFloatField, FloatControl } from "./affloatfield";
 import { getCurrentView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
 
+  // Context menu item type
+  type Item = {
+    label: string;
+    key: string;
+    handler: () => void;
+  };
+
 declare const Module: any;
 
 const nodeQueue: (() => Promise<void>)[] = [];
@@ -79,27 +86,41 @@ export async function createEditorCond(container: HTMLElement, id: string) {
   let render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
   const selector = AreaExtensions.selector();
 
-  // Context menu.
+// Context menu
   const contextMenu = new ContextMenuPlugin<Schemes>({
-    items: ContextMenuPresets.classic.setup(
-      Array.from(classIdToName.entries()).map(([classId, nodeName]) => [
-        nodeName,
-        () => AFNodeFactory.create(classId, editor, true, ReteViewType.ConditionalGraph).node
-      ])
-    )
-  });
-
-  function dummyAccum() {
-    return {
-      active() {
-        return false;
-      },
-
-      destroy() {
-
+    items: (context) => {
+      // If right-clicked on a node
+      if (typeof context !== "string") {
+        return {
+          list: [] // No context menu items for nodes
+        };
       }
+
+      // If right-clicked on empty space (root)
+      if (context === "root") {
+        return {
+          list: Array.from(classIdToName.entries()).map(([classId, nodeName]): Item => ({
+            label: nodeName,
+            key: classId,
+            handler: async () => {
+              const { x: screenX, y: screenY } = area.area.pointer;
+
+              const { node } = AFNodeFactory.create(classId, editor, true, ReteViewType.ConditionalGraph) as {
+                node: ClassicPreset.Node;
+              };
+
+              await editor.addNode(node);
+              await area.translate(node.id, { x: screenX, y: screenY });
+            }
+          }))
+        };
+      }
+
+      return {
+        list: []
+      };
     }
-  }
+  });
 
   // Enables node selection in the editor area.
   AreaExtensions.simpleNodesOrder(area);
@@ -253,7 +274,7 @@ selection.setButton(0);
   AreaExtensions.simpleNodesOrder(area);
 
   // Create default nodes.
-  //const outputPoseNode = await AFNodeFactory.create("OutputPose", editor);
+  const outputCondNode = await AFNodeFactory.create("OutputCond", editor, false, ReteViewType.ConditionalGraph);
 
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
@@ -310,37 +331,6 @@ selection.setButton(0);
       }
     return context
   })
-
-  // Bind custom keys.
-  window.addEventListener('keydown', async (e) => {
-
-      // Delete for nodes deletion.
-    if(e.key === 'Delete') {
-
-      if (getCurrentView().id !== viewId) return;
-
-      for (const selectedEntity of selector.entities.values()) {
-      const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
-        meta?: {isRemovable?: boolean}
-      };
-        if(node?.meta?.isRemovable) {
-          const connections = editor.getConnections();
-          
-          // Remove all connections where this node is source or target
-          for (const conn of connections) {
-            if (
-              conn.source === node.id ||
-              conn.target === node.id  
-            ) {
-              await editor.removeConnection(conn.id);
-            }
-          }
-
-          await editor.removeNode(selectedEntity.id);
-        }
-      }
-    }
-  }, {capture: true})
 
   // Prevent creation when sockets are not compatible.
   editor.addPipe((context) => {

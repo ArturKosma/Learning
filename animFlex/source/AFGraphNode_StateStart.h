@@ -1,5 +1,4 @@
 #pragma once
-#include "AFExec.h"
 #include "AFGraphNode.h"
 
 class AFGraphNode_StateStart: public AFGraphNodeCRTP<AFGraphNode_StateStart>
@@ -8,10 +7,6 @@ class AFGraphNode_StateStart: public AFGraphNodeCRTP<AFGraphNode_StateStart>
 	std::string GetNodeType() const override { return "StateStart"; }
 
 public:
-
-	FAFParam<AFExec> Exec = FAFParam<AFExec>("Exec");
-	inline static FAFGraphNodeParamRegistrar<AFGraphNode_StateStart, AFExec> _registrar_Exec = FAFGraphNodeParamRegistrar<AFGraphNode_StateStart, AFExec>("StateStart", "Exec", &AFGraphNode_StateStart::Exec, "Output");
-
 
 	void Evaluate(float deltaTime) override;
 };

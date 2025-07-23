@@ -325,37 +325,6 @@ selection.setButton(0);
     return context
   })
 
-  // Bind custom keys.
-  window.addEventListener('keydown', async (e) => {
-
-      // Delete for nodes deletion.
-    if(e.key === 'Delete') {
-
-      if (getCurrentView().id !== viewId) return;
-
-      for (const selectedEntity of selector.entities.values()) {
-      const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
-        meta?: {isRemovable?: boolean}
-      };
-        if(node?.meta?.isRemovable) {
-          const connections = editor.getConnections();
-          
-          // Remove all connections where this node is source or target
-          for (const conn of connections) {
-            if (
-              conn.source === node.id ||
-              conn.target === node.id  
-            ) {
-              await editor.removeConnection(conn.id);
-            }
-          }
-
-          await editor.removeNode(selectedEntity.id);
-        }
-      }
-    }
-  }, {capture: true})
-
   // Prevent creation when sockets are not compatible.
   editor.addPipe((context) => {
   if (context.type === "connectioncreate") {

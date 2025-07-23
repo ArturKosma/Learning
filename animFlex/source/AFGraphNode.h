@@ -5,6 +5,7 @@
 class AFGraphNode
 {
 	friend class AFAnimGraph;
+	friend class AFStateMachine;
 
 public:
 

@@ -10,6 +10,9 @@
 #include "AFContent.h"
 #include "AFGraphNodeRegistry.h"
 #include "AFGraphNode_Graph.h"
+#include "AFGraphNode_OutputCond.h"
+#include "AFGraphNode_StateCond.h"
+#include "AFGraphNode_StateMachine.h"
 #include "AFInput.h"
 #include "AFPlayerPawn.h"
 #include "AFSerializer.h"
@@ -62,6 +65,9 @@ const AFScene& AFGame::GetScene()
 
 void AFGame::OnNodeCreated(const char* msg)
 {
+	printf("************************************\n");
+	printf("received node created signal: %s\n", msg);
+
 	std::shared_ptr<AFPlayerPawn> playerPawn = GetScene().GetSceneData().playerPawn;
 	std::shared_ptr<AFAnimGraph> graph = nullptr;
 
@@ -72,19 +78,43 @@ void AFGame::OnNodeCreated(const char* msg)
 
 	const std::string& nodeContext = elem["nodeContext"];
 
-	std::shared_ptr<AFGraphNode_Graph> graphNode = std::dynamic_pointer_cast<AFGraphNode_Graph>(AFGraphNodeRegistry::Get().GetNode(nodeContext));
-	if (graphNode)
+	// Find already existing node and use it if context matches.
+	std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeContext);
+	if (!node)
 	{
-		graph = graphNode->GetGraph();
-	}
-	else
-	{
+		// Node like that doesn't exist so we assume we create a new node in the main graph.
+		printf("context is main\n");
 		graph = playerPawn->GetMeshComponent()->GetAnimState()->GetGraph();
+		graph->OnNodeCreated(msg);
+		return;
 	}
 
-	if (graph)
+	// The node context can be a regular graph, state machine or conditional graph.
+	// @todo Get rid of ifs by using some proper inheritance?
+	std::shared_ptr<AFGraphNode_Graph> graphNode = std::dynamic_pointer_cast<AFGraphNode_Graph>(node);
+	std::shared_ptr<AFGraphNode_StateMachine> stateMachine = std::dynamic_pointer_cast<AFGraphNode_StateMachine>(node);
+	std::shared_ptr<AFGraphNode_StateCond> graphNodeCond = std::dynamic_pointer_cast<AFGraphNode_StateCond>(node);
+
+	if (graphNode)
 	{
+		printf("context is regular graph\n");
+		graph = graphNode->GetGraph();
 		graph->OnNodeCreated(msg);
+		return;
+	}
+	if (stateMachine)
+	{
+		printf("context is state machine\n");
+		graph = stateMachine->GetStateMachine();
+		graph->OnNodeCreated(msg);
+		return;
+	}
+	if (graphNodeCond)
+	{
+		printf("context is conditional graph\n");
+		graph = graphNodeCond->GetGraph();
+		graph->OnNodeCreated(msg);
+		return;
 	}
 }
 
