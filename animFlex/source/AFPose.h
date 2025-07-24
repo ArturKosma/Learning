@@ -10,7 +10,11 @@ public:
 	// Usually this should initialize to the provided skeleton.
 	AFPose();
 
+	AFPose(const AFPose& otherPose);
+	AFPose& operator=(const AFPose& otherPose);
+
 	void ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time);
+	void CopyTransformsFrom(const AFPose& otherPose);
 
 	const std::vector<std::shared_ptr<class AFJoint>>& GetJoints() const;
 

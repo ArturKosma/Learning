@@ -12,6 +12,27 @@ AFPose::AFPose()
 	CreateJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
 }
 
+AFPose::AFPose(const AFPose& otherPose)
+{
+	CreateJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
+	CopyTransformsFrom(otherPose);
+}
+
+AFPose& AFPose::operator=(const AFPose& otherPose)
+{
+	if (this != &otherPose)
+	{
+		if (m_joints.empty())
+		{
+			CreateJoints(otherPose.GetJoints());
+		}
+
+		CopyTransformsFrom(otherPose);
+	}
+
+	return *this;
+}
+
 void AFPose::CreateJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
 {
 	m_joints.clear();
@@ -69,6 +90,23 @@ void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time)
 	for (auto& joint : m_joints)
 	{
 		joint->CalculateLocalTRSMatrix();
+	}
+}
+
+void AFPose::CopyTransformsFrom(const AFPose& otherPose)
+{
+	assert(m_joints.size() == otherPose.GetJoints().size() && "Incompatible poses");
+
+	const auto& joints = GetJoints();
+	const auto& otherJoints = otherPose.GetJoints();
+
+	for (size_t i = 0; i < m_joints.size(); ++i)
+	{
+		joints[i]->SetLocation(otherJoints[i]->GetLocation());
+		joints[i]->SetRotation(otherJoints[i]->GetRotation());
+		joints[i]->SetScale(otherJoints[i]->GetScale());
+
+		joints[i]->CalculateLocalTRSMatrix();
 	}
 }
 

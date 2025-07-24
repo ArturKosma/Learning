@@ -33,9 +33,6 @@ void AFAnimGraph::Evaluate(float deltaTime)
 
 void AFAnimGraph::OnNodeCreated(const std::string& msg)
 {
-	printf("node created within regular graph\n");
-	printf("%s\n", msg.c_str());
-
 	nlohmann::json nodes = nlohmann::json::parse(msg);
 
 	// @todo Enable multiple nodes creation.
@@ -49,15 +46,6 @@ void AFAnimGraph::OnNodeCreated(const std::string& msg)
 	std::shared_ptr<AFGraphNode> newNode = AFGraphNodeRegistry::Get().CreateNode(nodeType, nodeId);
 	newNode->m_nodeId = nodeId;
 	newNode->Init();
-
-	if (nodeContext == "0")
-	{
-		printf("node created no context, node id: %s\n", nodeId.c_str());
-	}
-	else
-	{
-		printf("node created with context: %s, type: %s\n", nodeContext.c_str(), nodeType.c_str());
-	}
 
 	// #hack
 	// Cache OutputPose node, which will be the start of evaluation for the whole graph.
@@ -124,7 +112,8 @@ void AFAnimGraph::OnNodeRemoved(const std::string& msg)
 	const std::string& nodeId = node["nodeId"];
 	const std::string& nodeType = node["nodeType"];
 
-	// Remove the node from hashmap and destroy the object.
+	// Remove the record of this node from nodes hashmap. This will get rid of the shared pointer in the hashmap.
+	// Some other shared pointer might be still pointing to it.
 	AFGraphNodeRegistry::Get().RemoveNode(nodeId);
 }
 

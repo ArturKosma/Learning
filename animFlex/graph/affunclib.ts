@@ -637,3 +637,74 @@ export async function OnNodeRemoved(node: ClassicPreset.Node) {
         [graphString]
     );  
 }
+
+export async function OnStateConnectionCreated(context: string, nodeFrom: ClassicPreset.Node, nodeTo: ClassicPreset.Node, connectionId: string, nodeCond: string) {
+
+    // Wait until Emscripten runtime is ready.
+    if (!Module.calledRun) {
+        await new Promise<void>((resolve) => {
+        const prevInit = Module.onRuntimeInitialized;
+        Module.onRuntimeInitialized = function () {
+            if (typeof prevInit === 'function') prevInit();
+            resolve();
+        };
+        });
+    }
+
+    // Container for JSON.
+    const graphJSON: any[] = [];
+
+    // Add this node to JSON.
+    graphJSON.push({
+        nodeContext: context,
+        nodeFromID: nodeFrom.id,
+        nodeToID: nodeTo.id,
+        connectionID: connectionId,
+        nodeCondID: nodeCond
+    });
+
+    // Stringify JSON.
+    const graphString = JSON.stringify(graphJSON);
+
+    // Pass the JSON to C++.
+    Module.ccall(
+        'OnStateConnectionCreated',   
+        null,              
+        ['string'],       
+        [graphString]
+    );  
+}
+
+export async function OnStateConnectionRemoved(context: string, connectionId: string) {
+
+    // Wait until Emscripten runtime is ready.
+    if (!Module.calledRun) {
+        await new Promise<void>((resolve) => {
+        const prevInit = Module.onRuntimeInitialized;
+        Module.onRuntimeInitialized = function () {
+            if (typeof prevInit === 'function') prevInit();
+            resolve();
+        };
+        });
+    }
+
+    // Container for JSON.
+    const graphJSON: any[] = [];
+
+    // Add this node to JSON.
+    graphJSON.push({
+        nodeContext: context,
+        connectionID: connectionId
+    });
+
+    // Stringify JSON.
+    const graphString = JSON.stringify(graphJSON);
+
+    // Pass the JSON to C++.
+    Module.ccall(
+        'OnStateConnectionRemoved',   
+        null,              
+        ['string'],       
+        [graphString]
+    );  
+}

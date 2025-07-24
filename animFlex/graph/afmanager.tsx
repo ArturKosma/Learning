@@ -128,7 +128,6 @@ export function switchToView(id: string) {
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
 async function delKey(editor: NodeEditor<Schemes>, selector: AreaExtensions.Selector<SelectorEntity>) {
-  console.log("del in " + getCurrentView().id);
 
   for (const selectedEntity of selector.entities.values()) {
   const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {

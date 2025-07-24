@@ -9,6 +9,12 @@ class AFGraphNode
 
 public:
 
+	template<typename ...Types>
+	static bool IsAnyOf(std::shared_ptr<AFGraphNode> node)
+	{
+		return static_cast<bool>((... || std::dynamic_pointer_cast<Types>(node)));
+	}
+
 	virtual ~AFGraphNode() = default;
 
 	virtual void Init();

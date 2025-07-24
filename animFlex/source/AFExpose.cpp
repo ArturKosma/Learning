@@ -39,6 +39,20 @@ extern "C"
 	}
 
 	EMSCRIPTEN_KEEPALIVE
+	void OnStateConnectionCreated(const char* msg)
+	{
+		AFApp& app = AFApp::GetInstance();
+		app.GetGame()->OnStateConnectionCreated(msg);
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void OnStateConnectionRemoved(const char* msg)
+	{
+		AFApp& app = AFApp::GetInstance();
+		app.GetGame()->OnStateConnectionRemoved(msg);
+	}
+
+	EMSCRIPTEN_KEEPALIVE
 	const char* GetLastActiveSockets()
 	{
 		const std::string lastActiveSockets = AFEvaluator::Get().GetLastActiveSockets();

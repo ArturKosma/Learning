@@ -20,7 +20,7 @@ import { addCustomBackground } from "./custom-background";
 import styled from 'styled-components';
 import { createView, getCurrentView } from './afmanager';
 import { ReteViewType } from './aftypes';
-import { OnNodeCreated, OnNodeRemoved } from './affunclib';
+import { OnNodeCreated, OnNodeRemoved, OnStateConnectionCreated, OnStateConnectionRemoved } from './affunclib';
 
 const nodeQueue: (() => Promise<void>)[] = [];
 let isProcessing = false;
@@ -51,7 +51,7 @@ async function create(label: string, editor: NodeEditor<Schemes>, nodeSelector: 
   let nodeType = "Unknown";
   if (node instanceof ConditionNode) nodeType = "StateCond";
   else if (node instanceof StateNodeEntry) nodeType = "StateStart";
-  else if (node instanceof StateNode) nodeType = "AFGraphNode_Graph";
+  else if (node instanceof StateNode) nodeType = "State";
 
   (node as any).meta = { 
     isEntry: entry, 
@@ -409,13 +409,25 @@ export async function createEditorSM(container: HTMLElement, id: string) {
         return;
       }
 
+      const sourceNode = editor.getNode(conn.source);
+      const targetNode = editor.getNode(conn.target);
+
+      if(sourceNode == undefined || targetNode == undefined) {
+        return;
+      }
+
+      let condNode;
+
       // Connecting normal state nodes creates a condition nodes inbetween them.
       if (editor.getNode(conn.source) instanceof StateNode && editor.getNode(conn.target) instanceof StateNode){
-        let condNode = await create("C", editor, nodeSelector, false, conn.id);
+        condNode = await create("C", editor, nodeSelector, false, conn.id);
         (condNode as any).meta.nodeFrom = conn.source;
         (condNode as any).meta.nodeTo = conn.target;
       }
+
+      OnStateConnectionCreated(viewId, sourceNode, targetNode, conn.id, condNode == undefined ? "" : condNode.id);
     }
+
     return ctx;
   });
 
@@ -434,6 +446,8 @@ export async function createEditorSM(container: HTMLElement, id: string) {
           }
         }
       }
+
+      OnStateConnectionRemoved(viewId, conn.id);
     }
     return ctx;
   });

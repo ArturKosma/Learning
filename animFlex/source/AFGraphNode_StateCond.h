@@ -12,7 +12,13 @@ public:
 	void Evaluate(float deltaTime) override;
 	std::shared_ptr<AFAnimGraph> GetGraph() const;
 
+	bool GetLastEvaluation() const;
+
 protected:
 
 	std::shared_ptr<AFAnimGraph> m_graph = nullptr;
+
+private:
+
+	bool m_lastEval = false;
 };

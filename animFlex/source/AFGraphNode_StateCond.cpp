@@ -13,3 +13,8 @@ std::shared_ptr<AFAnimGraph> AFGraphNode_StateCond::GetGraph() const
 {
 	return m_graph;
 }
+
+bool AFGraphNode_StateCond::GetLastEvaluation() const
+{
+	return m_lastEval;
+}

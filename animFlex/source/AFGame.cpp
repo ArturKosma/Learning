@@ -65,9 +65,6 @@ const AFScene& AFGame::GetScene()
 
 void AFGame::OnNodeCreated(const char* msg)
 {
-	printf("************************************\n");
-	printf("received node created signal: %s\n", msg);
-
 	std::shared_ptr<AFPlayerPawn> playerPawn = GetScene().GetSceneData().playerPawn;
 	std::shared_ptr<AFAnimGraph> graph = nullptr;
 
@@ -83,7 +80,6 @@ void AFGame::OnNodeCreated(const char* msg)
 	if (!node)
 	{
 		// Node like that doesn't exist so we assume we create a new node in the main graph.
-		printf("context is main\n");
 		graph = playerPawn->GetMeshComponent()->GetAnimState()->GetGraph();
 		graph->OnNodeCreated(msg);
 		return;
@@ -97,21 +93,18 @@ void AFGame::OnNodeCreated(const char* msg)
 
 	if (graphNode)
 	{
-		printf("context is regular graph\n");
 		graph = graphNode->GetGraph();
 		graph->OnNodeCreated(msg);
 		return;
 	}
 	if (stateMachine)
 	{
-		printf("context is state machine\n");
 		graph = stateMachine->GetStateMachine();
 		graph->OnNodeCreated(msg);
 		return;
 	}
 	if (graphNodeCond)
 	{
-		printf("context is conditional graph\n");
 		graph = graphNodeCond->GetGraph();
 		graph->OnNodeCreated(msg);
 		return;
@@ -126,6 +119,62 @@ void AFGame::OnNodeUpdated(const char* msg)
 void AFGame::OnNodeRemoved(const char* msg)
 {
 	AFAnimGraph::OnNodeRemoved(msg);
+}
+
+void AFGame::OnStateConnectionCreated(const char* msg)
+{
+	nlohmann::json json = nlohmann::json::parse(msg);
+	const auto& elem = json[0];
+	const std::string& nodeContext = elem["nodeContext"];
+
+	// Find already existing node and use it if context matches.
+	std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeContext);
+	if (!node)
+	{
+		return;
+	}
+
+	std::shared_ptr<AFGraphNode_StateMachine> stateMachine = std::dynamic_pointer_cast<AFGraphNode_StateMachine>(node);
+	if(!stateMachine)
+	{
+		return;
+	}
+
+	std::shared_ptr<AFStateMachine> sm = stateMachine->GetStateMachine();
+	if (!sm)
+	{
+		return;
+	}
+
+	sm->OnConnectionCreated(msg);
+}
+
+void AFGame::OnStateConnectionRemoved(const char* msg)
+{
+	nlohmann::json json = nlohmann::json::parse(msg);
+	const auto& elem = json[0];
+	const std::string& nodeContext = elem["nodeContext"];
+
+	// Find already existing node and use it if context matches.
+	std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeContext);
+	if (!node)
+	{
+		return;
+	}
+
+	std::shared_ptr<AFGraphNode_StateMachine> stateMachine = std::dynamic_pointer_cast<AFGraphNode_StateMachine>(node);
+	if (!stateMachine)
+	{
+		return;
+	}
+
+	std::shared_ptr<AFStateMachine> sm = stateMachine->GetStateMachine();
+	if (!sm)
+	{
+		return;
+	}
+
+	sm->OnConnectionRemoved(msg);
 }
 
 void AFGame::OnSelect(const FAFPickID& pickID)

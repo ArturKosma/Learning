@@ -132,3 +132,11 @@ struct FAFFetchContext
 	class AFContent* content;
 	std::function<void(std::shared_ptr<T>)> onComplete;
 };
+
+struct FAFStateConnection
+{
+	std::string from;
+	std::string to;
+	std::string id;
+	std::string cond;
+};

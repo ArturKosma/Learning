@@ -13,9 +13,15 @@ public:
 	static AFGame* GetGame();
 	const AFScene& GetScene();
 
+	// #hack
+	// Signals from the frontend probably shouldn't be here.
+	// @todo fixme.
 	void OnNodeCreated(const char* msg);
 	void OnNodeUpdated(const char* msg);
 	void OnNodeRemoved(const char* msg);
+
+	void OnStateConnectionCreated(const char* msg);
+	void OnStateConnectionRemoved(const char* msg);
 
 private:
 
