@@ -1,5 +1,6 @@
 #pragma once
 #include "AFGraphNode.h"
+#include "AFAnimGraph.h"
 
 class AFGraphNode_State : public AFGraphNodeCRTP<AFGraphNode_State>
 {
@@ -8,5 +9,11 @@ class AFGraphNode_State : public AFGraphNodeCRTP<AFGraphNode_State>
 
 public:
 
+	void Init() override;
 	void Evaluate(float deltaTime) override;
+	std::shared_ptr<AFAnimGraph> GetGraph() const;
+
+protected:
+
+	std::shared_ptr<AFAnimGraph> m_graph = nullptr;
 };

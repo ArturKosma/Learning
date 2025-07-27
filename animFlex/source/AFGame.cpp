@@ -85,11 +85,12 @@ void AFGame::OnNodeCreated(const char* msg)
 		return;
 	}
 
-	// The node context can be a regular graph, state machine or conditional graph.
+	// The node context can be a regular graph, state machine, conditional graph or state node.
 	// @todo Get rid of ifs by using some proper inheritance?
 	std::shared_ptr<AFGraphNode_Graph> graphNode = std::dynamic_pointer_cast<AFGraphNode_Graph>(node);
 	std::shared_ptr<AFGraphNode_StateMachine> stateMachine = std::dynamic_pointer_cast<AFGraphNode_StateMachine>(node);
 	std::shared_ptr<AFGraphNode_StateCond> graphNodeCond = std::dynamic_pointer_cast<AFGraphNode_StateCond>(node);
+	std::shared_ptr<AFGraphNode_State> stateNode = std::dynamic_pointer_cast<AFGraphNode_State>(node);
 
 	if (graphNode)
 	{
@@ -106,6 +107,12 @@ void AFGame::OnNodeCreated(const char* msg)
 	if (graphNodeCond)
 	{
 		graph = graphNodeCond->GetGraph();
+		graph->OnNodeCreated(msg);
+		return;
+	}
+	if (stateNode)
+	{
+		graph = stateNode->GetGraph();
 		graph->OnNodeCreated(msg);
 		return;
 	}

@@ -2,14 +2,19 @@
 
 void AFGraphNode_StateCond::Init()
 {
-	m_graph = std::make_shared<AFAnimGraph>();
+	m_graph = std::make_shared<AFAnimGraphCond>();
 }
 
 void AFGraphNode_StateCond::Evaluate(float deltaTime)
 {
+	if (m_graph)
+	{
+		m_graph->Evaluate(deltaTime);
+		m_lastEval = m_graph->GetEvalResult();
+	}
 }
 
-std::shared_ptr<AFAnimGraph> AFGraphNode_StateCond::GetGraph() const
+std::shared_ptr<AFAnimGraphCond> AFGraphNode_StateCond::GetGraph() const
 {
 	return m_graph;
 }

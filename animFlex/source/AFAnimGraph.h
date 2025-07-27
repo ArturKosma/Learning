@@ -18,8 +18,11 @@ public:
 
 	const AFPose& GetFinalPose() const;
 
+protected:
+
+	AFPose m_finalPose = {};
+
 private:
 
 	std::shared_ptr<AFGraphNode_OutputPose> m_outputPoseNode = nullptr;
-	AFPose m_finalPose = {};
 };

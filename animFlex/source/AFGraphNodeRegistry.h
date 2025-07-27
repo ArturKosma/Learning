@@ -8,7 +8,6 @@
 #include <glm/vec3.hpp>
 #include <type_traits>
 
-#include "AFAnimGraph.h"
 #include "AFEvaluator.h"
 #include "AFExec.h"
 #include "AFPose.h"
@@ -354,6 +353,7 @@ const T& FAFParam<T>::GetValue() const
 	if (!connected)
 	{
 		// It's not connected, so just any value there currently is.
+		//printf("nothing connected.\n");
 		return value;
 	}
 

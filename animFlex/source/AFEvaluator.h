@@ -18,10 +18,15 @@ public:
 	std::string GetLastActiveSockets();
 	void ClearLastActiveSockets();
 
+	void AddLastActiveState(const nlohmann::json& newState);
+	std::string GetLastActiveStates();
+	void ClearLastActiveStates();
+
 	void ClearEvaluationState();
 
 private:
 
 	nlohmann::json m_lastActiveSockets = nlohmann::json::array();
+	nlohmann::json m_lastActiveStates = nlohmann::json::array();
 	std::vector<std::shared_ptr<class AFGraphNode>> m_evaluated = {};
 };

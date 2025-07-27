@@ -33,6 +33,21 @@ void AFEvaluator::ClearLastActiveSockets()
 	m_lastActiveSockets = nlohmann::json::array();
 }
 
+void AFEvaluator::AddLastActiveState(const nlohmann::json& newState)
+{
+	m_lastActiveStates.push_back(newState);
+}
+
+std::string AFEvaluator::GetLastActiveStates()
+{
+	return m_lastActiveStates.dump();
+}
+
+void AFEvaluator::ClearLastActiveStates()
+{
+	m_lastActiveStates = nlohmann::json::array();
+}
+
 void AFEvaluator::ClearEvaluationState()
 {
 	m_evaluated.clear();

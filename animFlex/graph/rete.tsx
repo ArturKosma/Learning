@@ -361,8 +361,7 @@ selection.setButton(0);
   // Listen for node creation and inform C++ about it.
   editor.addPipe(context => {
   if (context.type === 'nodecreated') {
-
-    enqueueNode(() => OnNodeCreated(context.data, viewId));
+      enqueueNode(() => OnNodeCreated(context.data, viewId));
     }
 
     return context;

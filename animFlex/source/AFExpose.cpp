@@ -68,5 +68,22 @@ extern "C"
 	{
 		free(ptr);
 	}
+
+	EMSCRIPTEN_KEEPALIVE
+	const char* GetLastActiveStates()
+	{
+		const std::string lastActiveStates = AFEvaluator::Get().GetLastActiveStates();
+
+		char* buffer = (char*)malloc(lastActiveStates.length() + 1);
+		strcpy(buffer, lastActiveStates.c_str());
+
+		return buffer;
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+		void FreeLastActiveStates(char* ptr)
+	{
+		free(ptr);
+	}
 }
 #endif

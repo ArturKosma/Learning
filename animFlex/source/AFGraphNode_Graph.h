@@ -1,5 +1,6 @@
 #pragma once
 #include "AFGraphNode.h"
+#include "AFAnimGraph.h"
 
 class AFGraphNode_Graph : public AFGraphNodeCRTP<AFGraphNode_Graph>
 {

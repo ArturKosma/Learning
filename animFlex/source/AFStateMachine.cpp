@@ -24,13 +24,6 @@ void AFStateMachine::Evaluate(float deltaTime)
 	// Max 5 jumps per evaluate.
 	for (int i = 0; i < 5; i++)
 	{
-		if (nextState.expired())
-		{
-			// Something went very wrong.
-			// nextState was a node specified by one of the TO transitions, but that node doesn't exist in the node registry.
-			return;
-		}
-
 		// Find all outgoing connections.
 		std::vector<FAFStateConnection> outgoing = {};
 		std::copy_if(m_connections.begin(), m_connections.end(), std::back_inserter(outgoing),
@@ -69,19 +62,42 @@ void AFStateMachine::Evaluate(float deltaTime)
 		nextState = AFGraphNodeRegistry::Get().GetNode(foundTransition->to);
 	}
 
-	// There was no transition at all, evaluate our current state.
-	if (nextState.lock() == m_currentState.lock())
+	if (nextState.expired())
 	{
-		printf("evaluating id: %s\n", m_currentState.lock()->GetNodeID().c_str());
-		m_currentState.lock()->Evaluate(deltaTime);
+		// Something went very wrong.
+		// nextState was a node specified by one of the TO transitions, but that node doesn't exist in the node registry.
 		return;
 	}
 
-	// There was a transition. Simply jump there and evaluate.
+	// There was no transition at all, evaluate our current state.
+	if (nextState.lock() == m_currentState.lock())
+	{
+		
+	}
+	else
+	{
+		// There was a transition. Simply jump there.
+		printf("next state id: %s\n", nextState.lock()->GetNodeID().c_str());
+		m_currentState = nextState;
+	}
+
+	// Evaluate current state.
 	// @todo Blending.
-	printf("next state id: %s\n", nextState.lock()->GetNodeID().c_str());
-	m_currentState = nextState;
-	m_currentState.lock()->Evaluate(deltaTime);
+	std::shared_ptr<AFGraphNode_State> currentState = std::dynamic_pointer_cast<AFGraphNode_State>(m_currentState.lock());
+	if (!currentState)
+	{
+		return;
+	}
+	currentState->Evaluate(deltaTime);
+
+	// Cache last active state node ID.
+	// Used for debug.
+	nlohmann::json lastActiveEntry;
+	lastActiveEntry["nodeId"] = currentState->GetNodeID();
+	AFEvaluator::Get().AddLastActiveState(lastActiveEntry);
+
+	// Cache final pose.
+	m_finalPose.CopyTransformsFrom(currentState->GetGraph()->GetFinalPose());
 }
 
 void AFStateMachine::OnNodeCreated(const std::string& msg)

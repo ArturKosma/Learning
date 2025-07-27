@@ -1,7 +1,6 @@
 #include "AFPose.h"
 #include <chrono>
 
-#include "AFApp.h"
 #include "AFContent.h"
 #include "AFJoint.h"
 #include "AFMesh.h"

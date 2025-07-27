@@ -52,7 +52,6 @@ void AFAnimGraph::OnNodeCreated(const std::string& msg)
 	// @todo Don't check this upon every node creation.
 	if (nodeType == "OutputPose")
 	{
-		//printf("%s\n", "output pose created!");
 		m_outputPoseNode = std::dynamic_pointer_cast<AFGraphNode_OutputPose>(newNode);
 	}
 }
@@ -67,8 +66,6 @@ void AFAnimGraph::OnNodeUpdated(const std::string& msg)
 	// Fetch edited node ID.
 	const std::string& nodeId = node["nodeId"];
 	const std::string& nodeType = node["nodeType"];
-
-	//printf("%s\n", msg.c_str());
 
 	// Find the node to edit.
 	std::shared_ptr<AFGraphNode> editedNode = AFGraphNodeRegistry::Get().GetNode(nodeId);
@@ -91,7 +88,6 @@ void AFAnimGraph::OnNodeUpdated(const std::string& msg)
 	for (std::shared_ptr<FAFParamStaticPropertyBase> property : staticProperties)
 	{
 		const std::string& paramName = property->GetParamName();
-
 		if (paramToValueField.count(paramName))
 		{
 			property->Apply(editedNode, paramToValueField[paramName]);

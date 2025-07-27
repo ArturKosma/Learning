@@ -118,8 +118,8 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 	// Mark all nodes dirty. This will allow for new evaluation of each of them.
 	AFEvaluator::Get().ClearEvaluationState();
 	AFEvaluator::Get().ClearLastActiveSockets();
+	AFEvaluator::Get().ClearLastActiveStates();
 
-	//printf("%s\n", "main eval!");
 	m_graph->Evaluate(deltaTime);
 
 	const std::vector<std::shared_ptr<AFJoint>>& calculatedJoints = m_graph->GetFinalPose().GetJoints();

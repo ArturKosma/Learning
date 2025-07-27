@@ -1,5 +1,6 @@
 #pragma once
 #include "AFGraphNode.h"
+#include "AFAnimGraphCond.h"
 
 class AFGraphNode_StateCond : public AFGraphNodeCRTP<AFGraphNode_StateCond>
 {
@@ -10,13 +11,13 @@ public:
 
 	void Init() override;
 	void Evaluate(float deltaTime) override;
-	std::shared_ptr<AFAnimGraph> GetGraph() const;
+	std::shared_ptr<AFAnimGraphCond> GetGraph() const;
 
 	bool GetLastEvaluation() const;
 
 protected:
 
-	std::shared_ptr<AFAnimGraph> m_graph = nullptr;
+	std::shared_ptr<AFAnimGraphCond> m_graph = nullptr;
 
 private:
 

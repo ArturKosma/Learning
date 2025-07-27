@@ -22,6 +22,8 @@ import { createView, getCurrentView } from './afmanager';
 import { ReteViewType } from './aftypes';
 import { OnNodeCreated, OnNodeRemoved, OnStateConnectionCreated, OnStateConnectionRemoved } from './affunclib';
 
+declare const Module: any;
+
 const nodeQueue: (() => Promise<void>)[] = [];
 let isProcessing = false;
 
@@ -112,7 +114,7 @@ class StateNodeEntry extends Node {
   constructor(label: string, public shape: Shape = 'rect') {
     super(label);
 
-      this.addOutput('default', new Classic.Output(socket));
+    this.addOutput('default', new Classic.Output(socket));
   }
 }
 
@@ -313,13 +315,37 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   selection.setButton(0);
 
   // Register React presets.
+  // Stable highlight state reference to avoid re-registering components
+  const highlightRef = { current: "" };
+
+  // Stable wrapper for CircleNode
+  function NodeWrapper(props: any) {
+    return <CircleNode {...props} highlighted={highlightRef.current === props.data.id} />;
+  }
+
+  // Stable wrapper for CircleSocket
+  function SocketWrapper(context: { nodeId: string; key: string; side: string }) {
+    const { nodeId, key, side } = context;
+    return (props: any) => (
+      <CircleSocket
+        {...props}
+        highlighted={highlightRef.current === nodeId}
+        data-node-id={nodeId}
+        data-socket-key={key}
+        data-side={side}
+      />
+    );
+  }
+
+  // Register React presets once with stable component references
   reactRender.addPreset(ReactPresets.classic.setup({
     socketPositionWatcher,
-    customize: { node:()=>CircleNode,
-                 socket:()=>CircleSocket,
-                 connection:()=>CustomConnection }
+    customize: {
+      node: () => NodeWrapper,
+      socket: (context) => SocketWrapper(context),
+      connection: () => CustomConnection
+    }
   }));
-  reactRender.addPreset(ReactPresets.classic.setup());
   reactRender.addPreset(ReactPresets.contextMenu.setup());
 
   // Enable dragging with right-mouse button.
@@ -472,28 +498,84 @@ export async function createEditorSM(container: HTMLElement, id: string) {
       return context;
     });
 
-  // Node translation.
-  /*area.addPipe(async ctx => {
-    const { id } = ctx.data as { id: string };
-    const node = editor.getNode(id);
+    function HashString(str) {
+        let hash = 0;
+        if (str.length === 0) return hash;
 
-    // Prevent translation of conditional nodes.
-    if(ctx.type === 'nodetranslated'){
-
-      if((node as any).meta?.isConditional) {
-
-        console.log("dragging");
-
-        const connections = editor.getConnections();
-        for(const connection of connections) {
-          console.log("transformer");
-          pathTransformer(editor, area, connection);
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash |= 0;
         }
-      }
+        return hash;
     }
 
-    return ctx;
-  })*/
+  let lastHash : number = 0;
+  let highlightedState : string = "";
+
+    // Keep getting last active state from C++ to highlight it.
+    async function GetLastActiveState() {
+  
+      if (getCurrentView().id != viewId) return;
+  
+      // Wait until Emscripten runtime is ready.
+      if (!Module.calledRun) {
+          await new Promise<void>((resolve) => {
+          const prevInit = Module.onRuntimeInitialized;
+          Module.onRuntimeInitialized = function () {
+              if (typeof prevInit === 'function') prevInit();
+              resolve();
+          };
+          });
+      }
+  
+      const ptr = Module.ccall(
+          'GetLastActiveStates',   
+          'number',              
+          [],       
+          []
+      );
+  
+      // Convert the pointer to a JavaScript string.
+      const stateString = UTF8ToString(ptr);
+  
+      if (!stateString) return;
+  
+      // If the string didn't change, don't update highlighted state.
+      const hash = HashString(stateString);
+      if(hash == lastHash) {
+        return;
+      } else {
+        lastHash = hash;
+      }
+  
+      try {
+          const stateStringJson = JSON.parse(stateString);
+          for(const item of stateStringJson) {
+            const node = editor.getNode(item.nodeId);
+            if(node) {
+              highlightRef.current = node.id;
+            }
+          }
+          
+          // Re-render the nodes.
+          for (const node of editor.getNodes()) {
+            area.update('node', node.id);
+          }
+  
+      } catch (error) {
+          console.error('Failed to parse active states JSON:', error);
+      }
+  
+      // Free the allocated memory.
+      Module.ccall(
+          'FreeLastActiveStates',
+          null,                    
+          ['number'],              
+          [ptr]                    
+      );
+    }
+    const intervalId = setInterval(GetLastActiveState, 1000 / 30);
 
   const pathPlugin = new ConnectionPathPlugin<Schemes, AreaExtra>({
     transformer: (connection) => pathTransformer(editor, area, connection),
@@ -505,8 +587,6 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   reactRender.use(pathPlugin);
 
   const entry = await create("Entry", editor, nodeSelector, true);
-  //const a = await create("A", editor, nodeSelector);
-  //const b = await create("B", editor, nodeSelector);
 
   const arrange = new AutoArrangePlugin<Schemes>();
   const arrangeOptions = {
@@ -538,6 +618,7 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   
   return {
       editor, selector, destroy: () => {
+        clearInterval(intervalId);
         area.destroy()
       },
   };

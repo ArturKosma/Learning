@@ -448,15 +448,15 @@ export function CreateSockets(node: ClassicPreset.Node, editor: NodeEditor<Schem
 declare const Module: any;
 
 export async function OnNodeCreated(node: ClassicPreset.Node, context: string) {
-
+    
     // Wait until Emscripten runtime is ready.
     if (!Module.calledRun) {
         await new Promise<void>((resolve) => {
-        const prevInit = Module.onRuntimeInitialized;
-        Module.onRuntimeInitialized = function () {
-            if (typeof prevInit === 'function') prevInit();
-            resolve();
-        };
+            const prevInit = Module.onRuntimeInitialized;
+            Module.onRuntimeInitialized = function () {
+                if (typeof prevInit === 'function') prevInit();
+                resolve();
+            };
         });
     }
 
