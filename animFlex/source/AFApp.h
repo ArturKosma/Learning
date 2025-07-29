@@ -1,5 +1,9 @@
 #pragma once
-#include "AFGame.h"
+#include <glm/vec2.hpp>
+
+class AFWindow;
+class AFRenderer;
+class AFGame;
 
 class AFApp
 {
@@ -8,15 +12,19 @@ public:
 	AFApp();
 	~AFApp();
 
-	void Init();
 	void StartLoop();
+	void CloseApp();
 
 	void OnWindowResize(int newWidth, int newHeight);
 
 	AFGame* GetGame() const;
+	AFRenderer* GetRenderer() const;
+	AFWindow* GetWindow() const;
 
 	static AFApp& GetInstance();
 	static glm::ivec2 GetWindowSize();
+
+	void SetCursorHidden(bool hidden);
 
 private:
 

@@ -81,8 +81,7 @@ public:
 
 	static void BindAction(const std::string& actionName, const std::function<void()>& actionFunction, EAFKeyAction action);
 	static void BindAxis(const std::string& axis, const std::function<void(float)>& fun);
-
-	static bool GetFreeViewMode();
+	static void UnbindAllInputs();
 
 	bool GetMouseDown();
 	glm::vec2 GetCursorPos();
@@ -117,9 +116,6 @@ private:
 	void UpdateCursorPosState();
 	void UpdateStrokeState();
 
-	void Input_FreeViewMode_Pressed();
-	void Input_FreeViewMode_Released();
-
 	struct GLFWwindow* m_window = nullptr;
 
 	std::unordered_map<std::string, FAFBoundAction> m_boundActionMappings = {};
@@ -131,7 +127,4 @@ private:
 	double m_cursorOldYPos = 0.0;
 	double m_cursorNewXPos = 0.0;
 	double m_cursorNewYPos = 0.0;
-
-
-	bool m_freeView = false;
 };

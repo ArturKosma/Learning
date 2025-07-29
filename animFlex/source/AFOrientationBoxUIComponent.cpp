@@ -97,8 +97,14 @@ void AFOrientationBoxUIComponent::Draw(const FAFDrawOverride& overrideProperties
 
 void AFOrientationBoxUIComponent::OnClickPressed(uint8_t elementId)
 {
-	std::shared_ptr<AFCamera> currentCamera = AFGame::GetGame()->GetScene().GetActiveCamera();
-	if(!currentCamera)
+	AFCameraManager* cameraManager = AFGame::GetGame()->GetCameraManager();
+	if(!cameraManager)
+	{
+		return;
+	}
+
+	std::shared_ptr<AFCamera> currentCamera = cameraManager->GetActiveCamera();
+	if (!currentCamera)
 	{
 		return;
 	}
@@ -154,5 +160,5 @@ void AFOrientationBoxUIComponent::OnClickPressed(uint8_t elementId)
 		}
 	}
 
-	currentCamera->GetMovementComponent()->BlendTo(blendTargetLoc, blendTargetRot.x, blendTargetRot.y, blendLength);
+	cameraManager->BlendToStatic(blendTargetLoc, blendTargetRot.x, blendTargetRot.y, blendLength);
 }

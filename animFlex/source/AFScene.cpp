@@ -22,7 +22,7 @@
 #include "AFCamera.h"
 #include "AFMesh.h"
 
-std::shared_ptr<AFActor> AFScene::FindActor(const std::string& actorName)
+std::shared_ptr<AFActor> AFScene::FindActor(const std::string& actorName) const
 {
 	auto it = std::find_if(m_sceneData.sceneActors.begin(), m_sceneData.sceneActors.end(),
 		[actorName](std::shared_ptr<AFActor> actor)
@@ -56,16 +56,6 @@ void AFScene::AddUI(std::shared_ptr<AFUI> newUI)
 	}
 
 	m_sceneData.uis.push_back(newUI);
-}
-
-void AFScene::SetActiveCamera(std::shared_ptr<AFCamera> newActiveCamera)
-{
-	m_sceneData.activeCamera = newActiveCamera;
-}
-
-std::shared_ptr<AFCamera> AFScene::GetActiveCamera() const
-{
-	return m_sceneData.activeCamera;
 }
 
 void AFScene::SetPlayerPawn(std::shared_ptr<AFPlayerPawn> newPlayerPawn)
@@ -150,7 +140,7 @@ void AFScene::CreateDefaultSceneActors()
 	// Create default camera.
 	std::shared_ptr<AFCamera> initCamera = CreateObject<AFCamera>();
 	initCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
-	SetActiveCamera(initCamera);
+	initCamera->SetDisplayName("editorCamera0");
 	AddActor(initCamera);
 
 	// Create default player.

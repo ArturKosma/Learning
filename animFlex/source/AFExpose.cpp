@@ -1,6 +1,7 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #include "AFApp.h"
+#include "AFGame.h"
 #include <cstring>
 #include <cstdlib>
 
@@ -81,9 +82,30 @@ extern "C"
 	}
 
 	EMSCRIPTEN_KEEPALIVE
-		void FreeLastActiveStates(char* ptr)
+	void FreeLastActiveStates(char* ptr)
 	{
 		free(ptr);
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void BeginPlayFromJS()
+	{
+		AFApp& app = AFApp::GetInstance();
+		app.GetGame()->BeginPlay();
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void Possess()
+	{
+		AFApp& app = AFApp::GetInstance();
+		app.GetGame()->SetControlMode(EAFControlMode::ActionRPG);
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void UnPossess()
+	{
+		AFApp& app = AFApp::GetInstance();
+		app.GetGame()->SetControlMode(EAFControlMode::Editor);
 	}
 }
 #endif

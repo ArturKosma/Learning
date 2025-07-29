@@ -10,6 +10,7 @@
 #include <ostream>
 #include <glm/ext/matrix_clip_space.hpp>
 
+#include "AFApp.h"
 #include "AFSkeletalMeshComponent.h"
 #include "AFTextRender.h"
 #include "IAFPickerInterface.h"
@@ -74,6 +75,11 @@ void AFRenderer::Cleanup()
 const GLubyte* AFRenderer::GetOpenGLVersion()
 {
 	return glGetString(GL_VERSION);
+}
+
+FAFPickID AFRenderer::ReadColorIdFromPixelCoord(int x, int y)
+{
+	return AFApp::GetInstance().GetRenderer()->ReadColorId(x, y);
 }
 
 void AFRenderer::Draw(const FAFSceneData& sceneData, const FAFAppData& appData)

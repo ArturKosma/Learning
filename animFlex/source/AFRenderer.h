@@ -20,6 +20,8 @@ public:
 
 	const GLubyte* GetOpenGLVersion();
 
+	static FAFPickID ReadColorIdFromPixelCoord(int x, int y);
+
 private:
 
 	AFRenderer();

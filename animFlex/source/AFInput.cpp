@@ -3,8 +3,6 @@
 #include <glad/glad.h>
 #include "AFUtility.h"
 #include <algorithm>
-#include <imgui_impl_glfw.h>
-#include <imgui_internal.h>
 #include <GLFW/glfw3.h>
 
 void AFInput::OnKeyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods)
@@ -100,13 +98,6 @@ void AFInput::Tick()
 	UpdateCursorPosState();
 	UpdateStrokeState();
 
-	// Don't send any axis events when IMGui wants the input, unless it's FreeView mode.
-	ImGuiIO& io = ImGui::GetIO();
-	if ((io.WantCaptureMouse || io.WantCaptureKeyboard) && !m_freeView)
-	{
-		return;
-	}
-
 	// Go through all bound axes and call their functors.
 	for(const auto& [axisName, boundAxis] : m_boundAxisMappings)
 	{
@@ -182,9 +173,10 @@ void AFInput::BindAxis(const std::string& axis, const std::function<void(float)>
 	GetInstance().m_boundAxisMappings.insert_or_assign(axis, boundAxis);
 }
 
-bool AFInput::GetFreeViewMode()
+void AFInput::UnbindAllInputs()
 {
-	return GetInstance().m_freeView;
+	GetInstance().m_boundActionMappings.clear();
+	GetInstance().m_boundAxisMappings.clear();
 }
 
 bool AFInput::GetMouseDown()
@@ -234,9 +226,6 @@ void AFInput::Init(GLFWwindow* window)
 	{
 		GetInstance().m_keystate.insert_or_assign(key, 0.0f);
 	}
-
-	GetInstance().BindAction("FreeViewMode", [] {GetInstance().Input_FreeViewMode_Pressed(); }, EAFKeyAction::Pressed);
-	GetInstance().BindAction("FreeViewMode", [] {GetInstance().Input_FreeViewMode_Released(); }, EAFKeyAction::Released);
 }
 
 AFInput::AFInput()
@@ -444,31 +433,4 @@ void AFInput::UpdateStrokeState()
 		m_keystate.insert_or_assign(1011, static_cast<float>(strokeZoomIn)); // Stroke zoom in.
 		m_keystate.insert_or_assign(1012, static_cast<float>(strokeZoomOut)); // Stroke zoom out.
 	}
-}
-
-void AFInput::Input_FreeViewMode_Pressed()
-{
-	m_freeView = true;
-
-#ifdef __EMSCRIPTEN__
-	emscripten_request_pointerlock("#canvas", true);
-#else
-	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	if(glfwRawMouseMotionSupported())
-	{
-		glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-	}
-#endif
-}
-
-void AFInput::Input_FreeViewMode_Released()
-{
-	m_freeView = false;
-
-#ifdef __EMSCRIPTEN__
-	emscripten_exit_pointerlock();
-#else
-	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-#endif
-
 }

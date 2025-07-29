@@ -140,3 +140,22 @@ struct FAFStateConnection
 	std::string id;
 	std::string cond;
 };
+
+enum class EAFControlMode : uint8_t
+{
+	Editor,
+	ActionRPG
+};
+
+enum class EAFEditorControlMode: uint8_t
+{
+	Normal,
+	FreeView
+};
+
+enum class EAFCameraManagerState: uint8_t
+{
+	Editor,
+	Blending,
+	ActionRPG
+};

@@ -61,11 +61,11 @@ AFApp::AFApp()
 		return;
 	}
 
-	if (!m_helperInterface->Init(*m_window))
+	/*if (!m_helperInterface->Init(*m_window))
 	{
 		printf("%s\n", "Helper Interface Init() failed.");
 		return;
-	}
+	}*/
 
 	AFTimerManager::GetInstance().Init();
 }
@@ -81,15 +81,7 @@ AFApp::~AFApp()
 
 void AFApp::StartLoop()
 {
-	AFInput::BindAction("CloseApp", [this]() {glfwSetWindowShouldClose(m_window->GetGLFWWindow(), true); }, EAFKeyAction::Pressed);
-	AFInput::BindAction("Select", [this]()
-	{
-		const glm::ivec2& cursorPos = AFUtility::IsMobile() ? AFInput::GetInstance().GetTouchPos(0) : AFInput::GetInstance().GetCursorPos();
-		const FAFPickID& colorID = m_renderer->ReadColorId(cursorPos.x, cursorPos.y);
-		m_game->OnSelect(colorID);
-
-	}, EAFKeyAction::Pressed);
-
+	GetGame()->BeginPlay();
 #ifdef __EMSCRIPTEN__
 	printf("Compiled with Emscripten.\n");
 
@@ -108,6 +100,11 @@ void AFApp::StartLoop()
 #endif
 }
 
+void AFApp::CloseApp()
+{
+	glfwSetWindowShouldClose(m_window->GetGLFWWindow(), true);
+}
+
 AFApp& AFApp::GetInstance()
 {
 	static AFApp appInstance;
@@ -117,6 +114,30 @@ AFApp& AFApp::GetInstance()
 glm::ivec2 AFApp::GetWindowSize()
 {
 	return { GetInstance().m_window->GetWidth(), GetInstance().m_window->GetHeight() };
+}
+
+void AFApp::SetCursorHidden(bool hidden)
+{
+	if (hidden)
+	{
+#ifdef __EMSCRIPTEN__
+		emscripten_request_pointerlock("#canvas", true);
+#else
+		glfwSetInputMode(GetWindow()->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		if (glfwRawMouseMotionSupported())
+		{
+			glfwSetInputMode(GetWindow()->GetGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+		}
+#endif
+	}
+	else
+	{
+#ifdef __EMSCRIPTEN__
+		emscripten_exit_pointerlock();
+#else
+		glfwSetInputMode(GetWindow()->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+#endif
+	}
 }
 
 void AFApp::Tick()
@@ -172,4 +193,14 @@ void AFApp::OnWindowResize(int newWidth, int newHeight)
 AFGame* AFApp::GetGame() const
 {
 	return m_game;
+}
+
+AFRenderer* AFApp::GetRenderer() const
+{
+	return m_renderer;
+}
+
+AFWindow* AFApp::GetWindow() const
+{
+	return m_window;
 }

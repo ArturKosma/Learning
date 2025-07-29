@@ -10,12 +10,9 @@ class AFScene
 
 public:
 
-	std::shared_ptr<AFActor> FindActor(const std::string& actorName);
+	std::shared_ptr<AFActor> FindActor(const std::string& actorName) const;
 	void AddActor(std::shared_ptr<AFActor> newActor);
 	void AddUI(std::shared_ptr<AFUI> newUI);
-
-	void SetActiveCamera(std::shared_ptr<AFCamera> newActiveCamera);
-	std::shared_ptr<AFCamera> GetActiveCamera() const;
 
 	void SetPlayerPawn(std::shared_ptr<AFPlayerPawn> newPlayerPawn);
 	std::shared_ptr<AFPlayerPawn> GetPlayerPawn() const;

@@ -6,7 +6,6 @@
 #include "AFAnimGraph.h"
 #include "AFAnimState.h"
 #include "AFApp.h"
-#include "AFCamera.h"
 #include "AFContent.h"
 #include "AFGraphNodeRegistry.h"
 #include "AFGraphNode_Graph.h"
@@ -15,9 +14,8 @@
 #include "AFGraphNode_StateMachine.h"
 #include "AFInput.h"
 #include "AFPlayerPawn.h"
-#include "AFSerializer.h"
+#include "AFRenderer.h"
 #include "AFSkeletalMeshComponent.h"
-#include "AFTimerManager.h"
 #include "AFUIComponent.h"
 #include "AFUtility.h"
 #include "IAFPickerInterface.h"
@@ -37,6 +35,10 @@ bool AFGame::Init()
 		return false;
 	}
 
+	// Init camera manager.
+	m_cameraManager = new AFCameraManager();
+	m_cameraManager->Init(m_scene);
+
 	return true;
 }
 
@@ -51,6 +53,8 @@ void AFGame::Tick(float deltaTime)
 	{
 		ui->Tick(deltaTime);
 	}
+
+	printf("control mode: %d\n", static_cast<uint8_t>(m_currentControlMode));
 }
 
 AFGame* AFGame::GetGame()
@@ -58,9 +62,14 @@ AFGame* AFGame::GetGame()
 	return AFApp::GetInstance().GetGame();
 }
 
-const AFScene& AFGame::GetScene()
+const AFScene& AFGame::GetScene() const
 {
 	return m_scene;
+}
+
+AFCameraManager* AFGame::GetCameraManager() const
+{
+	return m_cameraManager;
 }
 
 void AFGame::OnNodeCreated(const char* msg)
@@ -184,13 +193,154 @@ void AFGame::OnStateConnectionRemoved(const char* msg)
 	sm->OnConnectionRemoved(msg);
 }
 
-void AFGame::OnSelect(const FAFPickID& pickID)
+void AFGame::SetControlMode(EAFControlMode newControlMode)
 {
-	if(AFInput::GetFreeViewMode())
+	if (m_currentControlMode == newControlMode)
 	{
 		return;
 	}
 
+	m_currentControlMode = newControlMode;
+	AFInput::UnbindAllInputs();
+
+	switch (newControlMode)
+	{
+	case EAFControlMode::Editor:
+	{
+		SetEditorControlMode(EAFEditorControlMode::Normal);
+		m_cameraManager->UpdateState();
+
+		AFInput::BindAction("Select", [this]()
+			{
+				const glm::ivec2& cursorPos = AFUtility::IsMobile() ? AFInput::GetInstance().GetTouchPos(0) : AFInput::GetInstance().GetCursorPos();
+				const FAFPickID& colorID = AFRenderer::ReadColorIdFromPixelCoord(cursorPos.x, cursorPos.y);
+				OnSelect(colorID);
+			}, EAFKeyAction::Pressed);
+
+		AFInput::BindAxis("CameraYaw", [this](float deltaX)
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->AddYaw(deltaX);
+				}
+			});
+		AFInput::BindAxis("CameraPitch", [this](float deltaY)
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->AddPitch(deltaY);
+				}
+			});
+
+		AFInput::BindAxis("CameraYaw_Stroke", [this](float deltaX)
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->AddYawStroke(deltaX);
+				}
+			});
+		AFInput::BindAxis("CameraPitch_Stroke", [this](float deltaY)
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->AddPitchStroke(deltaY);
+				}
+			});
+
+		AFInput::BindAxis("ForwardBackward", [this](float axis)
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->ForwardBackward(axis);
+				}
+			});
+		AFInput::BindAxis("RightLeft", [this](float axis)
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->RightLeft(axis);
+				}
+			});
+		AFInput::BindAxis("UpDown", [this](float axis)
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->UpDown(axis);
+				}
+			});
+
+		AFInput::BindAxis("Zoom_Stroke", [this](float axis)
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->ZoomStroke(axis);
+				}
+			});
+
+		AFInput::BindAction("CameraAddSpeed", [this]
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->AddCameraSpeedMultiplier(1.0f);
+				}
+			}, EAFKeyAction::Pressed);
+		AFInput::BindAction("CameraLowerSpeed", [this]
+			{
+				if (m_currentEditorControlMode == EAFEditorControlMode::FreeView)
+				{
+					m_cameraManager->AddCameraSpeedMultiplier(-1.0f);
+				}
+			}, EAFKeyAction::Pressed);
+
+		AFInput::BindAction("FreeViewMode", [this]
+			{
+				SetEditorControlMode(EAFEditorControlMode::FreeView);
+			}, EAFKeyAction::Pressed);
+
+		AFInput::BindAction("FreeViewMode", [this]
+			{
+				SetEditorControlMode(EAFEditorControlMode::Normal);
+			}, EAFKeyAction::Released);
+
+		AFInput::BindAction("ToggleControlMode", [this]()
+			{
+				SetControlMode(EAFControlMode::ActionRPG);
+			}, EAFKeyAction::Pressed);
+
+		break;
+	}
+	case EAFControlMode::ActionRPG:
+	{
+		AFApp::GetInstance().SetCursorHidden(true);
+		m_cameraManager->UpdateState();
+
+		AFInput::BindAction("ToggleControlMode", [this]()
+			{
+				SetControlMode(EAFControlMode::Editor);
+			}, EAFKeyAction::Pressed);
+
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+}
+
+EAFControlMode AFGame::GetControlMode() const
+{
+	return m_currentControlMode;
+}
+
+void AFGame::BeginPlay()
+{
+	m_cameraManager->BeginPlay();
+	SetControlMode(EAFControlMode::Editor);
+}
+
+void AFGame::OnSelect(const FAFPickID& pickID)
+{
 	for (std::shared_ptr<AFActor> sceneActor : m_scene.GetSceneData().sceneActors)
 	{
 		// Per component select.
@@ -254,11 +404,6 @@ void AFGame::OnSelect(const FAFPickID& pickID)
 
 void AFGame::OnHover(const FAFPickID& pickID)
 {
-	if (AFInput::GetFreeViewMode())
-	{
-		return;
-	}
-
 	std::shared_ptr<AFObject> newHover = nullptr;
 	uint8_t newHoverElement = -1;
 
@@ -332,6 +477,29 @@ void AFGame::OnHover(const FAFPickID& pickID)
 
 		m_currentHover = newHover;
 		m_currentHoverElement = newHoverElement;
+	}
+}
+
+void AFGame::SetEditorControlMode(EAFEditorControlMode newEditorControlMode)
+{
+	switch (newEditorControlMode)
+	{
+		case EAFEditorControlMode::Normal:
+		{
+			m_currentEditorControlMode = EAFEditorControlMode::Normal;
+			AFApp::GetInstance().SetCursorHidden(false);
+			break;
+		}
+		case EAFEditorControlMode::FreeView:
+		{
+			m_currentEditorControlMode = EAFEditorControlMode::FreeView;
+			AFApp::GetInstance().SetCursorHidden(true);
+			break;
+		}
+		default:
+		{
+			break;
+		}
 	}
 }
 

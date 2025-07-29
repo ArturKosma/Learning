@@ -7,8 +7,6 @@ class AFCameraMovementComponent : public AFMovementComponent
 {
 public:
 
-	void BlendTo(const glm::vec3& targetLocation, float targetPitch, float targetYaw, float length);
-
 	void AddControlRotation(const glm::vec3& eulerToAdd) override;
 	void AddMovementInput(const glm::vec3& movementInput) override;
 	void AddOffset(const glm::vec3& offset) override;
@@ -23,6 +21,5 @@ public:
 
 private:
 
-	EAFCameraMovementMode m_cameraMovementMode = EAFCameraMovementMode::Normal;
 	float m_cameraSpeedMultiplier = 100.0f;
 };
