@@ -9,6 +9,8 @@ public:
 
 	AFPlayerPawn();
 
+	virtual void BeginPlay() override;
+
 	std::shared_ptr<AFCameraComponent> GetCameraComponent() const;
 	std::shared_ptr<AFSkeletalMeshComponent> GetMeshComponent() const;
 

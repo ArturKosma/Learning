@@ -1,11 +1,16 @@
 #include "AFComponent.h"
 
-void AFComponent::SetOwner(AFObject* newOwner)
+void AFComponent::SetOwner(std::weak_ptr<AFObject> newOwner)
 {
-    m_owner = newOwner;
+    m_weakOwner = newOwner;
 }
 
-AFObject* AFComponent::GetOwner() const
+void AFComponent::SetOwner(AFObject* newOwner)
 {
-	return m_owner;
+	m_rawOwner = newOwner;
+}
+
+std::weak_ptr<AFObject> AFComponent::GetOwner() const
+{
+	return m_weakOwner;
 }

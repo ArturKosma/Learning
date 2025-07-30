@@ -103,7 +103,7 @@ void AFOrientationBoxUIComponent::OnClickPressed(uint8_t elementId)
 		return;
 	}
 
-	std::shared_ptr<AFCamera> currentCamera = cameraManager->GetActiveCamera();
+	std::shared_ptr<AFCamera> currentCamera = std::dynamic_pointer_cast<AFCamera>(cameraManager->GetActiveCamera()->GetOwner().lock());
 	if (!currentCamera)
 	{
 		return;

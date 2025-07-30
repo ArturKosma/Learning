@@ -91,3 +91,27 @@ void AFTimerManager::DeltaCalc()
 	m_deltaTime = currentTime - m_previousTime;
 	m_previousTime = currentTime;
 }
+
+void AFTimerManager::ClearTimer(std::shared_ptr<AFAlphaTimer> timer)
+{
+	std::shared_ptr<AFAlphaTimer> timerToClear = nullptr;
+
+	for (std::shared_ptr<AFAlphaTimer> alphaTimer : m_alphaTimers)
+	{
+		if (alphaTimer == timer)
+		{
+			timerToClear = alphaTimer;
+		}
+	}
+
+	if (!timerToClear)
+	{
+		return;
+	}
+
+	m_alphaTimers.erase(std::remove_if(m_alphaTimers.begin(), m_alphaTimers.end(),
+		[timerToClear](const std::shared_ptr<AFAlphaTimer>& alphaTimer)
+		{
+			return alphaTimer == timerToClear;
+		}), m_alphaTimers.end());
+}

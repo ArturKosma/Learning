@@ -40,3 +40,11 @@ std::shared_ptr<AFComponent> AFComponentOwner::GetComponentByName(const std::str
 
     return nullptr;
 }
+
+void AFComponentOwner::RegisterComponents()
+{
+    for (std::shared_ptr<AFComponent> comp : m_components)
+    {
+        comp->SetOwner(shared_from_this());
+    }
+}

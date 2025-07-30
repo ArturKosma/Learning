@@ -42,6 +42,8 @@ public:
 	static AFTimerManager& GetInstance();
 	static float GetDeltaTime();
 
+	void ClearTimer(std::shared_ptr<AFAlphaTimer> timer);
+
 private:
 
 	void Init();

@@ -2,6 +2,8 @@
 #include "AFCamera.h"
 #include "AFScene.h"
 
+class AFAlphaTimer;
+
 class AFCameraManager
 {
 public:
@@ -10,10 +12,10 @@ public:
 	void BeginPlay();
 
 	void UpdateState();
-	void SetActiveCamera(std::shared_ptr<AFCamera> otherCamera);
-	std::shared_ptr<AFCamera> GetActiveCamera() const;
+	void SetActiveCamera(std::shared_ptr<AFCameraComponent> otherCamera);
+	std::shared_ptr<AFCameraComponent> GetActiveCamera() const;
 
-	void BlendTo(std::shared_ptr<AFCameraComponent> otherCamera, float length, EAFInterpolationType interpType);
+	void BlendTo(std::shared_ptr<AFActor> actorWithCamComp, float length, EAFInterpolationType interpType);
 	void BlendToStatic(const glm::vec3& targetLocation, float targetPitch, float targetYaw, float length);
 
 	void AddYaw(float yaw);
@@ -30,6 +32,8 @@ private:
 
 	bool m_blending = false;
 
-	std::shared_ptr<AFCamera> m_activeCamera = nullptr;
+	std::shared_ptr<AFCameraComponent> m_activeCamera = nullptr;
 	std::shared_ptr<AFPlayerPawn> m_playerPawn = nullptr;
+
+	std::shared_ptr<AFAlphaTimer> m_currentBlend = nullptr;
 };

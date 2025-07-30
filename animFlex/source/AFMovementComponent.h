@@ -16,11 +16,11 @@ public:
 	void SetControlRotation(const glm::vec3& newControlRotation);
 	glm::vec3 GetControlRotation() const;
 
-	virtual void AddControlRotation(const glm::vec3& eulerToAdd);
+	virtual void AddControlRotation(const glm::vec3& delta);
 	virtual void AddMovementInput(const glm::vec3& movementInput);
 	virtual void AddOffset(const glm::vec3& offset);
 
-private:
+protected:
 
 	glm::vec3 m_velocity = glm::vec3(0.0f);
 	float m_deceleration = 10.0f;

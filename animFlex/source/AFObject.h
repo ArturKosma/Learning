@@ -1,9 +1,10 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
-class AFObject
+class AFObject : public std::enable_shared_from_this<AFObject>
 {
 	friend class AFScene;
 
@@ -12,6 +13,7 @@ public:
 	AFObject() = default;
 	virtual ~AFObject() = default;
 
+	virtual void BeginPlay();
 	virtual void Tick(float deltaTime);
 
 	void SetDisplayName(const std::string& newName);

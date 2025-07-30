@@ -84,20 +84,8 @@ FAFPickID AFRenderer::ReadColorIdFromPixelCoord(int x, int y)
 
 void AFRenderer::Draw(const FAFSceneData& sceneData, const FAFAppData& appData)
 {
-	std::shared_ptr<AFCamera> camera = sceneData.activeCamera;
-	if(!camera)
-	{
-		return;
-	}
-
-	std::shared_ptr<AFCameraComponent> cameraComp = camera->GetCameraComponent();
+	std::shared_ptr<AFCameraComponent> cameraComp = sceneData.activeCamera;
 	if(!cameraComp)
-	{
-		return;
-	}
-
-	std::shared_ptr<AFCameraMovementComponent> cameraMov = camera->GetMovementComponent();
-	if(!cameraMov)
 	{
 		return;
 	}
@@ -138,7 +126,7 @@ void AFRenderer::Draw(const FAFSceneData& sceneData, const FAFAppData& appData)
 		frameBufferSize.y,
 		near,
 		far,
-		cameraMov->GetControlRotation().x);
+		cameraComp->GetWorldRotation().x);
 	m_uniformBuffer.UploadRenderProperties(renderPropertiesMat);
 
 	// View & projection upload.

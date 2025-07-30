@@ -19,6 +19,8 @@ public:
 
 	void AddCameraSpeedMultiplier(float direction);
 
+	void ResetControlRotation();
+
 private:
 
 	float m_cameraSpeedMultiplier = 100.0f;

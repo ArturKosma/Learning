@@ -10,6 +10,8 @@ class AFScene
 
 public:
 
+	void BeginPlay();
+
 	std::shared_ptr<AFActor> FindActor(const std::string& actorName) const;
 	void AddActor(std::shared_ptr<AFActor> newActor);
 	void AddUI(std::shared_ptr<AFUI> newUI);
@@ -43,6 +45,14 @@ std::shared_ptr<T> AFScene::CreateObject()
 	std::shared_ptr<AFObject> casted = std::static_pointer_cast<AFObject>(newObject);
 
 	casted->m_uniqueId = AFIDGenerator::Next();
+
+	std::shared_ptr<AFComponentOwner> compOwner = std::dynamic_pointer_cast<AFComponentOwner>(casted);
+	if (compOwner)
+	{
+		// If components were added in the construction script of the compOwner,
+		// set their owner.
+		compOwner->RegisterComponents();
+	}
 
 	return newObject;
 }

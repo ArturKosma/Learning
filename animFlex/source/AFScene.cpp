@@ -22,6 +22,14 @@
 #include "AFCamera.h"
 #include "AFMesh.h"
 
+void AFScene::BeginPlay()
+{
+	for(std::shared_ptr<AFObject> obj : m_sceneData.sceneActors)
+	{
+		obj->BeginPlay();
+	}
+}
+
 std::shared_ptr<AFActor> AFScene::FindActor(const std::string& actorName) const
 {
 	auto it = std::find_if(m_sceneData.sceneActors.begin(), m_sceneData.sceneActors.end(),
@@ -142,6 +150,12 @@ void AFScene::CreateDefaultSceneActors()
 	initCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
 	initCamera->SetDisplayName("editorCamera0");
 	AddActor(initCamera);
+
+	// Create temporary camera for camera blending.
+	std::shared_ptr<AFCamera> tempCamera = CreateObject<AFCamera>();
+	tempCamera->SetLocation({ 0.0f, 100.0f, 220.0f });
+	tempCamera->SetDisplayName("tempCamera0");
+	AddActor(tempCamera);
 
 	// Create default player.
 	std::shared_ptr<AFPlayerPawn> playerPawn = AFScene::CreateObject<AFPlayerPawn>();

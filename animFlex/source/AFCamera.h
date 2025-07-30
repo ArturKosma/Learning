@@ -12,6 +12,8 @@ public:
 
 	AFCamera();
 
+	void BeginPlay() override;
+
 	std::shared_ptr<AFCameraComponent> GetCameraComponent() const;
 	std::shared_ptr<AFCameraMovementComponent> GetMovementComponent() const;
 

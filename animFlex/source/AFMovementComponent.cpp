@@ -8,7 +8,7 @@
 
 void AFMovementComponent::Tick(float deltaTime)
 {
-	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
 	if(!owner)
 	{
 		return;
@@ -42,7 +42,7 @@ float AFMovementComponent::GetMaxSpeed() const
 
 void AFMovementComponent::SetControlRotation(const glm::vec3& newControlRotation)
 {
-	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
 	if (!owner)
 	{
 		return;
@@ -50,13 +50,14 @@ void AFMovementComponent::SetControlRotation(const glm::vec3& newControlRotation
 
 	m_controlPitch = glm::clamp(newControlRotation.x, -89.0f, 89.0f);
 	m_controlYaw = newControlRotation.y;
-	m_controlYaw = m_controlYaw > 360.0f ? m_controlYaw - 360.0f : m_controlYaw;
-	m_controlYaw = m_controlYaw < -360.0f ? m_controlYaw + 360.0f : m_controlYaw;
 
-	const glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
-	const glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::quat quatRoll = glm::angleAxis(glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-	owner->SetRotation(glm::normalize(quatYaw * quatPitch));
+	glm::quat rotation = quatRoll * quatYaw * quatPitch;
+
+	owner->SetRotation(glm::normalize(rotation));
 }
 
 glm::vec3 AFMovementComponent::GetControlRotation() const
@@ -66,7 +67,7 @@ glm::vec3 AFMovementComponent::GetControlRotation() const
 
 void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 {
-	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
 	if (!owner)
 	{
 		return;
@@ -87,7 +88,7 @@ void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 
 void AFMovementComponent::AddOffset(const glm::vec3& offset)
 {
-	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
 	if (!owner)
 	{
 		return;
@@ -96,21 +97,21 @@ void AFMovementComponent::AddOffset(const glm::vec3& offset)
 	owner->AddOffsetLocation(offset);
 }
 
-void AFMovementComponent::AddControlRotation(const glm::vec3& eulerToAdd)
+void AFMovementComponent::AddControlRotation(const glm::vec3& delta)
 {
-	AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
 	if (!owner)
 	{
 		return;
 	}
 
-	if (glm::length(eulerToAdd) <= std::numeric_limits<float>::epsilon())
+	if (glm::length(delta) <= std::numeric_limits<float>::epsilon())
 	{
 		return;
 	}
 
-	m_controlPitch = glm::clamp(m_controlPitch + eulerToAdd.x, -89.0f, 89.0f);
-	m_controlYaw += eulerToAdd.y;
+	m_controlPitch = glm::clamp(m_controlPitch + delta.x, -89.0f, 89.0f);
+	m_controlYaw += delta.y;
 	m_controlYaw = m_controlYaw > 360.0f ? m_controlYaw - 360.0f : m_controlYaw;
 	m_controlYaw = m_controlYaw < -360.0f ? m_controlYaw + 360.0f : m_controlYaw;
 

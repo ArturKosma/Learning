@@ -22,7 +22,7 @@ struct FAFSceneData
 	std::vector<std::shared_ptr<class AFActor>> sceneActors = {};
 	std::vector<std::shared_ptr<class AFUI>> uis = {};
 	unsigned long long vertexCount = 0;
-	std::shared_ptr<class AFCamera> activeCamera = nullptr;
+	std::shared_ptr<class AFCameraComponent> activeCamera = nullptr;
 	std::shared_ptr<class AFPlayerPawn> playerPawn = nullptr;
 };
 

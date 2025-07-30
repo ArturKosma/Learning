@@ -8,7 +8,7 @@ AFSceneComponent::AFSceneComponent()
 
 glm::vec3 AFSceneComponent::GetWorldLocation() const
 {
-    AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+    std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
     if (!owner)
     {
         return glm::vec3(0.0f);
@@ -19,7 +19,7 @@ glm::vec3 AFSceneComponent::GetWorldLocation() const
 
 glm::vec3 AFSceneComponent::GetWorldRotation() const
 {
-    AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+    std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
     if (!owner)
     {
         return glm::vec3(0.0f);
@@ -30,7 +30,7 @@ glm::vec3 AFSceneComponent::GetWorldRotation() const
 
 glm::quat AFSceneComponent::GetWorldRotationQuat() const
 {
-    AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+    std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
     if (!owner)
     {
         return glm::quat();
@@ -41,7 +41,7 @@ glm::quat AFSceneComponent::GetWorldRotationQuat() const
 
 glm::vec3 AFSceneComponent::GetWorldScale() const
 {
-    AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+    std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
     if (!owner)
     {
         return glm::vec3(1.0f);
@@ -52,7 +52,7 @@ glm::vec3 AFSceneComponent::GetWorldScale() const
 
 glm::mat4 AFSceneComponent::GetWorldTransform() const
 {
-    AFActor* owner = dynamic_cast<AFActor*>(GetOwner());
+    std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
     if (!owner)
     {
         return glm::mat4();

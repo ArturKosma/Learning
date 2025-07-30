@@ -39,6 +39,8 @@ bool AFGame::Init()
 	m_cameraManager = new AFCameraManager();
 	m_cameraManager->Init(m_scene);
 
+
+
 	return true;
 }
 
@@ -335,6 +337,8 @@ EAFControlMode AFGame::GetControlMode() const
 
 void AFGame::BeginPlay()
 {
+	m_scene.BeginPlay();
+
 	m_cameraManager->BeginPlay();
 	SetControlMode(EAFControlMode::Editor);
 }

@@ -14,6 +14,11 @@ AFCamera::AFCamera()
 	AddComponent(m_cameraComponent);
 }
 
+void AFCamera::BeginPlay()
+{
+	AFActor::BeginPlay();
+}
+
 std::shared_ptr<AFCameraComponent> AFCamera::GetCameraComponent() const
 {
 	return m_cameraComponent;

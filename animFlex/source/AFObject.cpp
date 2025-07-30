@@ -1,5 +1,9 @@
 #include "AFObject.h"
 
+void AFObject::BeginPlay()
+{
+}
+
 void AFObject::Tick(float deltaTime)
 {
 }

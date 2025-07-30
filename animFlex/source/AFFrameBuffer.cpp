@@ -153,13 +153,7 @@ void AFFramebuffer::UnBind()
 
 void AFFramebuffer::DrawToScreen(const FAFSceneData& sceneData)
 {
-	std::shared_ptr<AFCamera> camera = sceneData.activeCamera;
-	if (!camera)
-	{
-		return;
-	}
-
-	std::shared_ptr<AFCameraComponent> cameraComp = camera->GetCameraComponent();
+	std::shared_ptr<AFCameraComponent> cameraComp = sceneData.activeCamera;
 	if (!cameraComp)
 	{
 		return;
