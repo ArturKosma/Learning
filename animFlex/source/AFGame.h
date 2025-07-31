@@ -40,6 +40,7 @@ private:
 
 	AFScene m_scene = AFScene();
 	AFCameraManager* m_cameraManager = nullptr;
+	std::shared_ptr<AFPlayerPawn> m_player = nullptr;
 
 	std::shared_ptr<AFObject> m_currentHover = nullptr;
 	uint8_t m_currentHoverElement = -1;

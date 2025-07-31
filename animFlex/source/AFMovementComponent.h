@@ -13,7 +13,7 @@ public:
 	virtual float GetDeceleration() const;
 	virtual float GetMaxSpeed() const;
 
-	void SetControlRotation(const glm::vec3& newControlRotation);
+	virtual void SetControlRotation(const glm::vec3& newControlRotation);
 	glm::vec3 GetControlRotation() const;
 
 	virtual void AddControlRotation(const glm::vec3& delta);

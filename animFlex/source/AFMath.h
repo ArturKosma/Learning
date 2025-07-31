@@ -79,8 +79,21 @@ public:
 		return translationMatrix * rotationMatrix * scaleMatrix;
 	}
 
+	static glm::mat4 IdentityTransform()
+	{
+		return glm::mat4(1.0f);
+	}
+
 	static glm::quat Vec4ToQuat(const glm::vec4& vec4)
 	{
 		return glm::quat(vec4.w, vec4.x, vec4.y, vec4.z);
+	}
+
+	static glm::vec3 RotationFromDirection(const glm::vec3& dir)
+	{
+		float yaw = glm::degrees(atan2(dir.x, -dir.z)); // Yaw around Y.
+		float pitch = glm::degrees(asin(dir.y)); // Pitch up/down.
+
+		return glm::vec3(pitch, yaw, 0.0f);
 	}
 };

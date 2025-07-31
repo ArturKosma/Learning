@@ -13,6 +13,7 @@
 #include "AFGraphNode_StateCond.h"
 #include "AFGraphNode_StateMachine.h"
 #include "AFInput.h"
+#include "AFMath.h"
 #include "AFPlayerPawn.h"
 #include "AFRenderer.h"
 #include "AFSkeletalMeshComponent.h"
@@ -39,7 +40,8 @@ bool AFGame::Init()
 	m_cameraManager = new AFCameraManager();
 	m_cameraManager->Init(m_scene);
 
-
+	// Cache player.
+	m_player = m_scene.GetPlayerPawn();
 
 	return true;
 }
@@ -55,8 +57,6 @@ void AFGame::Tick(float deltaTime)
 	{
 		ui->Tick(deltaTime);
 	}
-
-	printf("control mode: %d\n", static_cast<uint8_t>(m_currentControlMode));
 }
 
 AFGame* AFGame::GetGame()
@@ -316,10 +316,27 @@ void AFGame::SetControlMode(EAFControlMode newControlMode)
 		AFApp::GetInstance().SetCursorHidden(true);
 		m_cameraManager->UpdateState();
 
+		const glm::vec3 lookAtPoint = m_player->GetLocation() + m_player->GetSpringArmComponent()->GetLocalLocation();
+		const glm::vec3 dirToPawn = glm::normalize(lookAtPoint - m_cameraManager->GetActiveCamera()->GetWorldLocation());
+		glm::vec3 newControlRot = AFMath::RotationFromDirection(dirToPawn);
+		newControlRot.y += 180.0f;
+		m_player->GetCharacterMovementComponent()->SetControlRotation(newControlRot);
+
 		AFInput::BindAction("ToggleControlMode", [this]()
 			{
 				SetControlMode(EAFControlMode::Editor);
 			}, EAFKeyAction::Pressed);
+
+		AFInput::BindAxis("CameraYaw", [this](float deltaX)
+			{
+				const float offset = deltaX * AFTimerManager::GetDeltaTime() * 5.0f;
+				m_player->GetCharacterMovementComponent()->AddControlRotation(glm::vec3(0.0f, offset, 0.0f));
+			});
+		AFInput::BindAxis("CameraPitch", [this](float deltaY)
+			{
+				const float offset = deltaY * AFTimerManager::GetDeltaTime() * -5.0f;
+				m_player->GetCharacterMovementComponent()->AddControlRotation(glm::vec3(offset, 0.0f, 0.0f));
+			});
 
 		break;
 	}

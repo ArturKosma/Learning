@@ -126,6 +126,14 @@ void AFApp::SetCursorHidden(bool hidden)
 		glfwSetInputMode(GetWindow()->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		if (glfwRawMouseMotionSupported())
 		{
+			int w_px, h_px;
+			glfwGetWindowSize(GetWindow()->GetGLFWWindow(), &w_px, &h_px);
+			double centerX = w_px * 0.5;
+			double centerY = h_px * 0.5;
+
+			// Initially warp cursor to center to avoid init bump.
+			glfwSetCursorPos(GetWindow()->GetGLFWWindow(), centerX, centerY);
+
 			glfwSetInputMode(GetWindow()->GetGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 		}
 #endif
@@ -136,6 +144,12 @@ void AFApp::SetCursorHidden(bool hidden)
 		emscripten_exit_pointerlock();
 #else
 		glfwSetInputMode(GetWindow()->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+		if (glfwRawMouseMotionSupported())
+		{
+			// Turn off raw.
+			glfwSetInputMode(GetWindow()->GetGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
+		}
 #endif
 	}
 }

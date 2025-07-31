@@ -348,10 +348,29 @@ void AFInput::OnTouchEnd(int eventType, const EmscriptenTouchEvent* e)
 
 void AFInput::UpdateCursorPosState()
 {
-	const double cursorPosXDelta = m_cursorNewXPos - m_cursorOldXPos;
-	const double cursorPosYDelta = m_cursorNewYPos - m_cursorOldYPos;
+	double cursorPosXDelta = m_cursorNewXPos - m_cursorOldXPos;
+	double cursorPosYDelta = m_cursorNewYPos - m_cursorOldYPos;
 	m_cursorOldXPos = m_cursorNewXPos;
 	m_cursorOldYPos = m_cursorNewYPos;
+
+	// Different delta calculation for raw mouse motion to prevent opengl bumps.
+	if (glfwRawMouseMotionSupported() &&
+		glfwGetInputMode(m_window, GLFW_RAW_MOUSE_MOTION) == GLFW_TRUE)
+	{
+		double x, y;
+		glfwGetCursorPos(m_window, &x, &y);
+
+		int w, h;
+		glfwGetWindowSize(m_window, &w, &h);
+		double centerX = w * 0.5;
+		double centerY = h * 0.5;
+
+		cursorPosXDelta = x - centerX;
+		cursorPosYDelta = y - centerY;
+
+		// Warp cursor back to center.
+		glfwSetCursorPos(m_window, centerX, centerY);
+	}
 
 	const double mouseTurnRight = cursorPosXDelta > 0.0 ? abs(static_cast<float>(cursorPosXDelta)) : 0.0f;
 	const double mouseTurnLeft = cursorPosXDelta < 0.0 ? abs(static_cast<float>(cursorPosXDelta)) : 0.0f;

@@ -50,14 +50,6 @@ void AFMovementComponent::SetControlRotation(const glm::vec3& newControlRotation
 
 	m_controlPitch = glm::clamp(newControlRotation.x, -89.0f, 89.0f);
 	m_controlYaw = newControlRotation.y;
-
-	glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::quat quatRoll = glm::angleAxis(glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	glm::quat rotation = quatRoll * quatYaw * quatPitch;
-
-	owner->SetRotation(glm::normalize(rotation));
 }
 
 glm::vec3 AFMovementComponent::GetControlRotation() const
@@ -114,9 +106,4 @@ void AFMovementComponent::AddControlRotation(const glm::vec3& delta)
 	m_controlYaw += delta.y;
 	m_controlYaw = m_controlYaw > 360.0f ? m_controlYaw - 360.0f : m_controlYaw;
 	m_controlYaw = m_controlYaw < -360.0f ? m_controlYaw + 360.0f : m_controlYaw;
-
-	const glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
-	const glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));
-
-	owner->SetRotation(glm::normalize(quatYaw * quatPitch));
 }

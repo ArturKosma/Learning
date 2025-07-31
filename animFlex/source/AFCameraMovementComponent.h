@@ -6,6 +6,7 @@
 class AFCameraMovementComponent : public AFMovementComponent
 {
 public:
+	void SetControlRotation(const glm::vec3& newControlRotation) override;
 
 	void AddControlRotation(const glm::vec3& eulerToAdd) override;
 	void AddMovementInput(const glm::vec3& movementInput) override;

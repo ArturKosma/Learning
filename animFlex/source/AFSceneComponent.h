@@ -15,7 +15,6 @@ public:
 	glm::vec3 GetWorldRotation() const;
 	glm::quat GetWorldRotationQuat() const;
 	glm::vec3 GetWorldScale() const;
-
 	glm::mat4 GetWorldTransform() const;
 
 	glm::vec3 GetLocalLocation() const;
@@ -28,6 +27,10 @@ public:
 	void SetLocalRotation(const glm::vec3& newEulerRotation);
 	void SetLocalRotation(const glm::quat& newQuatRotation);
 	void SetLocalScale(const glm::vec3& newScale);
+	void SetLocalTransform(const glm::mat4& newTransform);
+
+	void SetWorldLocation(const glm::vec3& newWorldLocation);
+	void SetWorldTransform(const glm::mat4& newWorldTransform);
 
 	void AddLocalOffsetLocation(const glm::vec3& offset);
 	void AddLocalOffsetRotation(const glm::vec3& offset);

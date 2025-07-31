@@ -5,9 +5,39 @@
 #include "AFActor.h"
 #include "AFMath.h"
 
+void AFCameraMovementComponent::SetControlRotation(const glm::vec3& newControlRotation)
+{
+	AFMovementComponent::SetControlRotation(newControlRotation);
+
+	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
+	if (!owner)
+	{
+		return;
+	}
+
+	glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::quat quatRoll = glm::angleAxis(glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	glm::quat rotation = quatRoll * quatYaw * quatPitch;
+
+	owner->SetRotation(glm::normalize(rotation));
+}
+
 void AFCameraMovementComponent::AddControlRotation(const glm::vec3& eulerToAdd)
 {
 	AFMovementComponent::AddControlRotation(eulerToAdd);
+
+	const glm::quat quatPitch = glm::angleAxis(glm::radians(m_controlPitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	const glm::quat quatYaw = glm::angleAxis(glm::radians(m_controlYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
+	if (!owner)
+	{
+		return;
+	}
+
+	owner->SetRotation(glm::normalize(quatYaw * quatPitch));
 }
 
 void AFCameraMovementComponent::AddMovementInput(const glm::vec3& movementInput)
