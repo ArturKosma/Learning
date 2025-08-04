@@ -5,6 +5,8 @@ class AFSpringArmComponent : public AFSceneComponent
 {
 public:
 
+	void OnOwnerTransform(glm::mat4 offset) override;
+
 	void Tick(float deltaTime) override;
 
 	void SetArmLength(float newLength);

@@ -3,6 +3,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include "AFSceneComponent.h"
+
 AFActor::AFActor()
 {
     RecreateTransform();
@@ -104,11 +106,28 @@ void AFActor::RecreateTransform()
 {
     OnTransformRecreation();
 
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_location);
-    glm::mat4 rotationMatrix = glm::mat4_cast(m_rotation);
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_scale);
+    const glm::mat4 previousTransform = m_transform;
+
+    const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_location);
+    const glm::mat4 rotationMatrix = glm::mat4_cast(m_rotation);
+    const glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_scale);
 
     m_transform = translationMatrix * rotationMatrix * scaleMatrix;
+
+    const glm::mat4 offset = glm::inverse(previousTransform) * m_transform;
+
+    // Inform child scene components about the change in transform.
+    // Some of them might want to recalculate something.
+    for (std::shared_ptr<AFComponent> comp : m_components)
+    {
+        std::shared_ptr<AFSceneComponent> sceneComp = std::dynamic_pointer_cast<AFSceneComponent>(comp);
+        if (!sceneComp)
+        {
+            continue;
+        }
+
+        sceneComp->OnOwnerTransform(offset);
+    }
 }
 
 void AFActor::OnTransformRecreation()

@@ -18,7 +18,14 @@ glm::vec3 AFSceneComponent::GetWorldLocation() const
         return glm::vec3(0.0f);
     }
 
-    return m_localLocation + owner->GetLocation();
+    glm::vec3 location;
+    glm::quat rotation;
+    glm::vec3 scale;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(GetWorldTransform(), scale, rotation, location, skew, perspective);
+
+    return location;
 }
 
 glm::vec3 AFSceneComponent::GetWorldRotation() const
@@ -29,7 +36,14 @@ glm::vec3 AFSceneComponent::GetWorldRotation() const
         return glm::vec3(0.0f);
     }
 
-    return glm::degrees(glm::eulerAngles(m_localRotation * owner->GetRotationQuat()));
+    glm::vec3 location;
+    glm::quat rotation;
+    glm::vec3 scale;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(GetWorldTransform(), scale, rotation, location, skew, perspective);
+
+    return glm::degrees(glm::eulerAngles(rotation));
 }
 
 glm::quat AFSceneComponent::GetWorldRotationQuat() const
@@ -40,7 +54,14 @@ glm::quat AFSceneComponent::GetWorldRotationQuat() const
         return glm::quat();
     }
 
-    return m_localRotation * owner->GetRotationQuat();
+    glm::vec3 location;
+    glm::quat rotation;
+    glm::vec3 scale;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(GetWorldTransform(), scale, rotation, location, skew, perspective);
+
+    return rotation;
 }
 
 glm::vec3 AFSceneComponent::GetWorldScale() const
@@ -51,7 +72,14 @@ glm::vec3 AFSceneComponent::GetWorldScale() const
         return glm::vec3(1.0f);
     }
 
-    return m_localScale * owner->GetScale();
+    glm::vec3 location;
+    glm::quat rotation;
+    glm::vec3 scale;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(GetWorldTransform(), scale, rotation, location, skew, perspective);
+
+    return scale;
 }
 
 glm::mat4 AFSceneComponent::GetWorldTransform() const
@@ -168,7 +196,7 @@ void AFSceneComponent::AddLocalOffsetLocation(const glm::vec3& offset)
 
 void AFSceneComponent::AddLocalOffsetRotation(const glm::vec3& offset)
 {
-    glm::quat quatToAdd = glm::quat(offset);
+    glm::quat quatToAdd = glm::quat(glm::radians(offset));
 
     SetLocalRotation(quatToAdd * m_localRotation);
 }
@@ -176,6 +204,11 @@ void AFSceneComponent::AddLocalOffsetRotation(const glm::vec3& offset)
 void AFSceneComponent::AddLocalOffsetScale(const glm::vec3& offset)
 {
     SetLocalScale(m_localScale + offset);
+}
+
+void AFSceneComponent::OnOwnerTransform(glm::mat4 offset)
+{
+
 }
 
 void AFSceneComponent::RecreateTransform()

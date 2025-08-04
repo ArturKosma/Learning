@@ -91,9 +91,52 @@ public:
 
 	static glm::vec3 RotationFromDirection(const glm::vec3& dir)
 	{
-		float yaw = glm::degrees(atan2(dir.x, -dir.z)); // Yaw around Y.
-		float pitch = glm::degrees(asin(dir.y)); // Pitch up/down.
+		const float yaw = glm::degrees(atan2(dir.x, -dir.z)); // Yaw around Y.
+		const float pitch = glm::degrees(asin(dir.y)); // Pitch up/down.
 
 		return glm::vec3(pitch, yaw, 0.0f);
+	}
+
+	static glm::vec3 DirectionFromRotation(const glm::vec3& rot)
+	{
+		const float pitch = glm::radians(rot.x);
+		const float yaw = glm::radians(rot.y);
+
+		const float x = sin(yaw) * cos(pitch);
+		const float y = sin(pitch);
+		const float z = -cos(yaw) * cos(pitch);
+
+		return glm::normalize(glm::vec3(x, y, z));
+	}
+
+	static glm::quat QInterpTo(const glm::quat& current, const glm::quat& target, float interpSpeed, float deltaTime)
+	{
+		if (interpSpeed <= 0.0f)
+		{
+			return target;
+		}
+
+		glm::quat currentNorm = glm::normalize(current);
+		glm::quat targetNorm = glm::normalize(target);
+
+		// Ensure shortest path.
+		if (glm::dot(currentNorm, targetNorm) < 0.0f)
+		{
+			targetNorm = -targetNorm;
+		}
+
+		float dot = glm::dot(currentNorm, targetNorm);
+		dot = glm::clamp(dot, -1.0f, 1.0f);
+		const float angle = 2.0f * std::acos(dot);
+
+		if (angle < 1e-6f)
+		{
+			return targetNorm;
+		}
+
+		const float maxStep = interpSpeed * deltaTime;
+		const float t = glm::clamp(maxStep / angle, 0.0f, 1.0f);
+
+		return glm::slerp(currentNorm, targetNorm, t);
 	}
 };

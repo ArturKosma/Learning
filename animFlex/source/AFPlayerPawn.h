@@ -12,6 +12,7 @@ public:
 	AFPlayerPawn();
 
 	virtual void BeginPlay() override;
+	void Tick(float deltaTime) override;
 
 	std::shared_ptr<AFCameraComponent> GetCameraComponent() const;
 	std::shared_ptr<AFSkeletalMeshComponent> GetMeshComponent() const;

@@ -1,8 +1,5 @@
 #include "AFMovementComponent.h"
 #include "AFMath.h"
-
-#include <glm/ext/quaternion_trigonometric.hpp>
-
 #include "AFActor.h"
 #include "AFTimerManager.h"
 
@@ -14,15 +11,40 @@ void AFMovementComponent::Tick(float deltaTime)
 		return;
 	}
 
-	if (!m_accelerating)
+	if (glm::length(m_lastMovementInput) > std::numeric_limits<float>::epsilon())
 	{
+		m_accelerating = true;
+
+		const glm::vec3 desiredVelocity = AFMath::GetSafeNormal(m_lastMovementInput) * GetMaxSpeed();
+		const glm::vec3 deltaVelocity = desiredVelocity - m_velocity;
+
+		float maxDelta = GetAcceleration() * deltaTime;
+		if (glm::length(deltaVelocity) > maxDelta)
+		{
+			m_velocity += AFMath::GetSafeNormal(deltaVelocity) * maxDelta;
+		}
+		else
+		{
+			m_velocity = desiredVelocity;
+		}
+	}
+	else
+	{
+		m_accelerating = false;
+
 		const float speed = glm::length(m_velocity);
 		const float newSpeed = glm::max(speed - (GetDeceleration() * deltaTime), 0.0f);
 		m_velocity = AFMath::GetSafeNormal(m_velocity) * newSpeed;
 	}
 
-	owner->AddOffsetLocation(m_velocity * deltaTime);
-	m_accelerating = false;
+	if (glm::length(m_velocity) > std::numeric_limits<float>::epsilon())
+	{
+		m_lastPositiveVelocity = m_velocity;
+		owner->AddOffsetLocation(m_velocity * deltaTime);
+	}
+
+	// Consume last input.
+	m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 float AFMovementComponent::GetAcceleration() const
@@ -67,14 +89,9 @@ void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 
 	if (glm::length(movementInput) > std::numeric_limits<float>::epsilon())
 	{
-		m_accelerating = true;
-
-		m_velocity = m_velocity + (AFMath::GetSafeNormal(movementInput) * GetAcceleration() * AFTimerManager::GetDeltaTime());
-
-		if (glm::length(m_velocity) > GetMaxSpeed())
-		{
-			m_velocity = glm::normalize(m_velocity) * GetMaxSpeed();
-		}
+		m_lastMovementInput += movementInput;
+		m_lastMovementInput = glm::normalize(m_lastMovementInput);
+		m_lastPositiveMovementInput = m_lastMovementInput;
 	}
 }
 

@@ -36,6 +36,8 @@ public:
 	void AddLocalOffsetRotation(const glm::vec3& offset);
 	void AddLocalOffsetScale(const glm::vec3& offset);
 
+	virtual void OnOwnerTransform(glm::mat4 offset);
+
 protected:
 
 	void RecreateTransform();

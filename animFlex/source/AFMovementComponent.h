@@ -22,7 +22,11 @@ public:
 
 protected:
 
-	glm::vec3 m_velocity = glm::vec3(0.0f);
+	glm::vec3 m_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_lastPositiveVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_lastPositiveMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
+
 	float m_deceleration = 10.0f;
 	float m_acceleration = 50.0f;
 	float m_maxSpeed = 2.0f;

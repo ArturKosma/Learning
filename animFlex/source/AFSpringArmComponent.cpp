@@ -2,7 +2,23 @@
 #include "AFPlayerPawn.h"
 #include "AFMath.h"
 
-// @todo Allow any attachment to spring arm, which would result in proper transform of the attached object.
+// @todo Allow any attachment to spring arm, which would result in proper transform of the attached object automatically.
+
+void AFSpringArmComponent::OnOwnerTransform(glm::mat4 offset)
+{
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::vec3 scale;
+	glm::quat rotation;
+	glm::vec3 translation;
+
+	glm::decompose(offset, scale, rotation, translation, skew, perspective);
+
+	const glm::vec3 eulerOffset = glm::degrees(glm::eulerAngles(rotation));
+
+	// Counter the actor's rotation change by applying local rotation in opposite direction.
+	AddLocalOffsetRotation(eulerOffset * -1.0f);
+}
 
 void AFSpringArmComponent::Tick(float deltaTime)
 {
@@ -24,12 +40,12 @@ void AFSpringArmComponent::Tick(float deltaTime)
 		// Create the orbit transform.
 		const glm::mat4 orbit = controlRot * springOffset * lookBack;
 
-		// Don't transform the spring arm, update the local transform of attached camera.
+		// Don't transform the spring arm, update the local transform of attached camera instead.
 		m_attachedCamera->SetLocalTransform(GetLocalTransform() * orbit);
 
 		// Collision with the ground.
 		glm::vec3 worldLoc = m_attachedCamera->GetWorldLocation();
-		const float offsetY = 5.0f;
+		const float offsetY = 30.0f;
 		if (worldLoc.y < offsetY)
 		{
 			float t = (offsetY - GetWorldLocation().y) / (worldLoc.y - GetWorldLocation().y);
