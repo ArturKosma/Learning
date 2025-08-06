@@ -56,8 +56,8 @@ export function CustomChecker(props: { data: BoolControl }) {
       <style>{`
         .custom-checkbox-input {
           appearance: none;
-          width: 16px;
-          height: 16px;
+          width: 20px;
+          height: 20px;
           background-color: #141414;
           border: 1px solid #434343;
           border-radius: 4px;
@@ -65,6 +65,8 @@ export function CustomChecker(props: { data: BoolControl }) {
           transition: background 0.2s ease, border 0.2s ease;
           cursor: pointer;
           vertical-align: middle;
+          box-sizing: border-box;
+          padding: 0;
         }
 
         .custom-checkbox-input:hover {
@@ -79,13 +81,14 @@ export function CustomChecker(props: { data: BoolControl }) {
         .custom-checkbox-input:checked::after {
           content: "";
           position: absolute;
-          left: 4px;
-          top: 1px;
           width: 4px;
           height: 8px;
+          top: 50%;
+          left: 50%;
           border: solid white;
           border-width: 0 2px 2px 0;
-          transform: rotate(45deg);
+          transform: translate(-50%, -50%) rotate(45deg);
+          transform-origin: center;
         }
       `}</style>
     </div>

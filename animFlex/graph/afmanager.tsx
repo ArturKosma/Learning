@@ -5,6 +5,7 @@ import { ReteViewType } from "./aftypes";
 import { ClassicPreset, GetSchemes, NodeEditor } from "rete";
 import { AreaExtensions } from "rete-area-plugin";
 import { SelectorEntity } from "rete-area-plugin/_types/extensions/selectable";
+import { GraphNode } from "./afnodeFactory";
 
 let currentView : any;
 
@@ -149,6 +150,19 @@ async function delKey(editor: NodeEditor<Schemes>, selector: AreaExtensions.Sele
       await editor.removeNode(selectedEntity.id);
     }
   }
+}
+
+export let nodes: GraphNode[] = [];
+export async function setManifest() {
+    
+    // Read and parse JSON graph manifest.
+    const res = await fetch('./graphManifest.json');
+    const data = await res.json();
+    nodes = data.Nodes;
+}
+
+export function getManifestNodes() {
+    return nodes;
 }
 
 window.addEventListener('keydown', async (e) => {

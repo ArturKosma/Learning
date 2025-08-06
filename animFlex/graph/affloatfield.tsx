@@ -88,17 +88,18 @@ export function CustomFloatField(props: { data: FloatControl }) {
         />
         <style>{`
           .custom-number-input {
-            min-width: 30px;
-            height: 30px;
+            height: 24px;
             font-size: 10px;
             background-color: #141414;
             color: #fff;
             border: 1px solid #434343;
-            border-radius: 6px;
-            padding: 0 6px;
+            border-radius: 4px;
             transition: background 0.2s ease, border 0.2s ease;
-            outline: none;
-            width: auto
+            line-height: 24px;
+            vertical-align: middle;
+            width: auto;
+            box-sizing: border-box;
+            padding: 0;
           }
 
           .custom-number-input:hover {

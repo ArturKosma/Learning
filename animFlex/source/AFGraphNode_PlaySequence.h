@@ -12,6 +12,8 @@ public:
 
 	AFPARAM(std::string, playseq_animName, "", "Input", "HidePin|Dropdown_Anims");
 	AFPARAM(AFPose, playseq_outputPose, "", "Output", "");
+	AFPARAM(bool, playseq_useRootmotion, "Use Rootmotion", "", "");
+	AFPARAM(float, playseq_playrate, "Playrate", "", "");
 
 	void Init() override;
 	void OnUpdate() override;

@@ -67,6 +67,13 @@
                     "label": "",
                     "direction": "Output",
                     "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "blendBool_blendTime",
+                    "label": "Blend Time",
+                    "direction": "",
+                    "meta": []
                 }
             ]
         },
@@ -154,6 +161,20 @@
                     "var_name": "playseq_outputPose",
                     "label": "",
                     "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "playseq_useRootmotion",
+                    "label": "Use Rootmotion",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "playseq_playrate",
+                    "label": "Playrate",
+                    "direction": "",
                     "meta": []
                 }
             ]

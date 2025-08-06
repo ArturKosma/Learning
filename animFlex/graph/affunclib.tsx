@@ -3,12 +3,13 @@ import {DropdownControl} from './afdropdown';
 import resultPoseIcon from './resultPose.png';
 import { NodeRef } from "rete-area-plugin/_types/extensions/shared/types";
 import { Input, Socket } from "rete/_types/presets/classic";
-import { classIdToMeta, classIdToName, classIdToParams, GraphNodeParam } from './afnodeFactory';
+import { classIdToMeta, classIdToName, classIdToParams, GraphNode, GraphNodeParam } from './afnodeFactory';
 import { getSourceTarget } from 'rete-connection-plugin'
-import { BoolControl } from "./afchecker";
-import { FloatControl } from "./affloatfield";
-import { createView, switchToView } from "./afmanager";
+import { BoolControl, CustomChecker } from "./afchecker";
+import { FloatControl, CustomFloatField } from "./affloatfield";
+import { createView, getManifestNodes, switchToView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
+import { createRoot } from "react-dom/client";
 
 class PoseSocket extends ClassicPreset.Socket {
   constructor(name: string) {
@@ -328,27 +329,30 @@ function CreateAndAddSocket(
         var_name: param.var_name
     };
 
-    // Create socket object casted.
-    const newSocket = param.direction === "Input"
-        ? new ClassicPreset.Input(socket, undefined, false)
-        : new ClassicPreset.Output(socket, undefined, false);
+    // Create a new socket only if it has a direction.
+    if(param.direction != "") {
+        // Create socket object casted.
+        const newSocket = param.direction === "Input"
+            ? new ClassicPreset.Input(socket, undefined, false)
+            : new ClassicPreset.Output(socket, undefined, false);
 
-    // Add it a label.
-    newSocket.label = param.label;
+        // Add it a label.
+        newSocket.label = param.label;
 
-    // Add it to the node.
-    if (param.direction === "Input") {
-        node.addInput(uid, newSocket);
+        // Add it to the node.
+        if (param.direction === "Input") {
+            node.addInput(uid, newSocket);
 
-        // Create default control and assign it to the input.
-        const defaultControl = GetDefaultControlPerType(editor, node, socketType, meta);
-        if (defaultControl) {
-            (newSocket as ClassicPreset.Input).control = defaultControl;
-            (newSocket as ClassicPreset.Input).showControl = true;
+            // Create default control and assign it to the input.
+            const defaultControl = GetDefaultControlPerType(editor, node, socketType, meta);
+            if (defaultControl) {
+                (newSocket as ClassicPreset.Input).control = defaultControl;
+                (newSocket as ClassicPreset.Input).showControl = true;
+            }
+
+        } else {
+            node.addOutput(uid, newSocket);
         }
-
-    } else {
-        node.addOutput(uid, newSocket);
     }
 }
 
@@ -708,3 +712,104 @@ export async function OnStateConnectionRemoved(context: string, connectionId: st
         [graphString]
     );  
 }
+
+// Selection re-renders details panel.
+export function setDetailsPanelVisible(editor: NodeEditor<Schemes>, show: boolean, nodeId: string = "") {
+    const panel = document.getElementById('details-panel');
+    if (panel) panel.style.display = show ? 'block' : 'none';
+
+    if(show && nodeId != "") {
+      const node = editor.getNode(nodeId);
+      if(node) {
+        const nodeType = node.meta?.type
+
+        if(nodeType == "") {
+          if(panel) panel.style.display = 'none';
+          return;
+        }
+
+        const manifest = getManifestNodes().find(n => n.class_id === nodeType);
+        if(!manifest) {
+          if(panel) panel.style.display = 'none';
+          return;
+        }
+
+        const undirectedParams = manifest.params.filter(p => p.direction === "");
+        if(undirectedParams.length == 0) {
+          if(panel) panel.style.display = 'none';
+          return;
+        }
+
+        const content = document.getElementById('details-content')!;
+        content.innerHTML = ""; // Clear out.
+
+        undirectedParams.forEach((param, idx) => {
+
+          // Row for each param.
+          const row = document.createElement('div');
+          row.className = `detail-row${idx}`;
+          Object.assign(row.style, {
+            display: 'flex',
+            flexDirection: 'row',
+            borderBottom: '1px solid #151515',
+            paddingLeft: '20px',
+            width: '100%',
+            boxSizing: 'border-box'
+          });
+
+          // Name.
+          const nameCell = document.createElement('div');
+          nameCell.id = `detail-name${idx}`;
+          nameCell.textContent = param.label || param.var_name;
+          Object.assign(nameCell.style, {
+            flex: '6',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            borderRight: '1px solid #151515',
+            padding: '10px 0',
+          });
+
+          // Control.
+          const controlCell = document.createElement('div');
+          controlCell.id = `detail-control${idx}`;
+          Object.assign(controlCell.style, {
+            flex: '4',
+            padding: '10px 5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          });
+
+          // Create the actual control.
+          let controlInstance: any;
+          let reactElement: React.ReactElement;
+
+          switch (param.var_type) {
+            case 'float':
+              controlInstance = new FloatControl(editor, node!);
+              reactElement = <CustomFloatField data={controlInstance} />;
+              break;
+
+            case 'bool':
+              controlInstance = new BoolControl(editor, node!);
+              reactElement = <CustomChecker data={controlInstance} />;
+              break;
+
+            default:
+              break;
+          }
+
+          const root = createRoot(controlCell);
+          root.render(reactElement);
+
+          // Assemble.
+          row.appendChild(nameCell);
+          row.appendChild(controlCell);
+          content.appendChild(row);
+        })
+      }
+    }
+
+    return;
+  }

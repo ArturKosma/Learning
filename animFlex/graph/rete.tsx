@@ -15,12 +15,13 @@ import {
 } from "rete-context-menu-plugin";
 import styled from "styled-components";
 import {DropdownControl, CustomDropdown} from './afdropdown'; 
-import {CanCreateConnection, GetConnectionSockets, OnNodeCreated, OnNodeRemoved, OnNodeUpdated} from './affunclib'
+import {CanCreateConnection, GetConnectionSockets, OnNodeCreated, OnNodeRemoved, OnNodeUpdated, setDetailsPanelVisible} from './affunclib'
 import { setupSelection } from './selection';
 import { BoolControl, CustomChecker } from "./afchecker";
 import { CustomFloatField, FloatControl } from "./affloatfield";
 import { getCurrentView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
+import { SelectorEntity } from "rete-area-plugin/_types/extensions/selectable";
 
 declare const Module: any;
 
@@ -98,12 +99,16 @@ export async function createEditor(container: HTMLElement, id: string) {
             handler: async () => {
               const { x: screenX, y: screenY } = area.area.pointer;
 
+              const gridSize = 16;
+              const snappedX = Math.round(screenX / gridSize) * gridSize;
+              const snappedY = Math.round(screenY / gridSize) * gridSize;
+
               const { node } = AFNodeFactory.create(classId, editor, true, ReteViewType.Graph) as {
                 node: ClassicPreset.Node;
               };
 
               await editor.addNode(node);
-              await area.translate(node.id, { x: screenX, y: screenY });
+              await area.translate(node.id, { x: snappedX, y: snappedY });
             }
           }))
         };
@@ -117,21 +122,52 @@ export async function createEditor(container: HTMLElement, id: string) {
 
   // Enables node selection in the editor area.
   AreaExtensions.simpleNodesOrder(area);
-  const nodeSelector = AreaExtensions.selectableNodes(area, selector, {
+
+  // Custom selector for custom events.
+  class AFSelector extends AreaExtensions.Selector<any> {
+
+    add(entity, accumulate) {
+
+      if(this.isSelected(entity) && this.entities.size === 1) {
+
+        return;
+      }
+
+      super.add(entity, accumulate);
+
+      if(this.entities.size === 1) {
+        setDetailsPanelVisible(editor, true, entity.id);
+      } else {
+        setDetailsPanelVisible(editor, false);
+      }
+    }
+    
+    remove(entity) {
+      super.remove(entity);
+
+      if(!this.isSelected(entity)) {
+        setDetailsPanelVisible(editor, false);
+      }
+    }
+  }
+  const customSelector = new AFSelector();
+  const nodeSelector = AreaExtensions.selectableNodes(area, customSelector, {
     accumulating: AreaExtensions.accumulateOnCtrl()
   });
 
+  // Selection setup.
   const selection = setupSelection(area, {
     selected(ids) {
-      selector.unselectAll();
-      ids.forEach((id, i) => {
-        nodeSelector.select(id, i !== 0);
-      });
+      customSelector.unselectAll();
+        ids.forEach((id, i) => {
+          nodeSelector.select(id, i !== 0);
+        });
     },
   });
 
-selection.setShape('marquee');
-selection.setButton(0);
+  // Area selector.
+  selection.setShape('marquee');
+  selection.setButton(0);
 
   // Grid snapping.
   AreaExtensions.snapGrid(area, {size: 16, dynamic: false});
@@ -307,6 +343,19 @@ selection.setButton(0);
     if (context.type === 'zoom' && context.data.source === 'dblclick') return
     return context
   })
+
+  // Clicking, unclicking nodes.
+  /*area.addPipe(context => {
+    if (context.type === 'pointerdown' && context.data.event.button === 0) {
+      let selectedNodes = editor.getNodes().filter(node => node.selected);
+      if(selectedNodes.length != 1) {
+        console.log("unselect details");
+      } else {
+        console.log("select details");
+      }
+    }
+    return context
+  })*/
 
   // Show dragging hand when dragging around.
   let dragging = false;

@@ -12,6 +12,7 @@ public:
 	AFPARAM(AFPose, blendBool_inputPoseB, "B", "Input", "");
 	AFPARAM(bool, blendBool_useA, "Use A", "Input", "");
 	AFPARAM(AFPose, blendBool_outputPose, "", "Output", "");
+	AFPARAM(float, blendBool_blendTime, "Blend Time", "", "");
 
 	void Evaluate(float deltaTime) override;
 };
