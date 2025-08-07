@@ -8,17 +8,25 @@ export class BoolControl extends ClassicPreset.Control {
   value: boolean;
   onChange?: (val: boolean) => void;
   node: ClassicPreset.Node;
-  editor: NodeEditor<Schemes>
+  editor: NodeEditor<Schemes>;
+  varName: string;
 
-  constructor(editor: NodeEditor<Schemes>, node: ClassicPreset.Node) {
+  constructor(editor: NodeEditor<Schemes>, node: ClassicPreset.Node, varName: string, initial: boolean) {
     super();
-    this.value = false;
+    this.value = initial;
     this.node = node;
     this.editor = editor;
+    this.varName = varName;
   }
 
   setValue(val: boolean) {
     this.value = val;
+
+    // Write-through to valuesMap.
+    const meta: any = (this.node as any).meta ?? ((this.node as any).meta = {});
+    const valuesMap: Record<string, string> = (meta.valuesMap ??= {});
+    valuesMap[this.varName] = String(val);
+
     this.onChange?.(val);
     OnNodeUpdated(this.editor, this.node);
   }

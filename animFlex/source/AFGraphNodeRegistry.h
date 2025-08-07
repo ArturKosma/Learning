@@ -411,7 +411,7 @@ const T& FAFParam<T>::GetValue() const
 	inline static FAFGraphNodeClassRegistrar<Class> _registrar_##Class = FAFGraphNodeClassRegistrar<Class>(#Class); \
 	std::string GetNodeType() const override {return #Class;}
 
-#define AFPARAM(Type, VarName, VarString, Direction, Meta) \
+#define AFPARAM(Type, VarName, DefaultValue, VarString, Direction, Meta) \
 	FAFParam<Type> VarName = FAFParam<Type>(#VarName); \
 	inline static FAFGraphNodeParamRegistrar<ThisClass, Type> _registrar_##VarName = FAFGraphNodeParamRegistrar<ThisClass, Type>(ThisClassStringName, #VarName, &ThisClass::VarName, Direction)
 	

@@ -130,26 +130,27 @@ type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPr
 
 async function delKey(editor: NodeEditor<Schemes>, selector: AreaExtensions.Selector<SelectorEntity>) {
 
-  for (const selectedEntity of selector.entities.values()) {
-  const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
-    meta?: {isRemovable?: boolean}
-  };
-    if(node?.meta?.isRemovable) {
-      const connections = editor.getConnections();
-      
-      // Remove all connections where this node is source or target
-      for (const conn of connections) {
-        if (
-          conn.source === node.id ||
-          conn.target === node.id  
-        ) {
-          await editor.removeConnection(conn.id);
-        }
-      }
+    for (const selectedEntity of selector.entities.values()) {
+        const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
+            meta?: {isRemovable?: boolean}
+        };
 
-      await editor.removeNode(selectedEntity.id);
+        if(node?.meta?.isRemovable) {
+            const connections = editor.getConnections();
+            
+            // Remove all connections where this node is source or target
+            for (const conn of connections) {
+                if (
+                conn.source === node.id ||
+                conn.target === node.id  
+                ) {
+                await editor.removeConnection(conn.id);
+                }
+            }
+
+            await editor.removeNode(selectedEntity.id);
+        }
     }
-  }
 }
 
 export let nodes: GraphNode[] = [];

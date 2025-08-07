@@ -123,6 +123,8 @@ export async function createEditor(container: HTMLElement, id: string) {
   // Enables node selection in the editor area.
   AreaExtensions.simpleNodesOrder(area);
 
+  setDetailsPanelVisible(editor, true, "");
+
   // Custom selector for custom events.
   class AFSelector extends AreaExtensions.Selector<any> {
 
@@ -137,6 +139,10 @@ export async function createEditor(container: HTMLElement, id: string) {
 
       if(this.entities.size === 1) {
         setDetailsPanelVisible(editor, true, entity.id);
+        const node = editor.getNode(entity.id);
+        if (node?.meta?.valuesMap) {
+            console.log("valuesMap for node:", entity.id, node.meta.valuesMap);
+        }
       } else {
         setDetailsPanelVisible(editor, false);
       }
@@ -546,7 +552,7 @@ function HashString(str) {
   resizeObserver.observe(container);
   
   return {
-      editor, selector, destroy: () => {
+      editor, selector: customSelector, destroy: () => {
         clearInterval(intervalId);
         area.destroy()
       },

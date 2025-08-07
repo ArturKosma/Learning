@@ -6,19 +6,59 @@ import json
 RE_AFCLASS = re.compile(
     r'\bAFCLASS\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)'
 )
+
+# AFPARAM(Type, VarName, DefaultValue, Label, Direction, Meta)
+# DefaultValue may be "quoted" or a bare token like 1.0f, 0.25, false, true, MyEnum::Value
 RE_AFPARAM = re.compile(
-    r'\bAFPARAM\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]*)"\s*,\s*"([^"]*)"(?:\s*,\s*"([^"]*)")?\s*\)'
+    r'\bAFPARAM\s*\(\s*'
+    r'([a-zA-Z_][\w:]*)\s*,\s*'                       # Type
+    r'([a-zA-Z_][\w:]*)\s*,\s*'                       # VarName
+    r'("([^"]*)"|[^,]+)\s*,\s*'                       # DefaultValue (grp3 raw, grp4 inner if quoted)
+    r'"([^"]*)"\s*,\s*'                               # Label
+    r'"([^"]*)"\s*,\s*'                               # Direction
+    r'"([^"]*)"\s*'                                   # Meta
+    r'\)'
 )
 
 def fetch_headers(directory):
     if not os.path.isdir(directory):
         return []
-
     return [
         os.path.join(directory, item)
         for item in os.listdir(directory)
         if os.path.isfile(os.path.join(directory, item)) and item.endswith(".h")
     ]
+
+def normalize_default(default_raw: str, default_inner: str | None) -> str:
+    """
+    Return a string representation of the default suitable for JSON.
+    - If quoted: use the inner contents (including empty string).
+    - If bare token:
+        * strip trailing 'f' from numeric literals like 1.0f
+        * keep 'true'/'false' as lower-case strings
+        * otherwise return as-is (e.g., identifiers / enums) as a string token
+    """
+    if default_inner is not None:
+        # It was quoted -> use inner without quotes
+        return default_inner
+
+    token = default_raw.strip()
+
+    # Lowercase for boolean detection
+    low = token.lower()
+    if low in ('true', 'false'):
+        return low
+
+    # Strip trailing 'f' from float literals like 1.0f
+    if re.fullmatch(r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?f', token):
+        return token[:-1]  # remove 'f'
+
+    # If it looks like a plain number, keep as text anyway (JS can parseFloat)
+    if re.fullmatch(r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?', token):
+        return token
+
+    # Fallback: enum/identifier -> keep as string token
+    return token
 
 def extract_macros(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -33,7 +73,6 @@ def extract_macros(filepath):
     for line in lines:
         class_match = RE_AFCLASS.search(line)
         if class_match:
-            # If we were processing a class, save it before starting a new one
             if current_class_id:
                 result.append([
                     (current_class_id, current_class_name, current_class_meta),
@@ -47,11 +86,21 @@ def extract_macros(filepath):
 
         param_match = RE_AFPARAM.search(line)
         if param_match and current_class_id:
-            var_type, var_name, label, direction, meta_raw = param_match.groups()
-            param_meta = meta_raw.split("|") if meta_raw else []
-            current_params.append((var_type, var_name, label, direction, param_meta))
+            (
+                var_type,
+                var_name,
+                default_raw,
+                default_inner,
+                label,
+                direction,
+                meta_raw
+            ) = param_match.groups()
 
-    # Final class at end of file
+            default_str = normalize_default(default_raw, default_inner)
+            param_meta = meta_raw.split("|") if meta_raw else []
+
+            current_params.append((var_type, var_name, default_str, label, direction, param_meta))
+
     if current_class_id:
         result.append([
             (current_class_id, current_class_name, current_class_meta),
@@ -75,10 +124,11 @@ if __name__ == "__main__":
                 "params": []
             }
 
-            for var_type, var_name, label, direction, param_meta in params:
+            for var_type, var_name, default_str, label, direction, param_meta in params:
                 node["params"].append({
                     "var_type": var_type,
                     "var_name": var_name,
+                    "default": default_str,
                     "label": label,
                     "direction": direction,
                     "meta": param_meta
@@ -86,9 +136,7 @@ if __name__ == "__main__":
 
             nodes.append(node)
 
-    outputNodes = {
-        "Nodes": nodes
-    }
+    outputNodes = { "Nodes": nodes }
 
     with open("graphManifest.json", "w", encoding="utf-8") as f:
         json.dump(outputNodes, f, indent=4)

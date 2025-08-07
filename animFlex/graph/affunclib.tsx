@@ -56,16 +56,23 @@ class ExecSocket extends ClassicPreset.Socket {
   }
 }
 
-export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: ClassicPreset.Node, socketType: string, meta: any) {
+export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: ClassicPreset.Node, varName: string, socketType: string, meta: any, initial: any) {
+
+    const toBool = (v: any) =>
+        typeof v === 'string' ? v.toLowerCase() === 'true' : Boolean(v);
+
+    const toFloat = (v: any) =>
+        typeof v === 'string' ? Number(v) : Number(v);
+
   switch (socketType) {
     case "bool":
-      return new BoolControl(editor, node);
+      return new BoolControl(editor, node, varName, toBool(initial));
     case "float":
-      return new FloatControl(editor, node);
+      return new FloatControl(editor, node, varName, toFloat(initial));
     case "string": {
         const dropdownMeta = meta.find((m: string) => m.includes("Dropdown_"));
         if (dropdownMeta) {
-            return new DropdownControl(dropdownMeta, editor, node);
+            return new DropdownControl(dropdownMeta, editor, node, varName);
         }
         return undefined;
     }
@@ -133,6 +140,7 @@ export function GetNodeMeta(type: string, graphType: ReteViewType): any {
                 bigIcon: false,
                 isRemovable: true,
                 classMeta,
+                valuesMap: {} as Record<string, string>
             };
             break;
         }
@@ -150,6 +158,7 @@ export function GetNodeMeta(type: string, graphType: ReteViewType): any {
                 bigIcon: false,
                 isRemovable: true,
                 classMeta,
+                valuesMap: {} as Record<string, string>
             };
             break;
         }
@@ -167,6 +176,7 @@ export function GetNodeMeta(type: string, graphType: ReteViewType): any {
                 bigIcon: false,
                 isRemovable: true,
                 classMeta,
+                valuesMap: {} as Record<string, string>
             };
             break;
         }
@@ -318,6 +328,10 @@ function CreateAndAddSocket(
         node
     );
 
+    // Make sure valuesMap exists on the node.
+    const nodeMeta: any = (node as any).meta ?? ((node as any).meta = {});
+    if (!nodeMeta.valuesMap) nodeMeta.valuesMap = {};
+
     // Attach full param.meta to the socket.
     const existingMeta = (socket as any).meta ?? {};
     const paramFlags = param.meta && Array.isArray(param.meta)
@@ -328,6 +342,9 @@ function CreateAndAddSocket(
         ...paramFlags,
         var_name: param.var_name
     };
+
+    // Add default value to the values map.
+    nodeMeta.valuesMap[param.var_name] = param.default ?? "";
 
     // Create a new socket only if it has a direction.
     if(param.direction != "") {
@@ -344,7 +361,7 @@ function CreateAndAddSocket(
             node.addInput(uid, newSocket);
 
             // Create default control and assign it to the input.
-            const defaultControl = GetDefaultControlPerType(editor, node, socketType, meta);
+            const defaultControl = GetDefaultControlPerType(editor, node, param.var_name, socketType, meta, param.default);
             if (defaultControl) {
                 (newSocket as ClassicPreset.Input).control = defaultControl;
                 (newSocket as ClassicPreset.Input).showControl = true;
@@ -716,100 +733,141 @@ export async function OnStateConnectionRemoved(context: string, connectionId: st
 // Selection re-renders details panel.
 export function setDetailsPanelVisible(editor: NodeEditor<Schemes>, show: boolean, nodeId: string = "") {
     const panel = document.getElementById('details-panel');
-    if (panel) panel.style.display = show ? 'block' : 'none';
+    const content = document.getElementById('details-content');
 
-    if(show && nodeId != "") {
-      const node = editor.getNode(nodeId);
-      if(node) {
-        const nodeType = node.meta?.type
+    if (!panel || !content) return;
 
-        if(nodeType == "") {
-          if(panel) panel.style.display = 'none';
-          return;
-        }
+    panel.style.display = 'block';
+    content.innerHTML = ""; // Clear out.
 
-        const manifest = getManifestNodes().find(n => n.class_id === nodeType);
-        if(!manifest) {
-          if(panel) panel.style.display = 'none';
-          return;
-        }
+    const showPlaceholder = () => {
+        content.innerHTML = `<div style="
+            padding: 20px;
+            text-align: center;
+            font-style: italic;
+            color: #999;
+        ">Choose object to show details</div>`;
+    };
 
-        const undirectedParams = manifest.params.filter(p => p.direction === "");
-        if(undirectedParams.length == 0) {
-          if(panel) panel.style.display = 'none';
-          return;
-        }
+    const showPlaceholderEmpty = () => {
+        content.innerHTML = `<div style="
+            padding: 20px;
+            text-align: center;
+            font-style: italic;
+            color: #999;
+        "></div>`;
+    };
 
-        const content = document.getElementById('details-content')!;
-        content.innerHTML = ""; // Clear out.
+    if (!show) {
+        showPlaceholder()
+        return;
+    }
 
-        undirectedParams.forEach((param, idx) => {
+    if (nodeId === "") {
+        showPlaceholder();
+        return;
+    }
 
-          // Row for each param.
-          const row = document.createElement('div');
-          row.className = `detail-row${idx}`;
-          Object.assign(row.style, {
+    const node = editor.getNode(nodeId);
+    if (!node) {
+        showPlaceholder();
+        return;
+    }
+
+    const nodeType = node.meta?.type;
+    if (!nodeType) {
+        showPlaceholder();
+        return;
+    }
+
+    const manifest = getManifestNodes().find(n => n.class_id === nodeType);
+    if (!manifest) {
+        showPlaceholderEmpty();
+        return;
+    }
+
+    const undirectedParams = manifest.params.filter(p => p.direction === "");
+    if (undirectedParams.length === 0) {
+        showPlaceholderEmpty();
+        return;
+    }
+
+    // Create rows for each parameter.
+    undirectedParams.forEach((param, idx) => {
+        const row = document.createElement('div');
+        row.className = `detail-row${idx}`;
+        Object.assign(row.style, {
             display: 'flex',
             flexDirection: 'row',
             borderBottom: '1px solid #151515',
             paddingLeft: '20px',
             width: '100%',
             boxSizing: 'border-box'
-          });
+        });
 
-          // Name.
-          const nameCell = document.createElement('div');
-          nameCell.id = `detail-name${idx}`;
-          nameCell.textContent = param.label || param.var_name;
-          Object.assign(nameCell.style, {
+        // Name cell.
+        const nameCell = document.createElement('div');
+        nameCell.id = `detail-name${idx}`;
+        nameCell.textContent = param.label || param.var_name;
+        Object.assign(nameCell.style, {
             flex: '6',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
             borderRight: '1px solid #151515',
             padding: '10px 0',
-          });
+        });
 
-          // Control.
-          const controlCell = document.createElement('div');
-          controlCell.id = `detail-control${idx}`;
-          Object.assign(controlCell.style, {
+        // Control cell.
+        const controlCell = document.createElement('div');
+        controlCell.id = `detail-control${idx}`;
+        Object.assign(controlCell.style, {
             flex: '4',
             padding: '10px 5px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
-          });
+        });
 
-          // Create the actual control.
-          let controlInstance: any;
-          let reactElement: React.ReactElement;
+        // Create control.
+        let controlInstance: any;
+        let reactElement: React.ReactElement;
 
-          switch (param.var_type) {
+        switch (param.var_type) {
             case 'float':
-              controlInstance = new FloatControl(editor, node!);
-              reactElement = <CustomFloatField data={controlInstance} />;
-              break;
+                const initialFloat = (() => {
+                    const vm: Record<string, string> | undefined = (node as any).meta?.valuesMap;
+                    const s = vm?.[param.var_name] ?? String(param.default ?? "");
+                    return parseFloat(s) || 0;
+                })();
+
+                controlInstance = new FloatControl(editor, node, param.var_name, initialFloat);
+                reactElement = <CustomFloatField data={controlInstance} />;
+                break;
 
             case 'bool':
-              controlInstance = new BoolControl(editor, node!);
-              reactElement = <CustomChecker data={controlInstance} />;
-              break;
+                const initialBool = (() => {
+                    const vm: Record<string, string> | undefined = (node as any).meta?.valuesMap;
+                    const s = vm?.[param.var_name] ?? String(param.default ?? "");
+                    return String(s).toLowerCase() === "true";
+                })();
 
+                controlInstance = new BoolControl(editor, node, param.var_name, initialBool);
+                reactElement = <CustomChecker data={controlInstance} />;
+                break;
             default:
-              break;
-          }
+                break;
+        }
 
-          const root = createRoot(controlCell);
-          root.render(reactElement);
+        if (reactElement) {
+            const root = createRoot(controlCell);
+            root.render(reactElement);
+        }
 
-          // Assemble.
-          row.appendChild(nameCell);
-          row.appendChild(controlCell);
-          content.appendChild(row);
-        })
-      }
-    }
+        // Assemble
+        row.appendChild(nameCell);
+        row.appendChild(controlCell);
+        content.appendChild(row);
 
-    return;
-  }
+    });
+}

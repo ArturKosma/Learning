@@ -9,44 +9,54 @@ export class FloatControl extends ClassicPreset.Control {
   onChange?: (val: number) => void;
   node?: ClassicPreset.Node;
   editor: NodeEditor<Schemes>;
+  varName: string;
 
-  constructor(editor: NodeEditor<Schemes>, node: ClassicPreset.Node) {
+  constructor(editor: NodeEditor<Schemes>, node: ClassicPreset.Node, varName: string, initial: number) {
     super();
-    this.value = 0.0;
+    this.value = initial;
     this.node = node;
     this.editor = editor;
+    this.varName = varName;
   }
 
   setValue(val: number) {
     this.value = val;
+
+    // Write-through to valuesMap.
+    const meta: any = (this.node as any).meta ?? ((this.node as any).meta = {});
+    const valuesMap: Record<string, string> = (meta.valuesMap ??= {});
+    valuesMap[this.varName] = String(val);
   }
 }
 
+function formatOneDecimalMin(val: number) {
+  const str = String(val);
+  return str.includes('.') ? str : str + '.0';
+}
+
 export function CustomFloatField(props: { data: FloatControl }) {
-  const [text, setText] = React.useState<string>(() => props.data.value.toFixed(1));
+  const [text, setText] = React.useState<string>(() => formatOneDecimalMin(props.data.value));
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+  // If value changes externally, reflect it without rounding
   React.useEffect(() => {
-    setText(props.data.value.toFixed(1));
+    setText(formatOneDecimalMin(props.data.value));
   }, [props.data.value]);
 
   const handleBlur = () => {
-    const parsed = parseFloat(text);
-    if (isNaN(parsed)) {
-      props.data.setValue(0.0);
-      setText("0.0");
-      return;
-    }
+    const raw = text.trim();
 
-    const rounded = parseFloat(parsed.toFixed(3));
-    props.data.setValue(rounded);
-
-    const formatted =
-      Number.isInteger(rounded) ? `${rounded.toFixed(1)}` : `${rounded}`;
-    setText(formatted);
-
-    if (props.data.node) {
-      OnNodeUpdated(props.data.editor, props.data.node);
+    // Accept numbers incl. scientific: -1.23e-4, .5, 5., +3
+    // If you want to be looser, just use parseFloat and isNaN check.
+    const num = Number(raw);
+    if (Number.isFinite(num)) {
+      props.data.setValue(num);
+      setText(formatOneDecimalMin(num));
+      if (props.data.node) {
+        OnNodeUpdated(props.data.editor, props.data.node);
+      }
+    } else {
+      setText(formatOneDecimalMin(props.data.value));
     }
   };
 

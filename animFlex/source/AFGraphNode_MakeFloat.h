@@ -7,8 +7,8 @@ class AFGraphNode_MakeFloat : public AFGraphNodeCRTP<AFGraphNode_MakeFloat>
 
 public:
 
-	AFPARAM(float, Input, "", "Input", "HidePin");
-	AFPARAM(float, Output, "", "Output", "");
+	AFPARAM(float, Input, 0.0f, "", "Input", "HidePin");
+	AFPARAM(float, Output, 0.0f, "", "Output", "");
 
 	void Evaluate(float deltaTime) override;
 };

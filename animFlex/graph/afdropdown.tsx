@@ -23,17 +23,25 @@ export class DropdownControl extends ClassicPreset.Control {
   onChange?: (val: string) => void;
   node: ClassicPreset.Node;
   editor: NodeEditor<Schemes>;
+  varName: string;
 
-  constructor(type: string, editor: NodeEditor<Schemes>, node: ClassicPreset.Node) {
+  constructor(type: string, editor: NodeEditor<Schemes>, node: ClassicPreset.Node, varName: string) {
     super();
     this.value = '';
     this.node = node;
     this.editor = editor;
+    this.varName = varName;
   }
 
   setValue(val: string) {
     this.value = val;
     this.onChange?.(val);
+
+    // Write-through to valuesMap.
+    const meta: any = (this.node as any).meta ?? ((this.node as any).meta = {});
+    const valuesMap: Record<string, string> = (meta.valuesMap ??= {});
+    valuesMap[this.varName] = String(val);
+
     OnNodeUpdated(this.editor, this.node)
   }
 }

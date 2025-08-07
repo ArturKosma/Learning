@@ -7,8 +7,8 @@ class AFGraphNode_MakeBool : public AFGraphNodeCRTP<AFGraphNode_MakeBool>
 
 public:
 
-	AFPARAM(bool, Input, "", "Input", "HidePin");
-	AFPARAM(bool, Output, "", "Output", "");
+	AFPARAM(bool, Input, false, "", "Input", "HidePin");
+	AFPARAM(bool, Output, false, "", "Output", "");
 
 	void Evaluate(float deltaTime) override;
 };
