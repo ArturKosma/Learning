@@ -1,0 +1,304 @@
+{
+    "Nodes": [
+        {
+            "class_id": "AFGraphNode_Blend",
+            "node_name": "Blend",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "blend_inputPoseA",
+                    "default": "",
+                    "label": "A",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "blend_inputPoseB",
+                    "default": "",
+                    "label": "B",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "blend_alpha",
+                    "default": "0.0",
+                    "label": "Alpha",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "blend_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_BlendByBool",
+            "node_name": "Blend by Bool",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "blendBool_inputPoseA",
+                    "default": "",
+                    "label": "A",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "blendBool_inputPoseB",
+                    "default": "",
+                    "label": "B",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "blendBool_useA",
+                    "default": "true",
+                    "label": "Use A",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "blendBool_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "blendBool_blendTime",
+                    "default": "0.25",
+                    "label": "Blend Time",
+                    "direction": "",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_Compare",
+            "node_name": "Compare",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "m_a",
+                    "default": "0.0",
+                    "label": "A",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_b",
+                    "default": "0.0",
+                    "label": "B",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_compareType",
+                    "default": "0",
+                    "label": "Compare Type",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFCompareTypes_Enum"
+                    ]
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_compareResult",
+                    "default": "false",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_GetFloatProperty",
+            "node_name": "Get Float Property",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "int",
+                    "var_name": "m_propertyEnum",
+                    "default": "0",
+                    "label": "Property Name",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFFloatProperties_Enum"
+                    ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_floatProperty",
+                    "default": "0.0",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_Graph",
+            "node_name": "Graph",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "GraphOutput",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_MakeBool",
+            "node_name": "Make Bool",
+            "meta": [
+                "Compact"
+            ],
+            "params": [
+                {
+                    "var_type": "bool",
+                    "var_name": "Input",
+                    "default": "false",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin"
+                    ]
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "Output",
+                    "default": "false",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_MakeFloat",
+            "node_name": "Make Float",
+            "meta": [
+                "Compact"
+            ],
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "Input",
+                    "default": "0.0",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin"
+                    ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "Output",
+                    "default": "0.0",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_PlaySequence",
+            "node_name": "Play Sequence",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "std::string",
+                    "var_name": "playseq_animName",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "Dropdown_Anims"
+                    ]
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "playseq_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "playseq_forceRootLock",
+                    "default": "true",
+                    "label": "Force Root Lock",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "playseq_playrate",
+                    "default": "1.0",
+                    "label": "Playrate",
+                    "direction": "",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_StateMachine",
+            "node_name": "State Machine",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "StateMachineOutput",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        }
+    ],
+    "Enums": [
+        {
+            "enum_name": "EAFCompareTypes",
+            "values": [
+                "Greater",
+                "GreaterEqual",
+                "Equal",
+                "NonEqual",
+                "Lesser",
+                "LesserEqual"
+            ]
+        },
+        {
+            "enum_name": "EAFFloatProperties",
+            "values": [
+                "VelocityLength",
+                "DeltaAngle"
+            ]
+        }
+    ]
+}
