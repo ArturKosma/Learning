@@ -8,7 +8,11 @@
 
 AFPose::AFPose()
 {
-	CreateJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
+	std::shared_ptr<AFMesh> mannequinMesh = AFContent::Get().FindAsset<AFMesh>("sk_mannequin");
+	if (mannequinMesh)
+	{
+		CreateJoints(mannequinMesh->GetJoints());
+	}
 }
 
 AFPose::AFPose(const AFPose& otherPose)
@@ -46,12 +50,13 @@ void AFPose::CreateJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
 		newJoint->SetScale(joints[i]->GetScale());
 
 		newJoint->CalculateLocalTRSMatrix();
+		newJoint->SetNodeName(joints[i]->GetNodeName());
 
 		m_joints[i] = newJoint;
 	}
 }
 
-void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time)
+void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool forceRootLock)
 {
 	if (!(clip))
 	{
@@ -61,6 +66,15 @@ void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time)
 	for (auto& channel : clip->GetAnimationChannels())
 	{
 		const int targetJoint = channel->GetTargetJoint();
+
+		if (forceRootLock && targetJoint == 0)
+		{
+			m_joints.at(0)->SetLocation(glm::vec3(0.0f, 0.0f, 0.0f));
+			m_joints.at(0)->SetRotation(glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+			m_joints.at(0)->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+
+			continue;
+		}
 
 		switch (channel->GetTargetPath())
 		{

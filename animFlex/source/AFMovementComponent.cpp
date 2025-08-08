@@ -62,6 +62,11 @@ float AFMovementComponent::GetMaxSpeed() const
 	return m_maxSpeed;
 }
 
+glm::vec3 AFMovementComponent::GetVelocity() const
+{
+	return m_velocity;
+}
+
 void AFMovementComponent::SetControlRotation(const glm::vec3& newControlRotation)
 {
 	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());

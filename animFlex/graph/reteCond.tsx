@@ -21,6 +21,7 @@ import { BoolControl, CustomChecker } from "./afchecker";
 import { CustomFloatField, FloatControl } from "./affloatfield";
 import { getCurrentView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
+import { CustomDropdownEnum, DropdownControlEnum } from "./afdropdownEnum";
 
   // Context menu item type
   type Item = {
@@ -187,6 +188,9 @@ selection.setButton(0);
                 }
                 if (data.payload instanceof FloatControl) {
                   return CustomFloatField;
+                }
+                if (data.payload instanceof DropdownControlEnum) {
+                  return CustomDropdownEnum;
                 }
             }
             }}));

@@ -77,7 +77,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 	else
 	{
 		// There was a transition. Simply jump there.
-		printf("next state id: %s\n", nextState.lock()->GetNodeID().c_str());
+		//printf("next state id: %s\n", nextState.lock()->GetNodeID().c_str());
 		m_currentState = nextState;
 	}
 
@@ -131,7 +131,7 @@ void AFStateMachine::OnNodeCreated(const std::string& msg)
 	{
 		std::weak_ptr<AFGraphNode> weakState = std::dynamic_pointer_cast<AFGraphNode>(newNode);
 		m_states.push_back(weakState);
-		printf("created: %s\n", nodeId.c_str());
+		//printf("created: %s\n", nodeId.c_str());
 	}
 }
 

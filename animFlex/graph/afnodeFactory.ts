@@ -16,6 +16,11 @@ export type GraphNode = {
   meta: string[];
 };
 
+export type AFEnum = {
+  enum_name: string;
+  values: string[];
+};
+
 export const classIdToName: Map<string, string> = new Map();
 export const classIdToParams: Map<string, GraphNodeParam[]> = new Map();
 export const classIdToMeta: Map<string, string[]> = new Map();

@@ -5,7 +5,7 @@ import { ReteViewType } from "./aftypes";
 import { ClassicPreset, GetSchemes, NodeEditor } from "rete";
 import { AreaExtensions } from "rete-area-plugin";
 import { SelectorEntity } from "rete-area-plugin/_types/extensions/selectable";
-import { GraphNode } from "./afnodeFactory";
+import { GraphNode, AFEnum } from "./afnodeFactory";
 
 let currentView : any;
 
@@ -154,16 +154,22 @@ async function delKey(editor: NodeEditor<Schemes>, selector: AreaExtensions.Sele
 }
 
 export let nodes: GraphNode[] = [];
+export let enums: AFEnum[] = [];
 export async function setManifest() {
     
     // Read and parse JSON graph manifest.
     const res = await fetch('./graphManifest.json');
     const data = await res.json();
     nodes = data.Nodes;
+    enums = data.Enums;
 }
 
 export function getManifestNodes() {
     return nodes;
+}
+
+export function getManifestEnums() {
+    return enums;
 }
 
 window.addEventListener('keydown', async (e) => {

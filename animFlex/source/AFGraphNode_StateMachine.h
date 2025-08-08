@@ -8,7 +8,7 @@ class AFGraphNode_StateMachine : public AFGraphNodeCRTP<AFGraphNode_StateMachine
 
 public:
 
-	AFPARAM(AFPose, StateMachineOutput, "", "", "Output", "");
+	AFPARAM(AFPose, StateMachineOutput, {}, "", "Output", "");
 
 	void Init() override;
 

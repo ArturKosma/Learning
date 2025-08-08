@@ -13,7 +13,7 @@ public:
 	AFPose(const AFPose& otherPose);
 	AFPose& operator=(const AFPose& otherPose);
 
-	void ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time);
+	void ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool forceRootLock = false);
 	void CopyTransformsFrom(const AFPose& otherPose);
 
 	const std::vector<std::shared_ptr<class AFJoint>>& GetJoints() const;

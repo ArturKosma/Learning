@@ -1,7 +1,8 @@
-import sys
+﻿import sys
 import os
 import re
 import json
+from typing import Optional
 
 RE_AFCLASS = re.compile(
     r'\bAFCLASS\s*\(\s*([a-zA-Z_][\w:]*)\s*,\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)'
@@ -20,6 +21,10 @@ RE_AFPARAM = re.compile(
     r'\)'
 )
 
+# === ENUM SUPPORT ===
+RE_AFENUM = re.compile(r'\bAFENUM\s*\(\s*\)')                 # AFENUM()
+RE_ENUM_CLASS = re.compile(r'\benum\s+class\s+([a-zA-Z_]\w*)\b')  # enum class Name
+
 def fetch_headers(directory):
     if not os.path.isdir(directory):
         return []
@@ -29,7 +34,7 @@ def fetch_headers(directory):
         if os.path.isfile(os.path.join(directory, item)) and item.endswith(".h")
     ]
 
-def normalize_default(default_raw: str, default_inner: str | None) -> str:
+def normalize_default(default_raw: str, default_inner: Optional[str]) -> str:
     """
     Return a string representation of the default suitable for JSON.
     - If quoted: use the inner contents (including empty string).
@@ -43,6 +48,10 @@ def normalize_default(default_raw: str, default_inner: str | None) -> str:
         return default_inner
 
     token = default_raw.strip()
+
+    # Special case: {} → empty string
+    if token == "{}":
+        return ""
 
     # Lowercase for boolean detection
     low = token.lower()
@@ -109,12 +118,103 @@ def extract_macros(filepath):
 
     return result
 
+# === ENUM SUPPORT ===
+def extract_enums(filepath):
+    """
+    Return a list with a single dict (per file) containing:
+      { "enum_name": <Name>, "values": [ "A", "B", ... ] }
+    Only one AFENUM() per file is expected.
+    """
+    with open(filepath, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    enums = []
+    pending_afenum = False
+    enum_name = None
+    capturing = False   # inside { ... } of the enum
+    waiting_for_brace = False
+    enum_values = []
+
+    for raw_line in lines:
+        line_no_block = re.sub(r'/\*.*?\*/', '', raw_line)  # strip /* ... */ inline blocks (not multi-line-safe)
+        line = line_no_block
+
+        # 1) Look for AFENUM()
+        if not pending_afenum and not enum_name and RE_AFENUM.search(line):
+            pending_afenum = True
+            # continue scanning this line; enum might also be declared here
+
+        # 2) Once AFENUM() was seen, find 'enum class <Name>'
+        if pending_afenum and not enum_name:
+            m = RE_ENUM_CLASS.search(line)
+            if m:
+                enum_name = m.group(1)
+                enum_values = []
+                pending_afenum = False
+                # Start capturing either immediately if '{' on same line, or wait for it
+                if '{' in line:
+                    capturing = True
+                    waiting_for_brace = False
+                else:
+                    waiting_for_brace = True
+                continue  # next line
+
+        # 3) Wait for opening brace if needed
+        if enum_name and waiting_for_brace and '{' in line:
+            capturing = True
+            waiting_for_brace = False
+            # fallthrough to capture this line content too
+
+        # 4) Capture values while inside enum body
+        if capturing:
+            # Check for closing brace first
+            if '}' in line:
+                # finalize this enum
+                enums.append({
+                    "enum_name": enum_name,
+                    "values": enum_values
+                })
+                # single AFENUM per file -> we can stop early
+                break
+
+            # Remove line comments and whitespace
+            clean = line.split('//', 1)[0].strip()
+            if not clean:
+                continue
+
+            # Lines can include the opening brace; trim it off
+            if clean.startswith('{'):
+                clean = clean[1:].strip()
+                if not clean:
+                    continue
+
+            # Split by commas because multiple entries could be on one line
+            parts = [p.strip() for p in clean.split(',')]
+
+            for part in parts:
+                if not part:
+                    continue
+                # Remove assignments like "Name = 5" or "Name = SomeOtherEnum"
+                name_only = part.split('=', 1)[0].strip()
+                # Filter out stray braces or semicolons if they sneak in
+                name_only = name_only.strip('{}; ')
+                if name_only:
+                    enum_values.append(name_only)
+
+    return enums
+
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python script.py <headers_dir>")
+        sys.exit(1)
+
     headers = fetch_headers(sys.argv[1])
     nodes = []
+    enums = []
 
     for file in headers:
         class_param_pairs = extract_macros(file)
+        file_enums = extract_enums(file)
 
         for (class_id, class_name, meta), params in class_param_pairs:
             node = {
@@ -136,7 +236,13 @@ if __name__ == "__main__":
 
             nodes.append(node)
 
-    outputNodes = { "Nodes": nodes }
+        # One AFENUM per file; this returns [] or [ {enum_name, values} ]
+        enums.extend(file_enums)
+
+    output = {
+        "Nodes": nodes,
+        "Enums": enums
+    }
 
     with open("graphManifest.json", "w", encoding="utf-8") as f:
-        json.dump(outputNodes, f, indent=4)
+        json.dump(output, f, indent=4)

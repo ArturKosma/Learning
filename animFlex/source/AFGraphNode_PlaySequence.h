@@ -11,8 +11,8 @@ class AFGraphNode_PlaySequence : public AFGraphNodeCRTP<AFGraphNode_PlaySequence
 public:
 
 	AFPARAM(std::string, playseq_animName, "", "", "Input", "HidePin|Dropdown_Anims");
-	AFPARAM(AFPose, playseq_outputPose, "", "", "Output", "");
-	AFPARAM(bool, playseq_useRootmotion, false, "Use Rootmotion", "", "");
+	AFPARAM(AFPose, playseq_outputPose, {}, "", "Output", "");
+	AFPARAM(bool, playseq_forceRootLock, true, "Force Root Lock", "", "");
 	AFPARAM(float, playseq_playrate, 1.0f, "Playrate", "", "");
 
 	void Init() override;

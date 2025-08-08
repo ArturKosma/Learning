@@ -28,7 +28,7 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 	}
 
 	// Increase time & sample anim.
-	m_localTime += deltaTime;
+	m_localTime += deltaTime * playseq_playrate;
 	const float time = std::fmod(m_localTime, m_animClip->GetClipEndTime());
-	const_cast<AFPose&>(playseq_outputPose.GetValue()).ApplyClip(m_animClip, time);
+	const_cast<AFPose&>(playseq_outputPose.GetValue()).ApplyClip(m_animClip, time, playseq_forceRootLock);
 }

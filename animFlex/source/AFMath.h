@@ -139,4 +139,9 @@ public:
 
 		return glm::slerp(currentNorm, targetNorm, t);
 	}
+
+	static bool NearlyEqual(float a, float b, float threshold = glm::epsilon<float>())
+	{
+		return glm::epsilonEqual(a, b, threshold);
+	}
 };

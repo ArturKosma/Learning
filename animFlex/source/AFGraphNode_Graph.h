@@ -8,7 +8,7 @@ class AFGraphNode_Graph : public AFGraphNodeCRTP<AFGraphNode_Graph>
 
 public:
 
-	AFPARAM(AFPose, GraphOutput, "", "", "Output", "");
+	AFPARAM(AFPose, GraphOutput, {}, "", "Output", "");
 
 	void Init() override;
 

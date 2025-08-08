@@ -87,6 +87,74 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_Compare",
+            "node_name": "Compare",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "m_a",
+                    "default": "0.0",
+                    "label": "A",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_b",
+                    "default": "0.0",
+                    "label": "B",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_compareType",
+                    "default": "0",
+                    "label": "Compare Type",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFCompareTypes_Enum"
+                    ]
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_compareResult",
+                    "default": "false",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_GetFloatProperty",
+            "node_name": "Get Float Property",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "int",
+                    "var_name": "m_propertyEnum",
+                    "default": "0",
+                    "label": "Property Name",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFFloatProperties_Enum"
+                    ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_floatProperty",
+                    "default": "0.0",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_Graph",
             "node_name": "Graph",
             "meta": [],
@@ -181,9 +249,9 @@
                 },
                 {
                     "var_type": "bool",
-                    "var_name": "playseq_useRootmotion",
-                    "default": "false",
-                    "label": "Use Rootmotion",
+                    "var_name": "playseq_forceRootLock",
+                    "default": "true",
+                    "label": "Force Root Lock",
                     "direction": "",
                     "meta": []
                 },
@@ -210,6 +278,26 @@
                     "direction": "Output",
                     "meta": []
                 }
+            ]
+        }
+    ],
+    "Enums": [
+        {
+            "enum_name": "EAFCompareTypes",
+            "values": [
+                "Greater",
+                "GreaterEqual",
+                "Equal",
+                "NonEqual",
+                "Lesser",
+                "LesserEqual"
+            ]
+        },
+        {
+            "enum_name": "EAFFloatProperties",
+            "values": [
+                "VelocityLength",
+                "DeltaAngle"
             ]
         }
     ]

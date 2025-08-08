@@ -22,6 +22,7 @@ import { CustomFloatField, FloatControl } from "./affloatfield";
 import { getCurrentView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
 import { SelectorEntity } from "rete-area-plugin/_types/extensions/selectable";
+import { CustomDropdownEnum, DropdownControlEnum } from "./afdropdownEnum";
 
 declare const Module: any;
 
@@ -141,7 +142,6 @@ export async function createEditor(container: HTMLElement, id: string) {
         setDetailsPanelVisible(editor, true, entity.id);
         const node = editor.getNode(entity.id);
         if (node?.meta?.valuesMap) {
-            console.log("valuesMap for node:", entity.id, node.meta.valuesMap);
         }
       } else {
         setDetailsPanelVisible(editor, false);
@@ -222,6 +222,9 @@ export async function createEditor(container: HTMLElement, id: string) {
                 }
                 if (data.payload instanceof FloatControl) {
                   return CustomFloatField;
+                }
+                if (data.payload instanceof DropdownControlEnum) {
+                  return CustomDropdownEnum;
                 }
             }
             }}));

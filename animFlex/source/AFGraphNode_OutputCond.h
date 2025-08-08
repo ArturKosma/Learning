@@ -9,7 +9,7 @@ class AFGraphNode_OutputCond : public AFGraphNodeCRTP<AFGraphNode_OutputCond>
 public:
 
 	FAFParam<bool> OutputCond = FAFParam<bool>("OutputCond");
-	inline static FAFGraphNodeParamRegistrar<AFGraphNode_OutputCond, bool> _registrar_OutputCond = FAFGraphNodeParamRegistrar<AFGraphNode_OutputCond, bool>("OutputCond", "OutputCond", &AFGraphNode_OutputCond::OutputCond, "Input");
+	inline static FAFGraphNodeParamRegistrar<AFGraphNode_OutputCond, bool> _registrar_OutputCond = FAFGraphNodeParamRegistrar<AFGraphNode_OutputCond, bool>("OutputCond", "OutputCond", false, &AFGraphNode_OutputCond::OutputCond, "Input");
 
 	void Evaluate(float deltaTime) override;
 };

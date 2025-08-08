@@ -82,6 +82,18 @@ struct ParamTraits<float>
 };
 
 template<>
+struct ParamTraits<int>
+{
+	static bool FromJSON(const nlohmann::json& json, int& out)
+	{
+		if (!json.is_string()) return false;
+		std::istringstream iss(json.get<std::string>());
+		const bool streamApplied = static_cast<bool>(iss >> out);
+		return streamApplied;
+	}
+};
+
+template<>
 struct ParamTraits<glm::vec3>
 {
 	static bool FromJSON(const nlohmann::json& json, glm::vec3& out)
@@ -332,7 +344,7 @@ struct FAFGraphNodeClassRegistrar
 template<typename OwnerClassType, typename ParamType>
 struct FAFGraphNodeParamRegistrar
 {
-	FAFGraphNodeParamRegistrar(const std::string& classStringName, const std::string& paramName, FAFParam<ParamType> OwnerClassType::* ptrToMember, const std::string& direction)
+	FAFGraphNodeParamRegistrar(const std::string& classStringName, const std::string& paramName, ParamType defaultValue, FAFParam<ParamType> OwnerClassType::* ptrToMember, const std::string& direction)
 	{
 		std::shared_ptr<FAFParamStaticProperty<OwnerClassType, ParamType>> prop = std::make_shared<FAFParamStaticProperty<OwnerClassType, ParamType>>();
 		prop->ptrToMember = ptrToMember;
@@ -413,5 +425,7 @@ const T& FAFParam<T>::GetValue() const
 
 #define AFPARAM(Type, VarName, DefaultValue, VarString, Direction, Meta) \
 	FAFParam<Type> VarName = FAFParam<Type>(#VarName); \
-	inline static FAFGraphNodeParamRegistrar<ThisClass, Type> _registrar_##VarName = FAFGraphNodeParamRegistrar<ThisClass, Type>(ThisClassStringName, #VarName, &ThisClass::VarName, Direction)
+	inline static FAFGraphNodeParamRegistrar<ThisClass, Type> _registrar_##VarName = FAFGraphNodeParamRegistrar<ThisClass, Type>(ThisClassStringName, #VarName, DefaultValue, &ThisClass::VarName, Direction)
+
+#define AFENUM() 
 	

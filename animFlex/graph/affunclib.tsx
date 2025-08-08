@@ -10,6 +10,7 @@ import { FloatControl, CustomFloatField } from "./affloatfield";
 import { createView, getManifestNodes, switchToView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
 import { createRoot } from "react-dom/client";
+import { DropdownControlEnum } from "./afdropdownEnum";
 
 class PoseSocket extends ClassicPreset.Socket {
   constructor(name: string) {
@@ -70,9 +71,13 @@ export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: Clas
     case "float":
       return new FloatControl(editor, node, varName, toFloat(initial));
     case "string": {
-        const dropdownMeta = meta.find((m: string) => m.includes("Dropdown_"));
+        const dropdownMeta = meta.find((m: string) => m.includes("Dropdown_")); // Any dropdowns.
         if (dropdownMeta) {
             return new DropdownControl(dropdownMeta, editor, node, varName);
+        }
+        const enumMeta = meta.find((m: string) => m.endsWith("_Enum")); // Enum dropdowns.
+        if (enumMeta) {
+            return new DropdownControlEnum(enumMeta, editor, node, varName);
         }
         return undefined;
     }
@@ -117,6 +122,7 @@ SocketTypes.set("std::string", "string");
 SocketTypes.set("float", "float");
 SocketTypes.set("bool", "bool");
 SocketTypes.set("AFExec", "Exec");
+SocketTypes.set("int", "string"); // We assume every int is really an enum in C++, and we want to show the enum as list of strings to choose, so a string.
 
 export function GetNodeMeta(type: string, graphType: ReteViewType): any {
 
@@ -601,6 +607,22 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
             var_name: (output?.socket as any)?.meta?.var_name,
             valueField,
         });
+    }
+
+    // Get value map to add the remaining node parameters that weren't sockets.
+    const valueMap = (node as any).meta?.valuesMap as Record<string, string> | undefined;
+
+    if (valueMap) {
+        const existing = new Set<string>(sockets.map(s => String(s?.var_name)));
+
+        for (const [var_name, value] of Object.entries(valueMap)) {
+            if (existing.has(var_name)) continue;
+
+            sockets.push({
+            var_name,
+            valueField: { value } // Already a string.
+            });
+        }
     }
 
     // Add this node to JSON.
