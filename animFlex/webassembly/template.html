@@ -110,6 +110,14 @@
             cursor: pointer;
         }
 
+        .save-button {
+            cursor: pointer;
+        }
+
+        .load-button {
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -128,18 +136,34 @@
         </div>
         <div id="bottom" style="flex: 1; display: flex; flex-direction: row; min-height: 0;">
             <div id="rete" style="flex: 1; min-height: 0vh; background: #202020; overflow: hidden;">
-                <div id="view-label" style="
-                        position: absolute;
+                <div id="view-label-container" style="
+                    position: absolute;
+                    display: flex;
+                    gap: 8px;
+                    z-index: 9999;
+                    padding-top: 4px;
+                ">
+                    <div class="save-button" style="
                         pointer-events: auto;
-                        z-index: 9999;
+                        padding-left: 4px;
+                    ">
+                        <img src="../animFlex/graph/save.png" alt="save"></img>
+                    </div>
+                    <div class="load-button" style="
+                        pointer-events: auto;
+                    ">
+                        <img src="../animFlex/graph/load.png" alt="load"></img>
+                    </div>
+                    <div id="view-label" style="
+                        pointer-events: auto;
                         font-family: 'Roboto', sans-serif;
                         font-weight: 400;
                         font-size: 14px;
                         letter-spacing: 0.5px;
                         color: #dadada9c;
-                        padding-top: 4px;
                     ">
-                    Main
+                        Main
+                    </div>
                 </div>
             </div>
             <div id="details-panel" style="
@@ -389,9 +413,48 @@
             const inst0 = await createView("Main", "0", ReteViewType.Graph);
         })();
     </script>
-    <script>
+    <script type="module">
+        import { save } from "../animFlex/graph/afmanager.tsx";
+
         document.querySelector('.possess-button').addEventListener('click', () => {
             Module.ccall('Possess');
+        })
+
+        document.querySelector('.save-button').addEventListener('click', async () => {
+        try {
+            // Prompt the user for a save location.
+            const handle = await window.showSaveFilePicker({
+                suggestedName: "save",
+                types: [
+                    {
+                        description: 'Text Files',
+                        accept: { 'text/plain': ['.animflex'] },
+                    },
+                ],
+            });
+
+            (async () => {
+                const saveData = await save();
+            })();
+
+            // Create a writable stream.
+            const writable = await handle.createWritable();
+
+            // Write data.
+            await writable.write("Hello, this is saved content!");
+
+            // Close the file.
+            await writable.close();
+
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error("Save failed:", err);
+            }
+        }
+});
+
+        document.querySelector('.load-button').addEventListener('click', () => {
+            console.log("load");
         })
 
         document.addEventListener('pointerlockchange', () => {

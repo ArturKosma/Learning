@@ -555,7 +555,7 @@ function HashString(str) {
   resizeObserver.observe(container);
   
   return {
-      editor, selector: customSelector, destroy: () => {
+      editor, selector: customSelector, area, destroy: () => {
         clearInterval(intervalId);
         area.destroy()
       },

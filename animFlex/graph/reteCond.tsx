@@ -509,7 +509,7 @@ function HashString(str) {
   resizeObserver.observe(container);
   
   return {
-      editor, selector, destroy: () => {
+      editor, selector, area, destroy: () => {
         clearInterval(intervalId);
         area.destroy()
       },

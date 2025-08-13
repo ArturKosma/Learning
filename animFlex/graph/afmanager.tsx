@@ -19,6 +19,7 @@ const editors: {
         container: HTMLElement, 
         editor: any, 
         selector: any,
+        area: any,
         destroy: () => void 
     }[] = [];
 
@@ -179,3 +180,7 @@ window.addEventListener('keydown', async (e) => {
         await delKey(current?.editor, current?.selector)
     }
   }, {capture: true})
+
+export async function save() {
+    console.log("im trying to kurwa save");
+}

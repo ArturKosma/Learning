@@ -617,7 +617,7 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   resizeObserver.observe(container);
   
   return {
-      editor, selector, destroy: () => {
+      editor, selector, area, destroy: () => {
         clearInterval(intervalId);
         area.destroy()
       },
