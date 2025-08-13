@@ -59,6 +59,13 @@ export function AFSocket<T extends ClassicPreset.Socket>({ data }: { data: T }) 
   React.useEffect(() => {
     if (!editor) return;
 
+    const conns = editor.getConnections ? editor.getConnections() : (editor as any).connections ?? [];
+    const isConn = conns.some((c: any) =>
+      c.sourceOutput === port.name || c.targetInput === port.name
+    );
+    setConnected(isConn);
+    meta.isConnected = isConn;
+
     const pipe = (context: any) => {
       if (
         context.type === 'connectioncreated' &&
@@ -94,7 +101,7 @@ export function AFSocket<T extends ClassicPreset.Socket>({ data }: { data: T }) 
 
   return (
     <Styles
-      title={data.name}
+      title={`${port.name}`}
       onMouseEnter={(e) => {
         const socketWrapper = e.currentTarget.closest('.input, .output');
         const socketWrapperId = socketWrapper?.getAttribute('data-testid');

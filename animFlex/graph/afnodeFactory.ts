@@ -33,7 +33,7 @@ export class AFNodeFactory {
         this.node = node
     }
 
-    static create(type: string, editor: NodeEditor<Schemes>, contextMenu: boolean = false, graphType: ReteViewType): AFNodeFactory {
+    static async create(type: string, editor: NodeEditor<Schemes>, contextMenu: boolean = false, graphType: ReteViewType, idOverride: string = "0"): Promise<AFNodeFactory> {
         const node = new ClassicPreset.Node("") as ClassicPreset.Node & {
             meta: {
                 type: string,
@@ -49,6 +49,10 @@ export class AFNodeFactory {
             }
         };
 
+        if(idOverride != "0") {
+          node.id = idOverride;
+        }
+
         // Fill meta like color, title.
         node.meta = GetNodeMeta(type, graphType);
 
@@ -56,8 +60,9 @@ export class AFNodeFactory {
         CreateSockets(node, editor);
 
         if(!contextMenu) {
-            editor.addNode(node);
+            await editor.addNode(node);
         }
+        
         return new AFNodeFactory(node);
   }
 }

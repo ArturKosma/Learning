@@ -326,6 +326,7 @@ React.useEffect(() => {
       styles={props.styles}
       meta={meta}
       data-testid="node"
+      title={`${id}`}
     >
       {!(meta.classMeta as string[])?.includes('Compact') && (
         <div className="titleBar" 
@@ -400,12 +401,10 @@ React.useEffect(() => {
             const isHidden = input.socket.meta?.HidePin;
             const socketType = input.socket.meta?.socketType;
 
-            const uniqueId_input = React.useMemo(() => crypto.randomUUID(), []);
-
             return input ? (
-            <div className={`input ${hoveredSocketId === uniqueId_input ? "socketHovered" : ""} ${socketType ?? ''}`} 
+            <div className={`input ${hoveredSocketId === key ? "socketHovered" : ""} ${socketType ?? ''}`} 
             key={key} 
-            data-testid={`${uniqueId_input}`}
+            data-testid={`${key}`}
             >
           {!isHidden && (
             <div
@@ -465,13 +464,12 @@ React.useEffect(() => {
       {/* Outputs */}
       {outputs.map(
           ([key, output]) => {
-              const uniqueId_output = React.useMemo(() => crypto.randomUUID(), []);
               const socketType = output.socket.meta?.socketType;
 
               return output ? (
-               <div className={`output ${hoveredSocketId === uniqueId_output ? "socketHovered" : ""} ${socketType ?? ''}`} 
+               <div className={`output ${hoveredSocketId === key ? "socketHovered" : ""} ${socketType ?? ''}`} 
                key={key} 
-               data-testid={`${uniqueId_output}`}
+               data-testid={`${key}`}
                >
                <div
                style={{ display: 'inline-block' }}

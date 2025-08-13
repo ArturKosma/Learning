@@ -104,7 +104,7 @@ export async function createEditor(container: HTMLElement, id: string) {
               const snappedX = Math.round(screenX / gridSize) * gridSize;
               const snappedY = Math.round(screenY / gridSize) * gridSize;
 
-              const { node } = AFNodeFactory.create(classId, editor, true, ReteViewType.Graph) as {
+              const { node } = await AFNodeFactory.create(classId, editor, true, ReteViewType.Graph) as {
                 node: ClassicPreset.Node;
               };
 

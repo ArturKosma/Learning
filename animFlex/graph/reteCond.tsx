@@ -106,7 +106,7 @@ export async function createEditorCond(container: HTMLElement, id: string) {
             handler: async () => {
               const { x: screenX, y: screenY } = area.area.pointer;
 
-              const { node } = AFNodeFactory.create(classId, editor, true, ReteViewType.ConditionalGraph) as {
+              const { node } = await AFNodeFactory.create(classId, editor, true, ReteViewType.ConditionalGraph) as {
                 node: ClassicPreset.Node;
               };
 
@@ -509,7 +509,7 @@ function HashString(str) {
   resizeObserver.observe(container);
   
   return {
-      editor, selector, area, destroy: () => {
+      editor, selector, destroy: () => {
         clearInterval(intervalId);
         area.destroy()
       },

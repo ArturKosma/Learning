@@ -410,11 +410,11 @@
 
         (async () => {
             await setManifest();
-            const inst0 = await createView("Main", "0", ReteViewType.Graph);
+            await createView("Main", "0", ReteViewType.Graph);
         })();
     </script>
     <script type="module">
-        import { save } from "../animFlex/graph/afmanager.tsx";
+        import { save, clear, load, switchToView } from "../animFlex/graph/afmanager.tsx";
 
         document.querySelector('.possess-button').addEventListener('click', () => {
             Module.ccall('Possess');
@@ -424,37 +424,44 @@
         try {
             // Prompt the user for a save location.
             const handle = await window.showSaveFilePicker({
-                suggestedName: "save",
-                types: [
-                    {
-                        description: 'Text Files',
-                        accept: { 'text/plain': ['.animflex'] },
-                    },
-                ],
+                suggestedName: "graph.animflex",
+                types: [{ description: 'AnimFlex Graph', accept: { 'application/json': ['.animflex'] } }],
             });
 
-            (async () => {
-                const saveData = await save();
-            })();
+            const data = await save();
 
-            // Create a writable stream.
             const writable = await handle.createWritable();
-
-            // Write data.
-            await writable.write("Hello, this is saved content!");
-
-            // Close the file.
+            await writable.write(new Blob([data], { type: 'application/json' }));
             await writable.close();
 
-        } catch (err) {
-            if (err.name !== 'AbortError') {
-                console.error("Save failed:", err);
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error("Save failed:", err);
+                }
             }
-        }
-});
+        });
 
-        document.querySelector('.load-button').addEventListener('click', () => {
-            console.log("load");
+        document.querySelector('.load-button').addEventListener('click', async () => {
+            try {
+                // Prompt the user for a file to open.
+                const [handle] = await window.showOpenFilePicker({
+                    types: [{ description: 'AnimFlex Graph', accept: { 'application/json': ['.animflex'] } }],
+                    multiple: false
+                });
+
+                const file = await handle.getFile();
+                const text = await file.text();
+                const json = JSON.parse(text);
+
+                await clear();
+                await load(json);
+                await switchToView("0");
+
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error("Load failed:", err);
+                }
+            }
         })
 
         document.addEventListener('pointerlockchange', () => {
