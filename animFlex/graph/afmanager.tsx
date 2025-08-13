@@ -262,7 +262,6 @@ export async function save(): Promise<string> {
       inputs: Array<{ id: string; varName: string; socketType?: string }>;
       outputs: Array<{ id: string; varName: string; socketType?: string }>;
     };
-    pinsByVarName: Record<string, string>;
   };
 
   type SerializedConnection = {
@@ -317,17 +316,12 @@ export async function save(): Promise<string> {
         })
       );
 
-      const pinsByVarName: Record<string, string> = {};
-      for (const p of inputs) if (p.varName) pinsByVarName[p.varName] = p.id;
-      for (const p of outputs) if (p.varName) pinsByVarName[p.varName] = p.id;
-
       return {
         id: node.id,
         type,
         position: pos ? { x: pos.x, y: pos.y } : null,
         ...(valuesMap ? { valuesMap } : {}),
         pins: { inputs, outputs },
-        pinsByVarName
       };
     });
 
@@ -356,6 +350,26 @@ export async function clear() {
     if (!mainEditorEntry) return;
 
     await destroyEditorRecursively(mainEditorEntry.id);
+}
+
+export function printAllConnectionIds() {
+  for (const e of editors) {
+    const conns = e.editor.getConnections() as Array<{
+      id: string;
+      source: string;
+      sourceOutput: string;
+      target: string;
+      targetInput: string;
+    }>;
+
+    console.group(`Editor "${e.name}" (${e.id}) — ${conns.length} connection(s)`);
+    for (const c of conns) {
+      console.log(
+        `id=${c.id} | ${c.source}:${c.sourceOutput} -> ${c.target}:${c.targetInput}`
+      );
+    }
+    console.groupEnd();
+  }
 }
 
 export async function load(data: SavedProject) {
@@ -421,13 +435,27 @@ export async function load(data: SavedProject) {
 
         // Recreate connections.
         for (const c of savedConnections) {
-            await editorObject.editor.addConnection(
-                new ClassicPreset.Connection(
-                    await editorObject.editor.getNode(c.source), 
-                    c.sourceOutput, 
-                    await editorObject.editor.getNode(c.target), 
-                    c.targetInput)
-                );
+            const srcNode = editorObject.editor.getNode(c.source)!;
+            const tgtNode = editorObject.editor.getNode(c.target)!;
+
+            // Build the connection explicitly.
+            const conn = new ClassicPreset.Connection(
+                srcNode,
+                c.sourceOutput,
+                tgtNode,
+                c.targetInput
+            ) as any;
+
+            // Override the connection ID.
+            conn.id = c.id;
+
+            await editorObject.editor.addConnection(conn);
+
+            // Mark sockets as connected.
+            const out = srcNode.outputs[c.sourceOutput];
+            const inp = tgtNode.inputs[c.targetInput];
+            if ((out as any)?.socket?.meta) (out as any).socket.meta.isConnected = true;
+            if ((inp as any)?.socket?.meta) (inp as any).socket.meta.isConnected = true;
         }
     }
 }
