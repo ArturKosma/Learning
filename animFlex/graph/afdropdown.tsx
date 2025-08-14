@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ClassicPreset, GetSchemes, NodeEditor } from 'rete';
-import { OnNodeUpdated } from './affunclib';
+import { AFSerializeInterface, OnNodeUpdated } from './affunclib';
 import { AreaPlugin } from 'rete-area-plugin';
 import { ReactPlugin } from 'rete-react-plugin';
 
@@ -17,7 +17,7 @@ async function loadManifest(): Promise<{ name: string }[]> {
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
-export class DropdownControl extends ClassicPreset.Control {
+export class DropdownControl extends ClassicPreset.Control implements AFSerializeInterface {
 
   value: string;
   onChange?: (val: string) => void;
@@ -44,6 +44,10 @@ export class DropdownControl extends ClassicPreset.Control {
 
     OnNodeUpdated(this.editor, this.node)
   }
+
+  serializeLoad(data: any): void {
+    this.setValue(data);
+  }
 }
 
 export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<any>, render: ReactPlugin<any> }) {
@@ -53,6 +57,8 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const stop = (e: any) => e.stopPropagation();
 
   useEffect(() => {
     loadManifest().then(entries => {
@@ -118,26 +124,34 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
       onClick={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
+      onPointerDownCapture={stop}
+      onDoubleClickCapture={stop}
+      onContextMenuCapture={stop}
+      onWheelCapture={stop}
     >
       <input
         ref={inputRef}
         className="custom-dropdown-input"
         value={searchValue}
         onChange={handleChange}
-        onFocus={handleFocus}
-        onKeyDown={handleKeyDown}
+        onFocus={(e) => { e.target.select(); setIsOpen(true); }}
+        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); inputRef.current?.blur(); } e.stopPropagation(); }}
+        onPointerDown={stop}
+        onMouseDown={stop}
+        onDoubleClick={stop}
+        onContextMenu={stop}
         placeholder="Choose Anim"
         title={searchValue}
       />
       {isOpen && (
         <ul className="custom-dropdown-list"
-            onPointerDown={(e) => e.stopPropagation()}
-            onPointerUp={(e) => e.stopPropagation()}
+            onPointerDownCapture={stop}
+            onWheelCapture={stop}
         >
           {filteredOptions.map(option => (
             <li
               key={option}
-              onClick={() => handleSelect(option)}
+              onClick={(e) => { e.stopPropagation(); handleSelect(option); }}
               className="custom-dropdown-item"
               onMouseDown={(e) => e.preventDefault()}
               onWheel={(e) => e.stopPropagation()}

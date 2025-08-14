@@ -1,10 +1,10 @@
 import React from 'react';
 import { ClassicPreset, GetSchemes, NodeEditor } from 'rete';
-import { OnNodeUpdated } from './affunclib';
+import { AFSerializeInterface, OnNodeUpdated } from './affunclib';
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
-export class BoolControl extends ClassicPreset.Control {
+export class BoolControl extends ClassicPreset.Control implements AFSerializeInterface {
   value: boolean;
   onChange?: (val: boolean) => void;
   node: ClassicPreset.Node;
@@ -29,6 +29,10 @@ export class BoolControl extends ClassicPreset.Control {
 
     this.onChange?.(val);
     OnNodeUpdated(this.editor, this.node);
+  }
+
+  serializeLoad(data: any): void {
+    this.setValue(data);
   }
 }
 

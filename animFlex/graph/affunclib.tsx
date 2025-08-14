@@ -12,6 +12,10 @@ import { ReteViewType } from "./aftypes";
 import { createRoot } from "react-dom/client";
 import { DropdownControlEnum } from "./afdropdownEnum";
 
+export interface AFSerializeInterface {
+  serializeLoad(data: any): void;
+}
+
 class PoseSocket extends ClassicPreset.Socket {
   constructor(name: string) {
     super(name);
@@ -205,7 +209,7 @@ export function GetNodeMeta(type: string, graphType: ReteViewType): any {
                 ...defaultMeta,
                 showSubTitle: true,
                 subTitle: "Graph",
-                title: "New Graph",
+                title: "",
                 titleEditable: true,
                 nodeWidth: 160,
                 color: 'linear-gradient(to right, rgba(12, 12, 12, 1.0), rgba(28, 28, 28, 0.9))',
@@ -219,7 +223,7 @@ export function GetNodeMeta(type: string, graphType: ReteViewType): any {
                 ...defaultMeta,
                 showSubTitle: true,
                 subTitle: "State Machine",
-                title: "New Graph",
+                title: "",
                 titleEditable: true,
                 nodeWidth: 160,
                 color: 'linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(70, 70, 70, 0.9))',
@@ -354,6 +358,7 @@ function CreateAndAddSocket(
 
     // Create a new socket only if it has a direction.
     if(param.direction != "") {
+
         // Create socket object casted.
         const newSocket = param.direction === "Input"
             ? new ClassicPreset.Input(socket, undefined, false)
@@ -877,6 +882,7 @@ export function setDetailsPanelVisible(editor: NodeEditor<Schemes>, show: boolea
                 controlInstance = new BoolControl(editor, node, param.var_name, initialBool);
                 reactElement = <CustomChecker data={controlInstance} />;
                 break;
+
             default:
                 break;
         }

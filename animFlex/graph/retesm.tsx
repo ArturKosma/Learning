@@ -46,7 +46,7 @@ async function processQueue() {
 
 type Schemes = GetSchemes<Node, Connection<Node, Node>>;
 
-async function create(label: string, editor: NodeEditor<Schemes>, nodeSelector: any, entry: boolean = false, connectionOwner: string = "") {
+export async function create(label: string, editor: NodeEditor<Schemes>, nodeSelector: any, entry: boolean = false, connectionOwner: string = "", addNode: boolean = true) {
 
   const node = connectionOwner != "" ? new ConditionNode("") : (entry ? new StateNodeEntry(label) : new StateNode(""));  
 
@@ -72,7 +72,10 @@ async function create(label: string, editor: NodeEditor<Schemes>, nodeSelector: 
     type: nodeType
   };
 
-  await editor.addNode(node);
+  if(addNode) {
+    await editor.addNode(node);
+  }
+
   return node;
 }
 
@@ -586,8 +589,6 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   useTransformerUpdater(editor, area);
   reactRender.use(pathPlugin);
 
-  const entry = await create("Entry", editor, nodeSelector, true);
-
   const arrange = new AutoArrangePlugin<Schemes>();
   const arrangeOptions = {
     top: 35,
@@ -602,6 +603,8 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   area.use(arrange);
   await arrange.layout();
   AreaExtensions.simpleNodesOrder(area);
+
+  const entry = await create("Entry", editor, nodeSelector, true);
 
   // Wait for the first render (initially rete is hidden) to call zoom.
   const resizeObserver = new ResizeObserver((entries) => {

@@ -1,14 +1,14 @@
 // DropdownControlEnum.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { ClassicPreset, GetSchemes, NodeEditor } from 'rete';
-import { OnNodeUpdated } from './affunclib';
+import { AFSerializeInterface, OnNodeUpdated } from './affunclib';
 import { AreaPlugin } from 'rete-area-plugin';
 import { ReactPlugin } from 'rete-react-plugin';
 import { getManifestEnums } from './afmanager';
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
-export class DropdownControlEnum extends ClassicPreset.Control {
+export class DropdownControlEnum extends ClassicPreset.Control implements AFSerializeInterface {
   // Store integer index internally; OnNodeUpdated will stringify it.
   value: number;
   onChange?: (val: number) => void;
@@ -67,6 +67,7 @@ export class DropdownControlEnum extends ClassicPreset.Control {
 
   // Accept a LABEL from the UI, convert to index, store numeric index
   setValue(label: string) {
+    
     const idx = this.values.indexOf(label);
     if (idx === -1) return;
 
@@ -79,6 +80,10 @@ export class DropdownControlEnum extends ClassicPreset.Control {
 
     OnNodeUpdated(this.editor, this.node);
   }
+
+  serializeLoad(data: any): void {
+    this.setValue(this.values[data]);
+  }
 }
 
 export function CustomDropdownEnum(props: { data: DropdownControlEnum, area: AreaPlugin<any>, render: ReactPlugin<any> }) {
@@ -90,6 +95,8 @@ export function CustomDropdownEnum(props: { data: DropdownControlEnum, area: Are
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const stop = (e: any) => e.stopPropagation();
 
   // Sync from control (index -> label)
   useEffect(() => {
@@ -147,15 +154,27 @@ export function CustomDropdownEnum(props: { data: DropdownControlEnum, area: Are
       onClick={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
+      onPointerDownCapture={stop}
+      onPointerUpCapture={stop}
+      onMouseDownCapture={stop}
+      onMouseUpCapture={stop}
+      onClickCapture={stop}
+      onDoubleClickCapture={stop}
+      onContextMenuCapture={stop}
+      onWheelCapture={stop}
     >
       <input
         ref={inputRef}
         className="custom-dropdown-input"
         value={displayValue}
         readOnly
-        onClick={handleClick}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}
+        onPointerDown={stop}
+        onMouseDown={stop}
+        onClick={stop}
+        onDoubleClick={stop}
+        onContextMenu={stop}
         placeholder={props.data.enumName || 'Choose value'}
         title={displayValue}
         style={{ cursor: options.length ? 'pointer' : 'not-allowed' }}
@@ -163,8 +182,11 @@ export function CustomDropdownEnum(props: { data: DropdownControlEnum, area: Are
       {isOpen && (
         <ul
           className="custom-dropdown-list"
-          onPointerDown={(e) => e.stopPropagation()}
-          onPointerUp={(e) => e.stopPropagation()}
+          onPointerDownCapture={stop}
+          onPointerUpCapture={stop}
+          onWheelCapture={stop}
+          onPointerDown={stop}
+          onPointerUp={stop}
         >
           {options.map(option => (
             <li

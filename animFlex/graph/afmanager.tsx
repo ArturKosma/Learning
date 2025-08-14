@@ -1,5 +1,5 @@
 import { createEditor } from "./rete";
-import { createEditorSM } from "./retesm";
+import { createEditorSM, create } from "./retesm";
 import { createEditorCond } from "./reteCond";
 import { ReteViewType } from "./aftypes";
 import { ClassicPreset, GetSchemes, NodeEditor } from "rete";
@@ -14,28 +14,34 @@ export function getCurrentView() {
     return currentView;
 } 
 
+type SerializedNode = {
+  id: string;
+  type: string;
+  label: string;
+  isEntry: boolean;
+  connectionOwner: string,
+  position: { x: number; y: number } | null;
+  valuesMap: Record<string, string>;
+  pins: {
+    inputs: Array<{ id: string; varName: string; socketType?: string }>;
+    outputs: Array<{ id: string; varName: string; socketType?: string }>;
+  };
+};
+
+type SerializedConnection = {
+  id: string;
+  source: string;
+  target: string;
+  sourceOutput: string;
+  targetInput: string;
+};
+
 type SavedEditor = {
   id: string
   name: string
   type: ReteViewType
-  nodes: Array<{
-    id: string
-    type: string
-    valuesMap: Record<string, string>
-    position: { x: number; y: number } | null
-    meta?: any
-    pins: {
-      inputs: Array<{ id: string; varName: string; socketType?: string }>;
-      outputs: Array<{ id: string; varName: string; socketType?: string }>;
-    };
-  }>
-  connections: Array<{
-    id: string
-    source: string
-    sourceOutput: string
-    target: string
-    targetInput: string
-  }>
+  nodes: Array<SerializedNode>
+  connections: Array<SerializedConnection>
 }
 
 type SavedProject = {
@@ -253,24 +259,6 @@ window.addEventListener('keydown', async (e) => {
   }, {capture: true})
 
 export async function save(): Promise<string> {
-  type SerializedNode = {
-    id: string;
-    type: string;
-    position: { x: number; y: number } | null;
-    valuesMap: Record<string, string>;
-    pins: {
-      inputs: Array<{ id: string; varName: string; socketType?: string }>;
-      outputs: Array<{ id: string; varName: string; socketType?: string }>;
-    };
-  };
-
-  type SerializedConnection = {
-    id: string;
-    source: string;
-    target: string;
-    sourceOutput: string; // pin id on source node
-    targetInput: string;  // pin id on target node
-  };
 
   const project = {
     editors: {} as Record<
@@ -319,6 +307,9 @@ export async function save(): Promise<string> {
       return {
         id: node.id,
         type,
+        label: node.label,
+        isEntry: (node as any).meta?.isEntry,
+        connectionOwner: (node as any).meta?.connectionOwner,
         position: pos ? { x: pos.x, y: pos.y } : null,
         ...(valuesMap ? { valuesMap } : {}),
         pins: { inputs, outputs },
@@ -362,7 +353,7 @@ export function printAllConnectionIds() {
       targetInput: string;
     }>;
 
-    console.group(`Editor "${e.name}" (${e.id}) — ${conns.length} connection(s)`);
+    console.group(`Editor "${e.name}" (${e.id}) ${conns.length} connection(s)`);
     for (const c of conns) {
       console.log(
         `id=${c.id} | ${c.source}:${c.sourceOutput} -> ${c.target}:${c.targetInput}`
@@ -374,88 +365,137 @@ export function printAllConnectionIds() {
 
 export async function load(data: SavedProject) {
     
-    // If there's no editors in the json - something went very wrong.
-    if (!data?.editors) return;
+  // If there's no editors in the json - something went very wrong.
+  if (!data?.editors) return;
 
-    // Fetch all the saved editor IDs from the json.
-    const ids = Object.keys(data.editors);
+  // Fetch all the saved editor IDs from the json.
+  const ids = Object.keys(data.editors);
 
-    // Create all the editors that were saved.
-    for (const id of ids) {
+  // Create all the editors that were saved.
+  for (const id of ids) {
 
-        const ed = data.editors[id];
-        await createView(ed.name, id, ed.type, false);
+    const ed = data.editors[id];
+    await createView(ed.name, id, ed.type, false);
 
-        const savedNodes = ed.nodes;
-        const savedConnections = ed.connections;
-        const editorObject = editors.find((e) => {return e.id == id});
-        if(!editorObject) continue;
-        const existingNodes = editorObject.editor.getNodes();
+    const savedNodes = ed.nodes;
+    const savedConnections = ed.connections;
+    const editorObject = editors.find((e) => {return e.id == id});
+    if(!editorObject) continue;
+    const existingNodes = editorObject.editor.getNodes();
 
-        // Remove the default created nodes. We want to create them by hand in order to apply saved ID.
-        for (const existingNode of existingNodes) {
-            await editorObject.editor.removeNode(existingNode.id);
-        }
-
-        // Recreate nodes.
-        for (const savedNode of savedNodes) {
-
-           const { node } = await AFNodeFactory.create(savedNode.type, editorObject.editor, true, ed.type, savedNode.id) as {
-                node: ClassicPreset.Node };
-
-            // Remap input pin IDs.
-            for (const saved of savedNode.pins.inputs) {
-                const currentKey = Object.keys(node.inputs).find(k =>
-                    ((node.inputs[k]?.socket as any).meta?.var_name) === saved.varName
-                );
-                if (currentKey && currentKey !== saved.id) {
-                    const inp = node.inputs[currentKey];
-                    (inp?.socket as any).name = saved.id;
-                    node.inputs[saved.id] = inp;
-                    delete node.inputs[currentKey];
-                }
-            }
-
-            // Remap output pin IDs.
-            for (const saved of savedNode.pins.outputs) {
-                const currentKey = Object.keys(node.outputs).find(k =>
-                    ((node.outputs[k]?.socket as any).meta?.var_name) === saved.varName
-                );
-                if (currentKey && currentKey !== saved.id) {
-                    const out = node.outputs[currentKey];
-                    (out?.socket as any).name = saved.id;
-                    node.outputs[saved.id] = out;
-                    delete node.outputs[currentKey];
-                }
-            }
-
-            await editorObject.editor.addNode(node);
-            await editorObject.area.translate(node.id, savedNode.position);
-        }
-
-        // Recreate connections.
-        for (const c of savedConnections) {
-            const srcNode = editorObject.editor.getNode(c.source)!;
-            const tgtNode = editorObject.editor.getNode(c.target)!;
-
-            // Build the connection explicitly.
-            const conn = new ClassicPreset.Connection(
-                srcNode,
-                c.sourceOutput,
-                tgtNode,
-                c.targetInput
-            ) as any;
-
-            // Override the connection ID.
-            conn.id = c.id;
-
-            await editorObject.editor.addConnection(conn);
-
-            // Mark sockets as connected.
-            const out = srcNode.outputs[c.sourceOutput];
-            const inp = tgtNode.inputs[c.targetInput];
-            if ((out as any)?.socket?.meta) (out as any).socket.meta.isConnected = true;
-            if ((inp as any)?.socket?.meta) (inp as any).socket.meta.isConnected = true;
-        }
+    // Remove the default created nodes. We want to create them by hand in order to apply saved ID.
+    for (const existingNode of existingNodes) {
+      await editorObject.editor.removeNode(existingNode.id);
     }
+
+    // Recreate nodes.
+    for (const savedNode of savedNodes) {
+
+      let newNode: any = undefined;
+
+      // State Machine graphs don't use NodeFactory to create nodes.
+      if(ed.type == 1) {
+
+        const node = await create(savedNode.label, editorObject.editor, editorObject.selector, savedNode.isEntry, savedNode.connectionOwner, false);
+        node.label = savedNode.label;
+        newNode = node;
+
+      } else {
+
+        const { node } = await AFNodeFactory.create(savedNode.type, editorObject.editor, true, ed.type, savedNode.id) as {
+        node: ClassicPreset.Node };
+        newNode = node;
+
+      }
+
+      // Reassign values map.
+      (newNode as any).meta.valuesMap = savedNode.valuesMap;
+
+      // Remap input pin IDs.
+      for (const saved of savedNode.pins.inputs) {
+        const currentKey = Object.keys(newNode.inputs).find(k =>
+            ((newNode.inputs[k]?.socket as any).meta?.var_name) === saved.varName
+        );
+        if (currentKey && currentKey !== saved.id) {
+          const inp = newNode.inputs[currentKey];
+          (inp?.socket as any).name = saved.id;
+          newNode.inputs[saved.id] = inp;
+          delete newNode.inputs[currentKey];
+
+          // Load on controls.
+          if(savedNode.valuesMap && saved.varName in savedNode.valuesMap) {
+            const controlData = savedNode.valuesMap[saved.varName];
+            const loadFun = (inp as any).control?.serializeLoad;
+            if(loadFun && typeof loadFun == "function") {
+              (inp as any).control.serializeLoad(controlData);
+            }
+          }
+        }
+      }
+
+      // Remap output pin IDs.
+      for (const saved of savedNode.pins.outputs) {
+        const currentKey = Object.keys(newNode.outputs).find(k =>
+            ((newNode.outputs[k]?.socket as any).meta?.var_name) === saved.varName
+        );
+        if (currentKey && currentKey !== saved.id) {
+          const out = newNode.outputs[currentKey];
+          (out?.socket as any).name = saved.id;
+          newNode.outputs[saved.id] = out;
+          delete newNode.outputs[currentKey];
+
+          // Load on controls.
+          if(savedNode.valuesMap && saved.varName in savedNode.valuesMap) {
+            const controlData = savedNode.valuesMap[saved.varName];
+            const loadFun = (out as any).control?.serializeLoad;
+            if(loadFun && typeof loadFun == "function") {
+              (out as any).control.serializeLoad(controlData);
+            }
+          }
+        }
+      }
+
+      // If this node is a subgraph, it has a name to apply.
+      if (ids.includes(savedNode.id)) {
+        const nodeName = data.editors[savedNode.id].name;
+        (newNode as any).meta.title = nodeName;
+      }
+
+      await editorObject.editor.addNode(newNode);
+      await editorObject.area.translate(newNode.id, savedNode.position);
+    }
+
+    // Recreate connections.
+    for (const c of savedConnections) {
+      const srcNode = editorObject.editor.getNode(c.source)!;
+      const tgtNode = editorObject.editor.getNode(c.target)!;
+
+      // State machine handles connections differently.
+      if(ed.type == 1) {
+
+        console.log("handle my ass");
+        
+      } else {
+
+        // Build the connection.
+        const conn = new ClassicPreset.Connection(
+            srcNode,
+            c.sourceOutput,
+            tgtNode,
+            c.targetInput
+        ) as any;
+
+        // Override the connection ID.
+        conn.id = c.id;
+
+        await editorObject.editor.addConnection(conn);
+
+        // Mark sockets as connected.
+        const out = srcNode.outputs[c.sourceOutput];
+        const inp = tgtNode.inputs[c.targetInput];
+        if ((out as any)?.socket?.meta) (out as any).socket.meta.isConnected = true;
+        if ((inp as any)?.socket?.meta) (inp as any).socket.meta.isConnected = true;
+      }
+    }
+  }
 }

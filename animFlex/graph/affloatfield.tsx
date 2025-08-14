@@ -1,10 +1,10 @@
 import React from 'react';
 import { ClassicPreset, GetSchemes, NodeEditor } from 'rete';
-import { OnNodeUpdated } from './affunclib';
+import { OnNodeUpdated, AFSerializeInterface } from './affunclib';
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
-export class FloatControl extends ClassicPreset.Control {
+export class FloatControl extends ClassicPreset.Control implements AFSerializeInterface {
   value: number;
   onChange?: (val: number) => void;
   node?: ClassicPreset.Node;
@@ -26,6 +26,10 @@ export class FloatControl extends ClassicPreset.Control {
     const meta: any = (this.node as any).meta ?? ((this.node as any).meta = {});
     const valuesMap: Record<string, string> = (meta.valuesMap ??= {});
     valuesMap[this.varName] = String(val);
+  }
+
+  serializeLoad(data: any) {
+    this.setValue(data);
   }
 }
 

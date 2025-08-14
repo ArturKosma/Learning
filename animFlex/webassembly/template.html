@@ -424,8 +424,8 @@
         try {
             // Prompt the user for a save location.
             const handle = await window.showSaveFilePicker({
-                suggestedName: "graph.animflex",
-                types: [{ description: 'AnimFlex Graph', accept: { 'application/json': ['.animflex'] } }],
+                suggestedName: "graph.json",
+                types: [{ description: 'AnimFlex Graph', accept: { 'application/json': ['.json'] } }],
             });
 
             const data = await save();
@@ -445,7 +445,7 @@
             try {
                 // Prompt the user for a file to open.
                 const [handle] = await window.showOpenFilePicker({
-                    types: [{ description: 'AnimFlex Graph', accept: { 'application/json': ['.animflex'] } }],
+                    types: [{ description: 'AnimFlex Graph', accept: { 'application/json': ['.json'] } }],
                     multiple: false
                 });
 

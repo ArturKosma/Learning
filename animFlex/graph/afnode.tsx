@@ -291,7 +291,7 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
   }, []);
 
   const [isEditing, setIsEditing] = React.useState(meta.titleEditable ? true : false);
-  const [title, setTitle] = React.useState(meta.titleEditable ? '' : meta.title);
+  const [title, setTitle] = React.useState(meta.title || '');
 
   React.useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {

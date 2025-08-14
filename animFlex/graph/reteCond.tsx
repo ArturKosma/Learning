@@ -277,9 +277,6 @@ selection.setButton(0);
   // Nodes layering.
   AreaExtensions.simpleNodesOrder(area);
 
-  // Create default nodes.
-  const outputCondNode = await AFNodeFactory.create("OutputCond", editor, false, ReteViewType.ConditionalGraph);
-
   // Enable dragging with right-mouse button.
   area.area.setDragHandler(new Drag({
     down: e => {
@@ -494,6 +491,9 @@ function HashString(str) {
     );
   }
   const intervalId = setInterval(GetLastActiveSockets, 1000 / 30);
+
+  // Create default nodes.
+  const outputCondNode = await AFNodeFactory.create("OutputCond", editor, false, ReteViewType.ConditionalGraph);
 
   // Wait for the first render (initially rete is hidden) to call zoom.
   const resizeObserver = new ResizeObserver((entries) => {
