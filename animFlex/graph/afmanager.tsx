@@ -383,6 +383,10 @@ export async function load(data: SavedProject) {
     if(!editorObject) continue;
     const existingNodes = editorObject.editor.getNodes();
 
+    // Tell the editor we are loading so it doesn't create conditional nodes automatically.
+    (editorObject.editor as any).meta ??= {};
+    (editorObject.editor as any).meta.isLoading = true;
+
     // Remove the default created nodes. We want to create them by hand in order to apply saved ID.
     for (const existingNode of existingNodes) {
       await editorObject.editor.removeNode(existingNode.id);
@@ -398,6 +402,7 @@ export async function load(data: SavedProject) {
 
         const node = await create(savedNode.label, editorObject.editor, editorObject.selector, savedNode.isEntry, savedNode.connectionOwner, false);
         node.label = savedNode.label;
+        node.id = savedNode.id;
         newNode = node;
 
       } else {
@@ -465,6 +470,8 @@ export async function load(data: SavedProject) {
       await editorObject.area.translate(newNode.id, savedNode.position);
     }
 
+    await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
     // Recreate connections.
     for (const c of savedConnections) {
       const srcNode = editorObject.editor.getNode(c.source)!;
@@ -473,7 +480,16 @@ export async function load(data: SavedProject) {
       // State machine handles connections differently.
       if(ed.type == 1) {
 
-        console.log("handle my ass");
+        // Build the connection.
+        const conn = (editorObject.editor as any).meta.createSMConnection(srcNode, tgtNode);
+
+        // Override the connection ID.
+        conn.id = c.id;
+
+        await editorObject.editor.addConnection(conn);
+
+        // Refresh connections.
+        editorObject.area.update('connection', conn.id);
         
       } else {
 
@@ -497,5 +513,15 @@ export async function load(data: SavedProject) {
         if ((inp as any)?.socket?.meta) (inp as any).socket.meta.isConnected = true;
       }
     }
+
+    // Nudge all the nodes.
+    for (const n of editorObject.editor.getNodes()) {
+      editorObject.area.update('node', n.id);
+    }
+
+    await new Promise<void>(r => requestAnimationFrame(() => r()));
+
+    // Re-enable normal behavior.
+    (editorObject.editor as any).meta.isLoading = false;
   }
 }

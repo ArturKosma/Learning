@@ -139,6 +139,11 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   const viewId = id;
 
   const editor      = new NodeEditor<Schemes>();
+
+  // We need additional meta isLoading field to prevent from automatic conditional node creation during load. Load creates those by itself.
+  (editor as any).meta ??= {};
+  (editor as any).meta.isLoading = false;
+
   const area        = new AreaPlugin<Schemes, AreaExtra>(container);
   const connection  = new ConnectionPlugin<Schemes, AreaExtra>();
   const reactRender = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
@@ -264,6 +269,11 @@ export async function createEditorSM(container: HTMLElement, id: string) {
     remove:  data => editor.removeConnection(data.id),
   };
   connection.addPreset(() => new UniPortConnector(connectionEvents));
+
+  // Expose the connection creation.
+  (editor as any).meta.createSMConnection = (source: Node, target: Node) => {
+    return new Connection(connectionEvents, source as any, target as any);
+  };
 
   // Allow only a single output on the Entry node.
   editor.addPipe(async ctx => {
@@ -443,6 +453,18 @@ export async function createEditorSM(container: HTMLElement, id: string) {
 
       if(sourceNode == undefined || targetNode == undefined) {
         return;
+      }
+
+      if ((editor as any).meta?.isLoading) {
+        const existing = editor.getNodes().find(n => (n as any)?.meta?.connectionOwner === conn.id);
+        OnStateConnectionCreated(
+          viewId,
+          sourceNode,
+          targetNode,
+          conn.id,
+          existing ? existing.id : ""
+        );
+        return ctx;
       }
 
       let condNode;
