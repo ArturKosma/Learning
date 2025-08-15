@@ -66,7 +66,7 @@ export function CustomConnection(props: { data: Connection }) {
             orient="auto"
           >
             <path
-              d={d}
+              d="M0,0 L10,5 L0,10 Z"
               fill={sel ? '#fff' : 'rgb(190,190,190)'}
               stroke="none"
             />

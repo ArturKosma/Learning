@@ -492,8 +492,12 @@ export async function createEditorSM(container: HTMLElement, id: string) {
         let nodes = editor.getNodes();
         for(const node of nodes){
           const nodeCasted = node as any;
-          if(nodeCasted.meta?.connectionOwner == conn.id){
+
+          // Do not remove the node when editor is destroying. The removal is handled from outside.
+          if(!(editor as any).meta.isDestroying) {
+            if(nodeCasted.meta?.connectionOwner == conn.id){
             editor.removeNode(node.id);
+          }
           }
         }
       }

@@ -20,6 +20,8 @@ type SerializedNode = {
   label: string;
   isEntry: boolean;
   connectionOwner: string,
+  nodeFrom: string,
+  nodeTo: string,
   position: { x: number; y: number } | null;
   valuesMap: Record<string, string>;
   pins: {
@@ -170,12 +172,17 @@ export function switchToView(id: string) {
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
 async function destroyEditorRecursively(editorId: string, visited = new Set<string>()) {
+
   const idx = editors.findIndex(e => e.id === editorId);
   if (idx === -1) return;
   if (visited.has(editorId)) return;
   visited.add(editorId);
 
   const entry = editors[idx];
+
+  (entry.editor as any).meta ??= {};
+  (entry.editor as any).meta.isDestroying = true;
+  (entry.editor as any).meta.isLoading = true;
 
   const nodes = entry.editor.getNodes() as Array<{ id: string }>;
   for (const n of nodes) {
@@ -193,11 +200,14 @@ async function destroyEditorRecursively(editorId: string, visited = new Set<stri
     await entry.editor.removeNode(n.id);
   }
 
-  entry.destroy?.();
+  await entry.destroy?.();
 
   if (entry.container.parentElement) {
     entry.container.parentElement.removeChild(entry.container);
   }
+
+  (entry.editor as any).meta.isDestroying = false;
+  (entry.editor as any).meta.isLoading = false;
 
   editors.splice(idx, 1);
 }
@@ -310,6 +320,8 @@ export async function save(): Promise<string> {
         label: node.label,
         isEntry: (node as any).meta?.isEntry,
         connectionOwner: (node as any).meta?.connectionOwner,
+        nodeFrom: (node as any).meta?.nodeFrom,
+        nodeTo: (node as any).meta?.nodeTo,
         position: pos ? { x: pos.x, y: pos.y } : null,
         ...(valuesMap ? { valuesMap } : {}),
         pins: { inputs, outputs },
@@ -371,6 +383,14 @@ export async function load(data: SavedProject) {
   // Fetch all the saved editor IDs from the json.
   const ids = Object.keys(data.editors);
 
+  // Hard reset existing editors with same ids.
+  for (const id of ids) {
+    const existing = editors.find(e => e.id === id);
+    if (existing) {
+      await destroyEditorRecursively(id);
+    }
+  }
+
   // Create all the editors that were saved.
   for (const id of ids) {
 
@@ -392,6 +412,9 @@ export async function load(data: SavedProject) {
       await editorObject.editor.removeNode(existingNode.id);
     }
 
+    // Reposition all nodes after their creation.
+    const pendingPositions: { id: string; pos: { x: number, y: number } }[] = [];
+
     // Recreate nodes.
     for (const savedNode of savedNodes) {
 
@@ -403,6 +426,8 @@ export async function load(data: SavedProject) {
         const node = await create(savedNode.label, editorObject.editor, editorObject.selector, savedNode.isEntry, savedNode.connectionOwner, false);
         node.label = savedNode.label;
         node.id = savedNode.id;
+        (node as any).meta.nodeFrom = savedNode.nodeFrom;
+        (node as any).meta.nodeTo = savedNode.nodeTo;
         newNode = node;
 
       } else {
@@ -467,10 +492,19 @@ export async function load(data: SavedProject) {
       }
 
       await editorObject.editor.addNode(newNode);
-      await editorObject.area.translate(newNode.id, savedNode.position);
+      if (savedNode.position) {
+        pendingPositions.push({ id: newNode.id, pos: savedNode.position });
+      }
     }
 
     await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+    // Translate all nodes.
+    for (const { id: nodeId, pos } of pendingPositions) {
+      if (editorObject.area?.nodeViews?.get(nodeId)) {
+        await editorObject.area.translate(nodeId, pos);
+      }
+    }
 
     // Recreate connections.
     for (const c of savedConnections) {
@@ -519,6 +553,7 @@ export async function load(data: SavedProject) {
       editorObject.area.update('node', n.id);
     }
 
+    // Give it a little bit of time.
     await new Promise<void>(r => requestAnimationFrame(() => r()));
 
     // Re-enable normal behavior.

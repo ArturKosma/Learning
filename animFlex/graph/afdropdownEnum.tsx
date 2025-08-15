@@ -155,10 +155,6 @@ export function CustomDropdownEnum(props: { data: DropdownControlEnum, area: Are
       onDoubleClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
       onPointerDownCapture={stop}
-      onPointerUpCapture={stop}
-      onMouseDownCapture={stop}
-      onMouseUpCapture={stop}
-      onClickCapture={stop}
       onDoubleClickCapture={stop}
       onContextMenuCapture={stop}
       onWheelCapture={stop}
@@ -172,7 +168,6 @@ export function CustomDropdownEnum(props: { data: DropdownControlEnum, area: Are
         onKeyDown={handleKeyDown}
         onPointerDown={stop}
         onMouseDown={stop}
-        onClick={stop}
         onDoubleClick={stop}
         onContextMenu={stop}
         placeholder={props.data.enumName || 'Choose value'}
@@ -183,10 +178,7 @@ export function CustomDropdownEnum(props: { data: DropdownControlEnum, area: Are
         <ul
           className="custom-dropdown-list"
           onPointerDownCapture={stop}
-          onPointerUpCapture={stop}
           onWheelCapture={stop}
-          onPointerDown={stop}
-          onPointerUp={stop}
         >
           {options.map(option => (
             <li

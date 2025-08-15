@@ -29,6 +29,8 @@
 !graph/*.ts
 !graph/*.tsx
 !graph/*.css
+!graph/editor/*
+!graph/selection/*
 
 # Disallow RETE modules
 graph/node_modules/*
