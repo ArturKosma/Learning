@@ -159,3 +159,19 @@ enum class EAFCameraManagerState: uint8_t
 	Blending,
 	ActionRPG
 };
+
+struct FAFStateBlend
+{
+	float currentBlendTime = 0.0f;
+	float blendLength = 0.25f;
+	std::weak_ptr<class AFGraphNode_State> blendFrom;
+	std::weak_ptr<class AFGraphNode_State> blendTo;
+};
+
+struct FAFStateSampling
+{
+	std::string nodeId = "";
+	std::string contextId = "";
+	float sampleTime = 0.0f;
+	float maxTime = 0.0f;
+};

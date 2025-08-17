@@ -100,6 +100,11 @@ void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 	}
 }
 
+glm::vec3 AFMovementComponent::GetMovementInput() const
+{
+	return m_lastMovementInput;
+}
+
 void AFMovementComponent::AddOffset(const glm::vec3& offset)
 {
 	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());

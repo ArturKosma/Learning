@@ -204,11 +204,7 @@ const onRef = useCallback((ref: HTMLElement) => {
                 title={id}
                 data-testid="node" 
                 highlighted={props.highlighted}
-                onPointerDown={(e) => {
-                    if(meta?.isConditional) {
-                      e.stopPropagation();
-                    }
-                  }
+                onPointerDown={(e) => {undefined}
                 }
                 onClick={(e) => {
                   //meta?.nodeSelect.select(data.id, false);

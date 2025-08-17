@@ -15,9 +15,14 @@ public:
 
 	bool GetLastEvaluation() const;
 
+	void SetConnectionPoints(const std::string& from, const std::string& to);
+	void GetConnectionPoints(std::string& from, std::string& to);
+
 protected:
 
 	std::shared_ptr<AFAnimGraphCond> m_graph = nullptr;
+	std::string m_from = "";
+	std::string m_to = "";
 
 private:
 

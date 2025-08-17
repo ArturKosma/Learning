@@ -19,7 +19,10 @@ public:
 	glm::vec3 GetControlRotation() const;
 
 	virtual void AddControlRotation(const glm::vec3& delta);
+
 	virtual void AddMovementInput(const glm::vec3& movementInput);
+	glm::vec3 GetMovementInput() const;
+
 	virtual void AddOffset(const glm::vec3& offset);
 
 protected:

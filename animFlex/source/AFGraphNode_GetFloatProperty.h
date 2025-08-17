@@ -5,7 +5,9 @@ AFENUM()
 enum class EAFFloatProperties
 {
 	VelocityLength,
-	DeltaAngle
+	DeltaAngle,
+	UserInputLength,
+	RelevantAnimTimeRemain
 };
 
 class AFGraphNode_GetFloatProperty : public AFGraphNodeCRTP<AFGraphNode_GetFloatProperty>

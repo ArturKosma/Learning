@@ -20,7 +20,7 @@ import { addCustomBackground } from "./custom-background";
 import styled from 'styled-components';
 import { createView, getCurrentView } from './afmanager';
 import { ReteViewType } from './aftypes';
-import { OnNodeCreated, OnNodeRemoved, OnStateConnectionCreated, OnStateConnectionRemoved } from './affunclib';
+import { OnNodeCreated, OnNodeRemoved, OnStateConnectionCreated, OnStateConnectionRemoved, setDetailsPanelVisible } from './affunclib';
 
 declare const Module: any;
 
@@ -147,7 +147,6 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   const area        = new AreaPlugin<Schemes, AreaExtra>(container);
   const connection  = new ConnectionPlugin<Schemes, AreaExtra>();
   const reactRender = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
-  const selector = AreaExtensions.selector();
 
     // Context menu item type
     type Item = {
@@ -314,35 +313,93 @@ export async function createEditorSM(container: HTMLElement, id: string) {
 
   AreaExtensions.simpleNodesOrder(area);
 
-  // Enable node selection.
-  const nodeSelector = AreaExtensions.selectableNodes(area, selector, {
+setDetailsPanelVisible(editor, true, "");
+
+  // Custom selector for custom events.
+  class AFSelector extends AreaExtensions.Selector<any> {
+
+    add(entity, accumulate) {
+
+      if(this.isSelected(entity) && this.entities.size === 1) {
+
+        return;
+      }
+
+      super.add(entity, accumulate);
+
+      if(this.entities.size === 1) {
+        setDetailsPanelVisible(editor, true, entity.id);
+        const node = editor.getNode(entity.id);
+        if (node?.meta?.valuesMap) {
+        }
+      } else {
+        setDetailsPanelVisible(editor, false);
+      }
+    }
+    
+    remove(entity) {
+      super.remove(entity);
+
+      if(!this.isSelected(entity)) {
+        setDetailsPanelVisible(editor, false);
+      }
+    }
+  }
+  const customSelector = new AFSelector();
+  const nodeSelector = AreaExtensions.selectableNodes(area, customSelector, {
     accumulating: AreaExtensions.accumulateOnCtrl()
   });
+
+  // Selection setup.
   const selection = setupSelection(area, {
     selected(ids) {
-      selector.unselectAll();
-      ids.forEach((id,i) => nodeSelector.select(id, i!==0));
-    }
+      customSelector.unselectAll();
+        ids.forEach((id, i) => {
+          nodeSelector.select(id, i !== 0);
+        });
+    },
   });
+
   selection.setShape('marquee');
   selection.setButton(0);
 
-  // Register React presets.
-  // Stable highlight state reference to avoid re-registering components
-  const highlightRef = { current: "" };
+  // Don't translate conditional nodes.
+  area.addPipe(ctx => {
+    if (ctx.type === 'nodedragged') {
+      const { id } = ctx.data
+      const node = editor.getNode(id) as any
 
-  // Stable wrapper for CircleNode
+      if (node?.meta?.isConditional) {
+        // prevent actual drag from moving the node
+
+        // on drag end, force the owning connection to re-render,
+        // which will call pathTransformer and snap the node back
+        const connId = node.meta.connectionOwner
+        const conn = connId && editor.getConnections().find(c => c.id === connId)
+        if (conn) {
+          // defer so we don't re-enter the same pipe synchronously
+          queueMicrotask(() => area.update('connection', conn.id))
+        }
+        return
+      }
+    }
+    return ctx
+  })
+  // Highlight states.
+  let highlightRef: string[] = [];
+
+  // Wrapper for CircleNode.
   function NodeWrapper(props: any) {
-    return <CircleNode {...props} highlighted={highlightRef.current === props.data.id} />;
+    return <CircleNode {...props} highlighted={highlightRef.includes(props.data.id)} />;
   }
 
-  // Stable wrapper for CircleSocket
+  // Wrapper for CircleSocket.
   function SocketWrapper(context: { nodeId: string; key: string; side: string }) {
     const { nodeId, key, side } = context;
     return (props: any) => (
       <CircleSocket
         {...props}
-        highlighted={highlightRef.current === nodeId}
+        highlighted={highlightRef.includes(nodeId)}
         data-node-id={nodeId}
         data-socket-key={key}
         data-side={side}
@@ -576,6 +633,7 @@ export async function createEditorSM(container: HTMLElement, id: string) {
         return;
       } else {
         lastHash = hash;
+        highlightRef = [];
       }
   
       try {
@@ -583,7 +641,7 @@ export async function createEditorSM(container: HTMLElement, id: string) {
           for(const item of stateStringJson) {
             const node = editor.getNode(item.nodeId);
             if(node) {
-              highlightRef.current = node.id;
+              highlightRef.push(node.id);
             }
           }
           
@@ -646,7 +704,7 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   resizeObserver.observe(container);
   
   return {
-      editor, selector, area, destroy: () => {
+      editor, selector: customSelector, area, destroy: () => {
         clearInterval(intervalId);
         area.destroy()
       },

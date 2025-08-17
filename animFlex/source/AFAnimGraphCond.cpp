@@ -19,10 +19,12 @@ void AFAnimGraphCond::OnNodeCreated(const std::string& msg)
 
 	const std::string& nodeId = node["nodeId"];
 	const std::string& nodeType = node["nodeType"];
+	const std::string& nodeContext = node["nodeContext"];
 
 	// Construct a node - it will be now accessible via m_idToNode hashmap.
 	std::shared_ptr<AFGraphNode> newNode = AFGraphNodeRegistry::Get().CreateNode(nodeType, nodeId);
 	newNode->m_nodeId = nodeId;
+	newNode->m_nodeContext = nodeContext;
 	newNode->Init();
 
 	// #hack

@@ -88,7 +88,11 @@ void AFGame::OnNodeCreated(const char* msg)
 
 	// Find already existing node and use it if context matches.
 	std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeContext);
-	if (!node)
+	if (node)
+	{	// Inform the nodeContext that it has a sub-node inside now.
+		node->AddSubNode(elem["nodeId"]);
+	}
+	else
 	{
 		// Node like that doesn't exist so we assume we create a new node in the main graph.
 		graph = playerPawn->GetMeshComponent()->GetAnimState()->GetGraph();
@@ -137,6 +141,8 @@ void AFGame::OnNodeUpdated(const char* msg)
 void AFGame::OnNodeRemoved(const char* msg)
 {
 	AFAnimGraph::OnNodeRemoved(msg);
+
+	// @todo Listen for node removal in node contexts, to remove subnodes, otherwise memory leak.
 }
 
 void AFGame::OnStateConnectionCreated(const char* msg)
@@ -144,6 +150,10 @@ void AFGame::OnStateConnectionCreated(const char* msg)
 	nlohmann::json json = nlohmann::json::parse(msg);
 	const auto& elem = json[0];
 	const std::string& nodeContext = elem["nodeContext"];
+	const std::string& nodeCondId = elem["nodeCondID"];
+	const std::string& nodeFromId = elem["nodeFromID"];
+	const std::string& nodeToId = elem["nodeToID"];
+
 
 	// Find already existing node and use it if context matches.
 	std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeContext);
@@ -165,6 +175,16 @@ void AFGame::OnStateConnectionCreated(const char* msg)
 	}
 
 	sm->OnConnectionCreated(msg);
+
+	// Find the conditional node and cache the From/To nodes.
+	std::shared_ptr<AFGraphNode_StateCond> condNode = 
+		std::dynamic_pointer_cast<AFGraphNode_StateCond>(AFGraphNodeRegistry::Get().GetNode(nodeCondId));
+	if (!condNode)
+	{
+		return;
+	}
+
+	condNode->SetConnectionPoints(nodeFromId, nodeToId);
 }
 
 void AFGame::OnStateConnectionRemoved(const char* msg)

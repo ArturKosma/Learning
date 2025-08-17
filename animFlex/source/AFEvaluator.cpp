@@ -35,6 +35,20 @@ void AFEvaluator::ClearLastActiveSockets()
 
 void AFEvaluator::AddLastActiveState(const nlohmann::json& newState)
 {
+	auto it = std::find_if(
+		m_lastActiveStatesCached.begin(),
+		m_lastActiveStatesCached.end(),
+		[newState](const nlohmann::json& entry) {
+			return entry.contains("nodeId") && entry["nodeId"] == newState["nodeId"];
+		});
+
+	// This state wasn't active last frame. Reinitialize it.
+	// @todo Conditional reset on reinitialize. Property on the node in details.
+	if (it == m_lastActiveStatesCached.end())
+	{
+		AFGraphNodeRegistry::Get().GetNode(newState["nodeId"])->OnReset();
+	}
+
 	m_lastActiveStates.push_back(newState);
 }
 
@@ -45,10 +59,44 @@ std::string AFEvaluator::GetLastActiveStates()
 
 void AFEvaluator::ClearLastActiveStates()
 {
+	m_lastActiveStatesCached = m_lastActiveStates;
 	m_lastActiveStates = nlohmann::json::array();
 }
 
 void AFEvaluator::ClearEvaluationState()
 {
 	m_evaluated.clear();
+}
+
+void AFEvaluator::AddSamplingState(const FAFStateSampling& sampling)
+{
+	auto it = std::find_if(m_samplingState.begin(), m_samplingState.end(), [sampling](const FAFStateSampling& cachedSampling)
+		{
+			return cachedSampling.nodeId == sampling.nodeId;
+		});
+	if (it == m_samplingState.end())
+	{
+		m_samplingState.push_back(sampling);
+	}
+}
+
+std::vector<FAFStateSampling> AFEvaluator::GetCachedSamplingState(const std::string& context) const
+{
+	std::vector<FAFStateSampling> ret = {};
+
+	for(const FAFStateSampling& sampling : m_samplingStateCached)
+	{
+		if (sampling.contextId == context)
+		{
+			ret.push_back(sampling);
+		}
+	}
+
+	return ret;
+}
+
+void AFEvaluator::ClearSamplingState()
+{
+	m_samplingStateCached = m_samplingState;
+	m_samplingState.clear();
 }

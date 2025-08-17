@@ -87,6 +87,71 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_BoolNot",
+            "node_name": "Not",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "bool",
+                    "var_name": "m_boolNotInput",
+                    "default": "false",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_boolNotResult",
+                    "default": "false",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_BoolOperator",
+            "node_name": "Bool Operator",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "bool",
+                    "var_name": "m_a",
+                    "default": "false",
+                    "label": "A",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_b",
+                    "default": "false",
+                    "label": "B",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_propertyEnum",
+                    "default": "0",
+                    "label": "Property Name",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFBoolOperators_Enum"
+                    ]
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_boolOperatorResult",
+                    "default": "false",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_Compare",
             "node_name": "Compare",
             "meta": [],
@@ -262,6 +327,30 @@
                     "label": "Playrate",
                     "direction": "",
                     "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "playseq_loop",
+                    "default": "true",
+                    "label": "Loop",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "playseq_startTime",
+                    "default": "0.0",
+                    "label": "Start Time",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "playseq_endTime",
+                    "default": "-1.0",
+                    "label": "End Time",
+                    "direction": "",
+                    "meta": []
                 }
             ]
         },
@@ -283,6 +372,13 @@
     ],
     "Enums": [
         {
+            "enum_name": "EAFBoolOperators",
+            "values": [
+                "And",
+                "Or"
+            ]
+        },
+        {
             "enum_name": "EAFCompareTypes",
             "values": [
                 "Greater",
@@ -297,7 +393,9 @@
             "enum_name": "EAFFloatProperties",
             "values": [
                 "VelocityLength",
-                "DeltaAngle"
+                "DeltaAngle",
+                "UserInputLength",
+                "RelevantAnimTimeRemain"
             ]
         }
     ]

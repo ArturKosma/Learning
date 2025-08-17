@@ -1,6 +1,8 @@
 #pragma once
 #include <memory>
 #include <vector>
+
+#include "AFStructs.h"
 #include "third_party/json.hpp"
 
 class AFEvaluator
@@ -24,9 +26,20 @@ public:
 
 	void ClearEvaluationState();
 
+	void AddSamplingState(const FAFStateSampling& sampling);
+	std::vector<FAFStateSampling> GetCachedSamplingState(const std::string& context) const;
+	void ClearSamplingState();
+
 private:
 
 	nlohmann::json m_lastActiveSockets = nlohmann::json::array();
 	nlohmann::json m_lastActiveStates = nlohmann::json::array();
+	// Required to compare if new active state is actually new or was active a frame before.
+	nlohmann::json m_lastActiveStatesCached = nlohmann::json::array();
+
 	std::vector<std::shared_ptr<class AFGraphNode>> m_evaluated = {};
+
+	std::vector<FAFStateSampling> m_samplingState = {};
+	// Required to be able to look in the previous frame.
+	std::vector<FAFStateSampling> m_samplingStateCached = {};
 };

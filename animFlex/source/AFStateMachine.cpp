@@ -1,9 +1,16 @@
 #include "AFStateMachine.h"
 #include "AFGraphNode.h"
 #include "AFGraphNode_StateCond.h"
+#include "AFMath.h"
 
 void AFStateMachine::Evaluate(float deltaTime)
 {
+	// Progress blend.
+	if (m_isBlending)
+	{
+		m_currentBlend.currentBlendTime = glm::clamp(m_currentBlend.currentBlendTime + deltaTime, 0.0f, m_currentBlend.blendLength);
+	}
+
 	// Erase expired states (deleted nodes).
 	m_states.erase(std::remove_if(m_states.begin(), m_states.end(),
 		[](const std::weak_ptr<AFGraphNode>& state)
@@ -76,28 +83,75 @@ void AFStateMachine::Evaluate(float deltaTime)
 	}
 	else
 	{
-		// There was a transition. Simply jump there.
+		// There was a transition.
 		//printf("next state id: %s\n", nextState.lock()->GetNodeID().c_str());
-		m_currentState = nextState;
+
+		// Jump there if we were in the entry state.
+		if (std::dynamic_pointer_cast<AFGraphNode_StateStart>(m_currentState.lock()))
+		{
+			m_currentState = nextState;
+		}
+		// Schedule the blend.
+		else
+		{
+			ScheduleBlend(m_currentState.lock()->GetNodeID(), nextState.lock()->GetNodeID(), 0.25f);
+			m_currentState = nextState;
+		}
 	}
 
-	// Evaluate current state.
-	// @todo Blending.
-	std::shared_ptr<AFGraphNode_State> currentState = std::dynamic_pointer_cast<AFGraphNode_State>(m_currentState.lock());
-	if (!currentState)
+	// Evaluate final pose.
+	if (m_isBlending)
 	{
-		return;
+		// Evaluate both blending states.
+		std::shared_ptr<AFGraphNode_State> from = m_currentBlend.blendFrom.lock();
+		std::shared_ptr<AFGraphNode_State> to = m_currentBlend.blendTo.lock();
+
+		// If any of the blending states became invalid, stop the blend.
+		if (!from || !to)
+		{
+			ClearBlend();
+		}
+
+		// Cache blend states IDs for debug.
+		// @todo Show blend progress as debug.
+		nlohmann::json fromEntry;
+		nlohmann::json toEntry;
+		fromEntry["nodeId"] = from->GetNodeID();
+		toEntry["nodeId"] = to->GetNodeID();
+		AFEvaluator::Get().AddLastActiveState(fromEntry);
+		AFEvaluator::Get().AddLastActiveState(toEntry);
+
+		from->Evaluate(deltaTime);
+		to->Evaluate(deltaTime);
+
+		// Blend poses.
+		AFMath::BlendPoses(m_finalPose, from->GetGraph()->GetFinalPose(), to->GetGraph()->GetFinalPose(), m_currentBlend.currentBlendTime / m_currentBlend.blendLength);
+
+		// If we reached max blend time carry on blend finish.
+		if (AFMath::NearlyEqual(m_currentBlend.currentBlendTime, m_currentBlend.blendLength))
+		{
+			ClearBlend();
+		}
 	}
-	currentState->Evaluate(deltaTime);
+	else
+	{
+		std::shared_ptr<AFGraphNode_State> currentState = std::dynamic_pointer_cast<AFGraphNode_State>(m_currentState.lock());
+		if (!currentState)
+		{
+			return;
+		}
 
-	// Cache last active state node ID.
-	// Used for debug.
-	nlohmann::json lastActiveEntry;
-	lastActiveEntry["nodeId"] = currentState->GetNodeID();
-	AFEvaluator::Get().AddLastActiveState(lastActiveEntry);
+		// Cache last active state node ID.
+		// Used for debug.
+		nlohmann::json lastActiveEntry;
+		lastActiveEntry["nodeId"] = currentState->GetNodeID();
+		AFEvaluator::Get().AddLastActiveState(lastActiveEntry);
 
-	// Cache final pose.
-	m_finalPose.CopyTransformsFrom(currentState->GetGraph()->GetFinalPose());
+		currentState->Evaluate(deltaTime);
+
+		// Cache final pose.
+		m_finalPose.CopyTransformsFrom(currentState->GetGraph()->GetFinalPose());
+	}
 }
 
 void AFStateMachine::OnNodeCreated(const std::string& msg)
@@ -114,6 +168,7 @@ void AFStateMachine::OnNodeCreated(const std::string& msg)
 	// Construct a node - it will be now accessible via m_idToNode hashmap.
 	std::shared_ptr<AFGraphNode> newNode = AFGraphNodeRegistry::Get().CreateNode(nodeType, nodeId);
 	newNode->m_nodeId = nodeId;
+	newNode->m_nodeContext = nodeContext;
 	newNode->Init();
 
 	// #hack
@@ -200,4 +255,49 @@ void AFStateMachine::OnConnectionRemoved(const std::string& msg)
 		{
 			return conn.id == connectionID;
 		}), m_connections.end());
+}
+
+void AFStateMachine::ScheduleBlend(const std::string& blendFrom, const std::string& blendTo, float blendLength)
+{
+	if (blendLength <= 0.0f)
+	{
+		return;
+	}
+
+	if (blendFrom.empty() || blendTo.empty())
+	{
+		return;
+	}
+
+	std::weak_ptr<AFGraphNode_State> blendFromNode = std::dynamic_pointer_cast<AFGraphNode_State>(AFGraphNodeRegistry::Get().GetNode(blendFrom));
+	std::weak_ptr<AFGraphNode_State> blendToNode = std::dynamic_pointer_cast<AFGraphNode_State>(AFGraphNodeRegistry::Get().GetNode(blendTo));
+
+	if (!blendFromNode.lock() || !blendToNode.lock())
+	{
+		return;
+	}
+
+	FAFStateBlend newBlend;
+	newBlend.blendLength = blendLength;
+	newBlend.currentBlendTime = 0.0f;
+
+	// If the new blend is just a reverse of a previous blend (to-from are swapped) we start the blend from where it ended.
+	// @todo Treat blend as a state, and blend from a state.
+	if (m_isBlending && (blendFrom == m_currentBlend.blendTo.lock()->GetNodeID() && blendTo == m_currentBlend.blendFrom.lock()->GetNodeID()))
+	{
+		const float normalizedOldProgress = m_currentBlend.currentBlendTime / m_currentBlend.blendLength;
+		newBlend.currentBlendTime = m_currentBlend.blendLength - (normalizedOldProgress * m_currentBlend.blendLength);
+	}
+
+	newBlend.blendFrom = blendFromNode;
+	newBlend.blendTo = blendToNode;
+
+	m_currentBlend = newBlend;
+	m_isBlending = true;
+}
+
+void AFStateMachine::ClearBlend()
+{
+	m_currentBlend = FAFStateBlend();
+	m_isBlending = false;
 }

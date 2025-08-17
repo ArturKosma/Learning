@@ -11,6 +11,7 @@ public:
 
 	void Init() override;
 	void Evaluate(float deltaTime) override;
+	void OnReset() override;
 	std::shared_ptr<AFAnimGraph> GetGraph() const;
 
 protected:

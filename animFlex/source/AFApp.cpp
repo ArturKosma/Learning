@@ -85,7 +85,7 @@ void AFApp::StartLoop()
 #ifdef __EMSCRIPTEN__
 	printf("Compiled with Emscripten.\n");
 
-	// Set the web main loop to run at requestAnimationFrame() fps.
+	// Set the web main loop to run at Emscripten's requestAnimationFrame() fps.
 	emscripten_set_main_loop_arg([](void* InAppPtr)
 		{
 			AFApp* appPtr = static_cast<AFApp*>(InAppPtr);

@@ -23,3 +23,15 @@ bool AFGraphNode_StateCond::GetLastEvaluation() const
 {
 	return m_lastEval;
 }
+
+void AFGraphNode_StateCond::SetConnectionPoints(const std::string& from, const std::string& to)
+{
+	m_from = from;
+	m_to = to;
+}
+
+void AFGraphNode_StateCond::GetConnectionPoints(std::string& from, std::string& to)
+{
+	from = m_from;
+	to = m_to;
+}

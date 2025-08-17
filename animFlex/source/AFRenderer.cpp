@@ -207,6 +207,8 @@ void AFRenderer::Draw(const FAFSceneData& sceneData, const FAFAppData& appData)
 			uiRenderComponent->Draw();
 		}
 	}
+
+	// @todo Wireframe draw mode.
 	
 	// Separate draw loop for the id-picker.
 	m_framebufferIdPicker.Bind();

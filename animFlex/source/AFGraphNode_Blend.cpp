@@ -1,6 +1,7 @@
 #include "AFGraphNode_Blend.h"
 
 #include "AFJoint.h"
+#include "AFMath.h"
 
 AFGraphNode_Blend::AFGraphNode_Blend()
 {
@@ -27,16 +28,5 @@ void AFGraphNode_Blend::Evaluate(float deltaTime)
 	const AFPose& b = blend_inputPoseB.GetValue();
 	const AFPose& finalPose = blend_outputPose.GetValue();
 
-	for (size_t i = 0; i < a.GetJoints().size(); ++i)
-	{
-		glm::vec3 blendLoc = glm::mix(a.GetJoints()[i]->GetLocation(), b.GetJoints()[i]->GetLocation(), alpha);
-		glm::quat blendRot = glm::slerp(a.GetJoints()[i]->GetRotation(), b.GetJoints()[i]->GetRotation(), alpha);
-		glm::vec3 blendScale = glm::mix(a.GetJoints()[i]->GetScale(), b.GetJoints()[i]->GetScale(), alpha);
-
-		finalPose.GetJoints()[i]->SetLocation(blendLoc);
-		finalPose.GetJoints()[i]->SetRotation(blendRot);
-		finalPose.GetJoints()[i]->SetScale(blendScale);
-
-		finalPose.GetJoints()[i]->CalculateLocalTRSMatrix();
-	}
+	AFMath::BlendPoses(finalPose, a, b, alpha);
 }

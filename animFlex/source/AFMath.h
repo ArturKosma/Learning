@@ -7,6 +7,9 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "AFPose.h"
+#include "AFJoint.h"
+
 class AFMath
 {
 public:
@@ -143,5 +146,21 @@ public:
 	static bool NearlyEqual(float a, float b, float threshold = glm::epsilon<float>())
 	{
 		return glm::epsilonEqual(a, b, threshold);
+	}
+
+	static void BlendPoses(const AFPose& outPose, const AFPose& a, const AFPose& b, float alpha)
+	{
+		for (size_t i = 0; i < a.GetJoints().size(); ++i)
+		{
+			glm::vec3 blendLoc = glm::mix(a.GetJoints()[i]->GetLocation(), b.GetJoints()[i]->GetLocation(), alpha);
+			glm::quat blendRot = glm::slerp(a.GetJoints()[i]->GetRotation(), b.GetJoints()[i]->GetRotation(), alpha);
+			glm::vec3 blendScale = glm::mix(a.GetJoints()[i]->GetScale(), b.GetJoints()[i]->GetScale(), alpha);
+
+			outPose.GetJoints()[i]->SetLocation(blendLoc);
+			outPose.GetJoints()[i]->SetRotation(blendRot);
+			outPose.GetJoints()[i]->SetScale(blendScale);
+
+			outPose.GetJoints()[i]->CalculateLocalTRSMatrix();
+		}
 	}
 };

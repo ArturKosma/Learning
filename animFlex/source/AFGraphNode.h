@@ -21,6 +21,7 @@ public:
 	virtual void Init();
 	virtual void OnUpdate();
 	virtual void Evaluate(float deltaTime) = 0;
+	virtual void OnReset();
 
 	std::string GetNodeID() const;
 	virtual std::string GetNodeType() const = 0;
@@ -30,9 +31,17 @@ public:
 		return GetNodeType() == other.GetNodeType();
 	}
 
+	void AddSubNode(const std::string& subNodeId);
+	std::vector<std::string> GetSubNodes() const;
+
+	void SetNodeContext(const std::string& contextID);
+	const std::string& GetNodeContext() const;
+
 protected:
 
 	std::string m_nodeId = "";
+	std::string m_nodeContext = "";
+	std::vector<std::string> m_subNodes = {};
 };
 
 template<typename Derived>

@@ -117,8 +117,10 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 
 	// Mark all nodes dirty. This will allow for new evaluation of each of them.
 	AFEvaluator::Get().ClearEvaluationState();
+
 	AFEvaluator::Get().ClearLastActiveSockets();
 	AFEvaluator::Get().ClearLastActiveStates();
+	AFEvaluator::Get().ClearSamplingState();
 
 	m_graph->Evaluate(deltaTime);
 

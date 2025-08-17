@@ -109,8 +109,8 @@ void main()
 
 	// The further away from the horizontal center of the screen something is - the stronger the effect.
 	float horizontalModifier = 0.0f;
-	horizontalModifier = abs((uv.x - 0.5f) * 2.5f); // Distance.
-	horizontalModifier = pow(horizontalModifier, 2.0f); // Distance non linear.
+	horizontalModifier = abs((uv.x - 0.5f) * 3.25f); // Distance.
+	horizontalModifier = pow(horizontalModifier, 2.25f); // Distance non linear.
 	horizonMask = horizonMask * horizontalModifier / 2.0f;
 	horizonMask *= 1.0f;
 

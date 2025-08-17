@@ -212,17 +212,47 @@ async function destroyEditorRecursively(editorId: string, visited = new Set<stri
   editors.splice(idx, 1);
 }
 
+async function delSelectedConnections(editor: NodeEditor<any>) {
+  const selected = editor.getConnections().filter((c: any) => c?.selected);
+  for (const conn of selected) {
+    try {
+      await editor.removeConnection(conn.id);
+    } catch {}
+  }
+}
+
 async function delKey(
   editor: NodeEditor<Schemes>,
   selector: AreaExtensions.Selector<SelectorEntity>,
   force: boolean = false
 ) {
+
+  delSelectedConnections(editor);
+
   const selectedEntities = Array.from(selector.entities.values());
 
   for (const selectedEntity of selectedEntities) {
-    const node = editor.getNode(selectedEntity.id) as ClassicPreset.Node & {
-      meta?: { isRemovable?: boolean }
-    };
+    const node = editor.getNode(selectedEntity.id) as (ClassicPreset.Node & {
+      meta?: {
+        isRemovable?: boolean;
+        isConditional?: boolean;
+        connectionOwner?: string;
+      }
+    }) | undefined;
+
+    if (!node) continue;
+
+    // If it's a conditional node, remove its owning connection instead of the node.
+    if (node.meta?.isConditional && node.meta.connectionOwner) {
+      const conn = editor.getConnections().find(c => c.id === node.meta!.connectionOwner);
+      if (conn) {
+        try {
+          await editor.removeConnection(conn.id);
+        } catch {}
+      }
+      // don't proceed to node deletion path
+      continue;
+    }
 
     if (!node?.meta?.isRemovable && !force) continue;
 
