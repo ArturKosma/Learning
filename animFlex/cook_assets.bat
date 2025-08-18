@@ -10,7 +10,7 @@ REM Go to packager exe.
 cd ../animFlex_cooking
 
 REM Order packaging per type.
-animFlex_cooking.exe anim %ANIMS_SOURCE% %ANIMS_EXPORT%
+animFlex_cooking.exe anim %ANIMS_SOURCE% %ANIMS_EXPORT% -noArgs
 
 REM Once packaged, deploy to assets.
 cd %ANIMS_EXPORT%
