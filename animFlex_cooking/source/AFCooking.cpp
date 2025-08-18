@@ -5,13 +5,19 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+
+#include "json.hpp"
 #include "zstd.h"
 
-std::string AFCooking::CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath)
+std::string AFCooking::CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath, const std::string& additionalArgs)
 {
 	if (type == "anim")
 	{
 		return CookAnim(sourcePath, targetPath);
+	}
+	else if (type == "animCurve")
+	{
+		return CookAnimCurve(sourcePath, targetPath, additionalArgs);
 	}
 
 	return "";
@@ -194,4 +200,193 @@ std::string AFCooking::CookAnim(const std::string& sourcePath, const std::string
 	outfile.close();
 
 	return animName;
+}
+
+std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::string& targetPath,
+	const std::string& additionalArgs)
+{
+	// Read additional args.
+	const std::vector<std::string> args = AFCooking::ReadAdditionalArgs(additionalArgs);
+	if (args.size() != 3)
+	{
+		printf("No 3 args provided.\n");
+		return "";
+	}
+
+	const std::string& requestedMotionType = args[0];
+	const int requestedBoneIdx = std::stoi(args[1]);
+	const std::string& requestedAxis = args[2];
+
+	// Load via TinyGLTF.
+	std::shared_ptr<tinygltf::Model> model = std::make_shared<tinygltf::Model>();
+	tinygltf::TinyGLTF loader;
+	std::string err;
+	std::string warn;
+
+	bool ret = loader.LoadBinaryFromFile(&*model, &err, &warn, sourcePath);
+	if (!ret)
+	{
+		ret = loader.LoadASCIIFromFile(&*model, &err, &warn, sourcePath);
+	}
+
+	if (!ret)
+	{
+		printf("Failed to parse glTF: %s\n", sourcePath.c_str());
+		return "";
+	}
+
+	if (model->animations.empty())
+	{
+		printf("No animations in file.\n");
+		return "";
+	}
+
+	// Save just the filename, without extension nor directory.
+	std::filesystem::path p(sourcePath);
+	const std::string& animName = p.filename().stem().string();
+
+	// We assume to have only 1 animation per file.
+	for (const auto& anim : model->animations)
+	{
+		for (const auto& channel : anim.channels)
+		{
+			FAFAnimationChannelData newChannel;
+
+			// Get important variables for the input (like keyframe times).
+			const tinygltf::Accessor& inputAccessor = model->accessors.at(anim.samplers.at(channel.sampler).input);
+			const tinygltf::BufferView& inputBufferView = model->bufferViews.at(inputAccessor.bufferView);
+			const tinygltf::Buffer& inputBuffer = model->buffers.at(inputBufferView.buffer);
+
+			// Get important variables for output (like translation and rotation).
+			const tinygltf::Accessor& outputAccessor = model->accessors.at(anim.samplers.at(channel.sampler).output);
+			const tinygltf::BufferView& outputBufferView = model->bufferViews.at(outputAccessor.bufferView);
+			const tinygltf::Buffer& outputBuffer = model->buffers.at(outputBufferView.buffer);
+
+			// Get keyframe count.
+			const uint32_t keyCount = static_cast<uint32_t>(outputAccessor.count);
+			newChannel.keyCount = keyCount;
+
+			// Get joint for this channel.
+			newChannel.targetJoint = static_cast<uint16_t>(channel.target_node);
+
+			if (newChannel.targetJoint != requestedBoneIdx)
+			{
+				continue;
+			}
+
+			// Allocate enough memory for timings and values arrays.
+			newChannel.timings = static_cast<float*>(std::malloc(sizeof(float) * keyCount));
+			newChannel.values = static_cast<glm::vec4*>(std::malloc(sizeof(glm::vec4) * keyCount));
+
+			// Get timings for every frame.
+			std::memcpy(newChannel.timings, &inputBuffer.data.at(0) + inputBufferView.byteOffset, inputBufferView.byteLength);
+
+			// Get interpolation type between frames.
+			const tinygltf::AnimationSampler sampler = anim.samplers.at(channel.sampler);
+			if (sampler.interpolation == "STEP")
+			{
+				newChannel.interpType = EAFInterpolationType::Step;
+			}
+			else if (sampler.interpolation == "LINEAR")
+			{
+				newChannel.interpType = EAFInterpolationType::Linear;
+			}
+			else if (sampler.interpolation == "CUBICSPLINE")
+			{
+				newChannel.interpType = EAFInterpolationType::CubicSpline;
+			}
+
+			// Get target path for this channel.
+			if (channel.target_path == "translation")
+			{
+				newChannel.targetPath = EAFTargetPath::Translation;
+			}
+			else if (channel.target_path == "rotation")
+			{
+				newChannel.targetPath = EAFTargetPath::Rotation;
+			}
+			else if (channel.target_path == "scale")
+			{
+				newChannel.targetPath = EAFTargetPath::Scale;
+			}
+
+			// Get values for this channel.
+			const uint8_t* rawValues = &outputBuffer.data.at(0) + outputBufferView.byteOffset;
+			if (outputAccessor.type == TINYGLTF_TYPE_VEC3)
+			{
+				const glm::vec3* src = reinterpret_cast<const glm::vec3*>(rawValues);
+				for (size_t i = 0; i < outputAccessor.count; ++i)
+				{
+					newChannel.values[i] = glm::vec4(src[i], 0.0f); // Copy with padding w = 0.
+				}
+			}
+			else if (outputAccessor.type == TINYGLTF_TYPE_VEC4)
+			{
+				const glm::vec4* src = reinterpret_cast<const glm::vec4*>(rawValues);
+				std::memcpy(newChannel.values, src, sizeof(glm::vec4) * outputAccessor.count);
+			}
+
+			// Monotonic (accumulates translation).
+			if (requestedMotionType == "monotonic")
+			{
+				nlohmann::json monotonicArray = nlohmann::json::array();
+
+				if (newChannel.targetPath != EAFTargetPath::Translation)
+				{
+					continue;
+				}
+
+				for (uint32_t i = 0; i < keyCount; ++i)
+				{
+					float value = 0.0f;
+					if (requestedAxis == "x") value = newChannel.values[i].x;
+					if (requestedAxis == "y") value = newChannel.values[i].y;
+					if (requestedAxis == "z") value = newChannel.values[i].z;
+
+					monotonicArray.push_back({ newChannel.timings[i], value });
+				}
+
+				std::string filename = "";
+				filename += animName;
+				filename += "_monotonic_";
+				filename += requestedAxis;
+				filename += ".json";
+				const std::string& monotonicPath = (std::filesystem::path(targetPath) / filename).string();
+				std::ofstream outJson(monotonicPath);
+				outJson << monotonicArray.dump(2);
+			}
+		}
+	}
+
+	return animName;
+}
+
+std::vector<std::string> AFCooking::ReadAdditionalArgs(const std::string& additionalArgs)
+{
+	std::vector<std::string> ret = {};
+	std::string currentArg = "";
+
+	for (char c : additionalArgs)
+	{
+		if (c == '-')
+		{
+			if (!currentArg.empty())
+			{
+				ret.push_back(currentArg);
+			}
+
+			currentArg.clear();
+		}
+		else
+		{
+			currentArg += c;
+		}
+	}
+
+	if (!currentArg.empty())
+	{
+		ret.push_back(currentArg);
+	}
+
+	return ret;
 }

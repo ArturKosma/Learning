@@ -14,11 +14,12 @@ int main(int argc, char* argv[])
     }
 
     // Read every 3 passed args.
-    for (int i = 1; i < argc; i+=3)
+    for (int i = 1; i < argc; i += 4)
     {
         const std::string type = argv[i];
         const std::string source = argv[i + 1];
         const std::string target = argv[i + 2];
+        const std::string additionalArgs = argv[i + 3];
 
         // Create json array manifest.
         nlohmann::json manifest = nlohmann::json::array();
@@ -30,7 +31,7 @@ int main(int argc, char* argv[])
             if (file.is_regular_file() && (file.path().extension() == ".gltf" || file.path().extension() == ".glb"))
             {
                 // CookFile this file.
-                const std::string& cookedName = AFCooking::CookFile(type, file.path().string(), target);
+                const std::string& cookedName = AFCooking::CookFile(type, file.path().string(), target, additionalArgs);
 
                 // Add it to the current manifest.
                 if (!cookedName.empty())

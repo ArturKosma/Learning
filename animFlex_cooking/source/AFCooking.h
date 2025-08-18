@@ -33,9 +33,14 @@ class AFCooking
 {
 public:
 
-	static std::string CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath);
+	static std::string CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath, const std::string& additionalArgs);
 
 private:
 
 	static std::string CookAnim(const std::string& sourcePath, const std::string& targetPath);
+	static std::string CookAnimCurve(const std::string& sourcePath, const std::string& targetPath, const std::string& additionalArgs);
+
+private:
+
+	static std::vector<std::string> ReadAdditionalArgs(const std::string& additionalArgs);
 };
