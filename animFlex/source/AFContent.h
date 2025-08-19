@@ -7,6 +7,7 @@
 #include "AFStructs.h"
 #include "AFUtility.h"
 #include "AFTexture.h"
+#include "AFFloatCurve.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/fetch.h>
@@ -29,6 +30,10 @@ public:
 	// Find existing previously added asset.
 	template<typename T>
 	std::shared_ptr<T> FindAsset(const char* assetName) const;
+
+	// Find existing previously added assets that match the part of the name.
+	template<typename T>
+	std::vector<std::shared_ptr<T>> FindAssets(const char* assetPartName) const;
 
 	// Download file via jsdelivr.
 	// Insta call onComplete if assetName exists in assets map.
@@ -72,6 +77,8 @@ std::shared_ptr<T> AFContent::AddAsset(const char* assetName, Args&&... args)
 	std::shared_ptr<AFAsset> casted = std::dynamic_pointer_cast<AFAsset>(newAsset);
 	if(casted->Load<T>(std::forward<Args>(args)...))
 	{
+		casted->m_name = assetName;
+		casted->OnLoadComplete();
 		assets.insert({ assetName , newAsset });
 		return newAsset;
 	}
@@ -91,6 +98,30 @@ std::shared_ptr<T> AFContent::FindAsset(const char* assetName) const
 	}
 
 	return nullptr;
+}
+
+template <typename T>
+std::vector<std::shared_ptr<T>> AFContent::FindAssets(const char* assetPartName) const
+{
+	static_assert(std::is_base_of<AFAsset, T>::value, "Found asset must derive from AFAsset.");
+
+	std::vector<std::shared_ptr<T>> ret;
+
+	for (const auto& [name, ptr] : assets)
+	{
+		if (name.find(assetPartName) == std::string::npos)
+		{
+			continue;
+		}
+
+		std::shared_ptr<T> casted = std::dynamic_pointer_cast<T>(ptr);
+		if (casted)
+		{
+			ret.push_back(casted);
+		}
+	}
+
+	return ret;
 }
 
 template <typename T>
@@ -139,6 +170,12 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 
 		// Deserialize the data.
 		userContext->ret->template Deserialize<T>(fetch->data);
+
+		// Assign name for the new asset.
+		userContext->ret->m_name = userContext->assetName;
+
+		// Call complete load on the object.
+		userContext->ret->OnLoadComplete();
 
 		// Cache the asset so it's easily obtainable.
 		userContext->content->assets.insert({ userContext->assetName, userContext->ret });

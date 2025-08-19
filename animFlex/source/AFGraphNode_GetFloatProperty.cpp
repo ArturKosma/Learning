@@ -83,6 +83,14 @@ void AFGraphNode_GetFloatProperty::Evaluate(float deltaTime)
 
 			break;
 		}
+		case EAFFloatProperties::DistanceTraveled:
+		{
+			const glm::vec3 currentLoc = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetLocation();
+			m_distanceTraveled = m_distanceTraveled + glm::length(currentLoc - m_previousPlayerLocation);
+			m_previousPlayerLocation = currentLoc;
+			ret = m_distanceTraveled;
+			break;
+		}
 		default:
 		{
 			ret = 0.0f;
@@ -91,4 +99,10 @@ void AFGraphNode_GetFloatProperty::Evaluate(float deltaTime)
 	}
 
 	m_floatProperty.SetValue(ret);
+}
+
+void AFGraphNode_GetFloatProperty::OnReset()
+{
+	m_distanceTraveled = 0.0f;
+	m_previousPlayerLocation = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetLocation();
 }

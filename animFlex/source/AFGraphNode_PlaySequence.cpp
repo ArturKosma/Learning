@@ -36,7 +36,21 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 	}
 	else
 	{
-		m_localTime = glm::clamp(m_localTime + (deltaTime * playseq_playrate), playseq_startTime.GetValue(), endTime - playseq_startTime);
+		if (playseq_distanceMatching)
+		{
+			std::shared_ptr<AFFloatCurve> rootDistanceCrv = m_animClip->GetCurve(m_animClip->GetClipName() + "_rootDistance");
+			if (!rootDistanceCrv)
+			{
+				return;
+			}
+
+			// Distance matching sets m_localTime.
+			m_localTime = glm::clamp(rootDistanceCrv->SampleByValue(playseq_distanceTraveled), playseq_startTime.GetValue(), endTime - playseq_startTime);
+		}
+		else
+		{
+			m_localTime = glm::clamp(m_localTime + (deltaTime * playseq_playrate), playseq_startTime.GetValue(), endTime - playseq_startTime);
+		}
 	}
 
 	const_cast<AFPose&>(playseq_outputPose.GetValue()).ApplyClip(m_animClip, m_localTime, playseq_forceRootLock);

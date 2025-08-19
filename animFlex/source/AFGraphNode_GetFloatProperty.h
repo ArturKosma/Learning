@@ -7,7 +7,8 @@ enum class EAFFloatProperties
 	VelocityLength,
 	DeltaAngle,
 	UserInputLength,
-	RelevantAnimTimeRemain
+	RelevantAnimTimeRemain,
+	DistanceTraveled
 };
 
 class AFGraphNode_GetFloatProperty : public AFGraphNodeCRTP<AFGraphNode_GetFloatProperty>
@@ -21,8 +22,12 @@ public:
 
 	void Init() override;
 	void Evaluate(float deltaTime) override;
+	void OnReset() override;
 
 private:
+
+	float m_distanceTraveled = 0.0f;
+	glm::vec3 m_previousPlayerLocation = glm::vec3(0.0f);
 
 	std::weak_ptr<class AFCharacterMovementComponent> m_charMovement = {};
 };

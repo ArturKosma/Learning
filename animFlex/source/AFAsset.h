@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdio>
+#include <string>
 #include <utility>
 
 class AFAsset
@@ -11,6 +12,7 @@ public:
 	virtual ~AFAsset() = default;
 
 	unsigned int GetUniqueID() const;
+	std::string GetName() const;
 
 	template<typename T, typename... Args>
 	bool Load(Args&&... args);
@@ -22,6 +24,8 @@ public:
 	bool Deserialize(Args&&... args);
 
 	virtual bool LoadExisting();
+
+	virtual void OnLoadComplete();
 
 protected:
 
@@ -60,6 +64,7 @@ protected:
 	}
 
 	unsigned int m_uniqueID = 0;
+	std::string m_name = "";
 };
 
 template <typename T, typename ... Args>

@@ -305,6 +305,14 @@
                     ]
                 },
                 {
+                    "var_type": "float",
+                    "var_name": "playseq_distanceTraveled",
+                    "default": "0.0",
+                    "label": "Distance Traveled",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
                     "var_type": "AFPose",
                     "var_name": "playseq_outputPose",
                     "default": "",
@@ -351,6 +359,14 @@
                     "label": "End Time",
                     "direction": "",
                     "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "playseq_distanceMatching",
+                    "default": "false",
+                    "label": "Distance Matching",
+                    "direction": "",
+                    "meta": []
                 }
             ]
         },
@@ -395,7 +411,8 @@
                 "VelocityLength",
                 "DeltaAngle",
                 "UserInputLength",
-                "RelevantAnimTimeRemain"
+                "RelevantAnimTimeRemain",
+                "DistanceTraveled"
             ]
         }
     ]

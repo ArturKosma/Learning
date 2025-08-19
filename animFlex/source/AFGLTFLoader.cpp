@@ -6,6 +6,7 @@
 #include <glm/gtx/dual_quaternion.hpp>
 #include <filesystem>
 
+#include "AFContent.h"
 #include "AFJoint.h"
 #include "third_party/tiny_gltf.h"
 
@@ -348,7 +349,8 @@ bool AFGLTFLoader::LoadAnim(const std::string& filename, AFAnimationClip* loaded
 
 	// Save just the filename, without extension nor directory.
 	std::filesystem::path p(filename);
-	loadedClip->SetClipName(p.filename().stem().string());
+	const std::string clipName = p.filename().stem().string();
+	loadedClip->SetClipName(clipName);
 
 	// We assume to have only 1 animation per file.
 	for (const auto& anim : model->animations)
