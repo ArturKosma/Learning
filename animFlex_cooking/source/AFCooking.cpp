@@ -207,15 +207,20 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 {
 	// Read additional args.
 	const std::vector<std::string> args = AFCooking::ReadAdditionalArgs(additionalArgs);
-	if (args.size() != 3)
-	{
-		printf("No 3 args provided.\n");
-		return "";
-	}
 
-	const std::string& requestedMotionType = args[0];
-	const int requestedBoneIdx = std::stoi(args[1]);
-	const std::string& requestedAxis = args[2];
+	std::string requestedMotionType = "";
+	int requestedBoneIdx = 0;
+	std::string requestedAxis = "";
+
+	// Figure out what the user wants based on args.
+	for (const std::string& arg : args)
+	{
+		if (arg == "rootDistance")
+		{
+			requestedMotionType = "rootDistance";
+			requestedBoneIdx = 0;
+		}
+	}
 
 	// Load via TinyGLTF.
 	std::shared_ptr<tinygltf::Model> model = std::make_shared<tinygltf::Model>();
@@ -326,34 +331,36 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				std::memcpy(newChannel.values, src, sizeof(glm::vec4) * outputAccessor.count);
 			}
 
-			// Monotonic (accumulates translation).
-			if (requestedMotionType == "monotonic")
+			// Root Distance - reads the length of vector of the root bone.
+			if (requestedMotionType == "rootDistance")
 			{
-				nlohmann::json monotonicArray = nlohmann::json::array();
+				nlohmann::json rootDistanceArray = nlohmann::json::array();
 
+				// We are only interested in the translation.
 				if (newChannel.targetPath != EAFTargetPath::Translation)
 				{
 					continue;
 				}
 
+				// Get the vector at every key.
 				for (uint32_t i = 0; i < keyCount; ++i)
 				{
-					float value = 0.0f;
-					if (requestedAxis == "x") value = newChannel.values[i].x;
-					if (requestedAxis == "y") value = newChannel.values[i].y;
-					if (requestedAxis == "z") value = newChannel.values[i].z;
+					const float valueX = newChannel.values[i].x;
+					const float valueY = newChannel.values[i].y;
+					const float valueZ = newChannel.values[i].z;
 
-					monotonicArray.push_back({ newChannel.timings[i], value });
+					const float distance = glm::length(glm::vec3(valueX, valueY, valueZ));
+
+					rootDistanceArray.push_back({ newChannel.timings[i], distance });
 				}
 
 				std::string filename = "";
 				filename += animName;
-				filename += "_monotonic_";
-				filename += requestedAxis;
+				filename += "_rootDistance";
 				filename += ".json";
-				const std::string& monotonicPath = (std::filesystem::path(targetPath) / filename).string();
-				std::ofstream outJson(monotonicPath);
-				outJson << monotonicArray.dump(2);
+				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
+				std::ofstream outJson(curvePath);
+				outJson << rootDistanceArray.dump(2);
 			}
 		}
 	}
