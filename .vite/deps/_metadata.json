@@ -1,0 +1,157 @@
+{
+  "hash": "34dadc47",
+  "configHash": "f805df5b",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "a0f0ea69",
+  "optimized": {
+    "react": {
+      "src": "../../../animFlex/graph/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "cbb22834",
+      "needsInterop": true
+    },
+    "react-dom": {
+      "src": "../../../animFlex/graph/node_modules/react-dom/index.js",
+      "file": "react-dom.js",
+      "fileHash": "a28cbf26",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../../animFlex/graph/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "3d8d4aaf",
+      "needsInterop": true
+    },
+    "react/jsx-runtime": {
+      "src": "../../../animFlex/graph/node_modules/react/jsx-runtime.js",
+      "file": "react_jsx-runtime.js",
+      "fileHash": "27367824",
+      "needsInterop": true
+    },
+    "rete": {
+      "src": "../../../animFlex/graph/node_modules/rete/rete.esm.js",
+      "file": "rete.js",
+      "fileHash": "606ed139",
+      "needsInterop": false
+    },
+    "rete-area-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-area-plugin/rete-area-plugin.esm.js",
+      "file": "rete-area-plugin.js",
+      "fileHash": "795b3bbc",
+      "needsInterop": false
+    },
+    "rete-connection-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-connection-plugin/rete-connection-plugin.esm.js",
+      "file": "rete-connection-plugin.js",
+      "fileHash": "15f308b9",
+      "needsInterop": false
+    },
+    "rete-react-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-react-plugin/rete-react-plugin.esm.js",
+      "file": "rete-react-plugin.js",
+      "fileHash": "cc1f3efa",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../../animFlex/graph/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "95bfa85b",
+      "needsInterop": true
+    },
+    "styled-components": {
+      "src": "../../../animFlex/graph/node_modules/styled-components/dist/styled-components.browser.esm.js",
+      "file": "styled-components.js",
+      "fileHash": "00dffc19",
+      "needsInterop": false
+    },
+    "rete-context-menu-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-context-menu-plugin/rete-context-menu-plugin.esm.js",
+      "file": "rete-context-menu-plugin.js",
+      "fileHash": "7dde32db",
+      "needsInterop": false
+    },
+    "antd": {
+      "src": "../../../animFlex/graph/node_modules/antd/es/index.js",
+      "file": "antd.js",
+      "fileHash": "5942b1f4",
+      "needsInterop": false
+    },
+    "rete-auto-arrange-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-auto-arrange-plugin/rete-auto-arrange-plugin.esm.js",
+      "file": "rete-auto-arrange-plugin.js",
+      "fileHash": "f53d2af7",
+      "needsInterop": false
+    },
+    "intersects": {
+      "src": "../../../animFlex/graph/node_modules/intersects/index.js",
+      "file": "intersects.js",
+      "fileHash": "3665e155",
+      "needsInterop": true
+    },
+    "poly-decomp": {
+      "src": "../../../animFlex/graph/node_modules/poly-decomp/src/index.js",
+      "file": "poly-decomp.js",
+      "fileHash": "3db9cb1a",
+      "needsInterop": true
+    },
+    "rete-connection-path-plugin": {
+      "src": "../../../animFlex/graph/node_modules/rete-connection-path-plugin/rete-connection-path-plugin.esm.js",
+      "file": "rete-connection-path-plugin.js",
+      "fileHash": "29e28e89",
+      "needsInterop": false
+    },
+    "d3-shape": {
+      "src": "../../../animFlex/graph/node_modules/d3-shape/src/index.js",
+      "file": "d3-shape.js",
+      "fileHash": "252331e7",
+      "needsInterop": false
+    },
+    "rete-render-utils": {
+      "src": "../../../animFlex/graph/node_modules/rete-render-utils/rete-render-utils.esm.js",
+      "file": "rete-render-utils.js",
+      "fileHash": "7393bfb7",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-HCAUJSZP": {
+      "file": "chunk-HCAUJSZP.js"
+    },
+    "chunk-KTQQQ4GN": {
+      "file": "chunk-KTQQQ4GN.js"
+    },
+    "chunk-XQ3X4JL4": {
+      "file": "chunk-XQ3X4JL4.js"
+    },
+    "chunk-3LB3UQTO": {
+      "file": "chunk-3LB3UQTO.js"
+    },
+    "chunk-C2PZ3BDC": {
+      "file": "chunk-C2PZ3BDC.js"
+    },
+    "chunk-37VOTOQP": {
+      "file": "chunk-37VOTOQP.js"
+    },
+    "chunk-OM334EPU": {
+      "file": "chunk-OM334EPU.js"
+    },
+    "chunk-W4S6QAMR": {
+      "file": "chunk-W4S6QAMR.js"
+    },
+    "chunk-O6P36EK3": {
+      "file": "chunk-O6P36EK3.js"
+    },
+    "chunk-AQPE7URQ": {
+      "file": "chunk-AQPE7URQ.js"
+    },
+    "chunk-XB4SY35X": {
+      "file": "chunk-XB4SY35X.js"
+    },
+    "chunk-4LE5KZDT": {
+      "file": "chunk-4LE5KZDT.js"
+    },
+    "chunk-PLDDJCW6": {
+      "file": "chunk-PLDDJCW6.js"
+    }
+  }
+}
