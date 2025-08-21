@@ -21,6 +21,7 @@
 #include "AFVertexBuffer.h"
 #include "AFCamera.h"
 #include "AFMesh.h"
+#include "AFTexture.h"
 
 void AFScene::BeginPlay()
 {

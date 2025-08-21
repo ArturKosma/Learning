@@ -6,19 +6,6 @@
 #include "AFContent.h"
 #include "zstd.h"
 
-void AFAnimationClip::OnLoadComplete()
-{
-	// Add curves for this clip.
-	// We assume curves to be loaded beforehand, and their name contains full anim clip name.
-	// Usually (Unreal Engine 5) curves are a part of Animation Sequence.
-	// Hack.
-	const std::vector<std::shared_ptr<AFFloatCurve>> curves = AFContent::Get().FindAssets<AFFloatCurve>(GetClipName().c_str());
-	for (std::shared_ptr<AFFloatCurve> curve : curves)
-	{
-		AddCurve(curve->GetName(), curve);
-	}
-}
-
 void AFAnimationClip::AddChannel(std::shared_ptr<tinygltf::Model> model, tinygltf::Animation anim,
                                  tinygltf::AnimationChannel channel)
 {

@@ -1,5 +1,5 @@
 #include "AFGraphNode_PlaySequence.h"
-
+#include <string_view>
 #include "AFContent.h"
 
 void AFGraphNode_PlaySequence::Init()
@@ -14,19 +14,46 @@ void AFGraphNode_PlaySequence::OnUpdate()
 		return;
 	}
 
-	// Fetch anim.
-	auto onComplete = [this](std::shared_ptr<AFAnimationClip> fetchedAnim)
+	// Called upon curves fetch complete.
+	auto onCompleteCurves = [this](std::vector<std::shared_ptr<AFFloatCurve>> fetchedCurves)
+		{
+			if (!m_animClip)
+			{
+				return;
+			}
+
+			const std::string prefix = m_animClip->GetClipName() + "_";
+			const std::string suffix = ".json";
+
+			for (std::shared_ptr<AFFloatCurve> crv : fetchedCurves)
+			{
+				std::string name = crv->GetName();
+				std::string_view sv(name);
+				sv.remove_prefix(prefix.size());
+				sv.remove_suffix(suffix.size());
+
+				// Add each curve.
+				m_animClip->AddCurve(std::string(sv), crv);
+			}
+		};
+
+	// Called upon anims fetch complete.
+	auto onComplete = [this, onCompleteCurves](std::shared_ptr<AFAnimationClip> fetchedAnim)
 		{
 			m_animClip = fetchedAnim;
 			m_localTime = 0.0f;
+
+			// Fetch curves.
+			AFContent::Get().FetchAssets<AFFloatCurve>("https://api.github.com/repos/ArturKosma/assets/contents/curves?ref=main",
+				"https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/",
+				playseq_animName.GetValue(),
+				onCompleteCurves);
 		};
 
+	// Fetch anim.
 	AFContent::Get().FetchAsset<AFAnimationClip>("https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/anims/", 
 		playseq_animName.GetValue() + ".afanim",
 		onComplete);
-
-	// Fetch curves.
-	// @todo fetch whole directories.
 }
 
 void AFGraphNode_PlaySequence::Evaluate(float deltaTime)

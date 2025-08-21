@@ -11,7 +11,6 @@
 class AFAnimationClip : public AFAsset
 {
 public:
-	void OnLoadComplete() override;
 
 	void AddChannel(std::shared_ptr<tinygltf::Model> model, tinygltf::Animation anim, tinygltf::AnimationChannel channel);
 	const std::vector<std::shared_ptr<AFAnimationChannel>>& GetAnimationChannels() const;

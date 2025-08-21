@@ -6,7 +6,6 @@
 
 #include "AFStructs.h"
 #include "AFUtility.h"
-#include "AFTexture.h"
 #include "AFFloatCurve.h"
 
 #ifdef __EMSCRIPTEN__
@@ -39,6 +38,11 @@ public:
 	// Insta call onComplete if assetName exists in assets map.
 	template<typename T>
 	void FetchAsset(const std::string& directoryPath, const std::string& assetName, std::function<void(std::shared_ptr<T>)> onComplete);
+
+	// Downloads all files from jsdelivr in a given folder,
+	// if those files contain assetPartName.
+	template<typename T>
+	void FetchAssets(const std::string& ghubDirectory, const std::string& assetsDirectory, const std::string& assetPartName, std::function<void(std::vector<std::shared_ptr<T>>)> onComplete);
 
 private:
 
@@ -172,9 +176,6 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 		// Assign name for the new asset.
 		userContext->ret->m_name = userContext->assetName;
 
-		// Call complete load on the object.
-		userContext->ret->OnLoadComplete();
-
 		// Cache the asset so it's easily obtainable.
 		userContext->content->assets.insert({ userContext->assetName, userContext->ret });
 
@@ -202,6 +203,198 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 	};
 
 	emscripten_fetch(&attr, fullPath.c_str());
+
+#endif
+}
+
+template <typename T>
+void AFContent::FetchAssets(const std::string& ghubDirectory, const std::string& assetsDirectory, const std::string& assetPartName,
+	std::function<void(std::vector<std::shared_ptr<T>>)> onComplete)
+{
+	if (assetPartName == "")
+	{
+		return;
+	}
+
+	// Batch context.
+	struct BatchCtx {
+		AFContent* self;
+		std::function<void(std::vector<std::shared_ptr<T>>)> onComplete;
+		std::vector<std::shared_ptr<T>> results;
+		size_t remaining = 0;
+	};
+
+	// Functor to call when filenames list get fetched.
+	auto completeFetchAllFileNames = [assetPartName, this, onComplete, assetsDirectory](std::vector<std::string> filenames)
+		{
+			std::vector<std::string> matching;
+			for (const std::string& filename : filenames)
+			{
+				auto it = filename.find(assetPartName);
+				if (it == std::string::npos)
+				{
+					continue;
+				}
+
+				// Add matching filenames after the list fetch.
+				matching.push_back(filename);
+			}
+
+			// Prepare batch context.
+			BatchCtx* bctx = new BatchCtx{ this, onComplete, {}, matching.size() };
+
+			for (const std::string& filename : matching)
+			{
+				// If this specific file already exists in content, don't fetch it.
+				auto it = assets.find(filename);
+				if (it != assets.end())
+				{
+					bctx->results.push_back(std::dynamic_pointer_cast<T>(it->second));
+
+					if (--bctx->remaining == 0)
+					{
+						bctx->onComplete(std::move(bctx->results));
+						return;
+					}
+
+					continue;
+				}
+
+				const std::string fullUrl = assetsDirectory + filename;
+
+				// Per-request context.
+				struct PerReq
+				{
+					BatchCtx* batch;
+					std::string assetName;
+					std::shared_ptr<T> ret;
+				};
+
+				// Prepare request.
+				auto* req = new PerReq
+				{
+					bctx,
+					filename,
+					std::make_shared<T>()
+				};
+
+#ifdef __EMSCRIPTEN__
+				emscripten_fetch_attr_t attr;
+				emscripten_fetch_attr_init(&attr);
+				std::strcpy(attr.requestMethod, "GET");
+				attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+				attr.userData = req;
+
+				attr.onsuccess = [](emscripten_fetch_t* fetch)
+				{
+					// Pointer to single request.
+					auto* req = static_cast<PerReq*>(fetch->userData);
+
+					// Pointer to batch data.
+					auto* batch = req->batch;
+
+					// Deserialize downloaded asset.
+					req->ret->template Deserialize<T>(fetch->data, fetch->numBytes);
+
+					// Assign name for the asset.
+					req->ret->m_name = req->assetName;
+
+					// Add deserialized asset to content.
+					batch->self->assets.insert({ req->assetName, req->ret });
+
+					// Close fetch for this single file.
+					emscripten_fetch_close(fetch);
+
+					// Add deserialized result to the batch.
+					batch->results.push_back(req->ret);
+
+					// Complete full batch?
+					if (--batch->remaining == 0) 
+					{
+						// Call complete.
+						batch->onComplete(std::move(batch->results));
+						delete batch;
+					}
+
+					delete req;
+
+				};
+				attr.onerror = [](emscripten_fetch_t* fetch)
+				{
+					// Pointer to single request.
+					auto* req = static_cast<PerReq*>(fetch->userData);
+
+					// Pointer to batch data.
+					auto* batch = req->batch;
+
+					// Close fetch.
+					emscripten_fetch_close(fetch);
+
+					if (--batch->remaining == 0)
+					{
+						// Call complete.
+						batch->onComplete(std::move(batch->results));
+						delete batch;
+					}
+
+					delete req;
+				};
+
+				// Request single file.
+				emscripten_fetch(&attr, fullUrl.c_str());
+#endif
+			}
+		};
+
+	// User data with function to be called upon fetching all files.
+	struct UserDataFetchAllFileNames
+	{
+		std::function<void(std::vector<std::string>)> onCompleteFetchAllFileNames;
+	};
+	auto* userData = new UserDataFetchAllFileNames{ completeFetchAllFileNames };
+
+#ifdef __EMSCRIPTEN__
+	emscripten_fetch_attr_t attr;
+	emscripten_fetch_attr_init(&attr);
+	strcpy(attr.requestMethod, "GET");
+	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+	attr.userData = userData;
+
+	attr.onsuccess = [](emscripten_fetch_t* fetch)
+	{
+		// Pointer to user data.
+		auto* ctx = static_cast<UserDataFetchAllFileNames*>(fetch->userData);
+
+		std::vector<std::string> names;
+		std::string jsonStr(fetch->data, fetch->numBytes);
+		auto j = nlohmann::json::parse(jsonStr); // Array.
+		names.reserve(j.size());
+
+		// Add every name to the array.
+		for (auto& item : j)
+		{
+			if (item.contains("name") && item["name"].is_string())
+			{
+				names.emplace_back(item["name"].get<std::string>());
+			}
+		}
+
+		emscripten_fetch_close(fetch);
+
+		// Call on complete.
+		ctx->onCompleteFetchAllFileNames(std::move(names));
+		delete ctx;
+	};
+	attr.onerror = [](emscripten_fetch_t* fetch)
+	{
+		// Pointer to user data.
+		auto* ctx = static_cast<UserDataFetchAllFileNames*>(fetch->userData);
+
+		emscripten_fetch_close(fetch);
+		delete ctx;
+	};
+
+	emscripten_fetch(&attr, ghubDirectory.c_str());
 
 #endif
 }

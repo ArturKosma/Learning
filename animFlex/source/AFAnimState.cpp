@@ -127,6 +127,12 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 	const std::vector<std::shared_ptr<AFJoint>>& calculatedJoints = m_graph->GetFinalPose().GetJoints();
 	const std::vector<std::shared_ptr<AFJoint>>& currentJoints = m_ownerMesh->GetMesh()->GetJoints();
 
+	std::unordered_map<std::string, float> curves = m_graph->GetFinalPose().GetCurvesValues();
+	for (const auto& [name, value] : curves)
+	{
+		printf("%s: %f\n", name.c_str(), value);
+	}
+
 	if (calculatedJoints.size() != currentJoints.size())
 	{
 		return;

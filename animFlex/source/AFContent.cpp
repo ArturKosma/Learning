@@ -179,49 +179,6 @@ bool AFContent::Init()
 	// Meshes
 	std::shared_ptr<AFMesh> mannequin = AddAsset<AFMesh>("sk_mannequin", "content/models/sk_mannequin.gltf");
 
-	// Anims.
-	//AddAsset<AFAnimationClip>("startBL", "content/anims/M_Neutral_Run_Start_BL_Rfoot.gltf");
-	//AddAsset<AFAnimationClip>("startF", "content/anims/M_Neutral_Run_Start_F_Lfoot.gltf");
-	//AddAsset<AFAnimationClip>("startBR", "content/anims/M_Neutral_Run_Start_BR_Rfoot.gltf");
-
-	// Curves.
-	for (const auto& file : std::filesystem::directory_iterator("content/curves"))
-	{
-		std::string curveName = "";
-		std::string animName = "";
-		std::string curvePath = "";
-
-		if (!file.is_regular_file() || file.path().extension() != ".json")
-		{
-			continue;
-		}
-
-		size_t length = 0;
-
-		// Root distance curves.
-		curveName = file.path().stem().string();
-		length = curveName.find("_rootDistance");
-		if (length != std::string::npos)
-		{
-			
-		}
-		else
-		{
-			continue;
-		}
-
-		curvePath = file.path().string();
-		animName = curveName.substr(0, length);
-
-		if (curveName.empty() || animName.empty() || curvePath.empty())
-		{
-			continue;
-		}
-
-		// Add the curve.
-		AddAsset<AFFloatCurve>(curveName.c_str(), curvePath.c_str());
-	}
-
 	// -------------------------------------------------
 	// Apply fallback properties post load.
 	// -------------------------------------------------
