@@ -249,6 +249,7 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 	// Save just the filename, without extension nor directory.
 	std::filesystem::path p(sourcePath);
 	const std::string& animName = p.filename().stem().string();
+	std::string curveName = "";
 
 	// We assume to have only 1 animation per file.
 	for (const auto& anim : model->animations)
@@ -357,15 +358,18 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				std::string filename = "";
 				filename += animName;
 				filename += "_rootDistance";
+				curveName = filename;
 				filename += ".json";
 				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
 				std::ofstream outJson(curvePath);
 				outJson << rootDistanceArray.dump(2);
+
+				printf("cooked curve: %s -> %s\n", filename.c_str(), curvePath.c_str());
 			}
 		}
 	}
 
-	return animName;
+	return curveName;
 }
 
 std::vector<std::string> AFCooking::ReadAdditionalArgs(const std::string& additionalArgs)
