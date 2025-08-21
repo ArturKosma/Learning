@@ -41,10 +41,62 @@ float AFFloatCurve::SampleByValue(float value)
 	return t_lo + normVal * (t_hi - t_lo);
 }
 
+float AFFloatCurve::SampleByTime(float time)
+{
+	// High index.
+	size_t hi = std::lower_bound(timings.begin(), timings.end(), time) - timings.begin();
+
+	// Low index.
+	size_t lo = std::max(static_cast<size_t>(0), hi - 1);
+
+	// Clamps.
+	if (hi <= 0)
+	{
+		return values.front();
+	}
+	if (hi >= values.size())
+	{
+		return values.back();
+	}
+
+	// Fetches.
+	const float v_lo = values[lo];
+	const float v_hi = values[hi];
+	const float t_lo = timings[lo];
+	const float t_hi = timings[hi];
+
+	// Find normalized time between t_lo and t_hi.
+	const float normTime = (time - t_lo) / (t_hi - t_lo);
+
+	// Use that normalized time to lerp between two value points v_lo and v_hi.
+	return v_lo + normTime * (v_hi - v_lo);
+}
+
 bool AFFloatCurve::LoadImpl(const char* filepath)
 {
 	std::ifstream f(filepath);
 	nlohmann::json jsonCrv = nlohmann::json::parse(f);
+	if (!jsonCrv.is_array())
+	{
+		return false;
+	}
+
+	// Read the timings & values from json.
+	for (auto& element : jsonCrv)
+	{
+		const float timing = element[0];
+		const float value = element[1];
+
+		timings.push_back(timing);
+		values.push_back(value);
+	}
+
+	return true;
+}
+
+bool AFFloatCurve::DeserializeImpl(const char* stream, size_t len)
+{
+	nlohmann::json jsonCrv = nlohmann::json::parse(stream, stream + len, nullptr, false);
 	if (!jsonCrv.is_array())
 	{
 		return false;

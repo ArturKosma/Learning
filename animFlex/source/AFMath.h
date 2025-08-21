@@ -162,5 +162,67 @@ public:
 
 			outPose.GetJoints()[i]->CalculateLocalTRSMatrix();
 		}
+
+		// Blend curves.
+		std::unordered_map<std::string, float> blended;
+		BlendCurveValues(blended, a.GetCurvesValues(), b.GetCurvesValues(), alpha);
+		outPose.SetCurvesValues(blended);
+	}
+
+	static void BlendCurveValues(std::unordered_map<std::string, float> out, std::unordered_map<std::string, float> a, std::unordered_map<std::string, float> b, float alpha)
+	{
+		// Figure out which curves to blend with each other or 0.
+		std::vector<std::string> a_unique = {};
+		std::vector<std::string> b_unique = {};
+		std::vector<std::string> common = {};
+
+		for (const auto& [name, _] : a)
+		{
+			auto it = b.find(name);
+			if (it != b.end())
+			{
+				auto commonIt = std::find(common.begin(), common.end(), name);
+				if (commonIt == common.end())
+				{
+					common.push_back(name);
+				}
+			}
+			else
+			{
+				a_unique.push_back(name);
+			}
+		}
+		for (const auto& [name, _] : b)
+		{
+			auto it = a.find(name);
+			if (it != a.end())
+			{
+				auto commonIt = std::find(common.begin(), common.end(), name);
+				if (commonIt == common.end())
+				{
+					common.push_back(name);
+				}
+			}
+			else
+			{
+				b_unique.push_back(name);
+			}
+		}
+
+		// Blend curves.
+		for (const std::string& name : common) 
+		{
+			out[name] = glm::mix(a[name], b[name], alpha);
+		}
+
+		// Blend with 0.
+		for (const std::string& name : a_unique)
+		{
+			out[name] = glm::mix(a[name], 0.0f, alpha);
+		}
+		for (const std::string& name : b_unique)
+		{
+			out[name] = glm::mix(0.0f, b[name], alpha);
+		}
 	}
 };

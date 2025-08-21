@@ -57,6 +57,12 @@ protected:
 		return false;
 	}
 
+	virtual bool DeserializeImpl(const char* filepath, size_t len)
+	{
+		printf("deserializeImpl base char* + len\n");
+		return false;
+	}
+
 	virtual bool DeserializeImpl()
 	{
 		printf("deserializeImpl base\n");

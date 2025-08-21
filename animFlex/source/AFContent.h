@@ -134,9 +134,7 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 
 	std::shared_ptr<T> ret = std::make_shared<T>();
 
-	// #hack
-	// We are currently fetching anims only, thus .afanim.
-	const std::string& fullPath = directoryPath + assetName + ".afanim";
+	const std::string& fullPath = directoryPath + assetName;
 
 	auto it = assets.find(assetName);
 	if (it != assets.end())
@@ -169,7 +167,7 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 		FAFFetchContext<T>* userContext = static_cast<FAFFetchContext<T>*>(fetch->userData);
 
 		// Deserialize the data.
-		userContext->ret->template Deserialize<T>(fetch->data);
+		userContext->ret->template Deserialize<T>(fetch->data, fetch->numBytes);
 
 		// Assign name for the new asset.
 		userContext->ret->m_name = userContext->assetName;

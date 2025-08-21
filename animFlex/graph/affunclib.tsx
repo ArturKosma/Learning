@@ -11,6 +11,9 @@ import { createView, getManifestNodes, switchToView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
 import { createRoot } from "react-dom/client";
 import { DropdownControlEnum } from "./afdropdownEnum";
+import { AreaPlugin } from "rete-area-plugin";
+import { ReactArea2D } from "rete-react-plugin";
+import { ContextMenuExtra } from "rete-context-menu-plugin";
 
 export interface AFSerializeInterface {
   serializeLoad(data: any): void;
@@ -342,11 +345,22 @@ function CreateAndAddSocket(
     const nodeMeta: any = (node as any).meta ?? ((node as any).meta = {});
     if (!nodeMeta.valuesMap) nodeMeta.valuesMap = {};
 
-    // Attach full param.meta to the socket.
+    // Parse the meta params.
     const existingMeta = (socket as any).meta ?? {};
-    const paramFlags = param.meta && Array.isArray(param.meta)
-    ? Object.fromEntries(param.meta.map(flag => [flag, true]))
+    const paramFlags = Array.isArray(param.meta)
+    ? Object.fromEntries(
+        (param.meta as string[]).map((flag) => {
+            if (typeof flag === 'string') {
+            const eq = flag.indexOf('=');
+            // Convert "Key=Value" -> ["Key", "Value"], otherwise ["Key", true]
+            return eq >= 0 ? [flag.slice(0, eq), flag.slice(eq + 1)] : [flag, true];
+            }
+            return [String(flag), true];
+        })
+        )
     : {};
+
+    // Add the meta to the socket.
     (socket as any).meta = {
         ...existingMeta,
         ...paramFlags,
@@ -356,31 +370,33 @@ function CreateAndAddSocket(
     // Add default value to the values map.
     nodeMeta.valuesMap[param.var_name] = param.default ?? "";
 
-    // Create a new socket only if it has a direction.
-    if(param.direction != "") {
+    // Auto hide pin and control when no direction specified.
+    if (param.direction === "") {
+        (socket as any).meta.HidePin = true;
+        (socket as any).meta.HideControl = true;
+    }
 
-        // Create socket object casted.
-        const newSocket = param.direction === "Input"
-            ? new ClassicPreset.Input(socket, undefined, false)
-            : new ClassicPreset.Output(socket, undefined, false);
+    // Create socket object casted.
+    const newSocket = param.direction === "Input"
+        ? new ClassicPreset.Input(socket, undefined, false)
+        : new ClassicPreset.Output(socket, undefined, false);
 
-        // Add it a label.
-        newSocket.label = param.label;
+    // Add it a label.
+    newSocket.label = param.label;
 
-        // Add it to the node.
-        if (param.direction === "Input") {
-            node.addInput(uid, newSocket);
+    // Add it to the node.
+    if (param.direction === "Input") {
+        node.addInput(uid, newSocket);
 
-            // Create default control and assign it to the input.
-            const defaultControl = GetDefaultControlPerType(editor, node, param.var_name, socketType, meta, param.default);
-            if (defaultControl) {
-                (newSocket as ClassicPreset.Input).control = defaultControl;
-                (newSocket as ClassicPreset.Input).showControl = true;
-            }
-
-        } else {
-            node.addOutput(uid, newSocket);
+        // Create default control and assign it to the input.
+        const defaultControl = GetDefaultControlPerType(editor, node, param.var_name, socketType, meta, param.default);
+        if (defaultControl) {
+            (newSocket as ClassicPreset.Input).control = defaultControl;
+            (newSocket as ClassicPreset.Input).showControl = true;
         }
+
+    } else {
+        node.addOutput(uid, newSocket);
     }
 }
 
@@ -517,9 +533,8 @@ export async function OnNodeCreated(node: ClassicPreset.Node, context: string) {
     );  
 }
 
+type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
 export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPreset.Node) {
-
-    //console.log("updating: " + node.id);
 
     // Wait until Emscripten runtime is ready.
     if (!Module.calledRun) {
@@ -566,17 +581,21 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
             
             // Try to find the control attached to this input.
             const control = (input as any).control;
-
             valueField = {
                 value: String(control?.value)
             };
         }
 
         // Add input.
-        sockets.push({
+
+        // Don't push undefined values.
+        // Let the the undefined be filled from valueMap.
+        if(valueField.value != "undefined"){
+            sockets.push({
             var_name: (input?.socket as any)?.meta?.var_name,
             valueField,
         });
+        }
     }
 
     // Go through all outputs.
@@ -601,17 +620,21 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
 
             // Try to find the control attached to this output.
             const control = (output as any).control;
-
             valueField = {
                 value: String(control?.value)
             };
         }
 
         // Add output.
-        sockets.push({
+
+        // Don't push undefined values.
+        // Let the the undefined be filled from valueMap.
+        if(valueField.value != "undefined") {
+            sockets.push({
             var_name: (output?.socket as any)?.meta?.var_name,
             valueField,
         });
+        }
     }
 
     // Get value map to add the remaining node parameters that weren't sockets.
@@ -639,6 +662,9 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
 
     // Stringify the JSON.
     const graphString = JSON.stringify(graphJSON);
+
+    //console.log(graphString)
+    editor.meta?.area.update('node', node.id);
 
     // Pass the JSON to C++.
     Module.ccall(

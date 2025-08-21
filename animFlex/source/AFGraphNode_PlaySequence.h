@@ -12,14 +12,14 @@ class AFGraphNode_PlaySequence : public AFGraphNodeCRTP<AFGraphNode_PlaySequence
 public:
 
 	AFPARAM(std::string, playseq_animName, "", "", "Input", "HidePin|Dropdown_Anims");
-	AFPARAM(float, playseq_distanceTraveled, 0.0f, "Distance Traveled", "Input", "");
 	AFPARAM(AFPose, playseq_outputPose, {}, "", "Output", "");
 	AFPARAM(bool, playseq_forceRootLock, true, "Force Root Lock", "", "");
 	AFPARAM(float, playseq_playrate, 1.0f, "Playrate", "", "");
 	AFPARAM(bool, playseq_loop, true, "Loop", "", "");
 	AFPARAM(float, playseq_startTime, 0.0f, "Start Time", "", "");
 	AFPARAM(float, playseq_endTime, -1.0f, "End Time", "", "");
-	AFPARAM(bool, playseq_distanceMatching, false, "Distance Matching", "", "");
+	AFPARAM(bool, playseq_manualTime, false, "Should Use Manual Time", "", "");
+	AFPARAM(float, playseq_manualTimeFloat, 0.0f, "Manual Time", "Input", "HidePin|HideControl|Show=playseq_manualTime");
 
 	void Init() override;
 	void OnUpdate() override;

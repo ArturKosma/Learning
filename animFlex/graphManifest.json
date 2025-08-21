@@ -194,6 +194,51 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_GetCurve",
+            "node_name": "Get Curve",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_curveName",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "Dropdown_Curves"
+                    ]
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_fetchType",
+                    "default": "0",
+                    "label": "Fetch Type",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFCurveFetchType_Enum"
+                    ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_inputValue",
+                    "default": "0.0",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_curveValue",
+                    "default": "0.0",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_GetFloatProperty",
             "node_name": "Get Float Property",
             "meta": [],
@@ -305,14 +350,6 @@
                     ]
                 },
                 {
-                    "var_type": "float",
-                    "var_name": "playseq_distanceTraveled",
-                    "default": "0.0",
-                    "label": "Distance Traveled",
-                    "direction": "Input",
-                    "meta": []
-                },
-                {
                     "var_type": "AFPose",
                     "var_name": "playseq_outputPose",
                     "default": "",
@@ -362,11 +399,23 @@
                 },
                 {
                     "var_type": "bool",
-                    "var_name": "playseq_distanceMatching",
+                    "var_name": "playseq_manualTime",
                     "default": "false",
-                    "label": "Distance Matching",
+                    "label": "Should Use Manual Time",
                     "direction": "",
                     "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "playseq_manualTimeFloat",
+                    "default": "0.0",
+                    "label": "Manual Time",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "HideControl",
+                        "Show=playseq_manualTime"
+                    ]
                 }
             ]
         },
@@ -403,6 +452,13 @@
                 "NonEqual",
                 "Lesser",
                 "LesserEqual"
+            ]
+        },
+        {
+            "enum_name": "EAFCurveFetchType",
+            "values": [
+                "ByTime",
+                "ByValue"
             ]
         },
         {

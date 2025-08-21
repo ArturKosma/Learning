@@ -58,6 +58,11 @@ std::shared_ptr<AFFloatCurve> AFAnimationClip::GetCurve(const std::string& curve
 	return m_curves[curveName];
 }
 
+const std::unordered_map<std::string, std::shared_ptr<AFFloatCurve>>& AFAnimationClip::GetCurves() const
+{
+	return m_curves;
+}
+
 bool AFAnimationClip::LoadImpl(const char* filepath)
 {
 	if (AFGLTFLoader::LoadAnim(filepath, this))
@@ -68,7 +73,7 @@ bool AFAnimationClip::LoadImpl(const char* filepath)
 	return false;
 }
 
-bool AFAnimationClip::DeserializeImpl(const char* stream)
+bool AFAnimationClip::DeserializeImpl(const char* stream, size_t len)
 {
 	// Cast the stream to a byte pointer.
 	char* cursor = const_cast<char*>(stream);

@@ -23,11 +23,12 @@ public:
 
 	void AddCurve(const std::string& curveName, std::shared_ptr<AFFloatCurve> newCurve);
 	std::shared_ptr<AFFloatCurve> GetCurve(const std::string& curveName);
+	const std::unordered_map<std::string, std::shared_ptr<AFFloatCurve>>& GetCurves() const;
 
 protected:
 
 	bool LoadImpl(const char* filepath) override;
-	bool DeserializeImpl(const char* stream) override;
+	bool DeserializeImpl(const char* stream, size_t len) override;
 
 private:
 

@@ -150,7 +150,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 		currentState->Evaluate(deltaTime);
 
 		// Cache final pose.
-		m_finalPose.CopyTransformsFrom(currentState->GetGraph()->GetFinalPose());
+		m_finalPose.CopyPoseFrom(currentState->GetGraph()->GetFinalPose());
 	}
 }
 

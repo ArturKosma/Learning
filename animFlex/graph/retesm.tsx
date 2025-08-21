@@ -148,6 +148,9 @@ export async function createEditorSM(container: HTMLElement, id: string) {
   const connection  = new ConnectionPlugin<Schemes, AreaExtra>();
   const reactRender = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
 
+  (editor as any).meta.area = area;
+
+
     // Context menu item type
     type Item = {
       label: string;

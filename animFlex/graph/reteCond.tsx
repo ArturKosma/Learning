@@ -87,6 +87,10 @@ export async function createEditorCond(container: HTMLElement, id: string) {
   let render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
   const selector = AreaExtensions.selector();
 
+  (editor as any).meta ??= {};
+  (editor as any).meta.area = area;
+
+
 // Context menu
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: (context) => {

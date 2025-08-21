@@ -43,4 +43,6 @@ private:
 
 	std::shared_ptr<AFAnimationClip> m_singleAnim = nullptr;
 	std::shared_ptr<AFAnimGraph> m_graph = nullptr;
+
+	std::unordered_map<std::string, std::shared_ptr<AFFloatCurve>> m_curves = {};
 };

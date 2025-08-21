@@ -9,6 +9,12 @@ void AFGraphNode_PlaySequence::Init()
 
 void AFGraphNode_PlaySequence::OnUpdate()
 {
+	if (playseq_animName.GetValue().empty())
+	{
+		return;
+	}
+
+	// Fetch anim.
 	auto onComplete = [this](std::shared_ptr<AFAnimationClip> fetchedAnim)
 		{
 			m_animClip = fetchedAnim;
@@ -16,8 +22,11 @@ void AFGraphNode_PlaySequence::OnUpdate()
 		};
 
 	AFContent::Get().FetchAsset<AFAnimationClip>("https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/anims/", 
-		playseq_animName.GetValue().c_str(),
+		playseq_animName.GetValue() + ".afanim",
 		onComplete);
+
+	// Fetch curves.
+	// @todo fetch whole directories.
 }
 
 void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
@@ -29,23 +38,17 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 
 	const float endTime = playseq_endTime <= 0.0f ? m_animClip->GetClipEndTime() : playseq_endTime;
 
-	// Increase time & sample anim.
-	if (playseq_loop)
+	if (playseq_manualTime)
 	{
-		m_localTime = std::fmod(m_localTime + (deltaTime * playseq_playrate), endTime - playseq_startTime) + playseq_startTime;
+		// Manual m_localTime.
+		m_localTime = glm::clamp(playseq_manualTimeFloat.GetValue(), playseq_startTime.GetValue(), endTime - playseq_startTime);
 	}
 	else
 	{
-		if (playseq_distanceMatching)
+		// Increase time & sample anim.
+		if (playseq_loop)
 		{
-			std::shared_ptr<AFFloatCurve> rootDistanceCrv = m_animClip->GetCurve(m_animClip->GetClipName() + "_rootDistance");
-			if (!rootDistanceCrv)
-			{
-				return;
-			}
-
-			// Distance matching sets m_localTime.
-			m_localTime = glm::clamp(rootDistanceCrv->SampleByValue(playseq_distanceTraveled), playseq_startTime.GetValue(), endTime - playseq_startTime);
+			m_localTime = std::fmod(m_localTime + (deltaTime * playseq_playrate), endTime - playseq_startTime) + playseq_startTime;
 		}
 		else
 		{

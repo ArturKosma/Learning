@@ -18,7 +18,7 @@ AFPose::AFPose()
 AFPose::AFPose(const AFPose& otherPose)
 {
 	CreateJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
-	CopyTransformsFrom(otherPose);
+	CopyPoseFrom(otherPose);
 }
 
 AFPose& AFPose::operator=(const AFPose& otherPose)
@@ -30,7 +30,7 @@ AFPose& AFPose::operator=(const AFPose& otherPose)
 			CreateJoints(otherPose.GetJoints());
 		}
 
-		CopyTransformsFrom(otherPose);
+		CopyPoseFrom(otherPose);
 	}
 
 	return *this;
@@ -104,9 +104,14 @@ void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool f
 	{
 		joint->CalculateLocalTRSMatrix();
 	}
+
+	for (const auto& [name, curve] : clip->GetCurves())
+	{
+		m_curvesValues[name] = curve->SampleByTime(time);
+	}
 }
 
-void AFPose::CopyTransformsFrom(const AFPose& otherPose)
+void AFPose::CopyPoseFrom(const AFPose& otherPose)
 {
 	assert(m_joints.size() == otherPose.GetJoints().size() && "Incompatible poses");
 
@@ -121,6 +126,18 @@ void AFPose::CopyTransformsFrom(const AFPose& otherPose)
 
 		joints[i]->CalculateLocalTRSMatrix();
 	}
+
+	SetCurvesValues(otherPose.m_curvesValues);
+}
+
+void AFPose::SetCurvesValues(const std::unordered_map<std::string, float>& curvesValues) const
+{
+	m_curvesValues = curvesValues;
+}
+
+const std::unordered_map<std::string, float>& AFPose::GetCurvesValues() const
+{
+	return m_curvesValues;
 }
 
 const std::vector<std::shared_ptr<class AFJoint>>& AFPose::GetJoints() const

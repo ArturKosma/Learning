@@ -14,13 +14,17 @@ public:
 	AFPose& operator=(const AFPose& otherPose);
 
 	void ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool forceRootLock = false);
-	void CopyTransformsFrom(const AFPose& otherPose);
+	void CopyPoseFrom(const AFPose& otherPose);
 
 	const std::vector<std::shared_ptr<class AFJoint>>& GetJoints() const;
 
+	void SetCurvesValues(const std::unordered_map<std::string, float>& curvesValues) const;
+	const std::unordered_map<std::string, float>& GetCurvesValues() const;
+
 private:
 
-	std::vector<std::shared_ptr<class AFJoint>> m_joints;
+	std::vector<std::shared_ptr<class AFJoint>> m_joints = {};
+	mutable std::unordered_map<std::string, float> m_curvesValues = {};
 
 	// Creates new instances of AFJoint and copies properties onto them.
 	void CreateJoints(const std::vector<std::shared_ptr<AFJoint>>& joints);

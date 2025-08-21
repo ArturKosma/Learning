@@ -74,6 +74,10 @@ export async function createEditor(container: HTMLElement, id: string) {
   let render = new ReactPlugin<Schemes, AreaExtra>({ createRoot });
   const selector = AreaExtensions.selector();
 
+  (editor as any).meta ??= {};
+  (editor as any).meta.area = area;
+
+
   // Context menu item type
   type Item = {
     label: string;

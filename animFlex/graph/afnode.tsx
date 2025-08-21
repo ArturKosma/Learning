@@ -309,6 +309,13 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
 
 const inputRef = React.useRef<HTMLInputElement>(null);
 
+// Normalize bool-like strings/numbers to boolean
+const toBool = (v: unknown) => {
+  if (typeof v === 'boolean') return v;
+  const s = String(v ?? '').trim().toLowerCase();
+  return s === 'true' || s === '1';
+};
+
 React.useEffect(() => {
   if (isEditing && inputRef.current) {
     const input = inputRef.current;  
@@ -398,8 +405,20 @@ React.useEffect(() => {
       {inputs.map(
           ([key, input]) => {
 
-            const isHidden = input.socket.meta?.HidePin;
+            let isHidden = input.socket.meta?.HidePin;
+            let isControlHidden = input.socket.meta?.HideControl;
             const socketType = input.socket.meta?.socketType;
+
+            // Show pin condition.
+            const showKey = input.socket.meta?.Show as string | undefined;
+            const valuesMap: Record<string, string> | undefined =
+              (input.socket.meta?.node as any)?.meta?.valuesMap;
+            if (showKey && valuesMap) {
+              const condVal = valuesMap[showKey];
+              const shouldShow = toBool(condVal);
+              isHidden = !shouldShow;
+              isControlHidden = !shouldShow;
+            }
 
             return input ? (
             <div className={`input ${hoveredSocketId === key ? "socketHovered" : ""} ${socketType ?? ''}`} 
@@ -422,7 +441,7 @@ React.useEffect(() => {
               {!isHidden && input?.label && (
                 <span className="input-title">{input.label}</span>
               )}
-              {input?.control && input?.showControl && !input.socket.meta?.isConnected && (
+              {input?.control && input?.showControl && !input.socket.meta?.isConnected && !isControlHidden && (
                 <span className="input-control">
                   <RefControl
                     key={key}
@@ -464,14 +483,28 @@ React.useEffect(() => {
       {/* Outputs */}
       {outputs.map(
           ([key, output]) => {
+
+              let isHidden = output.socket.meta?.HidePin;
               const socketType = output.socket.meta?.socketType;
+
+              // Show pin condition.
+              const showKey = output.socket.meta?.Show as string | undefined;
+              const valuesMap: Record<string, string> | undefined =
+                (output.socket.meta?.node as any)?.meta?.valuesMap;
+              if (showKey && valuesMap) {
+                const condVal = valuesMap[showKey];
+                const shouldShow = toBool(condVal);
+                isHidden = !shouldShow;
+              }
 
               return output ? (
                <div className={`output ${hoveredSocketId === key ? "socketHovered" : ""} ${socketType ?? ''}`} 
                key={key} 
                data-testid={`${key}`}
                >
-               <div
+
+              {!isHidden && (
+                <div
                style={{ display: 'inline-block' }}
                >
                <RefSocket
@@ -483,9 +516,12 @@ React.useEffect(() => {
                 payload={output.socket}
                 />
                 </div>
-              <span className="output-title" data-testid="output-title">
+              )}
+              {!isHidden && (
+                <span className="output-title" data-testid="output-title">
                 {output?.label}
               </span>
+              )}
             </div>
           ) : null
           }

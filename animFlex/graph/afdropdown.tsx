@@ -4,21 +4,28 @@ import { AFSerializeInterface, OnNodeUpdated } from './affunclib';
 import { AreaPlugin } from 'rete-area-plugin';
 import { ReactPlugin } from 'rete-react-plugin';
 
-// Anims dropdown loading.
-const url = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/anims/manifest.json`;
-let animNamesManifest: { name: string }[];
-async function loadManifest(): Promise<{ name: string }[]> {
-  if (!animNamesManifest) {
+// Dropdown loading.
+const animsUrl = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/anims/manifest.json`;
+const curvesUrl = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/manifest.json`;
+
+const manifestCache = new Map<string, { name: string }[]>();
+
+async function loadManifest(url: string): Promise<{ name: string }[]> {
+  if (!manifestCache.has(url)) {
     const res = await fetch(url);
-    animNamesManifest = await res.json();
+    if (!res.ok) throw new Error(`Failed to load manifest: ${url}`);
+    const data = (await res.json()) as { name: string }[];
+    manifestCache.set(url, data);
   }
-  return animNamesManifest;
+  return manifestCache.get(url)!;
 }
+
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
 export class DropdownControl extends ClassicPreset.Control implements AFSerializeInterface {
 
+  type: string
   value: string;
   onChange?: (val: string) => void;
   node: ClassicPreset.Node;
@@ -27,6 +34,7 @@ export class DropdownControl extends ClassicPreset.Control implements AFSerializ
 
   constructor(type: string, editor: NodeEditor<Schemes>, node: ClassicPreset.Node, varName: string) {
     super();
+    this.type = type;
     this.value = '';
     this.node = node;
     this.editor = editor;
@@ -60,13 +68,50 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
 
   const stop = (e: any) => e.stopPropagation();
 
-  useEffect(() => {
-    loadManifest().then(entries => {
-      const names = entries.map(entry => entry.name);
-      setManifestOptions(names);
-      setFilteredOptions(names);
+  const filterNames = (names: string[], inputTokens: string[]) =>
+    names.filter((name) => {
+      const labelTokens = normalize(name);
+      return inputTokens.every((token) => labelTokens.some((lt) => lt.includes(token)));
     });
-  }, []);
+
+  useEffect(() => {
+    const url =
+      props.data.type === 'Dropdown_Anims'
+        ? animsUrl
+        : props.data.type === 'Dropdown_Curves'
+        ? curvesUrl
+        : undefined;
+
+    if (!url) {
+      setManifestOptions([]);
+      setFilteredOptions([]);
+      return;
+    }
+
+    let alive = true;
+    loadManifest(url)
+      .then((entries) => {
+        if (!alive) return;
+        const names = entries.map((e) => e.name);
+        setManifestOptions(names);
+
+        if (searchValue) {
+          const inputTokens = normalize(searchValue);
+          setFilteredOptions(filterNames(names, inputTokens));
+        } else {
+          setFilteredOptions(names);
+        }
+      })
+      .catch(() => {
+        if (!alive) return;
+        setManifestOptions([]);
+        setFilteredOptions([]);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [props.data.type]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -140,7 +185,7 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
         onMouseDown={stop}
         onDoubleClick={stop}
         onContextMenu={stop}
-        placeholder="Choose Anim"
+        placeholder={props.data.type == "Dropdown_Anims" ? "Choose Anim" : "Choose Curve"}
         title={searchValue}
       />
       {isOpen && (
