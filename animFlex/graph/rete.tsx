@@ -233,7 +233,7 @@ export async function createEditor(container: HTMLElement, id: string) {
             }
             }}));
     connection.addPreset(() => new AFFlow(editor));
-    connection.addPreset(() => new ConnectionPresets.single(editor));
+    connection.addPreset(ConnectionPresets.classic.setup());
 
   // Context menu stylized.
   const { Menu, Common, Search, Item, Subitems } = Presets.contextMenu

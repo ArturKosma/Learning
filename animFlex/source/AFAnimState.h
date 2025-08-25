@@ -30,6 +30,8 @@ public:
 	void SetGraph(std::shared_ptr<AFAnimGraph> animGraph);
 	std::shared_ptr<AFAnimGraph> GetGraph() const;
 
+	float GetCurveValue(const std::string& curveName) const;
+
 	void SetEvaluationState(EAFAnimEvaluationState newEvaluationState);
 
 private:
@@ -44,5 +46,5 @@ private:
 	std::shared_ptr<AFAnimationClip> m_singleAnim = nullptr;
 	std::shared_ptr<AFAnimGraph> m_graph = nullptr;
 
-	std::unordered_map<std::string, std::shared_ptr<AFFloatCurve>> m_curves = {};
+	std::unordered_map<std::string, float> m_curves = {};
 };

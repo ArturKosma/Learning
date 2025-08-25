@@ -339,7 +339,6 @@ void AFGame::SetControlMode(EAFControlMode newControlMode)
 		const glm::vec3 lookAtPoint = m_player->GetLocation() + m_player->GetSpringArmComponent()->GetLocalLocation();
 		const glm::vec3 dirToPawn = glm::normalize(lookAtPoint - m_cameraManager->GetActiveCamera()->GetWorldLocation());
 		glm::vec3 newControlRot = AFMath::RotationFromDirection(dirToPawn);
-		newControlRot.y += 180.0f;
 		m_player->GetCharacterMovementComponent()->SetControlRotation(newControlRot);
 
 		AFInput::BindAction("ToggleControlMode", [this]()
@@ -362,14 +361,14 @@ void AFGame::SetControlMode(EAFControlMode newControlMode)
 				const glm::vec3 euler = m_player->GetCharacterMovementComponent()->GetControlRotation();
 				glm::vec3 dir = AFMath::DirectionFromRotation(euler);
 				dir = glm::normalize(glm::vec3(dir.x, 0.0f, dir.z));
-				m_player->GetCharacterMovementComponent()->AddMovementInput(dir * axis * -1.0f);
+				m_player->GetCharacterMovementComponent()->AddMovementInput(dir * axis);
 			});
 		AFInput::BindAxis("RightLeft", [this](float axis)
 			{
 				const glm::vec3 euler = m_player->GetCharacterMovementComponent()->GetControlRotation();
 				glm::vec3 dir = AFMath::DirectionFromRotation(euler);
-				dir = glm::cross(glm::normalize(glm::vec3(dir.x, 0.0f, dir.z)), glm::vec3(0.0f, 1.0f, 0.0f));
-				m_player->GetCharacterMovementComponent()->AddMovementInput(dir * -1.0f * axis);
+				dir = glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), glm::normalize(glm::vec3(dir.x, 0.0f, dir.z)));
+				m_player->GetCharacterMovementComponent()->AddMovementInput(dir * axis * -1.0f);
 			});
 
 		break;

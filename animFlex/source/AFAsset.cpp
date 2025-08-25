@@ -12,10 +12,11 @@ std::string AFAsset::GetName() const
 
 bool AFAsset::LoadExisting()
 {
-	printf("load existing base\n");
-	return false;
+	//printf("load existing base\n");
+	return true;
 }
 
 void AFAsset::OnLoadComplete()
 {
+	//printf("base load complete\n");
 }

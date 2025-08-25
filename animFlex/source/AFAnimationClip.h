@@ -12,6 +12,9 @@ class AFAnimationClip : public AFAsset
 {
 public:
 
+	// Called when animation is added to the content.
+	void OnLoadComplete() override;
+
 	void AddChannel(std::shared_ptr<tinygltf::Model> model, tinygltf::Animation anim, tinygltf::AnimationChannel channel);
 	const std::vector<std::shared_ptr<AFAnimationChannel>>& GetAnimationChannels() const;
 
@@ -26,8 +29,8 @@ public:
 
 protected:
 
-	bool LoadImpl(const char* filepath) override;
-	bool DeserializeImpl(const char* stream, size_t len) override;
+	bool LoadImpl(const char* filepath) override; // Called when added locally.
+	bool DeserializeImpl(const char* stream, size_t len) override; // Called when added via download.
 
 private:
 

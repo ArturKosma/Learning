@@ -1,8 +1,33 @@
 #include "AFFloatCurve.h"
 #include <fstream>
 
+#include "AFContent.h"
 #include "AFMath.h"
 #include "third_party/json.hpp"
+
+void AFFloatCurve::OnLoadComplete()
+{
+	const std::string& curveName = GetName();
+	//printf("loaded curve: %s\n", curveName.c_str());
+
+	std::vector<std::shared_ptr<AFAnimationClip>> anims = AFContent::Get().FindAllAssetsOfType<AFAnimationClip>();
+	for (const std::shared_ptr<AFAnimationClip>& anim : anims)
+	{
+		const std::string& animName = anim->GetName();
+		const size_t idx = curveName.find(animName);
+		if (idx != std::string::npos)
+		{
+			const size_t len = animName.size();
+			const std::string& curveLastName = curveName.substr(len + 1, curveName.size());
+
+			//printf("FOUND ANIM: %s\n", animName.c_str());
+
+			anim->AddCurve(curveLastName, AFContent::Get().FindAsset<AFFloatCurve>(curveName.c_str()));
+
+			return;
+		}
+	}
+}
 
 float AFFloatCurve::SampleByValue(float value)
 {

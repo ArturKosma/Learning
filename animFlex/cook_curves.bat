@@ -10,6 +10,6 @@ REM Go to packager exe.
 cd ../animFlex_cooking
 
 REM Order packaging per type.
-animFlex_cooking.exe animCurve %ANIMS_SOURCE% %ANIMS_EXPORT% -rootDistance
+animFlex_cooking.exe animCurve %ANIMS_SOURCE% %ANIMS_EXPORT% -rootYaw
 
 pause

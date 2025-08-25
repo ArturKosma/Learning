@@ -54,11 +54,16 @@ void AFPose::CreateJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
 
 		m_joints[i] = newJoint;
 	}
+
+	for (const std::string& curveName : AFUtility::GetCurveNames())
+	{
+		m_curvesValues[curveName] = 0.0f;
+	}
 }
 
 void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool forceRootLock)
 {
-	if (!(clip))
+	if (!clip)
 	{
 		return;
 	}
@@ -105,9 +110,17 @@ void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool f
 		joint->CalculateLocalTRSMatrix();
 	}
 
-	for (const auto& [name, curve] : clip->GetCurves())
+	const auto& curves = clip->GetCurves();
+	for (const std::string& curveName : AFUtility::GetCurveNames())
 	{
-		m_curvesValues[name] = curve->SampleByTime(time);
+		auto it = curves.find(curveName);
+		if (it == curves.end())
+		{
+			m_curvesValues[curveName] = 0.0f;
+			continue;
+		}
+
+		m_curvesValues[curveName] = it->second->SampleByTime(time);
 	}
 }
 

@@ -86,7 +86,7 @@ export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: Clas
         if (enumMeta) {
             return new DropdownControlEnum(enumMeta, editor, node, varName);
         }
-        return undefined;
+        return new DropdownControl("", editor, node, varName); // Simple text field.
     }
     default:
       return undefined;
@@ -379,7 +379,7 @@ function CreateAndAddSocket(
     // Create socket object casted.
     const newSocket = param.direction === "Input"
         ? new ClassicPreset.Input(socket, undefined, false)
-        : new ClassicPreset.Output(socket, undefined, false);
+        : new ClassicPreset.Output(socket, undefined, true);
 
     // Add it a label.
     newSocket.label = param.label;

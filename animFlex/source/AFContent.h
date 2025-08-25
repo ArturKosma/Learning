@@ -1,4 +1,5 @@
 #pragma once
+#include <fstream>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -24,7 +25,8 @@ public:
 	std::shared_ptr<T> AddAsset(const char* assetName, Args&&... args);
 
 	// Add existing asset.
-	inline std::shared_ptr<AFAsset> AddAsset(const char* assetName, std::shared_ptr<AFAsset> existingAsset);
+	template<typename T>
+	std::shared_ptr<T> AddAsset(const char* assetName, std::shared_ptr<T> existingAsset);
 
 	// Find existing previously added asset.
 	template<typename T>
@@ -34,15 +36,20 @@ public:
 	template<typename T>
 	std::vector<std::shared_ptr<T>> FindAssets(const char* assetPartName) const;
 
+	// Find all assets of a given type.
+	template <class T>
+	std::vector<std::shared_ptr<T>> FindAllAssetsOfType() const;
+
 	// Download file via jsdelivr.
 	// Insta call onComplete if assetName exists in assets map.
 	template<typename T>
-	void FetchAsset(const std::string& directoryPath, const std::string& assetName, std::function<void(std::shared_ptr<T>)> onComplete);
+	void FetchAsset(const std::string& directoryPath, const std::string& assetName, std::function<void(std::shared_ptr<T>)> onComplete, const std::string& extension = "");
 
 	// Downloads all files from jsdelivr in a given folder,
 	// if those files contain assetPartName.
+	// Requires a local .json manifest which contains all possible names.
 	template<typename T>
-	void FetchAssets(const std::string& ghubDirectory, const std::string& assetsDirectory, const std::string& assetPartName, std::function<void(std::vector<std::shared_ptr<T>>)> onComplete);
+	void FetchAssets(const std::string& jsonManifest, const std::string& assetsDirectory, const std::string& assetPartName, std::function<void(std::vector<std::shared_ptr<T>>)> onComplete, const std::string& extension = "");
 
 private:
 
@@ -91,6 +98,30 @@ std::shared_ptr<T> AFContent::AddAsset(const char* assetName, Args&&... args)
 }
 
 template <typename T>
+std::shared_ptr<T> AFContent::AddAsset(const char* assetName, std::shared_ptr<T> existingAsset)
+{
+	// Enforce unique names.
+	if (std::shared_ptr<T> existing = FindAsset<T>(assetName))
+	{
+		//printf("Add asset warning. Asset with name %s already exists.\n", assetName);
+		return existing;
+	}
+
+	if (existingAsset->LoadExisting())
+	{
+		existingAsset->m_name = assetName;
+		assets.insert({ assetName , existingAsset });
+
+
+		existingAsset->OnLoadComplete();
+
+		return existingAsset;
+	}
+
+	return nullptr;
+}
+
+template <typename T>
 std::shared_ptr<T> AFContent::FindAsset(const char* assetName) const
 {
 	static_assert(std::is_base_of<AFAsset, T>::value, "Found asset must derive from AFAsset.");
@@ -107,7 +138,7 @@ std::shared_ptr<T> AFContent::FindAsset(const char* assetName) const
 template <typename T>
 std::vector<std::shared_ptr<T>> AFContent::FindAssets(const char* assetPartName) const
 {
-	static_assert(std::is_base_of<AFAsset, T>::value, "Found asset must derive from AFAsset.");
+	static_assert(std::is_base_of<AFAsset, T>::value, "T must derive from AFAsset.");
 
 	std::vector<std::shared_ptr<T>> ret;
 
@@ -129,7 +160,26 @@ std::vector<std::shared_ptr<T>> AFContent::FindAssets(const char* assetPartName)
 }
 
 template <typename T>
-void AFContent::FetchAsset(const std::string& directoryPath, const std::string& assetName, std::function<void(std::shared_ptr<T>)> onComplete)
+std::vector<std::shared_ptr<T>> AFContent::FindAllAssetsOfType() const
+{
+	static_assert(std::is_base_of_v<AFAsset, T>, "T must derive from AFAsset.");
+
+	std::vector<std::shared_ptr<T>> ret;
+
+	for (const auto& [name, ptr] : assets)
+	{
+		std::shared_ptr<T> casted = std::dynamic_pointer_cast<T>(ptr);
+		if (casted)
+		{
+			ret.push_back(casted);
+		}
+	}
+
+	return ret;
+}
+
+template <typename T>
+void AFContent::FetchAsset(const std::string& directoryPath, const std::string& assetName, std::function<void(std::shared_ptr<T>)> onComplete, const std::string& extension)
 {
 	if (assetName == "")
 	{
@@ -138,7 +188,7 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 
 	std::shared_ptr<T> ret = std::make_shared<T>();
 
-	const std::string& fullPath = directoryPath + assetName;
+	const std::string& fullPath = directoryPath + assetName + extension;
 
 	auto it = assets.find(assetName);
 	if (it != assets.end())
@@ -170,14 +220,26 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 		// Get passed user context.
 		FAFFetchContext<T>* userContext = static_cast<FAFFetchContext<T>*>(fetch->userData);
 
+		// Make sure the asset wasn't added to content in the meantime.
+		std::shared_ptr<T> existing = userContext->content->template FindAsset<T>(userContext->assetName.c_str());
+		if (existing)
+		{
+			// Free fetch memory.
+			emscripten_fetch_close(fetch);
+
+			// Call complete.
+			userContext->onComplete(existing);
+
+			delete userContext;
+
+			return;
+		}
+
 		// Deserialize the data.
 		userContext->ret->template Deserialize<T>(fetch->data, fetch->numBytes);
 
-		// Assign name for the new asset.
-		userContext->ret->m_name = userContext->assetName;
-
-		// Cache the asset so it's easily obtainable.
-		userContext->content->assets.insert({ userContext->assetName, userContext->ret });
+		// Add new asset to the content.
+		userContext->content->AddAsset(userContext->assetName.c_str(), userContext->ret);
 
 		// Free fetch memory.
 		emscripten_fetch_close(fetch);
@@ -197,7 +259,7 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 		emscripten_fetch_close(fetch);
 
 		// Call complete.
-		userContext->onComplete(userContext->ret);
+		userContext->onComplete(nullptr);
 
 		delete userContext;
 	};
@@ -208,8 +270,8 @@ void AFContent::FetchAsset(const std::string& directoryPath, const std::string& 
 }
 
 template <typename T>
-void AFContent::FetchAssets(const std::string& ghubDirectory, const std::string& assetsDirectory, const std::string& assetPartName,
-	std::function<void(std::vector<std::shared_ptr<T>>)> onComplete)
+void AFContent::FetchAssets(const std::string& jsonManifest, const std::string& assetsDirectory, const std::string& assetPartName,
+	std::function<void(std::vector<std::shared_ptr<T>>)> onComplete, const std::string& extension)
 {
 	if (assetPartName == "")
 	{
@@ -225,7 +287,7 @@ void AFContent::FetchAssets(const std::string& ghubDirectory, const std::string&
 	};
 
 	// Functor to call when filenames list get fetched.
-	auto completeFetchAllFileNames = [assetPartName, this, onComplete, assetsDirectory](std::vector<std::string> filenames)
+	auto fetchAllFileNames = [assetPartName, this, onComplete, assetsDirectory, extension](std::vector<std::string> filenames)
 		{
 			std::vector<std::string> matching;
 			for (const std::string& filename : filenames)
@@ -242,6 +304,12 @@ void AFContent::FetchAssets(const std::string& ghubDirectory, const std::string&
 
 			// Prepare batch context.
 			BatchCtx* bctx = new BatchCtx{ this, onComplete, {}, matching.size() };
+			if (bctx->remaining == 0) 
+			{
+				bctx->onComplete(std::move(bctx->results));
+				delete bctx;
+				return;
+			}
 
 			for (const std::string& filename : matching)
 			{
@@ -260,7 +328,7 @@ void AFContent::FetchAssets(const std::string& ghubDirectory, const std::string&
 					continue;
 				}
 
-				const std::string fullUrl = assetsDirectory + filename;
+				const std::string fullUrl = assetsDirectory + filename + extension;
 
 				// Per-request context.
 				struct PerReq
@@ -293,14 +361,33 @@ void AFContent::FetchAssets(const std::string& ghubDirectory, const std::string&
 					// Pointer to batch data.
 					auto* batch = req->batch;
 
+					// Make sure the asset wasn't added to content in the meantime.
+					std::shared_ptr<T> existing = batch->self->template FindAsset<T>(req->assetName.c_str());
+					if (existing)
+					{
+
+						batch->results.push_back(existing);
+
+						// Close fetch for this single file.
+						emscripten_fetch_close(fetch);
+
+						// Complete full batch?
+						if (--batch->remaining == 0)
+						{
+							// Call complete.
+							batch->onComplete(std::move(batch->results));
+							delete batch;
+						}
+
+						delete req;
+						return;
+					}
+
 					// Deserialize downloaded asset.
 					req->ret->template Deserialize<T>(fetch->data, fetch->numBytes);
 
-					// Assign name for the asset.
-					req->ret->m_name = req->assetName;
-
 					// Add deserialized asset to content.
-					batch->self->assets.insert({ req->assetName, req->ret });
+					batch->self->AddAsset(req->assetName.c_str(), req->ret);
 
 					// Close fetch for this single file.
 					emscripten_fetch_close(fetch);
@@ -346,73 +433,20 @@ void AFContent::FetchAssets(const std::string& ghubDirectory, const std::string&
 			}
 		};
 
-	// User data with function to be called upon fetching all files.
-	struct UserDataFetchAllFileNames
+	// Open json manifest.
+	std::vector<std::string> names;
+	std::ifstream in(jsonManifest);
+	nlohmann::json data = nlohmann::json::parse(in); // Array.
+	names.reserve(data.size());
+
+	// Add every name to the array.
+	for (auto& item : data)
 	{
-		std::function<void(std::vector<std::string>)> onCompleteFetchAllFileNames;
-	};
-	auto* userData = new UserDataFetchAllFileNames{ completeFetchAllFileNames };
-
-#ifdef __EMSCRIPTEN__
-	emscripten_fetch_attr_t attr;
-	emscripten_fetch_attr_init(&attr);
-	strcpy(attr.requestMethod, "GET");
-	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
-	attr.userData = userData;
-
-	attr.onsuccess = [](emscripten_fetch_t* fetch)
-	{
-		// Pointer to user data.
-		auto* ctx = static_cast<UserDataFetchAllFileNames*>(fetch->userData);
-
-		std::vector<std::string> names;
-		std::string jsonStr(fetch->data, fetch->numBytes);
-		auto j = nlohmann::json::parse(jsonStr); // Array.
-		names.reserve(j.size());
-
-		// Add every name to the array.
-		for (auto& item : j)
+		if (item.contains("name") && item["name"].is_string())
 		{
-			if (item.contains("name") && item["name"].is_string())
-			{
-				names.emplace_back(item["name"].get<std::string>());
-			}
+			names.emplace_back(item["name"].get<std::string>());
 		}
-
-		emscripten_fetch_close(fetch);
-
-		// Call on complete.
-		ctx->onCompleteFetchAllFileNames(std::move(names));
-		delete ctx;
-	};
-	attr.onerror = [](emscripten_fetch_t* fetch)
-	{
-		// Pointer to user data.
-		auto* ctx = static_cast<UserDataFetchAllFileNames*>(fetch->userData);
-
-		emscripten_fetch_close(fetch);
-		delete ctx;
-	};
-
-	emscripten_fetch(&attr, ghubDirectory.c_str());
-
-#endif
-}
-
-std::shared_ptr<AFAsset> AFContent::AddAsset(const char* assetName, std::shared_ptr<AFAsset> existingAsset)
-{
-	// Enforce unique names.
-	if (std::shared_ptr<AFAsset> existing = FindAsset<AFAsset>(assetName))
-	{
-		printf("Add asset warning. Asset with name %s already exists.\n", assetName);
-		return existing;
 	}
 
-	if (existingAsset->LoadExisting())
-	{
-		assets.insert({ assetName , existingAsset });
-		return existingAsset;
-	}
-
-	return nullptr;
+	fetchAllFileNames(names);
 }

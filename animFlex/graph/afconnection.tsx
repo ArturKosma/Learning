@@ -23,6 +23,7 @@ const Path = styled.path<{ highlighted: boolean, socketType: string }>`
 
     if(p.socketType === "float") return "rgba(134, 249, 52, 0.8)";
     if(p.socketType === "bool") return "rgba(255, 0, 0, 0.8)";
+    if(p.socketType === "string") return "rgba(147, 0, 139, 0.8)";
 
     return "rgba(190, 190, 190, 0.8)";
   }};

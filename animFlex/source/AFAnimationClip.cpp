@@ -6,6 +6,28 @@
 #include "AFContent.h"
 #include "zstd.h"
 
+void AFAnimationClip::OnLoadComplete()
+{
+	const std::string& animName = GetName();
+	//printf("loaded anim: %s\n", animName.c_str());
+
+	std::vector<std::shared_ptr<AFFloatCurve>> curves = AFContent::Get().FindAllAssetsOfType<AFFloatCurve>();
+	for (const std::shared_ptr<AFFloatCurve>& curve : curves)
+	{
+		const std::string& curveName = curve->GetName();
+		const size_t idx = curveName.find(animName);
+		if (idx != std::string::npos)
+		{
+			const size_t len = animName.size();
+			const std::string& curveLastName = curveName.substr(len + 1, curveName.size());
+
+			//printf("FOUND CURVE: %s\n", curveName.c_str());
+
+			AddCurve(curveLastName, AFContent::Get().FindAsset<AFFloatCurve>(curveName.c_str()));
+		}
+	}
+}
+
 void AFAnimationClip::AddChannel(std::shared_ptr<tinygltf::Model> model, tinygltf::Animation anim,
                                  tinygltf::AnimationChannel channel)
 {

@@ -29,6 +29,10 @@ public:
 
 protected:
 
+	virtual bool LoadImpl()
+	{
+		return true;
+	}
 	virtual bool LoadImpl(const char* filepath)
 	{
 		printf("loadimpl base char*\n");

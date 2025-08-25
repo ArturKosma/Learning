@@ -14,10 +14,11 @@ class AFGraphNode_GetCurve : public AFGraphNodeCRTP<AFGraphNode_GetCurve>
 
 public:
 
-	AFPARAM(std::string, m_curveName, "", "", "Input", "HidePin|Dropdown_Curves");
+	AFPARAM(std::string, m_curveName, "", "", "Input", "HidePin|Dropdown_Curves||Show=m_showPin");
 	AFPARAM(int, m_fetchType, 0, "Fetch Type", "Input", "HidePin|EAFCurveFetchType_Enum");
 	AFPARAM(float, m_inputValue, 0.0f, "", "Input", "");
 	AFPARAM(float, m_curveValue, 0.0f, "Output", "Output", "");
+	AFPARAM(bool, m_showPin, false, "Show Pin", "", "");
 
 	void OnUpdate() override;
 	void Evaluate(float deltaTime) override;

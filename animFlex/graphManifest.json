@@ -152,6 +152,227 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_ChooseByAngle",
+            "node_name": "Choose By Angle",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_m180",
+                    "default": "",
+                    "label": "-180",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_m135",
+                    "default": "",
+                    "label": "-135",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_m90",
+                    "default": "",
+                    "label": "-90",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_m45",
+                    "default": "",
+                    "label": "-45",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_0",
+                    "default": "",
+                    "label": "0",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_45",
+                    "default": "",
+                    "label": "45",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_90",
+                    "default": "",
+                    "label": "90",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_135",
+                    "default": "",
+                    "label": "135",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_180",
+                    "default": "",
+                    "label": "180",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "chooseByAngle_angle",
+                    "default": "0.0",
+                    "label": "Angle",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_ChooseByAngle90",
+            "node_name": "Choose By Angle 90",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_m180",
+                    "default": "",
+                    "label": "-180",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_m90",
+                    "default": "",
+                    "label": "-90",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_0",
+                    "default": "",
+                    "label": "0",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_90",
+                    "default": "",
+                    "label": "90",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_180",
+                    "default": "",
+                    "label": "180",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "chooseByAngle_angle",
+                    "default": "0.0",
+                    "label": "Angle",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "chooseByAngle_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_ChooseStringByAngle90",
+            "node_name": "Choose String By Angle 90",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "std::string",
+                    "var_name": "chooseByAngle_m180",
+                    "default": "",
+                    "label": "-180",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "chooseByAngle_m90",
+                    "default": "",
+                    "label": "-90",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "chooseByAngle_0",
+                    "default": "",
+                    "label": "0",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "chooseByAngle_90",
+                    "default": "",
+                    "label": "90",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "chooseByAngle_180",
+                    "default": "",
+                    "label": "180",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "chooseByAngle_angle",
+                    "default": "0.0",
+                    "label": "Angle",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "chooseByAngle_outputString",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_Compare",
             "node_name": "Compare",
             "meta": [],
@@ -194,6 +415,34 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_GetAnimName",
+            "node_name": "Get Anim Name",
+            "meta": [
+                "Compact"
+            ],
+            "params": [
+                {
+                    "var_type": "std::string",
+                    "var_name": "Input",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "Dropdown_Anims"
+                    ]
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "Output",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_GetCurve",
             "node_name": "Get Curve",
             "meta": [],
@@ -206,7 +455,9 @@
                     "direction": "Input",
                     "meta": [
                         "HidePin",
-                        "Dropdown_Curves"
+                        "Dropdown_Curves",
+                        "",
+                        "Show=m_showPin"
                     ]
                 },
                 {
@@ -235,6 +486,42 @@
                     "label": "Output",
                     "direction": "Output",
                     "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_showPin",
+                    "default": "false",
+                    "label": "Show Pin",
+                    "direction": "",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_GetCurveName",
+            "node_name": "Get Curve Name",
+            "meta": [
+                "Compact"
+            ],
+            "params": [
+                {
+                    "var_type": "std::string",
+                    "var_name": "Input",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "Dropdown_Curves"
+                    ]
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "Output",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
                 }
             ]
         },
@@ -260,6 +547,14 @@
                     "default": "0.0",
                     "label": "Output",
                     "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_once",
+                    "default": "false",
+                    "label": "Evaluate Once When Relevant",
+                    "direction": "",
                     "meta": []
                 }
             ]
@@ -334,6 +629,33 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_MakeString",
+            "node_name": "Make String",
+            "meta": [
+                "Compact"
+            ],
+            "params": [
+                {
+                    "var_type": "std::string",
+                    "var_name": "Input",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin"
+                    ]
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "Output",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_PlaySequence",
             "node_name": "Play Sequence",
             "meta": [],
@@ -346,7 +668,8 @@
                     "direction": "Input",
                     "meta": [
                         "HidePin",
-                        "Dropdown_Anims"
+                        "Dropdown_Anims",
+                        "Show=playseq_showPin"
                     ]
                 },
                 {
@@ -416,6 +739,14 @@
                         "HideControl",
                         "Show=playseq_manualTime"
                     ]
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "playseq_showPin",
+                    "default": "false",
+                    "label": "Show Pin",
+                    "direction": "",
+                    "meta": []
                 }
             ]
         },
@@ -465,10 +796,10 @@
             "enum_name": "EAFFloatProperties",
             "values": [
                 "VelocityLength",
-                "DeltaAngle",
                 "UserInputLength",
                 "RelevantAnimTimeRemain",
-                "DistanceTraveled"
+                "DistanceTraveled",
+                "AngleTowardsMovementInput"
             ]
         }
     ]

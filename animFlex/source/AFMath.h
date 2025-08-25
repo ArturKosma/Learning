@@ -9,6 +9,7 @@
 
 #include "AFPose.h"
 #include "AFJoint.h"
+#include "AFUtility.h"
 
 class AFMath
 {
@@ -94,7 +95,7 @@ public:
 
 	static glm::vec3 RotationFromDirection(const glm::vec3& dir)
 	{
-		const float yaw = glm::degrees(atan2(dir.x, -dir.z)); // Yaw around Y.
+		const float yaw = -glm::degrees(atan2(dir.x, dir.z)); // Yaw around Y.
 		const float pitch = glm::degrees(asin(dir.y)); // Pitch up/down.
 
 		return glm::vec3(pitch, yaw, 0.0f);
@@ -103,11 +104,11 @@ public:
 	static glm::vec3 DirectionFromRotation(const glm::vec3& rot)
 	{
 		const float pitch = glm::radians(rot.x);
-		const float yaw = glm::radians(rot.y);
+		const float yaw = -glm::radians(rot.y);
 
 		const float x = sin(yaw) * cos(pitch);
 		const float y = sin(pitch);
-		const float z = -cos(yaw) * cos(pitch);
+		const float z = cos(yaw) * cos(pitch);
 
 		return glm::normalize(glm::vec3(x, y, z));
 	}
@@ -166,63 +167,58 @@ public:
 		// Blend curves.
 		std::unordered_map<std::string, float> blended;
 		BlendCurveValues(blended, a.GetCurvesValues(), b.GetCurvesValues(), alpha);
+
 		outPose.SetCurvesValues(blended);
 	}
 
-	static void BlendCurveValues(std::unordered_map<std::string, float> out, std::unordered_map<std::string, float> a, std::unordered_map<std::string, float> b, float alpha)
+	static void BlendCurveValues(std::unordered_map<std::string, float>& out, std::unordered_map<std::string, float> a, std::unordered_map<std::string, float> b, float alpha)
 	{
-		// Figure out which curves to blend with each other or 0.
-		std::vector<std::string> a_unique = {};
-		std::vector<std::string> b_unique = {};
-		std::vector<std::string> common = {};
-
-		for (const auto& [name, _] : a)
-		{
-			auto it = b.find(name);
-			if (it != b.end())
-			{
-				auto commonIt = std::find(common.begin(), common.end(), name);
-				if (commonIt == common.end())
-				{
-					common.push_back(name);
-				}
-			}
-			else
-			{
-				a_unique.push_back(name);
-			}
-		}
-		for (const auto& [name, _] : b)
-		{
-			auto it = a.find(name);
-			if (it != a.end())
-			{
-				auto commonIt = std::find(common.begin(), common.end(), name);
-				if (commonIt == common.end())
-				{
-					common.push_back(name);
-				}
-			}
-			else
-			{
-				b_unique.push_back(name);
-			}
-		}
-
 		// Blend curves.
-		for (const std::string& name : common) 
+		for (const std::string& name : AFUtility::GetCurveNames()) 
 		{
 			out[name] = glm::mix(a[name], b[name], alpha);
 		}
+	}
 
-		// Blend with 0.
-		for (const std::string& name : a_unique)
+	template<typename T>
+	static size_t NearestIndex(const std::vector<T>& array, const T& value)
+	{
+		if (array.empty())
 		{
-			out[name] = glm::mix(a[name], 0.0f, alpha);
+			return 0;
 		}
-		for (const std::string& name : b_unique)
+
+		// High index.
+		size_t hi = std::lower_bound(array.begin(), array.end(), value) - array.begin();
+
+		// Clamps.
+		if (hi <= 0)
 		{
-			out[name] = glm::mix(0.0f, b[name], alpha);
+			return 0;
 		}
+		else if (hi >= array.size())
+		{
+			return array.size() - 1;
+		}
+
+		// Low index.
+		size_t lo = std::max(static_cast<size_t>(0), hi - 1);
+
+		// Choose closer.
+		const T distHi = std::abs(value - array[hi]);
+		const T distLo = std::abs(value - array[lo]);
+
+		return (distHi < distLo) ? hi : lo;
+	}
+
+	static float SignedAngleBetweenVectors(const glm::vec3& vec1, const glm::vec3& vec2, const glm::vec3& up)
+	{
+		const float dot = glm::dot(vec1, vec2);
+		//printf("%f\n", dot);
+		const float crossSign = glm::dot(glm::cross(vec1, vec2), glm::normalize(up));
+
+		const float rad = glm::atan(crossSign, dot);
+
+		return glm::degrees(rad);
 	}
 };

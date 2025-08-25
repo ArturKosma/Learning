@@ -20,11 +20,9 @@ async function loadManifest(url: string): Promise<{ name: string }[]> {
   return manifestCache.get(url)!;
 }
 
-
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
 
 export class DropdownControl extends ClassicPreset.Control implements AFSerializeInterface {
-
   type: string
   value: string;
   onChange?: (val: string) => void;
@@ -68,25 +66,32 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
 
   const stop = (e: any) => e.stopPropagation();
 
+  const normalize = (str: string) =>
+    str.toLowerCase().replace(/[\s_\-]+/g, ' ').split(' ').filter(Boolean);
+
   const filterNames = (names: string[], inputTokens: string[]) =>
     names.filter((name) => {
       const labelTokens = normalize(name);
       return inputTokens.every((token) => labelTokens.some((lt) => lt.includes(token)));
     });
 
+  // Enable dropdown only for known manifest-backed types
+  const dropdownEnabled =
+    props.data.type === 'Dropdown_Anims' || props.data.type === 'Dropdown_Curves';
+
   useEffect(() => {
+    if (!dropdownEnabled) {
+      // No manifest => behave like a simple text field
+      setManifestOptions([]);
+      setFilteredOptions([]);
+      setIsOpen(false);
+      return;
+    }
+
     const url =
       props.data.type === 'Dropdown_Anims'
         ? animsUrl
-        : props.data.type === 'Dropdown_Curves'
-        ? curvesUrl
-        : undefined;
-
-    if (!url) {
-      setManifestOptions([]);
-      setFilteredOptions([]);
-      return;
-    }
+        : curvesUrl;
 
     let alive = true;
     loadManifest(url)
@@ -111,7 +116,7 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
     return () => {
       alive = false;
     };
-  }, [props.data.type]);
+  }, [props.data.type, dropdownEnabled]); // minimal change: keep deps tight
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -123,11 +128,21 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const normalize = (str: string) =>
-    str.toLowerCase().replace(/[\s_\-]+/g, ' ').split(' ').filter(Boolean);
+  // --- commit only after typing finished & dedupe ---
+  const lastCommittedRef = useRef<string>(props.data.value || '');
+  const suppressBlurCommitRef = useRef(false);
+
+  const commitValue = (val: string) => {
+    if (lastCommittedRef.current !== val) {
+      props.data.setValue(val);
+      lastCommittedRef.current = val;
+    }
+  };
+  // --------------------------------------------------
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
+    if (!dropdownEnabled) return; // simple text field mode
     const inputTokens = normalize(value);
     const matches = manifestOptions.filter(name => {
       const labelTokens = normalize(name);
@@ -139,28 +154,28 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
   };
 
   const handleSelect = (value: string) => {
+    suppressBlurCommitRef.current = true; // skip imminent blur commit
     setSearchValue(value);
     setIsOpen(false);
+    commitValue(value); // single update
     inputRef.current?.blur();
-    props.data.setValue(value);
+    setTimeout(() => {
+      suppressBlurCommitRef.current = false; // re-enable blur commits next tick
+    }, 0);
   };
-
-    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-        e.target.select();
-        setIsOpen(true);
-    };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      inputRef.current?.blur();
+      inputRef.current?.blur(); // onBlur will commit (if not suppressed)
     }
     e.stopPropagation();
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleSearch(e.target.value);
-  }
+    // intentionally NOT committing here anymore
+  };
 
   return (
     <div
@@ -179,16 +194,25 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
         className="custom-dropdown-input"
         value={searchValue}
         onChange={handleChange}
-        onFocus={(e) => { e.target.select(); setIsOpen(true); }}
-        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); inputRef.current?.blur(); } e.stopPropagation(); }}
+        onFocus={(e) => { e.target.select(); if (dropdownEnabled) setIsOpen(true); }}
+        onKeyDown={handleKeyDown}
+        onBlur={() => {
+          if (!suppressBlurCommitRef.current) {
+            commitValue(searchValue); // commit after typing finished
+          }
+        }}
         onPointerDown={stop}
         onMouseDown={stop}
         onDoubleClick={stop}
         onContextMenu={stop}
-        placeholder={props.data.type == "Dropdown_Anims" ? "Choose Anim" : "Choose Curve"}
+        placeholder={
+          dropdownEnabled
+            ? (props.data.type === "Dropdown_Anims" ? "Choose Anim" : "Choose Curve")
+            : "Type value…"
+        }
         title={searchValue}
       />
-      {isOpen && (
+      {dropdownEnabled && isOpen && (
         <ul className="custom-dropdown-list"
             onPointerDownCapture={stop}
             onWheelCapture={stop}
@@ -221,14 +245,8 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
           outline: none;
           box-sizing: border-box;
         }
-
-        .custom-dropdown-input:hover {
-          border: 1px solid rgb(67, 150, 238);
-        }
-
-        .custom-dropdown-input:focus {
-          border: 1px solid rgb(67, 150, 238);
-        }
+        .custom-dropdown-input:hover { border: 1px solid rgb(67, 150, 238); }
+        .custom-dropdown-input:focus { border: 1px solid rgb(67, 150, 238); }
 
         .custom-dropdown-container {
           position: relative;
@@ -238,21 +256,21 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
         }
 
         .custom-dropdown-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: #1f1f1f;
-            border: 1px solid #434343;
-            max-height: 200px;
-            overflow-y: auto;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            z-index: 1000;
-            border-radius: 4px;
-            white-space: nowrap;
-            width: max-content;
-            min-width: 100%;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background: #1f1f1f;
+          border: 1px solid #434343;
+          max-height: 200px;
+          overflow-y: auto;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          z-index: 1000;
+          border-radius: 4px;
+          white-space: nowrap;
+          width: max-content;
+          min-width: 100%;
         }
 
         .custom-dropdown-item {
@@ -269,34 +287,17 @@ export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<
           text-overflow: ellipsis;
         }
 
-        .custom-dropdown-item:hover {
-          background-color: #2a2a2a;
-        }
+        .custom-dropdown-item:hover { background-color: #2a2a2a; }
 
-        .custom-dropdown-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .custom-dropdown-list::-webkit-scrollbar-track {
-            background: #1f1f1f;
-            border-radius: 4px;
-        }
-
+        .custom-dropdown-list::-webkit-scrollbar { width: 8px; }
+        .custom-dropdown-list::-webkit-scrollbar-track { background: #1f1f1f; border-radius: 4px; }
         .custom-dropdown-list::-webkit-scrollbar-thumb {
-            background-color: #444;
-            border-radius: 4px;
-            border: 2px solid #1f1f1f;
+          background-color: #444; border-radius: 4px; border: 2px solid #1f1f1f;
         }
-
-        .custom-dropdown-list::-webkit-scrollbar-thumb:hover {
-            background-color: #666;
-        }
+        .custom-dropdown-list::-webkit-scrollbar-thumb:hover { background-color: #666; }
 
         /* Firefox */
-        .custom-dropdown-list {
-            scrollbar-width: thin;
-            scrollbar-color: #444 #1f1f1f;
-        }
+        .custom-dropdown-list { scrollbar-width: thin; scrollbar-color: #444 #1f1f1f; }
       `}</style>
     </div>
   );

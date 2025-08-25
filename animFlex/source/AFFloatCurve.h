@@ -8,6 +8,10 @@ class AFFloatCurve : public AFAsset
 {
 public:
 
+	// Called when curve is added to the content.
+	// Should be unique.
+	void OnLoadComplete() override;
+
 	// Takes in a value and tries to return time for that value.
 	float SampleByValue(float value);
 
@@ -16,8 +20,8 @@ public:
 
 protected:
 
-	bool LoadImpl(const char* filepath) override;
-	bool DeserializeImpl(const char* stream, size_t len) override;
+	bool LoadImpl(const char* filepath) override; // Added locally.
+	bool DeserializeImpl(const char* stream, size_t len) override; // Added via download.
 
 	std::vector<float> timings = {};
 	std::vector<float> values = {};

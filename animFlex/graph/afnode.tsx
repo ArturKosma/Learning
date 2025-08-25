@@ -417,7 +417,6 @@ React.useEffect(() => {
               const condVal = valuesMap[showKey];
               const shouldShow = toBool(condVal);
               isHidden = !shouldShow;
-              isControlHidden = !shouldShow;
             }
 
             return input ? (

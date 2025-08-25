@@ -121,6 +121,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 		AFEvaluator::Get().AddLastActiveState(fromEntry);
 		AFEvaluator::Get().AddLastActiveState(toEntry);
 
+		// Evaluate both states.
 		from->Evaluate(deltaTime);
 		to->Evaluate(deltaTime);
 

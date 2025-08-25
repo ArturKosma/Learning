@@ -3,7 +3,14 @@
 
 void AFGraphNode_GetCurve::OnUpdate()
 {
-	if (m_curveName.GetValue().empty())
+	const std::string& curveName = m_curveName.GetValue();
+
+	if (curveName.empty())
+	{
+		return;
+	}
+
+	if (m_curve && m_curve->GetName() == curveName)
 	{
 		return;
 	}
@@ -14,12 +21,14 @@ void AFGraphNode_GetCurve::OnUpdate()
 		};
 
 	AFContent::Get().FetchAsset<AFFloatCurve>("https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/",
-		m_curveName.GetValue() + ".json",
-		onComplete);
+		m_curveName.GetValue(),
+		onComplete, ".json");
 }
 
 void AFGraphNode_GetCurve::Evaluate(float deltaTime)
 {
+	OnUpdate();
+
 	if (!m_curve)
 	{
 		return;

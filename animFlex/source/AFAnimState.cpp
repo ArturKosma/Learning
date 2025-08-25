@@ -53,6 +53,17 @@ std::shared_ptr<AFAnimGraph> AFAnimState::GetGraph() const
 	return m_graph;
 }
 
+float AFAnimState::GetCurveValue(const std::string& curveName) const
+{
+	auto it = m_curves.find(curveName);
+	if (it != m_curves.end())
+	{
+		return it->second;
+	}
+
+	return 0.0f;
+}
+
 void AFAnimState::SetEvaluationState(EAFAnimEvaluationState newEvaluationState)
 {
 	m_evaluationState = newEvaluationState;
@@ -127,11 +138,14 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 	const std::vector<std::shared_ptr<AFJoint>>& calculatedJoints = m_graph->GetFinalPose().GetJoints();
 	const std::vector<std::shared_ptr<AFJoint>>& currentJoints = m_ownerMesh->GetMesh()->GetJoints();
 
+	// Copy curves without resetting.
 	std::unordered_map<std::string, float> curves = m_graph->GetFinalPose().GetCurvesValues();
 	for (const auto& [name, value] : curves)
 	{
-		printf("%s: %f\n", name.c_str(), value);
+		m_curves[name] = value;
 	}
+
+	printf("%f\n", GetCurveValue("rootYaw"));
 
 	if (calculatedJoints.size() != currentJoints.size())
 	{
