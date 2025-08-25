@@ -5,6 +5,8 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <detail/type_quat.hpp>
+#include <gtc/quaternion.hpp>
 
 #include "json.hpp"
 #include "zstd.h"
@@ -220,6 +222,11 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 			requestedMotionType = "rootDistance";
 			requestedBoneIdx = 0;
 		}
+		if (arg == "rootYaw")
+		{
+			requestedMotionType = "rootYaw";
+			requestedBoneIdx = 0;
+		}
 	}
 
 	// Load via TinyGLTF.
@@ -365,6 +372,37 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				outJson << rootDistanceArray.dump(2);
 
 				printf("cooked curve: %s -> %s\n", filename.c_str(), curvePath.c_str());
+			}
+			// Root Yaw - samples the rootmotion yaw on every frame.
+			if (requestedMotionType == "rootYaw")
+			{
+				nlohmann::json rootYawArray = nlohmann::json::array();
+
+				// We are only interested in the rotation.
+				if (newChannel.targetPath != EAFTargetPath::Rotation)
+				{
+					continue;
+				}
+
+				// Get the quaternion at every key.
+				for (uint32_t i = 0; i < keyCount; ++i)
+				{
+					const glm::vec4 v = newChannel.values[i];
+					const glm::quat q = glm::normalize(glm::quat(v.x, v.y, v.z, v.w));
+					glm::vec3 fwd = q * glm::vec3(0.0f, 0.0f, 1.0f);
+					const float yaw = atan2(fwd.y, fwd.z);
+
+					rootYawArray.push_back({ newChannel.timings[i], glm::degrees(yaw) });
+				}
+
+				std::string filename = "";
+				filename += animName;
+				filename += "_rootYaw";
+				curveName = filename;
+				filename += ".json";
+				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
+				std::ofstream outJson(curvePath);
+				outJson << rootYawArray.dump(2);
 			}
 		}
 	}
