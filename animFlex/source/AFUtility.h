@@ -160,7 +160,7 @@ public:
 	// Curves should be a part of skeleton, but since I have only "one" I can have this easily accessible.
 	static std::vector<std::string> GetCurveNames()
 	{
-		return { "rootDistance", "rootYaw" };
+		return { "rootDistance", "rootYaw", "rootYawDelta" };
 	}
 };
 

@@ -113,7 +113,7 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 	}
 	case EAFFloatProperties::AngleTowardsMovementInput:
 	{
-		const glm::vec3& movementInput = glm::normalize(m_charMovement.lock()->GetMovementInput());
+		const glm::vec3& movementInput = glm::normalize(m_charMovement.lock()->GetLastPositiveMovementInput());
 		const glm::quat& actorWorldRotation = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetRotationQuat();
 		const glm::vec3& actorWorldForward = glm::normalize(actorWorldRotation * glm::vec3(0.0, 0.0f, 1.0f));
 

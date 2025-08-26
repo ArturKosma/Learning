@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include <glm/vec3.hpp>
 
 #include "AFComponent.h"
@@ -22,6 +23,7 @@ public:
 
 	virtual void AddMovementInput(const glm::vec3& movementInput);
 	glm::vec3 GetMovementInput() const;
+	glm::vec3 GetLastPositiveMovementInput() const;
 
 	virtual void AddOffset(const glm::vec3& offset);
 

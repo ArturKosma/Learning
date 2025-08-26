@@ -373,6 +373,45 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_Clamp",
+            "node_name": "Clamp",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "m_value",
+                    "default": "0.0",
+                    "label": "Input",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_min",
+                    "default": "0.0",
+                    "label": "Min",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_max",
+                    "default": "0.0",
+                    "label": "Max",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_result",
+                    "default": "0.0",
+                    "label": "Result",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_Compare",
             "node_name": "Compare",
             "meta": [],
@@ -408,6 +447,87 @@
                     "var_type": "bool",
                     "var_name": "m_compareResult",
                     "default": "false",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_FloatDelta",
+            "node_name": "Float Delta",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_floatInput",
+                    "default": "0.0",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_floatOutput",
+                    "default": "0.0",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_FloatOperation",
+            "node_name": "Float Operation",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "m_a",
+                    "default": "0.0",
+                    "label": "A",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_b",
+                    "default": "0.0",
+                    "label": "B",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_operation",
+                    "default": "0",
+                    "label": "Operation",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFFloatOperations_Enum"
+                    ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_result",
+                    "default": "0.0",
                     "label": "Output",
                     "direction": "Output",
                     "meta": []
@@ -493,6 +613,45 @@
                     "default": "false",
                     "label": "Show Pin",
                     "direction": "",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_GetCurveFromPose",
+            "node_name": "Get Curve From Pose",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_curveName",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_curveValue",
+                    "default": "0.0",
+                    "label": "",
+                    "direction": "Output",
                     "meta": []
                 }
             ]
@@ -751,6 +910,111 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_Print",
+            "node_name": "Print",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_printFloat",
+                    "default": "false",
+                    "label": "",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_printString",
+                    "default": "false",
+                    "label": "",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_inputFloat",
+                    "default": "0.0",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "HideControl",
+                        "Show=m_printFloat"
+                    ]
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_inputString",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "HideControl",
+                        "Show=m_printString"
+                    ]
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_SetCurveValue",
+            "node_name": "Set Curve Value",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_curveEnum",
+                    "default": "0",
+                    "label": "Curve",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFCurve_Enum"
+                    ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_inputValue",
+                    "default": "0.0",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_StateMachine",
             "node_name": "State Machine",
             "meta": [],
@@ -786,6 +1050,16 @@
             ]
         },
         {
+            "enum_name": "EAFFloatOperations",
+            "values": [
+                "Add",
+                "Substract",
+                "Multiply",
+                "Divide",
+                "Modulo"
+            ]
+        },
+        {
             "enum_name": "EAFCurveFetchType",
             "values": [
                 "ByTime",
@@ -800,6 +1074,14 @@
                 "RelevantAnimTimeRemain",
                 "DistanceTraveled",
                 "AngleTowardsMovementInput"
+            ]
+        },
+        {
+            "enum_name": "EAFCurve",
+            "values": [
+                "rootDistance",
+                "rootYaw",
+                "rootYawDelta"
             ]
         }
     ]

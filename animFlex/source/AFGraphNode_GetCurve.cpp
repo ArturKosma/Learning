@@ -7,6 +7,7 @@ void AFGraphNode_GetCurve::OnUpdate()
 
 	if (curveName.empty())
 	{
+		m_curve = nullptr;
 		return;
 	}
 
@@ -31,6 +32,7 @@ void AFGraphNode_GetCurve::Evaluate(float deltaTime)
 
 	if (!m_curve)
 	{
+		m_curveValue.SetValue(0.0f);
 		return;
 	}
 
@@ -40,6 +42,8 @@ void AFGraphNode_GetCurve::Evaluate(float deltaTime)
 	{
 		case EAFCurveFetchType::ByTime:
 		{
+			// Takes in a time and returns value for it.
+			ret = m_curve->SampleByTime(m_inputValue);
 			break;
 		}
 		case EAFCurveFetchType::ByValue:

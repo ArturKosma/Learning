@@ -145,7 +145,7 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 		m_curves[name] = value;
 	}
 
-	printf("%f\n", GetCurveValue("rootYaw"));
+	//printf("%f\n", GetCurveValue("rootYawDelta"));
 
 	if (calculatedJoints.size() != currentJoints.size())
 	{
