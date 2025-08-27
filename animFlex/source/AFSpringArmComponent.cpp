@@ -27,10 +27,10 @@ void AFSpringArmComponent::Tick(float deltaTime)
 	if (m_attachedCamera && playerPawn)
 	{
 		// Cache new target world location.
-		m_targetWorldLocation = playerPawn->GetLocation() + glm::vec3(0.0f, 130.0f, 0.0f);
+		m_targetWorldLocation = playerPawn->GetLocation() + glm::vec3(-8.0f, 117.0f, 0.0f);
 
 		// Keep lerping to the target world location.
-		const float interpSpeed = AFMath::MapRangeClamped(glm::length(m_targetWorldLocation - m_currentWorldLocation), 0.0f, 75.0f, 0.1f, 800.0f);
+		const float interpSpeed = AFMath::MapRangeClamped(glm::length(m_targetWorldLocation - m_currentWorldLocation), 0.0f,100.0f, 0.1f, 650.0f);
 		m_currentWorldLocation = AFMath::VInterpTo(m_currentWorldLocation, m_targetWorldLocation, interpSpeed, deltaTime);
 
 		// Set world location.

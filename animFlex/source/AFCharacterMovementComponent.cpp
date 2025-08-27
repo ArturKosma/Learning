@@ -6,7 +6,7 @@
 
 float AFCharacterMovementComponent::GetAcceleration() const
 {
-	return 1000.0f;
+	return 800.0f;
 }
 
 float AFCharacterMovementComponent::GetDeceleration() const
