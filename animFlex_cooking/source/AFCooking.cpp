@@ -11,6 +11,20 @@
 #include "json.hpp"
 #include "zstd.h"
 
+static float MapRangeClamped(float value, float inMin, float inMax, float outMin, float outMax)
+{
+	const float denom = (inMax - inMin);
+	if (std::abs(denom) < 1e-8f)
+	{
+		return outMin;
+	}
+
+	float t = (value - inMin) / denom;
+	t = std::clamp(t, 0.0f, 1.0f);
+
+	return outMin + t * (outMax - outMin);
+}
+
 std::string AFCooking::CookFile(const std::string& type, const std::string& sourcePath, const std::string& targetPath, const std::string& additionalArgs)
 {
 	if (type == "anim")
@@ -213,6 +227,7 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 	std::string requestedMotionType = "";
 	int requestedBoneIdx = 0;
 	std::string requestedAxis = "";
+	float floatParam0 = 0.0f;
 
 	// Figure out what the user wants based on args.
 	for (const std::string& arg : args)
@@ -226,6 +241,18 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 		{
 			requestedMotionType = "rootYaw";
 			requestedBoneIdx = 0;
+		}
+		if (arg == "rootYawAuthority")
+		{
+			requestedMotionType = "rootYawAuthority";
+			requestedBoneIdx = 0;
+		}
+		if (size_t s = arg.find("value="); s != std::string::npos)
+		{
+			std::string valueStr = arg.substr(s + 6);
+			const float f = std::stof(valueStr);
+
+			floatParam0 = f;
 		}
 	}
 
@@ -398,6 +425,37 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				std::string filename = "";
 				filename += animName;
 				filename += "_rootYaw";
+				curveName = filename;
+				filename += ".json";
+				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
+				std::ofstream outJson(curvePath);
+				outJson << rootYawArray.dump(2);
+			}
+			// Writes down rootYawAuthority to 1.0f until timing > param, then smoothly to 0.0f.
+			if (requestedMotionType == "rootYawAuthority")
+			{
+				nlohmann::json rootYawArray = nlohmann::json::array();
+
+				// We are only interested in the rotation.
+				if (newChannel.targetPath != EAFTargetPath::Rotation)
+				{
+					continue;
+				}
+
+				for (uint32_t i = 0; i < keyCount; ++i)
+				{
+					float authorityValue = 1.0f;
+					if (newChannel.timings[i] > floatParam0)
+					{
+						authorityValue = MapRangeClamped(newChannel.timings[i], floatParam0, floatParam0 + 0.5f, 1.0f, 0.0f);
+					}
+
+					rootYawArray.push_back({ newChannel.timings[i], authorityValue });
+				}
+
+				std::string filename = "";
+				filename += animName;
+				filename += "_rootYawAuthority";
 				curveName = filename;
 				filename += ".json";
 				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
