@@ -6,7 +6,8 @@ enum class EAFCurve
 {
 	rootDistance,
 	rootYaw,
-	rootYawDelta
+	rootYawDelta,
+	rootYawAuthority
 };
 
 class AFGraphNode_SetCurveValue : public AFGraphNodeCRTP<AFGraphNode_SetCurveValue>

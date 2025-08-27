@@ -144,6 +144,29 @@ public:
 		return glm::slerp(currentNorm, targetNorm, t);
 	}
 
+	static glm::vec3 VInterpTo(const glm::vec3& current, const glm::vec3& target, float interpSpeed, float deltaTime)
+	{
+		if (interpSpeed <= 0.0f)
+		{
+			return target;
+		}
+
+		glm::vec3 delta = target - current;
+		float dist = glm::length(delta);
+		if (dist < 1e-6f)
+		{
+			return target;
+		}
+
+		float maxStep = interpSpeed * deltaTime;
+		if (dist <= maxStep)
+		{
+			return target;
+		}
+
+		return current + (delta / dist) * maxStep;
+	}
+
 	static bool NearlyEqual(float a, float b, float threshold = glm::epsilon<float>())
 	{
 		return glm::epsilonEqual(a, b, threshold);

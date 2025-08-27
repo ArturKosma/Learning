@@ -26,7 +26,19 @@ void AFSpringArmComponent::Tick(float deltaTime)
 
 	if (m_attachedCamera && playerPawn)
 	{
-		// Rotate the camera 180d on yaw, otherwise it will away from the pawn.
+		// Cache new target world location.
+		m_targetWorldLocation = playerPawn->GetLocation() + glm::vec3(0.0f, 130.0f, 0.0f);
+
+		// Keep lerping to the target world location.
+		const float interpSpeed = AFMath::MapRangeClamped(glm::length(m_targetWorldLocation - m_currentWorldLocation), 0.0f, 75.0f, 0.1f, 800.0f);
+		m_currentWorldLocation = AFMath::VInterpTo(m_currentWorldLocation, m_targetWorldLocation, interpSpeed, deltaTime);
+
+		// Set world location.
+		//const glm::vec3& loc = GetWorldLocation();
+		//printf("%f, %f, %f\n", loc.x, loc.y, loc.z);
+		SetWorldLocation(m_currentWorldLocation);
+
+		// Rotate the camera 180d on yaw, otherwise it will look away from the pawn.
 		const glm::mat4 lookBack = glm::mat4_cast(glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 
 		// Construct a mat4 from control rotation.

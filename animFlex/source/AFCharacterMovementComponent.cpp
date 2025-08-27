@@ -31,23 +31,32 @@ void AFCharacterMovementComponent::Tick(float deltaTime)
 			return;
 		}
 
+		std::shared_ptr<AFAnimState> animState = ownerPawn->GetMeshComponent()->GetAnimState();
+		if (!animState)
+		{
+			return;
+		}
+
 		const glm::vec3 lastDirection = AFMath::GetSafeNormal(m_velocity);
 		const glm::vec3 forward = glm::vec3(0.0f, 0.0f, 1.0f);
 		const glm::quat lastDirectionQuat = glm::rotation(forward, lastDirection);
 
-		const float rotateSpeed = 250.0f;
+		// Rotation from rootYawDelta, which acts like rootMotion for rotation.
+		const float rootYawDelta = animState->GetCurveValue("rootYawDelta");
 
-		// Rotation from rootYawDelta.
-		const float rootYawDelta = ownerPawn->GetMeshComponent()->GetAnimState()->GetCurveValue("rootYawDelta");
+		// Scales how much we use mechanical rotation towards last velocity.
+		const float rootYawAuthority = animState->GetCurveValue("rootYawAuthority");
 
-		if (rootYawDelta > glm::epsilon<float>())
+		float rotateSpeedTowardsVel = 250.0f * (1.0f - rootYawAuthority);
+
+		if (glm::abs(rootYawDelta) > glm::epsilon<float>())
 		{
 			ownerPawn->AddOffsetRotation(glm::vec3(0.0f, rootYawDelta, 0.0f));
 		}
-		else
+		else if (rotateSpeedTowardsVel > glm::epsilon<float>())
 		{
 			// Keep rotating the actor towards last velocity.
-			ownerPawn->SetRotation(AFMath::QInterpTo(ownerPawn->GetRotationQuat(), lastDirectionQuat, glm::radians(rotateSpeed), deltaTime));
+			ownerPawn->SetRotation(AFMath::QInterpTo(ownerPawn->GetRotationQuat(), lastDirectionQuat, glm::radians(rotateSpeedTowardsVel), deltaTime));
 		}
 	}
 }

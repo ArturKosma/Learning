@@ -94,7 +94,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 		// Schedule the blend.
 		else
 		{
-			ScheduleBlend(m_currentState.lock()->GetNodeID(), nextState.lock()->GetNodeID(), 0.25f);
+			ScheduleBlend(m_currentState.lock()->GetNodeID(), nextState.lock()->GetNodeID(), 0.15f);
 			m_currentState = nextState;
 		}
 	}

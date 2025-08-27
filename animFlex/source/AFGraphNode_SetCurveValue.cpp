@@ -11,6 +11,7 @@ void AFGraphNode_SetCurveValue::Evaluate(float deltaTime)
 		case 0: { curveName = "rootDistance"; break; }
 		case 1: { curveName = "rootYaw"; break; }
 		case 2: { curveName = "rootYawDelta"; break; }
+		case 3: { curveName = "rootYawAuthority"; break; }
 		default: { break; }
 	}
 

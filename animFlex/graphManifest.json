@@ -1081,7 +1081,8 @@
             "values": [
                 "rootDistance",
                 "rootYaw",
-                "rootYawDelta"
+                "rootYawDelta",
+                "rootYawAuthority"
             ]
         }
     ]
