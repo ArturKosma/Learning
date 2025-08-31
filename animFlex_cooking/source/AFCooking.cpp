@@ -254,6 +254,16 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 
 			floatParam0 = f;
 		}
+		if (arg == "feetGroundedL")
+		{
+			requestedMotionType = "feetGrounded";
+			requestedBoneIdx = 72;
+		}
+		if (arg == "feetGroundedR")
+		{
+			requestedMotionType = "feetGrounded";
+			requestedBoneIdx = 79;
+		}
 	}
 
 	// Load via TinyGLTF.
@@ -461,6 +471,35 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
 				std::ofstream outJson(curvePath);
 				outJson << rootYawArray.dump(2);
+			}
+			// Writes down 1 if feet touches (is near) the ground.
+			// @todo THIS WON'T WORK WITHOUT CREATING A HIERARCHY AND CHAIN OF LOCAL TRS.
+			// Use runtime for now.
+			if (requestedMotionType == "feetGrounded")
+			{
+				nlohmann::json feetGrounded = nlohmann::json::array();
+
+				// We are only interested in the translation.
+				if (newChannel.targetPath != EAFTargetPath::Translation)
+				{
+					continue;
+				}
+
+				for (uint32_t i = 0; i < keyCount; ++i)
+				{
+					const float height = newChannel.values[i].y;
+
+					feetGrounded.push_back({ newChannel.timings[i], height });
+				}
+
+				std::string filename = "";
+				filename += animName;
+				filename += requestedBoneIdx == 72 ? "_feetGroundedL" : "_feetGroundedR";
+				curveName = filename;
+				filename += ".json";
+				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
+				std::ofstream outJson(curvePath);
+				outJson << feetGrounded.dump(2);
 			}
 		}
 	}
