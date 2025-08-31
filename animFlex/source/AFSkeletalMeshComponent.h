@@ -24,6 +24,9 @@ public:
 
 	std::shared_ptr<AFAnimState> GetAnimState() const;
 
+	glm::vec3 GetJointLocation(int index) const;
+	glm::quat GetJointRotation(int index) const;
+
 private:
 
 	std::shared_ptr<AFAnimState> m_animState = nullptr;

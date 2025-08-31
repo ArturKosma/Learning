@@ -29,5 +29,6 @@ public:
 private:
 
 	float m_localTime = 0.0f;
+	std::string m_animName = "";
 	std::shared_ptr<AFAnimationClip> m_animClip = nullptr;
 };

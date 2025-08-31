@@ -167,6 +167,18 @@ public:
 		return current + (delta / dist) * maxStep;
 	}
 
+	static float FInterpTo(float current, float target, float interpSpeed, float deltaTime)
+	{
+		const float dist = target - current;
+		if (std::fabs(dist) <= 1e-6f)
+		{
+			return target;
+		}
+
+		const float alpha = std::clamp(deltaTime * interpSpeed, 0.0f, 1.0f);
+		return current + dist * alpha;
+	}
+
 	static bool NearlyEqual(float a, float b, float threshold = glm::epsilon<float>())
 	{
 		return glm::epsilonEqual(a, b, threshold);

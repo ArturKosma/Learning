@@ -28,7 +28,6 @@ public:
 private:
 
 	float m_distanceTraveled = 0.0f;
-	glm::vec3 m_previousPlayerLocation = glm::vec3(0.0f);
 	bool m_open = true;
 
 	std::weak_ptr<class AFCharacterMovementComponent> m_charMovement = {};

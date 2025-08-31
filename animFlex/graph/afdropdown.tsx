@@ -30,10 +30,10 @@ export class DropdownControl extends ClassicPreset.Control implements AFSerializ
   editor: NodeEditor<Schemes>;
   varName: string;
 
-  constructor(type: string, editor: NodeEditor<Schemes>, node: ClassicPreset.Node, varName: string) {
+  constructor(type: string, editor: NodeEditor<Schemes>, node: ClassicPreset.Node, varName: string, defaultValue: string = "") {
     super();
     this.type = type;
-    this.value = '';
+    this.value = defaultValue;
     this.node = node;
     this.editor = editor;
     this.varName = varName;
@@ -56,7 +56,7 @@ export class DropdownControl extends ClassicPreset.Control implements AFSerializ
   }
 }
 
-export function CustomDropdown(props: { data: DropdownControl, area: AreaPlugin<any>, render: ReactPlugin<any> }) {
+export function CustomDropdown(props: { data: DropdownControl }) {
   const [searchValue, setSearchValue] = useState(() => props.data.value || '');
   const [manifestOptions, setManifestOptions] = useState<string[]>([]);
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);

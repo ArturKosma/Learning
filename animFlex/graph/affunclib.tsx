@@ -1,5 +1,4 @@
 import { ClassicPreset, NodeEditor, GetSchemes } from "rete";
-import {DropdownControl} from './afdropdown'; 
 import resultPoseIcon from './resultPose.png';
 import { NodeRef } from "rete-area-plugin/_types/extensions/shared/types";
 import { Input, Socket } from "rete/_types/presets/classic";
@@ -7,6 +6,7 @@ import { classIdToMeta, classIdToName, classIdToParams, GraphNode, GraphNodePara
 import { getSourceTarget } from 'rete-connection-plugin'
 import { BoolControl, CustomChecker } from "./afchecker";
 import { FloatControl, CustomFloatField } from "./affloatfield";
+import { DropdownControl, CustomDropdown } from "./afdropdown";
 import { createView, getManifestNodes, switchToView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
 import { createRoot } from "react-dom/client";
@@ -571,13 +571,16 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
         let valueField;
         if(inputConnection.length == 1) {
             const conn = inputConnection[0];
-            valueField = {
-                connectedNodeId: conn.source,
-                connectedSocketName: (editor.getNode(conn.source)?.outputs[conn.sourceOutput]?.socket as any)?.meta?.var_name
+            const connSocketName = (editor.getNode(conn.source)?.outputs[conn.sourceOutput]?.socket as any)?.meta?.var_name;
+            if(connSocketName) {
+                valueField = {
+                    connectedNodeId: conn.source,
+                    connectedSocketName: connSocketName
+                }
             }
         }
         //.. or has a plain value
-        else {
+        if (!valueField) {
             
             // Try to find the control attached to this input.
             const control = (input as any).control;
@@ -610,13 +613,16 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
         let valueField;
         if(outputConnection.length == 1) {
             const conn = outputConnection[0];
-            valueField = {
-                connectedNodeId: conn.target,
-                connectedSocketName: (editor.getNode(conn.target)?.inputs[conn.targetInput]?.socket as any)?.meta?.var_name
+            const connSocketName = (editor.getNode(conn.source)?.outputs[conn.sourceOutput]?.socket as any)?.meta?.var_name;
+            if(connSocketName) {
+                valueField = {
+                    connectedNodeId: conn.target,
+                    connectedSocketName: connSocketName
+                }
             }
         }
         //.. or has a plain value
-        else {
+        if (!valueField) {
 
             // Try to find the control attached to this output.
             const control = (output as any).control;
@@ -833,6 +839,8 @@ export function setDetailsPanelVisible(editor: NodeEditor<Schemes>, show: boolea
         return;
     }
 
+    //console.log("hello?");
+
     const manifest = getManifestNodes().find(n => n.class_id === nodeType);
     if (!manifest) {
         showPlaceholderEmpty();
@@ -907,6 +915,17 @@ export function setDetailsPanelVisible(editor: NodeEditor<Schemes>, show: boolea
 
                 controlInstance = new BoolControl(editor, node, param.var_name, initialBool);
                 reactElement = <CustomChecker data={controlInstance} />;
+                break;
+
+            case 'std::string':
+                const initialString = (() => {
+                    const vm: Record<string, string> | undefined = (node as any).meta?.valuesMap;
+                    const s = vm?.[param.var_name] ?? String(param.default ?? "");
+                    return s;
+                })();
+
+                controlInstance = new DropdownControl("", editor, node, param.var_name, initialString);
+                reactElement = <CustomDropdown data={controlInstance} />;
                 break;
 
             default:

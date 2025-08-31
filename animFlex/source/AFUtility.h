@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
@@ -165,9 +166,21 @@ public:
 			"rootDistance",
 			"rootYaw",
 			"rootYawDelta",
-			"rootYawAuthority"
+			"rootYawAuthority",
+			"rootYawWarpScale",
+			"rootYawLeft"
 		};
 	}
+
+	// DJB2-like.
+	// @todo Learn about it.
+	static constexpr unsigned int StringSwitch(const char* str, int h = 0)
+	{
+		return !str[h] ? 5381 : (StringSwitch(str, h + 1) * 33) ^ str[h];
+	}
+
+	static float GetAngleTowardsMovementInput();
+
 };
 
 namespace AFIDGenerator

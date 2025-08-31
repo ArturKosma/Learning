@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include "AFUtility.h"
 #include <algorithm>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 void AFInput::OnKeyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods)

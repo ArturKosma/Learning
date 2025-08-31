@@ -24,6 +24,7 @@ public:
 	virtual void AddMovementInput(const glm::vec3& movementInput);
 	glm::vec3 GetMovementInput() const;
 	glm::vec3 GetLastPositiveMovementInput() const;
+	glm::vec3 GetLastLocationOffset() const;
 
 	virtual void AddOffset(const glm::vec3& offset);
 
@@ -33,6 +34,7 @@ protected:
 	glm::vec3 m_lastPositiveVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastPositiveMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_lastLocationOffset = glm::vec3(0.0f, 0.0f, 0.0f);;
 
 	float m_deceleration = 10.0f;
 	float m_acceleration = 50.0f;

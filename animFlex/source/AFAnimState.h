@@ -34,10 +34,21 @@ public:
 
 	void SetEvaluationState(EAFAnimEvaluationState newEvaluationState);
 
+	void CallFunctionByString(const std::string& functionName);
+
+	// Graph functions.
+	std::string GetStartRunAnim() const;
+
 private:
 
 	void EvaluateSingleAnim();
 	void EvaluateGraph(float deltaTime);
+
+	// Graph functions.
+	void OnStartRunEnter();
+
+	// Graph variables.
+	std::string m_startRunAnim = "";
 
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;

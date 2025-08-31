@@ -3,7 +3,9 @@
 #include <chrono>
 
 #include "AFEvaluator.h"
+#include "AFMath.h"
 #include "AFMesh.h"
+#include "AFUtility.h"
 
 void AFAnimState::Tick(float deltaTime)
 {
@@ -67,6 +69,27 @@ float AFAnimState::GetCurveValue(const std::string& curveName) const
 void AFAnimState::SetEvaluationState(EAFAnimEvaluationState newEvaluationState)
 {
 	m_evaluationState = newEvaluationState;
+}
+
+void AFAnimState::CallFunctionByString(const std::string& functionName)
+{
+	switch (AFUtility::StringSwitch(functionName.c_str()))
+	{
+		case AFUtility::StringSwitch("OnStartRunEnter"):
+		{
+			OnStartRunEnter();
+			break;
+		}
+		default:
+		{
+
+		}
+	}
+}
+
+std::string AFAnimState::GetStartRunAnim() const
+{
+	return m_startRunAnim;
 }
 
 void AFAnimState::EvaluateSingleAnim()
@@ -162,4 +185,35 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 	}
 
 	m_ownerMesh->GetMesh()->jointsDirty = true;
+}
+
+void AFAnimState::OnStartRunEnter()
+{
+	// How big the angle is towards target movement input?
+	const float angle = AFUtility::GetAngleTowardsMovementInput();
+
+	std::vector<float> angles =
+	{
+		-180.0f,
+		-90.0f,
+		0.0f,
+		90.0f,
+		180.0f
+	};
+
+	// Which index per 90s angle it is?
+	size_t index = AFMath::NearestIndex<float>(angles, angle);
+
+	std::vector<std::string> startRunAnims =
+	{
+		"M_Neutral_Run_Reface_Start_F_L_180",
+		"M_Neutral_Run_Reface_Start_F_L_090",
+		"M_Neutral_Run_Start_F_Rfoot",
+		"M_Neutral_Run_Reface_Start_F_R_090",
+		"M_Neutral_Run_Reface_Start_F_R_180"
+	};
+
+	m_startRunAnim = startRunAnims[index];
+
+	printf("%s\n", m_startRunAnim.c_str());
 }

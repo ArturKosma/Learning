@@ -22,6 +22,7 @@ import { CustomFloatField, FloatControl } from "./affloatfield";
 import { getCurrentView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
 import { CustomDropdownEnum, DropdownControlEnum } from "./afdropdownEnum";
+import { useEffect, useRef } from "react";
 
   // Context menu item type
   type Item = {
@@ -104,20 +105,30 @@ export async function createEditorCond(container: HTMLElement, id: string) {
       // If right-clicked on empty space (root)
       if (context === "root") {
         return {
-          list: Array.from(classIdToName.entries()).map(([classId, nodeName]): Item => ({
-            label: nodeName,
-            key: classId,
-            handler: async () => {
-              const { x: screenX, y: screenY } = area.area.pointer;
+          searchBar: true,
+          list: Array.from(classIdToName.entries())
+            .filter(([classId]) => {
+              const meta = classIdToMeta.get(classId);
+              return !meta?.includes("NoDropdown"); // NoDropdown meta prevents from showing up in items.
+            })
+            .map(([classId, nodeName]): Item => ({
+              label: nodeName,
+              key: classId,
+              handler: async () => {
+                const { x: screenX, y: screenY } = area.area.pointer;
 
-              const { node } = await AFNodeFactory.create(classId, editor, true, ReteViewType.ConditionalGraph) as {
-                node: ClassicPreset.Node;
-              };
+                const gridSize = 16;
+                const snappedX = Math.round(screenX / gridSize) * gridSize;
+                const snappedY = Math.round(screenY / gridSize) * gridSize;
 
-              await editor.addNode(node);
-              await area.translate(node.id, { x: screenX, y: screenY });
-            }
-          }))
+                const { node } = await AFNodeFactory.create(classId, editor, true, ReteViewType.Graph) as {
+                  node: ClassicPreset.Node;
+                };
+
+                await editor.addNode(node);
+                await area.translate(node.id, { x: snappedX, y: snappedY });
+              }
+            }))
         };
       }
 
@@ -203,13 +214,44 @@ selection.setButton(0);
 
   // Context menu stylized.
   const { Menu, Common, Search, Item, Subitems } = Presets.contextMenu
-  const CustomMenu = styled(Menu)`
+const CustomMenu = styled(Menu)`
   width: 180px;
-  opacity: 0.9;
-  background-image: linear-gradient(to right, rgba(85, 85, 85, 0.9), rgba(18, 18, 18, 0.9));
-  border: 1px solid black;
+  opacity: 0.95;
+  background: rgb(18, 18, 18);
+  border: 1px solid #111;
   border-radius: 10px;
-`
+
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+
+  /* padding so the sticky search can sit nicely */
+  padding: 8px 8px 6px;
+
+  /* cap total height and enable vertical scrolling */
+  max-height: min(40vh, 320px);
+  overflow-y: auto;
+  overflow-x: hidden; /* remove width scrollbar */
+
+  /* dark scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(60, 60, 60, 0.95) rgba(22, 22, 22, 0.95);
+
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-track {
+    background: rgba(22, 22, 22, 0.95);
+    border-left: 1px solid #0b0b0b;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(48,48,48,1), rgba(38,38,38,1));
+    border-radius: 8px;
+    border: 1px solid #000;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(70,70,70,1), rgba(50,50,50,1));
+  }
+`;
+
   const CustomItem = styled(Item)`
     background:rgb(18, 18, 18);
     transition: background 0.2s ease;
@@ -230,35 +272,43 @@ selection.setButton(0);
       background:rgb(18, 18, 18);
     }
   `
-  const CustomSearch = styled(Search)`
-    background:rgb(18, 18, 18);
-    opacity: 0.9;
-    border: 1px solid rgb(78, 78, 78);
-    transition: border 0.2s ease;
-    font-family: "Segoe UI", sans-serif;
-    font-size: 10px;
-    min-height: 28px;
-    border-radius: 6px;
+    const AutoFocusSearch: React.FC<any> = (props) => {
+      const ref = useRef<HTMLInputElement>(null);
 
-    &:hover,
-    & input:hover {
-      border: 1px solid rgb(67, 150, 238);
-    }
+      useEffect(() => {
+        // focus as soon as the search bar mounts
+        ref.current?.focus();
+      }, []);
 
-    &:focus,
-    & input:focus {
-      outline: none;
-      border: 1px solid rgb(67, 150, 238);
-    }
-  `
-  const CustomSubitems = styled(Subitems)`
-    background:rgb(18, 18, 18);
-    opacity: 0.9;
-    &:hover {
-      background-image: linear-gradient(to right, rgba(85, 85, 85, 1.0), rgba(18, 18, 18, 1.0));
-    }
-    border: none;
-  `
+      return <Search {...props} ref={ref} />;
+    };
+
+const CustomSearch = styled(AutoFocusSearch)`
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  background: rgb(18, 18, 18);
+  border: 1px solid rgb(60, 60, 60);
+  border-radius: 8px;
+
+  /* no margins that could cause width overflow; menu has padding already */
+  margin: 0 0 6px 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 6px;
+
+  font-family: "Segoe UI", sans-serif;
+  font-size: 10px;
+  min-height: 26px;
+
+  &:hover, & input:hover { border-color: rgb(67, 150, 238); }
+  &:focus, & input:focus { outline: none; border-color: rgb(67, 150, 238); }
+`;
+const CustomSubitems = styled(Subitems)`
+  background: rgb(18, 18, 18);
+  border: none;
+`;
   render.addPreset(Presets.contextMenu.setup({
     customize: {
       main: () => CustomMenu,

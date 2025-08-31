@@ -294,6 +294,24 @@ export function AFNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
   const [title, setTitle] = React.useState(meta.title || '');
 
   React.useEffect(() => {
+  setTitle(meta.title || "");
+}, [meta.title, props.data.id]);
+
+const commitTitle = (next: string) => {
+  setIsEditing(false);
+
+  // preferred: call an updater if you have one
+  if (typeof meta.onTitleChange === "function") {
+    meta.onTitleChange(next, props.data.id);
+  } else {
+    // fallback: mutate and force a rerender
+    meta.title = next;
+    // if you have refreshFlag:
+    // setRefreshFlag(f => f + 1);
+  }
+};
+
+  React.useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'F2' && selected && !isEditing && meta.titleEditable) {
       setIsEditing(true);
@@ -359,15 +377,16 @@ React.useEffect(() => {
                     type="text"
                     value={title}
                     placeholder="Graph Title"
-                    onChange={(e) => setTitle(e.target.value)}
-                    onBlur={() => {
-                      setIsEditing(false);
-                      meta.title = title;
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      commitTitle(e.currentTarget.value)
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        setIsEditing(false);
-                        meta.title = title;
+                        e.preventDefault();
+                        commitTitle(e.currentTarget.value);
                       }
                     }}
                     onMouseDown={(e) => e.stopPropagation()}

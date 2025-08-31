@@ -13,7 +13,8 @@ void AFEvaluator::EvaluateNode(std::shared_ptr<AFGraphNode> node)
 	if (it == m_evaluated.end())
 	{
 		// Node wasn't evaluated this turn. Evaluate it.
-		node->Evaluate(AFTimerManager::GetDeltaTime());
+		const float deltaTime = AFTimerManager::GetDeltaTime();
+		node->Evaluate(m_animPaused ? 0.0f : deltaTime * m_animPlayrate);
 		m_evaluated.push_back(node);
 	}
 }
@@ -99,4 +100,39 @@ void AFEvaluator::ClearSamplingState()
 {
 	m_samplingStateCached = m_samplingState;
 	m_samplingState.clear();
+}
+
+bool AFEvaluator::GetAnimPaused() const
+{
+	return m_animPaused;
+}
+
+float AFEvaluator::GetAnimPlayrate() const
+{
+	return m_animPlayrate;
+}
+
+std::string AFEvaluator::GetPlayrateStatus() const
+{
+	nlohmann::json j = {
+		{"Paused",   m_animPaused },
+		{"Playrate", m_animPaused ? 0.0f : m_animPlayrate }
+	};
+
+	return j.dump();
+}
+
+void AFEvaluator::PlayrateSlower()
+{
+	m_animPlayrate = glm::clamp(m_animPlayrate - 0.1f, 0.0f, 2.0f);
+}
+
+void AFEvaluator::PlayrateToggle()
+{
+	m_animPaused = !m_animPaused;
+}
+
+void AFEvaluator::PlayrateFaster()
+{
+	m_animPlayrate = glm::clamp(m_animPlayrate + 0.1f, 0.0f, 2.0f);
 }

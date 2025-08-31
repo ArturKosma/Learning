@@ -14,7 +14,9 @@ public:
 	void SetScale(const glm::vec3& newScale);
 
 	glm::vec3 GetLocation() const;
+	glm::vec3 GetGlobalLocation() const;
 	glm::quat GetRotation() const;
+	glm::quat GetGlobalRotation() const;
 	glm::vec3 GetScale() const;
 
 	static std::shared_ptr<AFJoint> CreateRoot(int rootBoneIdx);

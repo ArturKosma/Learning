@@ -1,5 +1,6 @@
 #include "AFSkeletalMeshComponent.h"
 #include "AFAnimState.h"
+#include "AFEvaluator.h"
 #include "AFMesh.h"
 
 AFSkeletalMeshComponent::AFSkeletalMeshComponent()
@@ -13,7 +14,10 @@ void AFSkeletalMeshComponent::Tick(float deltaTime)
 {
 	AFStaticMeshComponent::Tick(deltaTime);
 
-	m_animState->Tick(deltaTime);
+	const bool paused = AFEvaluator::Get().GetAnimPaused();
+	const float playrate = AFEvaluator::Get().GetAnimPlayrate();
+
+	m_animState->Tick(paused ? 0.0f : deltaTime * playrate);
 }
 
 void AFSkeletalMeshComponent::SetAnimation(std::shared_ptr<AFAnimationClip> newAnimation)
@@ -54,4 +58,14 @@ bool AFSkeletalMeshComponent::GetStateDirty() const
 std::shared_ptr<AFAnimState> AFSkeletalMeshComponent::GetAnimState() const
 {
 	return m_animState;
+}
+
+glm::vec3 AFSkeletalMeshComponent::GetJointLocation(int index) const
+{
+	return m_mesh->GetGlobalJointLocation(index);
+}
+
+glm::quat AFSkeletalMeshComponent::GetJointRotation(int index) const
+{
+	return m_mesh->GetGlobalJointRotation(index);
 }

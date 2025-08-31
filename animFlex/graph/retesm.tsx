@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import { createView, getCurrentView } from './afmanager';
 import { ReteViewType } from './aftypes';
 import { OnNodeCreated, OnNodeRemoved, OnStateConnectionCreated, OnStateConnectionRemoved, setDetailsPanelVisible } from './affunclib';
+import { classIdToParams } from './afnodeFactory';
 
 declare const Module: any;
 
@@ -51,9 +52,9 @@ export async function create(label: string, editor: NodeEditor<Schemes>, nodeSel
   const node = connectionOwner != "" ? new ConditionNode("") : (entry ? new StateNodeEntry(label) : new StateNode(""));  
 
   let nodeType = "Unknown";
-  if (node instanceof ConditionNode) nodeType = "StateCond";
+  if (node instanceof ConditionNode) nodeType = "AFGraphNode_StateCond";
   else if (node instanceof StateNodeEntry) nodeType = "StateStart";
-  else if (node instanceof StateNode) nodeType = "State";
+  else if (node instanceof StateNode) nodeType = "AFGraphNode_State";
 
   (node as any).meta = { 
     isEntry: entry, 
@@ -69,8 +70,18 @@ export async function create(label: string, editor: NodeEditor<Schemes>, nodeSel
     nodeFrom: undefined,
     nodeTo: undefined,
     editor: editor,
-    type: nodeType
+    type: nodeType,
+    valuesMap: {} as Record<string, string>
   };
+
+  // Fill valuesMap with default values.
+  const nodeParams = classIdToParams.get(nodeType);
+    if (nodeParams) {
+        for (const param of nodeParams) {
+          //console.log(param);
+          (node as any).meta.valuesMap[param.var_name] = param.default ?? "";
+        }
+    }
 
   if(addNode) {
     await editor.addNode(node);

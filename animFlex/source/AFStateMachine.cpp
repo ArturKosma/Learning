@@ -1,11 +1,22 @@
 #include "AFStateMachine.h"
+#include "AFAnimState.h"
+#include "AFGame.h"
 #include "AFGraphNode.h"
 #include "AFGraphNode_StateCond.h"
 #include "AFMath.h"
+#include "AFPlayerPawn.h"
 
 void AFStateMachine::Evaluate(float deltaTime)
 {
+	// Get anim state (equivalent to AnimInstance in UE).
+	std::shared_ptr<AFAnimState> animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
+	if (!animState)
+	{
+		return;
+	}
+
 	// Progress blend.
+	float blendTime = 0.15f;
 	if (m_isBlending)
 	{
 		m_currentBlend.currentBlendTime = glm::clamp(m_currentBlend.currentBlendTime + deltaTime, 0.0f, m_currentBlend.blendLength);
@@ -67,6 +78,13 @@ void AFStateMachine::Evaluate(float deltaTime)
 
 		// There is a transition. Cache the target node and try jumping again.
 		nextState = AFGraphNodeRegistry::Get().GetNode(foundTransition->to);
+
+		// Update blend time.
+		std::shared_ptr<AFGraphNode_StateCond> nextStateCond = std::dynamic_pointer_cast<AFGraphNode_StateCond>(AFGraphNodeRegistry::Get().GetNode(foundTransition->cond));
+		if (nextStateCond)
+		{
+			blendTime = nextStateCond->m_blendTime.GetValue();
+		}
 	}
 
 	if (nextState.expired())
@@ -84,7 +102,6 @@ void AFStateMachine::Evaluate(float deltaTime)
 	else
 	{
 		// There was a transition.
-		//printf("next state id: %s\n", nextState.lock()->GetNodeID().c_str());
 
 		// Jump there if we were in the entry state.
 		if (std::dynamic_pointer_cast<AFGraphNode_StateStart>(m_currentState.lock()))
@@ -94,8 +111,16 @@ void AFStateMachine::Evaluate(float deltaTime)
 		// Schedule the blend.
 		else
 		{
-			ScheduleBlend(m_currentState.lock()->GetNodeID(), nextState.lock()->GetNodeID(), 0.15f);
+			ScheduleBlend(m_currentState.lock()->GetNodeID(), nextState.lock()->GetNodeID(), blendTime);
 			m_currentState = nextState;
+		}
+
+		// Call OnEnter function on the new state.
+		std::shared_ptr<AFGraphNode_State> state = std::dynamic_pointer_cast<AFGraphNode_State>(m_currentState.lock());
+		if (state)
+		{
+			const std::string& funStr = state->m_onEnterFunStr.GetValue();
+			animState->CallFunctionByString(funStr);
 		}
 	}
 

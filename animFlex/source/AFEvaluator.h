@@ -30,6 +30,13 @@ public:
 	std::vector<FAFStateSampling> GetCachedSamplingState(const std::string& context) const;
 	void ClearSamplingState();
 
+	bool GetAnimPaused() const;
+	float GetAnimPlayrate() const;
+	std::string GetPlayrateStatus() const;
+	void PlayrateSlower();
+	void PlayrateToggle();
+	void PlayrateFaster();
+
 private:
 
 	nlohmann::json m_lastActiveSockets = nlohmann::json::array();
@@ -42,4 +49,7 @@ private:
 	std::vector<FAFStateSampling> m_samplingState = {};
 	// Required to be able to look in the previous frame.
 	std::vector<FAFStateSampling> m_samplingStateCached = {};
+
+	bool m_animPaused = false;
+	float m_animPlayrate = 1.0f;
 };

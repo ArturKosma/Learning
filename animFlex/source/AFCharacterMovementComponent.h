@@ -10,4 +10,10 @@ public:
 	float GetMaxSpeed() const override;
 
 	void Tick(float deltaTime) override;
+
+private:
+
+	float m_previousRootYaw = 0.0f;
+
+	glm::vec3 GetLocationAfterBallPivotRot(float deltaYaw);
 };

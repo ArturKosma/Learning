@@ -4,10 +4,11 @@
 
 class AFGraphNode_StateCond : public AFGraphNodeCRTP<AFGraphNode_StateCond>
 {
+	AFCLASS(AFGraphNode_StateCond, "StateCond", "NoDropdown")
+
 public:
 
-	inline static FAFGraphNodeClassRegistrar<AFGraphNode_StateCond> _registrar_AFGraphNode_StateCond = FAFGraphNodeClassRegistrar<AFGraphNode_StateCond>("StateCond");
-	std::string GetNodeType() const override { return "StateCond"; }
+	AFPARAM(float, m_blendTime, 0.15f, "Blend Time", "", "");
 
 	void Init() override;
 	void Evaluate(float deltaTime) override;

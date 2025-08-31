@@ -70,19 +70,19 @@ void AFActor::SetScale(const glm::vec3& newScale)
 
 void AFActor::SetTransform(const glm::mat4& newTransform)
 {
-    m_transform = newTransform;
-
     glm::vec3 skew;
     glm::vec4 perspective;
     glm::vec3 scale;
     glm::quat rotation;
     glm::vec3 translation;
     
-    glm::decompose(m_transform, scale, rotation, translation, skew, perspective);
+    glm::decompose(newTransform, scale, rotation, translation, skew, perspective);
 
     m_scale = scale;
     m_rotation = rotation;
     m_location = translation;
+
+    RecreateTransform();
 }
 
 void AFActor::AddOffsetLocation(const glm::vec3& offset)

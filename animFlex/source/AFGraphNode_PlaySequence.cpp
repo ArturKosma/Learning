@@ -13,10 +13,11 @@ void AFGraphNode_PlaySequence::OnUpdate()
 	}
 
 	// Nothing changed, no fetch.
-	if (m_animClip && m_animClip->GetClipName() == animName)
+	if (m_animName == animName)
 	{
 		return;
 	}
+	m_animName = animName;
 
 	// Called upon curves fetch complete.
 	auto onCompleteCurves = [](std::vector<std::shared_ptr<AFFloatCurve>> fetchedCurves)

@@ -719,6 +719,40 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_GetStringProperty",
+            "node_name": "Get String Property",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "int",
+                    "var_name": "m_propertyEnum",
+                    "default": "0",
+                    "label": "Property Name",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFStringProperties_Enum"
+                    ]
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_stringProperty",
+                    "default": "",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_once",
+                    "default": "false",
+                    "label": "Evaluate Once When Relevant",
+                    "direction": "",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_Graph",
             "node_name": "Graph",
             "meta": [],
@@ -1015,6 +1049,40 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_State",
+            "node_name": "State",
+            "meta": [
+                "NoDropdown"
+            ],
+            "params": [
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_onEnterFunStr",
+                    "default": "",
+                    "label": "On Enter",
+                    "direction": "",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_StateCond",
+            "node_name": "StateCond",
+            "meta": [
+                "NoDropdown"
+            ],
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "m_blendTime",
+                    "default": "0.15",
+                    "label": "Blend Time",
+                    "direction": "",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_StateMachine",
             "node_name": "State Machine",
             "meta": [],
@@ -1077,12 +1145,20 @@
             ]
         },
         {
+            "enum_name": "EAFStringProperties",
+            "values": [
+                "StartRunAnim"
+            ]
+        },
+        {
             "enum_name": "EAFCurve",
             "values": [
                 "rootDistance",
                 "rootYaw",
                 "rootYawDelta",
-                "rootYawAuthority"
+                "rootYawAuthority",
+                "rootYawWarpScale",
+                "rootYawLeft"
             ]
         }
     ]

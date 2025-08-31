@@ -107,5 +107,40 @@ extern "C"
 		AFApp& app = AFApp::GetInstance();
 		app.GetGame()->SetControlMode(EAFControlMode::Editor);
 	}
+
+	EMSCRIPTEN_KEEPALIVE
+	const char* GetPlayrateStatus()
+	{
+		const std::string playrateStatus = AFEvaluator::Get().GetPlayrateStatus();
+
+		char* buffer = (char*)malloc(playrateStatus.length() + 1);
+		strcpy(buffer, playrateStatus.c_str());
+
+		return buffer;
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void FreePlayrateStatus(char* ptr)
+	{
+		free(ptr);
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void PlayrateSlower()
+	{
+		AFEvaluator::Get().PlayrateSlower();
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void PlayrateToggle()
+	{
+		AFEvaluator::Get().PlayrateToggle();
+	}
+
+	EMSCRIPTEN_KEEPALIVE
+	void PlayrateFaster()
+	{
+		AFEvaluator::Get().PlayrateFaster();
+	}
 }
 #endif

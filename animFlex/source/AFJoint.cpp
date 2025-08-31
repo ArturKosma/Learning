@@ -2,6 +2,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/transform.hpp>
 
 void AFJoint::SetLocation(const glm::vec3& newLocation)
@@ -24,8 +25,34 @@ glm::vec3 AFJoint::GetLocation() const
 	return location;
 }
 
+glm::vec3 AFJoint::GetGlobalLocation() const
+{
+	glm::vec3 translation;
+	glm::quat rotation;
+	glm::vec3 scale;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::decompose(nodeMatrix,
+		scale, rotation, translation, skew, perspective);
+
+	return translation;
+}
+
 glm::quat AFJoint::GetRotation() const
 {
+	return rotation;
+}
+
+glm::quat AFJoint::GetGlobalRotation() const
+{
+	glm::vec3 translation;
+	glm::quat rotation;
+	glm::vec3 scale;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::decompose(nodeMatrix,
+		scale, rotation, translation, skew, perspective);
+
 	return rotation;
 }
 

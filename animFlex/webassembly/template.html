@@ -106,8 +106,33 @@
             background: rgba(87, 87, 0, 0.6);
         }
 
-        .possess-button {
-            cursor: pointer;
+        .playrate-flex {
+            position: absolute; 
+            bottom: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            left: 0;
+            right: 0;
+            gap: 8px;
+        }
+
+        .playrate-flex-number {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 400;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            color: #dadada9c;
+        }
+
+        .playrate-flex-buttons {
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            justify-content: center;
+            pointer-events: auto;
+            gap: 8px;
         }
 
         .save-button {
@@ -124,8 +149,21 @@
     <div class="emscripten_border" style="display: flex; flex-direction: column;">
         <div id="topPane" style="height: 100%; min-height: 30vh; position: relative">
             <canvas class="emscripten" id="canvas" style="width: 100%; height: 100%;" oncontextmenu="event.preventDefault()" tabindex="0" data-antialias="true"></canvas>
-            <div class="possess-button" style="position: absolute; bottom: 40px; right: 40px;">
-                <img src="../animFlex/graph/possessCharacter.png" alt="Possess"></img>
+            <div class="playrate-flex">
+                <div class="playrate-flex-number">
+                    1.0
+                </div>
+                <div class="playrate-flex-buttons">
+                    <div class="playrate-slower">
+                        <img src="../animFlex/graph/faster.png" alt="Slower" style="transform: scaleX(-1); transform-origin: center; cursor: pointer"></img>
+                    </div>
+                    <div class="playrate-pause">
+                        <img src="../animFlex/graph/pause.png" alt="Pause" style="cursor: pointer;"></img>
+                    </div>
+                    <div class="playrate-faster">
+                        <img src="../animFlex/graph/faster.png" alt="Faster" style="cursor: pointer;"></img>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="splitter" style="height: 10px; cursor: row-resize; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -229,8 +267,19 @@
         };
     </script>
     <script>
+        let runtimeReady = false;
+
+        // Safe wrapper to avoid calling into WASM too early.
+        function ccallSafe(name, returnType, argTypes, args) {
+            if (!runtimeReady) return 0;
+            return Module.ccall(name, returnType, argTypes, args);
+        }
+
+        </script>
+    <script>
         Module.onRuntimeInitialized = function () {
             console.log("Emscripten runtime initialized");
+            runtimeReady = true;
             resizeCanvasToContainer();
         };
 
@@ -416,9 +465,9 @@
     <script type="module">
         import { save, clear, load, switchToView } from "../animFlex/graph/afmanager.tsx";
 
-        document.querySelector('.possess-button').addEventListener('click', () => {
+        /*document.querySelector('.possess-button').addEventListener('click', () => {
             Module.ccall('Possess');
-        })
+        })*/
 
         document.querySelector('.save-button').addEventListener('click', async () => {
         try {
@@ -463,20 +512,69 @@
                 }
             }
         })
+    </script>
+    <script type="module">
+        // Select all images inside .playrate-flex.
+        import playUrl   from '../animFlex/graph/play.png?url';
+        import pauseUrl  from '../animFlex/graph/pause.png?url';
+        import fasterUrl from '../animFlex/graph/faster.png?url';
 
-        document.addEventListener('pointerlockchange', () => {
-            const canvas = document.getElementById("canvas");
-            const isLocked = document.pointerLockElement === canvas;
+        const fmt = (v) => Number(v).toFixed(1);
+        const numberEl = document.querySelector('.playrate-flex-number');
+        const pauseImg = document.querySelector('.playrate-pause img');
+        const slowerImg = document.querySelector('.playrate-slower img');
+        const fasterImg = document.querySelector('.playrate-faster img');
 
-            if (!isLocked) {
-
-                // Wait a bit before allowing pointer lock again.
-                setTimeout(() => {
-                }, 300);
-
-                Module.ccall('UnPossess');
-            }
+        document.querySelector('.playrate-slower').addEventListener('click', async () => {
+           ccallSafe('PlayrateSlower');
         });
+
+        document.querySelector('.playrate-pause').addEventListener('click', async () => {
+            ccallSafe('PlayrateToggle');
+        })
+
+        document.querySelector('.playrate-faster').addEventListener('click', async () => {
+            ccallSafe('PlayrateFaster');
+        })
+
+        function UpdatePlayrateFrontend() {
+            const ptr = ccallSafe(
+                'GetPlayrateStatus',   
+                'number',              
+                [],       
+                []
+            );
+
+            if(!ptr) return;
+
+            const statusString = UTF8ToString(ptr);
+            if (!statusString) return;
+
+            const statusJson = JSON.parse(statusString);
+
+            const playrate = statusJson['Playrate'];
+            const paused = statusJson['Paused']
+
+            if (numberEl) numberEl.textContent = fmt(playrate);
+            if (pauseImg) {
+                if (paused) {
+                    pauseImg.src = playUrl;
+                    pauseImg.alt = 'Play';
+                } else {
+                    pauseImg.src = pauseUrl;
+                    pauseImg.alt = 'Pause';
+                }
+            }
+
+            ccallSafe(
+                'FreePlayrateStatus',
+                null,                    
+                ['number'],              
+                [ptr]                    
+            );
+        }
+
+        setInterval(UpdatePlayrateFrontend, 1000 / 30);
     </script>
 
     <!-- @vite-ignore -->

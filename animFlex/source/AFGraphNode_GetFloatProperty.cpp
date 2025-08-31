@@ -28,7 +28,6 @@ void AFGraphNode_GetFloatProperty::Evaluate(float deltaTime)
 void AFGraphNode_GetFloatProperty::OnReset()
 {
 	m_distanceTraveled = 0.0f;
-	m_previousPlayerLocation = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetLocation();
 
 	m_open = true;
 }
@@ -104,21 +103,15 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 	}
 	case EAFFloatProperties::DistanceTraveled:
 	{
-		const glm::vec3 currentLoc = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetLocation();
-		m_distanceTraveled = m_distanceTraveled + glm::length(currentLoc - m_previousPlayerLocation);
-		m_previousPlayerLocation = currentLoc;
+		const glm::vec3 locationOffset = m_charMovement.lock()->GetLastLocationOffset();
+		m_distanceTraveled = m_distanceTraveled + glm::length(locationOffset);
 
 		ret = m_distanceTraveled;
 		break;
 	}
 	case EAFFloatProperties::AngleTowardsMovementInput:
 	{
-		const glm::vec3& movementInput = glm::normalize(m_charMovement.lock()->GetLastPositiveMovementInput());
-		const glm::quat& actorWorldRotation = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetRotationQuat();
-		const glm::vec3& actorWorldForward = glm::normalize(actorWorldRotation * glm::vec3(0.0, 0.0f, 1.0f));
-
-		const float angle = AFMath::SignedAngleBetweenVectors(movementInput, actorWorldForward, glm::vec3(0.0f, 1.0f, 0.0f));
-		ret = angle;
+		ret = AFUtility::GetAngleTowardsMovementInput();
 		break;
 	}
 	default:

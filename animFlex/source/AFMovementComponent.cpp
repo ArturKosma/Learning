@@ -40,7 +40,9 @@ void AFMovementComponent::Tick(float deltaTime)
 	if (glm::length(m_velocity) > std::numeric_limits<float>::epsilon())
 	{
 		m_lastPositiveVelocity = m_velocity;
-		owner->AddOffsetLocation(m_velocity * deltaTime);
+		const glm::vec3 velocityDelta = m_velocity * deltaTime;
+		owner->AddOffsetLocation(velocityDelta);
+		m_lastLocationOffset = velocityDelta;
 	}
 
 	// Consume last input.
@@ -108,6 +110,11 @@ glm::vec3 AFMovementComponent::GetMovementInput() const
 glm::vec3 AFMovementComponent::GetLastPositiveMovementInput() const
 {
 	return m_lastPositiveMovementInput;
+}
+
+glm::vec3 AFMovementComponent::GetLastLocationOffset() const
+{
+	return m_lastLocationOffset;
 }
 
 void AFMovementComponent::AddOffset(const glm::vec3& offset)

@@ -7,6 +7,7 @@ import { AreaExtensions } from "rete-area-plugin";
 import { SelectorEntity } from "rete-area-plugin/_types/extensions/selectable";
 import { GraphNode, AFEnum, AFNodeFactory } from "./afnodeFactory";
 import { makeConnection } from "rete-connection-plugin";
+import { OnNodeUpdated } from "./affunclib";
 
 let currentView : any;
 
@@ -100,6 +101,12 @@ export async function createView(name: string, id: string, type: ReteViewType, s
 
     const existing = editors.find(e => e.id === id);
     if(existing) {
+
+        // Refresh breadcrumbs.      
+        const idx = breadcrumbs.findIndex(b => b.id === existing.id);
+        if (idx !== -1) breadcrumbs.splice(idx, 1);
+        breadcrumbs.push({ name, id: existing.id });
+
         switchToView(existing.id);
         return existing;
     }
@@ -470,6 +477,8 @@ export async function load(data: SavedProject) {
 
       // Reassign values map.
       (newNode as any).meta.valuesMap = savedNode.valuesMap;
+      //console.log("*****");
+      //console.log(savedNode.valuesMap);
 
       // Remap input pin IDs.
       for (const saved of savedNode.pins.inputs) {
@@ -525,6 +534,9 @@ export async function load(data: SavedProject) {
       if (savedNode.position) {
         pendingPositions.push({ id: newNode.id, pos: savedNode.position });
       }
+
+      // Force OnNodeUpdated.
+      await OnNodeUpdated(editorObject.editor, newNode);
     }
 
     await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
