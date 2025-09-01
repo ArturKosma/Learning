@@ -31,12 +31,6 @@ void AFCharacterMovementComponent::Tick(float deltaTime)
 	std::shared_ptr<AFPlayerPawn> ownerPawn = std::dynamic_pointer_cast<AFPlayerPawn>(GetOwner().lock());
 	if (ownerPawn)
 	{
-		//const float d = 90.0f * deltaTime;
-		//const glm::vec3 p = GetLocationAfterBallPivotRot(90.0f * deltaTime);
-		//const glm::vec3 mix = glm::mix(ownerPawn->GetLocation(), p, 1.0f);
-		//ownerPawn->AddOffsetRotation(glm::vec3(0.0f, d, 0.0f));
-		//ownerPawn->SetLocation(mix);
-
 		if (glm::length(m_velocity) <= std::numeric_limits<float>::epsilon())
 		{
 			m_previousRootYaw = 0.0f;
@@ -49,20 +43,11 @@ void AFCharacterMovementComponent::Tick(float deltaTime)
 			return;
 		}
 
-
-		// Find delta angle to rotate mechanically.
-		const glm::vec3 lastDirection = AFMath::GetSafeNormal(m_velocity);
-		const glm::vec3 forward = glm::vec3(0.0f, 0.0f, 1.0f);
-		const glm::quat lastDirectionQuat = glm::rotation(forward, lastDirection);
-		float angle = glm::angle(lastDirectionQuat);
-		const glm::vec3 axis = glm::axis(lastDirectionQuat);
-		if (glm::dot(axis, glm::vec3(0.0f, 1.0, 0.0f)) < 0.0f)
-		{
-			angle = -angle;
-		}
+		m_distanceTraveled += glm::length(GetLastLocationOffset());
 
 		// Rotation from rootYaw, which acts like rootMotion for rotation.
-		const float rootYaw = animState->GetCurveValue("rootYaw");
+		//const float rootYaw = animState->GetCurveValue("rootYaw");
+		const float rootYaw = 0.0f;
 		//printf("%s: %f\n", "rootYaw", rootYaw);
 		//printf("%s: %f\n", "previousRootYaw", m_previousRootYaw);
 
@@ -77,10 +62,10 @@ void AFCharacterMovementComponent::Tick(float deltaTime)
 		// How much more we need towards target yaw.
 		const glm::quat& actorWorldRotation = ownerPawn->GetRotationQuat();
 		const glm::vec3& actorWorldForward = glm::normalize(actorWorldRotation * glm::vec3(0.0, 0.0f, 1.0f));
-		const float rootYawLeftCharacter = AFMath::SignedAngleBetweenVectors(m_lastPositiveMovementInput, actorWorldForward, glm::vec3(0.0f, 1.0f, 0.0f));
+		const float yawLeftCharacter = AFMath::SignedAngleBetweenVectors(m_lastPositiveMovementInput, actorWorldForward, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Yaw delta warp factor.
-		const float k = glm::clamp(rootYawLeftCharacter / rootYawLeftSafe, 0.0f, 5.0f);
+		const float k = glm::clamp(yawLeftCharacter / rootYawLeftSafe, 0.0f, 5.0f);
 
 		//printf("%s: %f\n", "char left", rootYawLeftCharacter);
 		//printf("%s: %f\n", "anim left", rootYawLeftSafe);
@@ -117,7 +102,7 @@ void AFCharacterMovementComponent::Tick(float deltaTime)
 
 			const glm::quat curRot = ownerPawn->GetRotationQuat();
 			const glm::vec3 curFwd = glm::normalize(glm::rotate(curRot, forward));
-			const glm::vec3 tgtFwd = AFMath::GetSafeNormal(lastDirection);
+			const glm::vec3 tgtFwd = AFMath::GetSafeNormal(m_velocity);
 
 			const float rad = std::atan2(glm::dot(up, glm::cross(curFwd, tgtFwd)),
 				glm::dot(curFwd, tgtFwd));
@@ -145,6 +130,16 @@ void AFCharacterMovementComponent::Tick(float deltaTime)
 		// Set pivoted location.
 		ownerPawn->SetLocation(finalLoc);
 	}
+}
+
+float AFCharacterMovementComponent::GetDistanceTraveled() const
+{
+	return m_distanceTraveled;
+}
+
+void AFCharacterMovementComponent::ResetDistanceTraveled()
+{
+	m_distanceTraveled = 0.0f;
 }
 
 glm::vec3 AFCharacterMovementComponent::GetLocationAfterBallPivotRot(float deltaYaw)

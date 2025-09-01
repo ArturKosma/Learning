@@ -5,6 +5,11 @@ void AFGraphNode_StateMachine::Init()
 	m_stateMachine = std::make_shared<AFStateMachine>();
 }
 
+void AFGraphNode_StateMachine::PreEvaluate(float deltaTime)
+{
+	m_stateMachine->PreEvaluate(deltaTime);
+}
+
 void AFGraphNode_StateMachine::Evaluate(float deltaTime)
 {
 	m_stateMachine->Evaluate(deltaTime);

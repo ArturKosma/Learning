@@ -44,9 +44,10 @@ struct FAFParam : FAFParamBase
 {
 public:
 
-	FAFParam(const std::string& paramName)
+	FAFParam(const std::string& paramName, T defaultValue = {})
 	{
 		name = paramName;
+		SetValue(defaultValue);
 	}
 
 	operator T()
@@ -424,7 +425,7 @@ const T& FAFParam<T>::GetValue() const
 	std::string GetNodeType() const override {return #Class;}
 
 #define AFPARAM(Type, VarName, DefaultValue, VarString, Direction, Meta) \
-	FAFParam<Type> VarName = FAFParam<Type>(#VarName); \
+	FAFParam<Type> VarName = FAFParam<Type>(#VarName, DefaultValue); \
 	inline static FAFGraphNodeParamRegistrar<ThisClass, Type> _registrar_##VarName = FAFGraphNodeParamRegistrar<ThisClass, Type>(ThisClassStringName, #VarName, DefaultValue, &ThisClass::VarName, Direction)
 
 #define AFENUM() 

@@ -48,6 +48,18 @@ bool AFGame::Init()
 
 void AFGame::Tick(float deltaTime)
 {
+	// Pre tick.
+	for (std::shared_ptr<AFActor> actor : m_scene.GetSceneData().sceneActors)
+	{
+		actor->PreTick(deltaTime);
+	}
+
+	for (std::shared_ptr<AFUI> ui : m_scene.GetSceneData().uis)
+	{
+		ui->PreTick(deltaTime);
+	}
+
+	// Tick.
 	for(std::shared_ptr<AFActor> actor : m_scene.GetSceneData().sceneActors)
 	{
 		actor->Tick(deltaTime);
@@ -56,6 +68,17 @@ void AFGame::Tick(float deltaTime)
 	for (std::shared_ptr<AFUI> ui : m_scene.GetSceneData().uis)
 	{
 		ui->Tick(deltaTime);
+	}
+
+	// Post tick.
+	for (std::shared_ptr<AFActor> actor : m_scene.GetSceneData().sceneActors)
+	{
+		actor->PostTick(deltaTime);
+	}
+
+	for (std::shared_ptr<AFUI> ui : m_scene.GetSceneData().uis)
+	{
+		ui->PostTick(deltaTime);
 	}
 }
 

@@ -7,6 +7,7 @@ class AFStateMachine : public AFAnimGraph
 {
 public:
 
+	void PreEvaluate(float deltaTime) override;
 	void Evaluate(float deltaTime) override;
 
 	void OnNodeCreated(const std::string& msg) override;

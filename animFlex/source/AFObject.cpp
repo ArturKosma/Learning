@@ -4,7 +4,15 @@ void AFObject::BeginPlay()
 {
 }
 
+void AFObject::PreTick(float deltaTime)
+{
+}
+
 void AFObject::Tick(float deltaTime)
+{
+}
+
+void AFObject::PostTick(float deltaTime)
 {
 }
 

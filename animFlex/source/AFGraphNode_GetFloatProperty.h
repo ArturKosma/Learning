@@ -27,7 +27,6 @@ public:
 
 private:
 
-	float m_distanceTraveled = 0.0f;
 	bool m_open = true;
 
 	std::weak_ptr<class AFCharacterMovementComponent> m_charMovement = {};

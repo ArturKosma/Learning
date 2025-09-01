@@ -1147,7 +1147,8 @@
         {
             "enum_name": "EAFStringProperties",
             "values": [
-                "StartRunAnim"
+                "StartRunAnim",
+                "StartRunCurve_RootDistance"
             ]
         },
         {

@@ -20,6 +20,7 @@ public:
 
 	virtual void Init();
 	virtual void OnUpdate();
+	virtual void PreEvaluate(float deltaTime);
 	virtual void Evaluate(float deltaTime) = 0;
 	virtual void OnReset();
 

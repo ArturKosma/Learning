@@ -10,6 +10,16 @@ AFSkeletalMeshComponent::AFSkeletalMeshComponent()
 	m_animState->SetOwnerMesh(this);
 }
 
+void AFSkeletalMeshComponent::PreTick(float deltaTime)
+{
+	AFStaticMeshComponent::PreTick(deltaTime);
+
+	const bool paused = AFEvaluator::Get().GetAnimPaused();
+	const float playrate = AFEvaluator::Get().GetAnimPlayrate();
+
+	m_animState->PreTick(paused ? 0.0f : deltaTime * playrate);
+}
+
 void AFSkeletalMeshComponent::Tick(float deltaTime)
 {
 	AFStaticMeshComponent::Tick(deltaTime);

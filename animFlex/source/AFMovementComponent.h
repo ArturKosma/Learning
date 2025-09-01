@@ -8,7 +8,8 @@ class AFMovementComponent : public AFComponent
 {
 public:
 
-	void Tick(float deltaTime);
+	void PreTick(float deltaTime) override;
+	void Tick(float deltaTime) override;
 
 	virtual float GetAcceleration() const;
 	virtual float GetDeceleration() const;

@@ -14,7 +14,10 @@ public:
 	virtual ~AFObject() = default;
 
 	virtual void BeginPlay();
+
+	virtual void PreTick(float deltaTime);
 	virtual void Tick(float deltaTime);
+	virtual void PostTick(float deltaTime);
 
 	void SetDisplayName(const std::string& newName);
 	std::string GetDisplayName() const;

@@ -4,7 +4,8 @@
 AFENUM()
 enum class EAFStringProperties
 {
-	StartRunAnim
+	StartRunAnim,
+	StartRunCurve_RootDistance
 };
 
 class AFGraphNode_GetStringProperty : public AFGraphNodeCRTP<AFGraphNode_GetStringProperty>

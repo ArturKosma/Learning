@@ -18,10 +18,14 @@ enum class EAFAnimEvaluationState : uint8_t
 	Playing
 };
 
+// This class acts as AnimInstance from Unreal Engine.
+// It has lots of variables and functions used during graph evaluation.
+
 class AFAnimState
 {
 public:
 
+	void PreTick(float deltaTime);
 	void Tick(float deltaTime);
 
 	void SetOwnerMesh(AFSkeletalMeshComponent* newOwner);
@@ -38,10 +42,12 @@ public:
 
 	// Graph functions.
 	std::string GetStartRunAnim() const;
+	std::string GetStartRunCurve_RootDistance() const;
 
 private:
 
 	void EvaluateSingleAnim();
+	void PreEvaluateGraph(float deltaTime);
 	void EvaluateGraph(float deltaTime);
 
 	// Graph functions.
@@ -49,6 +55,7 @@ private:
 
 	// Graph variables.
 	std::string m_startRunAnim = "";
+	std::string m_startRunCurve_rootDistance = "";
 
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;

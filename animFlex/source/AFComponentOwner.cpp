@@ -1,5 +1,19 @@
 #include "AFComponentOwner.h"
 
+void AFComponentOwner::PreTick(float deltaTime)
+{
+    for (std::shared_ptr<AFComponent> comp : m_components)
+    {
+        if (!comp)
+        {
+            continue;
+        }
+        comp->PreTick(deltaTime);
+    }
+
+    AFObject::PreTick(deltaTime);
+}
+
 void AFComponentOwner::Tick(float deltaTime)
 {
     for (std::shared_ptr<AFComponent> comp : m_components)
@@ -12,6 +26,20 @@ void AFComponentOwner::Tick(float deltaTime)
     }
 
     AFObject::Tick(deltaTime);
+}
+
+void AFComponentOwner::PostTick(float deltaTime)
+{
+    for (std::shared_ptr<AFComponent> comp : m_components)
+    {
+        if (!comp)
+        {
+            continue;
+        }
+        comp->PostTick(deltaTime);
+    }
+
+    AFObject::PostTick(deltaTime);
 }
 
 void AFComponentOwner::AddComponent(std::shared_ptr<AFComponent> newComponent)

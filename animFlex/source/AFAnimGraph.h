@@ -10,6 +10,7 @@ class AFAnimGraph : public AFObject
 {
 public:
 
+	virtual void PreEvaluate(float deltaTime);
 	virtual void Evaluate(float deltaTime);
 
 	virtual void OnNodeCreated(const std::string& msg);

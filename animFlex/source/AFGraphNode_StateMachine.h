@@ -12,6 +12,7 @@ public:
 
 	void Init() override;
 
+	void PreEvaluate(float deltaTime) override;
 	void Evaluate(float deltaTime) override;
 	std::shared_ptr<AFStateMachine> GetStateMachine() const;
 

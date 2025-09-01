@@ -15,6 +15,7 @@ public:
 	}
 
 	void EvaluateNode(std::shared_ptr<class AFGraphNode> node);
+	void PreEvaluateNode(std::shared_ptr<class AFGraphNode> node);
 
 	void AddLastActiveSocket(const nlohmann::json& newSocket);
 	std::string GetLastActiveSockets();
@@ -24,6 +25,7 @@ public:
 	std::string GetLastActiveStates();
 	void ClearLastActiveStates();
 
+	void ClearPreEvaluationState();
 	void ClearEvaluationState();
 
 	void AddSamplingState(const FAFStateSampling& sampling);
@@ -45,6 +47,7 @@ private:
 	nlohmann::json m_lastActiveStatesCached = nlohmann::json::array();
 
 	std::vector<std::shared_ptr<class AFGraphNode>> m_evaluated = {};
+	std::vector<std::shared_ptr<class AFGraphNode>> m_preEvaluated = {};
 
 	std::vector<FAFStateSampling> m_samplingState = {};
 	// Required to be able to look in the previous frame.

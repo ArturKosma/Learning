@@ -19,6 +19,58 @@ void AFEvaluator::EvaluateNode(std::shared_ptr<AFGraphNode> node)
 	}
 }
 
+void AFEvaluator::PreEvaluateNode(std::shared_ptr<class AFGraphNode> node)
+{
+	// Early return if invalid node.
+	if (!node)
+	{
+		return;
+	}
+
+	// Pre evaluate only once.
+	auto it = std::find(m_preEvaluated.begin(), m_preEvaluated.end(), node);
+	if (it != m_preEvaluated.end())
+	{
+		return;
+	}
+
+	// Remember this node was pre evaluated.
+	m_preEvaluated.push_back(node);
+
+	// Get connection per property.
+	std::vector<std::shared_ptr<FAFParamStaticPropertyBase>> staticProperties = AFGraphNodeRegistry::Get().GetStaticProperties(node->GetNodeType());
+	for (std::shared_ptr<FAFParamStaticPropertyBase> property : staticProperties)
+	{
+		FAFParamBase* param = static_cast<FAFParamBase*>(property->GetParam(node));
+		if (!param)
+		{
+			continue;
+		}
+
+		std::string connectedNodeId;
+		std::string connectedSocketName;
+		const bool connected = param->GetConnection(connectedNodeId, connectedSocketName);
+		if (!connected)
+		{
+			continue;
+		}
+
+		std::shared_ptr<AFGraphNode> connectedNode = AFGraphNodeRegistry::Get().GetNode(connectedNodeId);
+		if (!connectedNode)
+		{
+			continue;
+		}
+
+		// Recurrence down the chain.
+		PreEvaluateNode(connectedNode);
+	}
+
+	// Pre evaluate at the very end, so that the furthest nodes down the chain get pre evaluated first.
+	const float deltaTime = AFTimerManager::GetDeltaTime();
+	//printf("pre eval: %s\n", node->GetNodeID().c_str());
+	node->PreEvaluate(m_animPaused ? 0.0f : deltaTime * m_animPlayrate);
+}
+
 void AFEvaluator::AddLastActiveSocket(const nlohmann::json& newSocket)
 {
 	m_lastActiveSockets.push_back(newSocket);
@@ -62,6 +114,11 @@ void AFEvaluator::ClearLastActiveStates()
 {
 	m_lastActiveStatesCached = m_lastActiveStates;
 	m_lastActiveStates = nlohmann::json::array();
+}
+
+void AFEvaluator::ClearPreEvaluationState()
+{
+	m_preEvaluated.clear();
 }
 
 void AFEvaluator::ClearEvaluationState()

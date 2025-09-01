@@ -7,6 +7,30 @@
 
 #include "third_party/json.hpp"
 
+void AFAnimGraph::PreEvaluate(float deltaTime)
+{
+	if (m_outputPoseNode)
+	{
+		std::string connectedNodeId = "";
+		std::string connectedSocketName = "";
+		m_outputPoseNode->Pose.GetConnection(connectedNodeId, connectedSocketName);
+		if (connectedNodeId.empty() || connectedSocketName.empty())
+		{
+			return;
+		}
+
+		std::shared_ptr<AFGraphNode> connectedNode = AFGraphNodeRegistry::Get().GetNode(connectedNodeId);
+		if (!connectedNode)
+		{
+			return;
+		}
+
+		// Trigger pre evaluate for the output pose node.
+		// This should trigger whole chain of node pre evaluations.
+		AFEvaluator::Get().PreEvaluateNode(connectedNode);
+	}
+}
+
 void AFAnimGraph::Evaluate(float deltaTime)
 {
 	if (m_outputPoseNode)
@@ -46,6 +70,7 @@ void AFAnimGraph::OnNodeCreated(const std::string& msg)
 	std::shared_ptr<AFGraphNode> newNode = AFGraphNodeRegistry::Get().CreateNode(nodeType, nodeId);
 	newNode->m_nodeId = nodeId;
 	newNode->m_nodeContext = nodeContext;
+
 	newNode->Init();
 
 	// #hack

@@ -12,7 +12,9 @@ public:
 	AFComponentOwner() = default;
 	virtual ~AFComponentOwner() override = default;
 
+	void PreTick(float deltaTime) override;
 	void Tick(float deltaTime) override;
+	void PostTick(float deltaTime) override;
 
 	void AddComponent(std::shared_ptr<AFComponent> newComponent);
 

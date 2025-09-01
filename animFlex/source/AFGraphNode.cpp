@@ -8,6 +8,10 @@ void AFGraphNode::OnUpdate()
 {
 }
 
+void AFGraphNode::PreEvaluate(float deltaTime)
+{
+}
+
 void AFGraphNode::OnReset()
 {
 }

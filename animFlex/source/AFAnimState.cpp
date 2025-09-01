@@ -2,10 +2,38 @@
 #include "AFSkeletalMeshComponent.h"
 #include <chrono>
 
+#include "AFCharacterMovementComponent.h"
 #include "AFEvaluator.h"
+#include "AFGame.h"
 #include "AFMath.h"
 #include "AFMesh.h"
+#include "AFPlayerPawn.h"
 #include "AFUtility.h"
+
+void AFAnimState::PreTick(float deltaTime)
+{
+	if (m_evaluationState == EAFAnimEvaluationState::Idle)
+	{
+		return;
+	}
+
+	switch (m_sourceState)
+	{
+	case EAFAnimSourceState::SingleAnim:
+	{
+		break;
+	}
+	case EAFAnimSourceState::Graph:
+	{
+		PreEvaluateGraph(deltaTime);
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+}
 
 void AFAnimState::Tick(float deltaTime)
 {
@@ -92,6 +120,11 @@ std::string AFAnimState::GetStartRunAnim() const
 	return m_startRunAnim;
 }
 
+std::string AFAnimState::GetStartRunCurve_RootDistance() const
+{
+	return m_startRunCurve_rootDistance;
+}
+
 void AFAnimState::EvaluateSingleAnim()
 {
 	if (!(m_ownerMesh && m_singleAnim))
@@ -142,6 +175,17 @@ void AFAnimState::EvaluateSingleAnim()
 	m_ownerMesh->GetMesh()->jointsDirty = true;
 }
 
+void AFAnimState::PreEvaluateGraph(float deltaTime)
+{
+	if (!m_graph || !m_ownerMesh)
+	{
+		return;
+	}
+
+	AFEvaluator::Get().ClearPreEvaluationState();
+	m_graph->PreEvaluate(deltaTime);
+}
+
 void AFAnimState::EvaluateGraph(float deltaTime)
 {
 	if (!m_graph || !m_ownerMesh)
@@ -189,6 +233,12 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 
 void AFAnimState::OnStartRunEnter()
 {
+	std::shared_ptr<AFCharacterMovementComponent> charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
+	if (!charMovement)
+	{
+		return;
+	}
+
 	// How big the angle is towards target movement input?
 	const float angle = AFUtility::GetAngleTowardsMovementInput();
 
@@ -213,7 +263,21 @@ void AFAnimState::OnStartRunEnter()
 		"M_Neutral_Run_Reface_Start_F_R_180"
 	};
 
+	std::vector<std::string> startRunRootDistances =
+	{
+		"M_Neutral_Run_Reface_Start_F_L_180_rootDistance",
+		"M_Neutral_Run_Reface_Start_F_L_090_rootDistance",
+		"M_Neutral_Run_Start_F_Rfoot_rootDistance",
+		"M_Neutral_Run_Reface_Start_F_R_090_rootDistance",
+		"M_Neutral_Run_Reface_Start_F_R_180_rootDistance"
+	};
+
+	// Cache the start run anim name.
 	m_startRunAnim = startRunAnims[index];
 
-	printf("%s\n", m_startRunAnim.c_str());
+	// Cache the start run root distance curve name.
+	m_startRunCurve_rootDistance = startRunRootDistances[index];
+
+	// Reset the distance traveled for distance-matching.
+	charMovement->ResetDistanceTraveled();
 }

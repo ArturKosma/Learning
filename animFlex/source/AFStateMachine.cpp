@@ -6,20 +6,12 @@
 #include "AFMath.h"
 #include "AFPlayerPawn.h"
 
-void AFStateMachine::Evaluate(float deltaTime)
+void AFStateMachine::PreEvaluate(float deltaTime)
 {
-	// Get anim state (equivalent to AnimInstance in UE).
 	std::shared_ptr<AFAnimState> animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
 	if (!animState)
 	{
 		return;
-	}
-
-	// Progress blend.
-	float blendTime = 0.15f;
-	if (m_isBlending)
-	{
-		m_currentBlend.currentBlendTime = glm::clamp(m_currentBlend.currentBlendTime + deltaTime, 0.0f, m_currentBlend.blendLength);
 	}
 
 	// Erase expired states (deleted nodes).
@@ -38,6 +30,8 @@ void AFStateMachine::Evaluate(float deltaTime)
 
 	// Container for the new state to transition to.
 	std::weak_ptr<AFGraphNode> nextState = m_currentState;
+
+	float blendTime = 0.15f;
 
 	// Max 5 jumps per evaluate.
 	for (int i = 0; i < 5; i++)
@@ -84,6 +78,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 		if (nextStateCond)
 		{
 			blendTime = nextStateCond->m_blendTime.GetValue();
+			//printf("%f\n", blendTime);
 		}
 	}
 
@@ -97,7 +92,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 	// There was no transition at all, evaluate our current state.
 	if (nextState.lock() == m_currentState.lock())
 	{
-		
+
 	}
 	else
 	{
@@ -122,6 +117,22 @@ void AFStateMachine::Evaluate(float deltaTime)
 			const std::string& funStr = state->m_onEnterFunStr.GetValue();
 			animState->CallFunctionByString(funStr);
 		}
+	}
+}
+
+void AFStateMachine::Evaluate(float deltaTime)
+{
+	// Get anim state (equivalent to AnimInstance in UE).
+	std::shared_ptr<AFAnimState> animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
+	if (!animState)
+	{
+		return;
+	}
+
+	// Progress blend.
+	if (m_isBlending)
+	{
+		m_currentBlend.currentBlendTime = glm::clamp(m_currentBlend.currentBlendTime + deltaTime, 0.0f, m_currentBlend.blendLength);
 	}
 
 	// Evaluate final pose.

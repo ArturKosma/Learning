@@ -10,6 +10,7 @@ public:
 
 	AFSkeletalMeshComponent();
 
+	void PreTick(float deltaTime) override;
 	void Tick(float deltaTime) override;
 
 	void SetAnimation(std::shared_ptr<AFAnimationClip> newAnimation);

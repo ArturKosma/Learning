@@ -3,6 +3,11 @@
 #include "AFActor.h"
 #include "AFTimerManager.h"
 
+void AFMovementComponent::PreTick(float deltaTime)
+{
+	
+}
+
 void AFMovementComponent::Tick(float deltaTime)
 {
 	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
@@ -97,6 +102,10 @@ void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 	if (glm::length(movementInput) > std::numeric_limits<float>::epsilon())
 	{
 		m_lastMovementInput += movementInput;
+
+		// #hack.
+		// This won't work with gamepad and scaled stroke.
+		// @todo Gamepad support.
 		m_lastMovementInput = glm::normalize(m_lastMovementInput);
 		m_lastPositiveMovementInput = m_lastMovementInput;
 	}

@@ -113,6 +113,16 @@ public:
 		return glm::normalize(glm::vec3(x, y, z));
 	}
 
+	static glm::quat QuaternionFromDirection(const glm::vec3 direction, const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f))
+	{
+		glm::vec3 forward = glm::normalize(direction);
+		glm::vec3 right = glm::normalize(glm::cross(up, forward));
+		glm::vec3 newUp = glm::cross(forward, right);
+
+		glm::mat3 rotMat(right, newUp, forward);
+		return glm::quat_cast(rotMat);
+	}
+
 	static glm::quat QInterpTo(const glm::quat& current, const glm::quat& target, float interpSpeed, float deltaTime)
 	{
 		if (interpSpeed <= 0.0f)

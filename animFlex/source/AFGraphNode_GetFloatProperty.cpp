@@ -27,8 +27,6 @@ void AFGraphNode_GetFloatProperty::Evaluate(float deltaTime)
 
 void AFGraphNode_GetFloatProperty::OnReset()
 {
-	m_distanceTraveled = 0.0f;
-
 	m_open = true;
 }
 
@@ -103,10 +101,7 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 	}
 	case EAFFloatProperties::DistanceTraveled:
 	{
-		const glm::vec3 locationOffset = m_charMovement.lock()->GetLastLocationOffset();
-		m_distanceTraveled = m_distanceTraveled + glm::length(locationOffset);
-
-		ret = m_distanceTraveled;
+		ret = m_charMovement.lock()->GetDistanceTraveled();
 		break;
 	}
 	case EAFFloatProperties::AngleTowardsMovementInput:

@@ -4,11 +4,11 @@
 AFPlayerPawn::AFPlayerPawn()
 	: AFActor()
 {
-	m_meshComponent = AFScene::CreateObject<AFSkeletalMeshComponent>();
-	AddComponent(m_meshComponent);
-
 	m_characterMovementComponent = AFScene::CreateObject<AFCharacterMovementComponent>();
 	AddComponent(m_characterMovementComponent);
+
+	m_meshComponent = AFScene::CreateObject<AFSkeletalMeshComponent>();
+	AddComponent(m_meshComponent);
 
 	m_cameraComponent = AFScene::CreateObject<AFCameraComponent>();
 	m_cameraComponent->SetDisplayName("heroCamera");
