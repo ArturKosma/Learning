@@ -73,8 +73,6 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 		}
 	}
 
-	const_cast<AFPose&>(playseq_outputPose.GetValue()).ApplyClip(m_animClip, m_localTime, playseq_forceRootLock);
-
 	// Register the clip sampling globally.
 	// We need this information for things like RelevantAnimTimeRemaining.
 	FAFStateSampling sampling;
@@ -83,6 +81,8 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 	sampling.sampleTime = m_localTime;
 	sampling.maxTime = endTime;
 	AFEvaluator::Get().AddSamplingState(sampling);
+
+	const_cast<AFPose&>(playseq_outputPose.GetValue()).ApplyClip(m_animClip, m_localTime, playseq_forceRootLock);
 }
 
 void AFGraphNode_PlaySequence::OnReset()

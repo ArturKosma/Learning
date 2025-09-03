@@ -54,6 +54,10 @@ void AFMovementComponent::Tick(float deltaTime)
 		owner->AddOffsetLocation(velocityDelta);
 		m_lastLocationOffset = velocityDelta;
 	}
+
+	// Cache deltas.
+	m_lastControlYawDelta = GetControlRotation().y - m_lastFrameControlRotation.y;
+	m_lastFrameControlRotation = GetControlRotation();
 }
 
 float AFMovementComponent::GetAcceleration() const
@@ -86,6 +90,8 @@ void AFMovementComponent::SetControlRotation(const glm::vec3& newControlRotation
 
 	m_controlPitch = glm::clamp(newControlRotation.x, -89.0f, 89.0f);
 	m_controlYaw = newControlRotation.y;
+	m_controlYaw = m_controlYaw > 360.0f ? m_controlYaw - 360.0f : m_controlYaw;
+	m_controlYaw = m_controlYaw < -360.0f ? m_controlYaw + 360.0f : m_controlYaw;
 }
 
 glm::vec3 AFMovementComponent::GetControlRotation() const
@@ -123,6 +129,11 @@ glm::vec3 AFMovementComponent::GetLastPositiveMovementInput() const
 	return m_lastPositiveMovementInput;
 }
 
+glm::vec3 AFMovementComponent::GetLastFrameControlRotation() const
+{
+	return m_lastFrameControlRotation;
+}
+
 glm::vec3 AFMovementComponent::GetLastLocationOffset() const
 {
 	return m_lastLocationOffset;
@@ -152,17 +163,8 @@ void AFMovementComponent::AddControlRotation(const glm::vec3& delta)
 		return;
 	}
 
-	if (glm::length(delta) <= std::numeric_limits<float>::epsilon())
-	{
-		m_lastControlYawDelta = 0.0f;
-		return;
-	}
-
 	m_controlPitch = glm::clamp(m_controlPitch + delta.x, -89.0f, 89.0f);
-	const float oldControlYaw = m_controlYaw;
 	m_controlYaw += delta.y;
 	m_controlYaw = m_controlYaw > 360.0f ? m_controlYaw - 360.0f : m_controlYaw;
 	m_controlYaw = m_controlYaw < -360.0f ? m_controlYaw + 360.0f : m_controlYaw;
-
-	m_lastControlYawDelta = m_controlYaw - oldControlYaw;
 }

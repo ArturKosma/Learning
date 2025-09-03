@@ -24,7 +24,7 @@ void AFGraphNode_FloatOperation::Evaluate(float deltaTime)
 		case EAFFloatOperations::Divide:
 		{
 			float b = m_b.GetValue();
-			b = glm::sign(b) * glm::max(glm::abs(b), glm::epsilon<float>());
+			b = glm::sign(b == 0.0f ? 1.0f : b) * glm::max(glm::abs(b), glm::epsilon<float>());
 
 			ret = m_a / b;
 			break;

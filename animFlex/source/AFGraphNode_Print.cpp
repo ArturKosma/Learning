@@ -2,6 +2,8 @@
 
 void AFGraphNode_Print::Evaluate(float deltaTime)
 {
+	m_outputPose.SetValue(m_inputPose.GetValue());
+
 	if (m_printFloat.GetValue())
 	{
 		printf("%f\n", m_inputFloat.GetValue());
@@ -10,6 +12,4 @@ void AFGraphNode_Print::Evaluate(float deltaTime)
 	{
 		printf("%s\n", m_inputString.GetValue().c_str());
 	}
-
-	m_outputPose.SetValue(m_inputPose.GetValue());
 }

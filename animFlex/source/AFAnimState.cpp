@@ -20,7 +20,11 @@ void AFAnimState::PreTick(float deltaTime)
 
 	// Counter the control yaw (actor rotates with control yaw, root bone counters it).
 	// I do this on PreTick, because PreTick is checking entry states, like StartRun, which might calculate angle needed before reaching Tick.
-	m_rootYaw += pawn->GetCharacterMovementComponent()->GetLastControlYawDelta();
+	// PreTick happens after Input has ticked but before CharacterMovement has ticked, so we can get the "intent" here. The control rotation is already
+	// fresh new, but the delta is still old, so we calculate our own.
+	const float controlYawDelta = pawn->GetCharacterMovementComponent()->GetControlRotation().y - pawn->GetCharacterMovementComponent()->GetLastFrameControlRotation().y;
+	m_rootYaw += controlYawDelta;
+	m_rootYaw = AFMath::NormalizeAngle(m_rootYaw);
 
 	if (m_evaluationState == EAFAnimEvaluationState::Idle)
 	{
@@ -255,8 +259,6 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 		m_curves[name] = value;
 	}
 
-	//printf("%f\n", GetCurveValue("rootYawDelta"));
-
 	if (calculatedJoints.size() != currentJoints.size())
 	{
 		return;
@@ -334,6 +336,5 @@ void AFAnimState::OnStartRunEnter()
 	m_startRunCurve_rootYaw = startRunRootYaws[index];
 
 	// Reset the distance traveled for distance-matching in startRun.
-	// @todo Make sure this isn't added twice in Tick()!
-	m_startRunDistanceTraveled = glm::length(charMovement->GetLastLocationOffset());
+	m_startRunDistanceTraveled = 0.0f;
 }

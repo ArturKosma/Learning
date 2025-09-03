@@ -34,5 +34,5 @@ void AFCharacterMovementComponent::Tick(float deltaTime)
 		return;
 	}
 
-	ownerPawn->AddOffsetRotation({ 0.0f, -m_lastControlYawDelta, 0.0f });
+	ownerPawn->SetRotation({ 0.0f, -m_controlYaw, 0.0f });
 }

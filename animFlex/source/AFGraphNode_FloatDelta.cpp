@@ -7,11 +7,12 @@ void AFGraphNode_FloatDelta::OnReset()
 
 void AFGraphNode_FloatDelta::Evaluate(float deltaTime)
 {
+	m_outputPose.SetValue(m_inputPose.GetValue());
+
 	const float input = m_floatInput.GetValue();
 	const float delta = input - m_prev;
 
 	m_floatOutput.SetValue(delta);
-	m_outputPose.SetValue(m_inputPose.GetValue());
 
 	m_prev = input;
 }

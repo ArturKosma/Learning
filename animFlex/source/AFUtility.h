@@ -185,6 +185,9 @@ public:
 	// Which means if we want to use this correctly, we have to call it in after both have updated, in like late tick of AnimState.
 	static float GetRootAngleTowardsMovementInput();
 
+	static float GetRootAngleTowardsVelocity();
+	static float GetAngleTowardsVelocity();
+
 };
 
 namespace AFIDGenerator

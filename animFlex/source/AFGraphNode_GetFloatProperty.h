@@ -11,7 +11,9 @@ enum class EAFFloatProperties
 	AngleTowardsMovementInput,
 	ControlYawDelta,
 	RootYaw,
-	RootAngleTowardsMovementInput
+	RootAngleTowardsMovementInput,
+	RootAngleTowardsVelocity,
+	AngleTowardsVelocity,
 };
 
 class AFGraphNode_GetFloatProperty : public AFGraphNodeCRTP<AFGraphNode_GetFloatProperty>

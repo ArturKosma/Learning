@@ -27,6 +27,7 @@ public:
 	glm::vec3 GetMovementInput() const;
 	glm::vec3 GetLastPositiveMovementInput() const;
 
+	glm::vec3 GetLastFrameControlRotation() const;
 	glm::vec3 GetLastLocationOffset() const;
 	float GetLastControlYawDelta();
 
@@ -38,6 +39,7 @@ protected:
 	glm::vec3 m_lastPositiveVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastPositiveMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_lastFrameControlRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	glm::vec3 m_lastLocationOffset = glm::vec3(0.0f, 0.0f, 0.0f);
 	float m_lastControlYawDelta = 0.0f;

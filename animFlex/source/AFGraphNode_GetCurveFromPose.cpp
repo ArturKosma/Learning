@@ -2,6 +2,8 @@
 
 void AFGraphNode_GetCurveFromPose::Evaluate(float deltaTime)
 {
+	m_outputPose.SetValue(m_inputPose.GetValue());
+
 	const std::string& curveName = m_curveName.GetValue();
 	if (!curveName.empty())
 	{
@@ -12,6 +14,4 @@ void AFGraphNode_GetCurveFromPose::Evaluate(float deltaTime)
 			m_curveValue.SetValue(it->second);
 		}
 	}
-
-	m_outputPose.SetValue(m_inputPose.GetValue());
 }

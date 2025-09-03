@@ -12,6 +12,8 @@ void AFGraphNode_SetFloatProperty::Init()
 
 void AFGraphNode_SetFloatProperty::Evaluate(float deltaTime)
 {
+	m_outputPose.SetValue(m_inputPose.GetValue());
+
 	if (m_charMovement.expired())
 	{
 		return;
@@ -21,7 +23,7 @@ void AFGraphNode_SetFloatProperty::Evaluate(float deltaTime)
 	{
 	case EAFSetFloatProperties::RootYaw:
 	{
-		m_animState.lock()->SetRootYaw(m_floatProperty.GetValue());
+		m_animState.lock()->SetRootYaw(glm::mod(m_floatProperty.GetValue(), 360.0f));
 		break;
 	}
 	default:
@@ -30,6 +32,4 @@ void AFGraphNode_SetFloatProperty::Evaluate(float deltaTime)
 		break;
 	}
 	}
-
-	m_outputPose.SetValue(m_inputPose.GetValue());
 }

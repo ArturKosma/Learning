@@ -126,6 +126,16 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 		ret = AFUtility::GetRootAngleTowardsMovementInput();
 		break;
 	}
+	case EAFFloatProperties::RootAngleTowardsVelocity:
+	{
+		ret = AFUtility::GetRootAngleTowardsVelocity();
+		break;
+	}
+	case EAFFloatProperties::AngleTowardsVelocity:
+	{
+		ret = AFUtility::GetAngleTowardsVelocity();
+		break;
+	}
 	default:
 	{
 		ret = 0.0f;

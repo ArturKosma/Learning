@@ -179,14 +179,49 @@ public:
 
 	static float FInterpTo(float current, float target, float interpSpeed, float deltaTime)
 	{
-		const float dist = target - current;
-		if (std::fabs(dist) <= 1e-6f)
+		const float dist = glm::abs(target - current);
+		const float step = interpSpeed * deltaTime;
+		if (std::fabs(dist) <= step)
 		{
-			return target;
+			return dist;
 		}
 
-		const float alpha = std::clamp(deltaTime * interpSpeed, 0.0f, 1.0f);
-		return current + dist * alpha;
+		return dist > 0.0f ? step : -step;
+	}
+
+	static float DeltaAngle(float current, float target)
+	{
+		float diff = fmodf(target - current + 180.0f, 360.0f);
+
+		if (diff < 0.0f)
+		{
+			diff += 360.0f;
+		}
+
+		return diff - 180.0f;
+	}
+
+	static float NormalizeAngle(float angle)
+	{
+		float result = fmodf(angle + 180.0f, 360.0f);
+		if (result < 0.0f)
+		{
+			result += 360.0f;
+		}
+
+		return result - 180.0f;
+	}
+
+	static float FInterpToAngle(float currentAngle, float targetAngle, float interpSpeed, float deltaTime)
+	{
+		const float delta = DeltaAngle(currentAngle, targetAngle);
+		const float step = interpSpeed * deltaTime;
+		if (std::fabs(delta) <= step)
+		{
+			return delta;
+		}
+
+		return delta > 0.0f ? step : -step;
 	}
 
 	static bool NearlyEqual(float a, float b, float threshold = glm::epsilon<float>())

@@ -7,9 +7,9 @@ class AFGraphNode_SetRootYaw : public AFGraphNodeCRTP<AFGraphNode_SetRootYaw>
 
 public:
 
-	AFPARAM(AFPose, m_inputPose, {}, "Input", "Input", "");
+	AFPARAM(AFPose, m_inputPose, {}, "", "Input", "");
 	AFPARAM(float, m_yaw, 0.0f, "Yaw", "Input", "");
-	AFPARAM(AFPose, m_outputPose, {}, "Output", "Output", "");
+	AFPARAM(AFPose, m_outputPose, {}, "", "Output", "");
 
 	void Evaluate(float deltaTime) override;
 };
