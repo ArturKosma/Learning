@@ -15,6 +15,7 @@ void AFEvaluator::EvaluateNode(std::shared_ptr<AFGraphNode> node)
 		// Node wasn't evaluated this turn. Evaluate it.
 		const float deltaTime = AFTimerManager::GetDeltaTime();
 		node->Evaluate(m_animPaused ? 0.0f : deltaTime * m_animPlayrate);
+
 		m_evaluated.push_back(node);
 	}
 }
@@ -28,19 +29,24 @@ void AFEvaluator::PreEvaluateNode(std::shared_ptr<class AFGraphNode> node)
 	}
 
 	// Pre evaluate only once.
-	auto it = std::find(m_preEvaluated.begin(), m_preEvaluated.end(), node);
-	if (it != m_preEvaluated.end())
+	auto it = std::find(m_preevaluated.begin(), m_preevaluated.end(), node);
+	if (it != m_preevaluated.end())
 	{
 		return;
 	}
 
 	// Remember this node was pre evaluated.
-	m_preEvaluated.push_back(node);
+	m_preevaluated.push_back(node);
 
 	// Get connection per property.
 	std::vector<std::shared_ptr<FAFParamStaticPropertyBase>> staticProperties = AFGraphNodeRegistry::Get().GetStaticProperties(node->GetNodeType());
 	for (std::shared_ptr<FAFParamStaticPropertyBase> property : staticProperties)
 	{
+		if (!property->GetIsInput())
+		{
+			continue;
+		}
+
 		FAFParamBase* param = static_cast<FAFParamBase*>(property->GetParam(node));
 		if (!param)
 		{
@@ -65,9 +71,20 @@ void AFEvaluator::PreEvaluateNode(std::shared_ptr<class AFGraphNode> node)
 		PreEvaluateNode(connectedNode);
 	}
 
+	// Pre evaluate subnodes.
+	for (const std::string& subNodeId : node->GetSubNodes())
+	{
+		std::shared_ptr<AFGraphNode> subNode = AFGraphNodeRegistry::Get().GetNode(subNodeId);
+		if (!subNode)
+		{
+			continue;
+		}
+
+		PreEvaluateNode(subNode);
+	}
+
 	// Pre evaluate at the very end, so that the furthest nodes down the chain get pre evaluated first.
 	const float deltaTime = AFTimerManager::GetDeltaTime();
-	//printf("pre eval: %s\n", node->GetNodeID().c_str());
 	node->PreEvaluate(m_animPaused ? 0.0f : deltaTime * m_animPlayrate);
 }
 
@@ -118,7 +135,7 @@ void AFEvaluator::ClearLastActiveStates()
 
 void AFEvaluator::ClearPreEvaluationState()
 {
-	m_preEvaluated.clear();
+	m_preevaluated.clear();
 }
 
 void AFEvaluator::ClearEvaluationState()
@@ -192,4 +209,14 @@ void AFEvaluator::PlayrateToggle()
 void AFEvaluator::PlayrateFaster()
 {
 	m_animPlayrate = glm::clamp(m_animPlayrate + 0.1f, 0.0f, 2.0f);
+}
+
+EAFEvaluationMode AFEvaluator::GetEvaluationMode() const
+{
+	return m_evaluationMode;
+}
+
+void AFEvaluator::SetEvaluationMode(EAFEvaluationMode mode)
+{
+	m_evaluationMode = mode;
 }

@@ -1,6 +1,37 @@
 {
     "Nodes": [
         {
+            "class_id": "AFGraphNode_AddRootYawOffset",
+            "node_name": "Add Root Yaw Offset",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "Input",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_offset",
+                    "default": "0.0",
+                    "label": "Offset",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "Output",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_Blend",
             "node_name": "Blend",
             "meta": [],
@@ -470,7 +501,7 @@
                     "var_type": "float",
                     "var_name": "m_floatInput",
                     "default": "0.0",
-                    "label": "",
+                    "label": "Input",
                     "direction": "Input",
                     "meta": []
                 },
@@ -486,7 +517,7 @@
                     "var_type": "float",
                     "var_name": "m_floatOutput",
                     "default": "0.0",
-                    "label": "",
+                    "label": "Delta",
                     "direction": "Output",
                     "meta": []
                 }
@@ -952,7 +983,7 @@
                     "var_type": "AFPose",
                     "var_name": "m_inputPose",
                     "default": "",
-                    "label": "",
+                    "label": "Pose",
                     "direction": "Input",
                     "meta": []
                 },
@@ -960,7 +991,7 @@
                     "var_type": "bool",
                     "var_name": "m_printFloat",
                     "default": "false",
-                    "label": "",
+                    "label": "Print Float",
                     "direction": "",
                     "meta": []
                 },
@@ -968,7 +999,7 @@
                     "var_type": "bool",
                     "var_name": "m_printString",
                     "default": "false",
-                    "label": "",
+                    "label": "Print String",
                     "direction": "",
                     "meta": []
                 },
@@ -976,7 +1007,7 @@
                     "var_type": "float",
                     "var_name": "m_inputFloat",
                     "default": "0.0",
-                    "label": "",
+                    "label": "Input Float",
                     "direction": "Input",
                     "meta": [
                         "HidePin",
@@ -987,7 +1018,7 @@
                 {
                     "var_type": "std::string",
                     "var_name": "m_inputString",
-                    "default": "",
+                    "default": "Input String",
                     "label": "",
                     "direction": "Input",
                     "meta": [
@@ -1000,7 +1031,7 @@
                     "var_type": "AFPose",
                     "var_name": "m_outputPose",
                     "default": "",
-                    "label": "",
+                    "label": "Output",
                     "direction": "Output",
                     "meta": []
                 }
@@ -1043,6 +1074,79 @@
                     "var_name": "m_outputPose",
                     "default": "",
                     "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_SetFloatProperty",
+            "node_name": "Set Float Property",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_propertyEnum",
+                    "default": "0",
+                    "label": "Property Name",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFSetFloatProperties_Enum"
+                    ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_floatProperty",
+                    "default": "0.0",
+                    "label": "New Value",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_SetRootYaw",
+            "node_name": "Set Root Yaw",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "Input",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_yaw",
+                    "default": "0.0",
+                    "label": "Yaw",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "Output",
                     "direction": "Output",
                     "meta": []
                 }
@@ -1140,15 +1244,19 @@
                 "VelocityLength",
                 "UserInputLength",
                 "RelevantAnimTimeRemain",
-                "DistanceTraveled",
-                "AngleTowardsMovementInput"
+                "StartRunDistanceTraveled",
+                "AngleTowardsMovementInput",
+                "ControlYawDelta",
+                "RootYaw",
+                "RootAngleTowardsMovementInput"
             ]
         },
         {
             "enum_name": "EAFStringProperties",
             "values": [
                 "StartRunAnim",
-                "StartRunCurve_RootDistance"
+                "StartRunCurve_RootDistance",
+                "StartRunCurve_RootYaw"
             ]
         },
         {
@@ -1160,6 +1268,12 @@
                 "rootYawAuthority",
                 "rootYawWarpScale",
                 "rootYawLeft"
+            ]
+        },
+        {
+            "enum_name": "EAFSetFloatProperties",
+            "values": [
+                "RootYaw"
             ]
         }
     ]

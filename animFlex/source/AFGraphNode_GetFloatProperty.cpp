@@ -1,5 +1,6 @@
 #include "AFGraphNode_GetFloatProperty.h"
 
+#include "AFAnimState.h"
 #include "AFGame.h"
 #include "AFGraphNode_StateCond.h"
 #include "AFMath.h"
@@ -8,6 +9,7 @@
 void AFGraphNode_GetFloatProperty::Init()
 {
 	m_charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
+	m_animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
 }
 
 void AFGraphNode_GetFloatProperty::Evaluate(float deltaTime)
@@ -99,14 +101,29 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 
 		break;
 	}
-	case EAFFloatProperties::DistanceTraveled:
+	case EAFFloatProperties::StartRunDistanceTraveled:
 	{
-		ret = m_charMovement.lock()->GetDistanceTraveled();
+		ret = m_animState.lock()->GetStartRunDistanceTraveled();
 		break;
 	}
 	case EAFFloatProperties::AngleTowardsMovementInput:
 	{
 		ret = AFUtility::GetAngleTowardsMovementInput();
+		break;
+	}
+	case EAFFloatProperties::ControlYawDelta:
+	{
+		ret = m_charMovement.lock()->GetLastControlYawDelta();
+		break;
+	}
+	case EAFFloatProperties::RootYaw:
+	{
+		ret = m_animState.lock()->GetRootYaw();
+		break;
+	}
+	case EAFFloatProperties::RootAngleTowardsMovementInput:
+	{
+		ret = AFUtility::GetRootAngleTowardsMovementInput();
 		break;
 	}
 	default:

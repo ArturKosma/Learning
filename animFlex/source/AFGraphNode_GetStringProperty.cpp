@@ -51,6 +51,11 @@ void AFGraphNode_GetStringProperty::EvalImpl(float deltaTime)
 			ret = m_animState.lock()->GetStartRunCurve_RootDistance();
 			break;
 		}
+		case EAFStringProperties::StartRunCurve_RootYaw:
+		{
+			ret = m_animState.lock()->GetStartRunCurve_RootYaw();
+			break;
+		}
 		default:
 		{
 			ret = "";

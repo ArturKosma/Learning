@@ -254,6 +254,8 @@ void AFGame::SetControlMode(EAFControlMode newControlMode)
 	{
 		SetEditorControlMode(EAFEditorControlMode::Normal);
 		m_cameraManager->UpdateState();
+		m_player->GetCharacterMovementComponent()->AddMovementInput(glm::vec3(0.0f, 0.0f, 0.0f));
+		m_player->GetCharacterMovementComponent()->AddControlRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
 		AFInput::BindAction("Select", [this]()
 			{

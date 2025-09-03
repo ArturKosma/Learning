@@ -1,13 +1,17 @@
 #include "AFGraphNode_FloatDelta.h"
 
+void AFGraphNode_FloatDelta::OnReset()
+{
+	m_prev = 0.0f;
+}
+
 void AFGraphNode_FloatDelta::Evaluate(float deltaTime)
 {
-	if (m_prev.has_value())
-	{
-		const float ret = m_floatInput - m_prev.value();
-		m_floatOutput.SetValue(ret);
-	}
+	const float input = m_floatInput.GetValue();
+	const float delta = input - m_prev;
 
-	m_outputPose.SetValue(m_inputPose);
-	m_prev= m_floatInput.GetValue();
+	m_floatOutput.SetValue(delta);
+	m_outputPose.SetValue(m_inputPose.GetValue());
+
+	m_prev = input;
 }

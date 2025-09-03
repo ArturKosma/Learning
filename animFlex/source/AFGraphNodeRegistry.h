@@ -44,9 +44,10 @@ struct FAFParam : FAFParamBase
 {
 public:
 
-	FAFParam(const std::string& paramName, T defaultValue = {})
+	FAFParam(const std::string& paramName, bool paramIsInput = true, T defaultValue = {})
 	{
 		name = paramName;
+		isInput = paramIsInput;
 		SetValue(defaultValue);
 	}
 
@@ -61,10 +62,13 @@ public:
 	}
 	const T& GetValue() const;
 
+	bool IsInput() const { return isInput; }
+
 protected:
 
 	T value = {};
 	std::string name = "";
+	bool isInput = false;
 };
 
 template<typename T>
@@ -359,6 +363,18 @@ struct FAFGraphNodeParamRegistrar
 template <typename T>
 const T& FAFParam<T>::GetValue() const
 {
+	// During the pre-evaluation phase we simply return whatever is cached,
+	if (AFEvaluator::Get().GetEvaluationMode() == EAFEvaluationMode::PreEvaluate)
+	{
+		return value;
+	}
+
+	// Outputs instantly return value.
+	if (!IsInput())
+	{
+		return value;
+	}
+
 	// If this socket is connected to something.
 	std::string connectedNodeId = "";
 	std::string connectedSocketName = "";
@@ -366,12 +382,8 @@ const T& FAFParam<T>::GetValue() const
 	if (!connected)
 	{
 		// It's not connected, so just any value there currently is.
-		//printf("nothing connected.\n");
 		return value;
 	}
-
-	// What direction is our target?
-	bool iAmInput = false;
 
 	// Pointer to the target socket.
 	std::shared_ptr<FAFParamStaticPropertyBase> targetSocket = nullptr;
@@ -383,11 +395,10 @@ const T& FAFParam<T>::GetValue() const
 	{
 		if (property->GetParamName() == connectedSocketName)
 		{
-			// I am the opposite of my target.
-			iAmInput = !property->GetIsInput();
-
 			// Save the pointer.
 			targetSocket = property;
+
+			break;
 		}
 	}
 
@@ -401,22 +412,13 @@ const T& FAFParam<T>::GetValue() const
 		AFEvaluator::Get().AddLastActiveSocket(lastActiveEntry);
 	}
 
-	if (iAmInput)
-	{
-		// If I am an input, we might need to ask our target node to evaluate itself.
-		// If target was already evaluated we don't re-evaluate.
-		// Evaluation of a node triggers its own AFParams::GetValue(), which triggers whole chain of graph evaluations.
+	// We need to ask our target node to evaluate itself.
+	// If target was already evaluated we don't re-evaluate.
+	// Evaluation of a node triggers its own AFParams::GetValue(), which triggers whole chain of graph evaluations.
 
-		AFEvaluator::Get().EvaluateNode(connection);
-
-		// Now we can fetch the value from target socket.
-		return (static_cast<FAFParam<T>*>(targetSocket->GetParam(connection)))->GetValue();
-	}
-	else
-	{
-		// If I am an output I just return whatever I have currently assigned.
-		return value;
-	}
+	AFEvaluator::Get().EvaluateNode(connection);
+	// Now we can fetch the value from target socket.
+	return (static_cast<FAFParam<T>*>(targetSocket->GetParam(connection)))->GetValue();
 }
 
 #define AFCLASS(Class, ClassStringName, Meta) \
@@ -425,7 +427,7 @@ const T& FAFParam<T>::GetValue() const
 	std::string GetNodeType() const override {return #Class;}
 
 #define AFPARAM(Type, VarName, DefaultValue, VarString, Direction, Meta) \
-	FAFParam<Type> VarName = FAFParam<Type>(#VarName, DefaultValue); \
+	FAFParam<Type> VarName = FAFParam<Type>(#VarName, std::string(Direction).compare("Input") == 0, DefaultValue); \
 	inline static FAFGraphNodeParamRegistrar<ThisClass, Type> _registrar_##VarName = FAFGraphNodeParamRegistrar<ThisClass, Type>(ThisClassStringName, #VarName, DefaultValue, &ThisClass::VarName, Direction)
 
 #define AFENUM() 

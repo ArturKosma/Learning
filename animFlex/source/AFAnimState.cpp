@@ -12,6 +12,16 @@
 
 void AFAnimState::PreTick(float deltaTime)
 {
+	std::shared_ptr<AFPlayerPawn> pawn = AFGame::GetGame()->GetScene().GetPlayerPawn();
+	if (!pawn)
+	{
+		return;
+	}
+
+	// Counter the control yaw (actor rotates with control yaw, root bone counters it).
+	// I do this on PreTick, because PreTick is checking entry states, like StartRun, which might calculate angle needed before reaching Tick.
+	m_rootYaw += pawn->GetCharacterMovementComponent()->GetLastControlYawDelta();
+
 	if (m_evaluationState == EAFAnimEvaluationState::Idle)
 	{
 		return;
@@ -37,6 +47,15 @@ void AFAnimState::PreTick(float deltaTime)
 
 void AFAnimState::Tick(float deltaTime)
 {
+	std::shared_ptr<AFPlayerPawn> pawn = AFGame::GetGame()->GetScene().GetPlayerPawn();
+	if (!pawn)
+	{
+		return;
+	}
+
+	// Increment distance traveled for distance matching.
+	m_startRunDistanceTraveled += glm::length(pawn->GetCharacterMovementComponent()->GetLastLocationOffset());
+
 	if(m_evaluationState == EAFAnimEvaluationState::Idle)
 	{
 		return;
@@ -125,6 +144,26 @@ std::string AFAnimState::GetStartRunCurve_RootDistance() const
 	return m_startRunCurve_rootDistance;
 }
 
+std::string AFAnimState::GetStartRunCurve_RootYaw() const
+{
+	return m_startRunCurve_rootYaw;
+}
+
+float AFAnimState::GetStartRunDistanceTraveled() const
+{
+	return m_startRunDistanceTraveled;
+}
+
+float AFAnimState::GetRootYaw() const
+{
+	return m_rootYaw;
+}
+
+void AFAnimState::SetRootYaw(float yaw)
+{
+	m_rootYaw = yaw;
+}
+
 void AFAnimState::EvaluateSingleAnim()
 {
 	if (!(m_ownerMesh && m_singleAnim))
@@ -182,7 +221,10 @@ void AFAnimState::PreEvaluateGraph(float deltaTime)
 		return;
 	}
 
+	// Mark all nodes dirty. This will allow for new evaluation of each of them.
 	AFEvaluator::Get().ClearPreEvaluationState();
+
+	AFEvaluator::Get().SetEvaluationMode(EAFEvaluationMode::PreEvaluate);
 	m_graph->PreEvaluate(deltaTime);
 }
 
@@ -200,6 +242,7 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 	AFEvaluator::Get().ClearLastActiveStates();
 	AFEvaluator::Get().ClearSamplingState();
 
+	AFEvaluator::Get().SetEvaluationMode(EAFEvaluationMode::Evaluate);
 	m_graph->Evaluate(deltaTime);
 
 	const std::vector<std::shared_ptr<AFJoint>>& calculatedJoints = m_graph->GetFinalPose().GetJoints();
@@ -239,8 +282,8 @@ void AFAnimState::OnStartRunEnter()
 		return;
 	}
 
-	// How big the angle is towards target movement input?
-	const float angle = AFUtility::GetAngleTowardsMovementInput();
+	// How big the angle is towards target movement input from the root?
+	const float angle = AFUtility::GetRootAngleTowardsMovementInput();
 
 	std::vector<float> angles =
 	{
@@ -272,12 +315,25 @@ void AFAnimState::OnStartRunEnter()
 		"M_Neutral_Run_Reface_Start_F_R_180_rootDistance"
 	};
 
+	std::vector<std::string> startRunRootYaws =
+	{
+		"M_Neutral_Run_Reface_Start_F_L_180_rootYaw",
+		"M_Neutral_Run_Reface_Start_F_L_090_rootYaw",
+		"",
+		"M_Neutral_Run_Reface_Start_F_R_090_rootYaw",
+		"M_Neutral_Run_Reface_Start_F_R_180_rootYaw"
+	};
+
 	// Cache the start run anim name.
 	m_startRunAnim = startRunAnims[index];
 
 	// Cache the start run root distance curve name.
 	m_startRunCurve_rootDistance = startRunRootDistances[index];
 
-	// Reset the distance traveled for distance-matching.
-	charMovement->ResetDistanceTraveled();
+	// Cache the start run root yaw curve name.
+	m_startRunCurve_rootYaw = startRunRootYaws[index];
+
+	// Reset the distance traveled for distance-matching in startRun.
+	// @todo Make sure this isn't added twice in Tick()!
+	m_startRunDistanceTraveled = glm::length(charMovement->GetLastLocationOffset());
 }

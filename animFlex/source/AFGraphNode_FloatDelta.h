@@ -8,13 +8,14 @@ class AFGraphNode_FloatDelta : public AFGraphNodeCRTP<AFGraphNode_FloatDelta>
 public:
 
 	AFPARAM(AFPose, m_inputPose, {}, "", "Input", "");
-	AFPARAM(float, m_floatInput, 0.0f, "", "Input", "");
+	AFPARAM(float, m_floatInput, 0.0f, "Input", "Input", "");
 	AFPARAM(AFPose, m_outputPose, {}, "", "Output", "");
-	AFPARAM(float, m_floatOutput, 0.0f, "", "Output", "");
+	AFPARAM(float, m_floatOutput, 0.0f, "Delta", "Output", "");
 
+	void OnReset() override;
 	void Evaluate(float deltaTime) override;
 
 private:
 
-	std::optional<float> m_prev;
+	float m_prev = 0.0f;
 };

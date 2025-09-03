@@ -11,13 +11,4 @@ public:
 
 	void Tick(float deltaTime) override;
 
-	float GetDistanceTraveled() const;
-	void ResetDistanceTraveled();
-
-private:
-
-	float m_previousRootYaw = 0.0f;
-	float m_distanceTraveled = 0.0f;
-
-	glm::vec3 GetLocationAfterBallPivotRot(float deltaYaw);
 };

@@ -10,7 +10,7 @@ void AFGraphNode_Compare::Evaluate(float deltaTime)
 	{
 		case EAFCompareTypes::Greater:
 		{
-			res = m_a > m_b;
+			res = m_a.GetValue() > m_b.GetValue();
 			break;
 		}
 		case EAFCompareTypes::GreaterEqual:

@@ -181,6 +181,10 @@ public:
 
 	static float GetAngleTowardsMovementInput();
 
+	// This uses information from both character movement and anim state components.
+	// Which means if we want to use this correctly, we have to call it in after both have updated, in like late tick of AnimState.
+	static float GetRootAngleTowardsMovementInput();
+
 };
 
 namespace AFIDGenerator

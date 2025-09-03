@@ -7,8 +7,11 @@ enum class EAFFloatProperties
 	VelocityLength,
 	UserInputLength,
 	RelevantAnimTimeRemain,
-	DistanceTraveled,
-	AngleTowardsMovementInput
+	StartRunDistanceTraveled,
+	AngleTowardsMovementInput,
+	ControlYawDelta,
+	RootYaw,
+	RootAngleTowardsMovementInput
 };
 
 class AFGraphNode_GetFloatProperty : public AFGraphNodeCRTP<AFGraphNode_GetFloatProperty>
@@ -30,6 +33,7 @@ private:
 	bool m_open = true;
 
 	std::weak_ptr<class AFCharacterMovementComponent> m_charMovement = {};
+	std::weak_ptr<class AFAnimState> m_animState = {};
 
 	void EvalImpl(float deltaTime);
 };

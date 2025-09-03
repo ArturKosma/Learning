@@ -3,6 +3,11 @@
 #include "AFActor.h"
 #include "AFTimerManager.h"
 
+void AFMovementComponent::PostTick(float deltaTime)
+{
+	m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
 void AFMovementComponent::PreTick(float deltaTime)
 {
 	
@@ -49,9 +54,6 @@ void AFMovementComponent::Tick(float deltaTime)
 		owner->AddOffsetLocation(velocityDelta);
 		m_lastLocationOffset = velocityDelta;
 	}
-
-	// Consume last input.
-	m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 float AFMovementComponent::GetAcceleration() const
@@ -126,6 +128,11 @@ glm::vec3 AFMovementComponent::GetLastLocationOffset() const
 	return m_lastLocationOffset;
 }
 
+float AFMovementComponent::GetLastControlYawDelta()
+{
+	return m_lastControlYawDelta;
+}
+
 void AFMovementComponent::AddOffset(const glm::vec3& offset)
 {
 	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
@@ -147,11 +154,15 @@ void AFMovementComponent::AddControlRotation(const glm::vec3& delta)
 
 	if (glm::length(delta) <= std::numeric_limits<float>::epsilon())
 	{
+		m_lastControlYawDelta = 0.0f;
 		return;
 	}
 
 	m_controlPitch = glm::clamp(m_controlPitch + delta.x, -89.0f, 89.0f);
+	const float oldControlYaw = m_controlYaw;
 	m_controlYaw += delta.y;
 	m_controlYaw = m_controlYaw > 360.0f ? m_controlYaw - 360.0f : m_controlYaw;
 	m_controlYaw = m_controlYaw < -360.0f ? m_controlYaw + 360.0f : m_controlYaw;
+
+	m_lastControlYawDelta = m_controlYaw - oldControlYaw;
 }

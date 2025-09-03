@@ -31,10 +31,6 @@ void AFPlayerPawn::Tick(float deltaTime)
 {
 	AFActor::Tick(deltaTime);
 
-	//printf("pawn pos: %f, %f, %f\n", GetLocation().x, GetLocation().y, GetLocation().z);
-	//printf("pawn rot: %f, %f, %f\n", GetRotation().x, GetRotation().y, GetRotation().z);
-	//printf("cam pos: %f, %f, %f\n", m_cameraComponent->GetWorldLocation().x, m_cameraComponent->GetWorldLocation().y, m_cameraComponent->GetWorldLocation().z);
-	//printf("cam rot: %f, %f, %f\n", m_cameraComponent->GetWorldRotation().x, m_cameraComponent->GetWorldRotation().y, m_cameraComponent->GetWorldRotation().z);
 }
 
 std::shared_ptr<AFCameraComponent> AFPlayerPawn::GetCameraComponent() const

@@ -8,6 +8,11 @@
 
 void AFStateMachine::PreEvaluate(float deltaTime)
 {
+	
+}
+
+void AFStateMachine::Evaluate(float deltaTime)
+{
 	std::shared_ptr<AFAnimState> animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
 	if (!animState)
 	{
@@ -117,16 +122,6 @@ void AFStateMachine::PreEvaluate(float deltaTime)
 			const std::string& funStr = state->m_onEnterFunStr.GetValue();
 			animState->CallFunctionByString(funStr);
 		}
-	}
-}
-
-void AFStateMachine::Evaluate(float deltaTime)
-{
-	// Get anim state (equivalent to AnimInstance in UE).
-	std::shared_ptr<AFAnimState> animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
-	if (!animState)
-	{
-		return;
 	}
 
 	// Progress blend.

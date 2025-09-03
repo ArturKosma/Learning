@@ -175,3 +175,9 @@ struct FAFStateSampling
 	float sampleTime = 0.0f;
 	float maxTime = 0.0f;
 };
+
+enum class EAFEvaluationMode : uint8_t
+{
+	PreEvaluate,
+	Evaluate
+};

@@ -43,6 +43,10 @@ public:
 	// Graph functions.
 	std::string GetStartRunAnim() const;
 	std::string GetStartRunCurve_RootDistance() const;
+	std::string GetStartRunCurve_RootYaw() const;
+	float GetStartRunDistanceTraveled() const;
+	float GetRootYaw() const;
+	void SetRootYaw(float yaw);
 
 private:
 
@@ -56,6 +60,9 @@ private:
 	// Graph variables.
 	std::string m_startRunAnim = "";
 	std::string m_startRunCurve_rootDistance = "";
+	std::string m_startRunCurve_rootYaw = "";
+	float m_startRunDistanceTraveled = 0.0f;
+	float m_rootYaw = 0.0f;
 
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;

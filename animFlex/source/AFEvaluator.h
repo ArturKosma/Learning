@@ -39,6 +39,9 @@ public:
 	void PlayrateToggle();
 	void PlayrateFaster();
 
+	EAFEvaluationMode GetEvaluationMode() const;
+	void SetEvaluationMode(EAFEvaluationMode mode);
+
 private:
 
 	nlohmann::json m_lastActiveSockets = nlohmann::json::array();
@@ -46,12 +49,14 @@ private:
 	// Required to compare if new active state is actually new or was active a frame before.
 	nlohmann::json m_lastActiveStatesCached = nlohmann::json::array();
 
+	std::vector<std::shared_ptr<class AFGraphNode>> m_preevaluated = {};
 	std::vector<std::shared_ptr<class AFGraphNode>> m_evaluated = {};
-	std::vector<std::shared_ptr<class AFGraphNode>> m_preEvaluated = {};
 
 	std::vector<FAFStateSampling> m_samplingState = {};
 	// Required to be able to look in the previous frame.
 	std::vector<FAFStateSampling> m_samplingStateCached = {};
+
+	EAFEvaluationMode m_evaluationMode = EAFEvaluationMode::PreEvaluate;
 
 	bool m_animPaused = false;
 	float m_animPlayrate = 1.0f;
