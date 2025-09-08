@@ -14,6 +14,7 @@ import { DropdownControlEnum } from "./afdropdownEnum";
 import { AreaPlugin } from "rete-area-plugin";
 import { ReactArea2D } from "rete-react-plugin";
 import { ContextMenuExtra } from "rete-context-menu-plugin";
+import { CustomVector3Field, Vector3Control } from "./afvectorfield";
 
 export interface AFSerializeInterface {
   serializeLoad(data: any): void;
@@ -64,6 +65,15 @@ class ExecSocket extends ClassicPreset.Socket {
   }
 }
 
+class VectorSocket extends ClassicPreset.Socket {
+  constructor(name: string) {
+    super(name);
+  }
+  isCompatibleWith(other: ClassicPreset.Socket) {
+    return other instanceof VectorSocket;
+  }
+}
+
 export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: ClassicPreset.Node, varName: string, socketType: string, meta: any, initial: any) {
 
     const toBool = (v: any) =>
@@ -71,6 +81,35 @@ export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: Clas
 
     const toFloat = (v: any) =>
         typeof v === 'string' ? Number(v) : Number(v);
+
+    const toVector = (v: any): { x: number; y: number; z: number } => {
+        if (Array.isArray(v)) {
+            return {
+                x: Number(v[0] ?? 0),
+                y: Number(v[1] ?? 0),
+                z: Number(v[2] ?? 0)
+            };
+        }
+        if (typeof v === 'object' && v !== null) {
+            return {
+                x: Number((v as any).x ?? 0),
+                y: Number((v as any).y ?? 0),
+                z: Number((v as any).z ?? 0)
+            };
+        }
+        if (typeof v === 'string') {
+            const parts = v.split(',').map((s) => Number(s.trim()));
+            return {
+                x: Number(parts[0] ?? 0),
+                y: Number(parts[1] ?? 0),
+                z: Number(parts[2] ?? 0)
+            };
+        }
+            if (typeof v === 'number') {
+                return { x: v, y: v, z: v };
+            }
+            return { x: 0, y: 0, z: 0 };
+        };
 
   switch (socketType) {
     case "bool":
@@ -87,6 +126,9 @@ export function GetDefaultControlPerType(editor: NodeEditor<Schemes>, node: Clas
             return new DropdownControlEnum(enumMeta, editor, node, varName);
         }
         return new DropdownControl("", editor, node, varName); // Simple text field.
+    }
+    case "vector": {
+        return new Vector3Control(editor, node, varName, toVector(initial));
     }
     default:
       return undefined;
@@ -130,6 +172,7 @@ SocketTypes.set("float", "float");
 SocketTypes.set("bool", "bool");
 SocketTypes.set("AFExec", "Exec");
 SocketTypes.set("int", "string"); // We assume every int is really an enum in C++, and we want to show the enum as list of strings to choose, so a string.
+SocketTypes.set("glm::vec3", "vector");
 
 export function GetNodeMeta(type: string, graphType: ReteViewType): any {
 
@@ -297,6 +340,9 @@ function CreateSocketWithMeta(
         case "Exec":
             baseSocket = new ExecSocket(uid);
             break;    
+         case "vector":
+            baseSocket = new VectorSocket(uid);
+            break; 
         default:
             baseSocket = new ClassicPreset.Socket(uid); // fallback
     }
@@ -495,6 +541,27 @@ export function CreateSockets(node: ClassicPreset.Node, editor: NodeEditor<Schem
 
 declare const Module: any;
 
+function serializeControl(control: any): string | undefined {
+  if (!control) return "undefined";
+
+  // Prefer control's own serializer
+  if (typeof control.serializeSave === 'function') {
+    const v = control.serializeSave();
+    return v;
+  }
+
+  const val = control.value;
+  if (val == null) return "undefined";
+
+  // Common vector case: {x,y,z}
+  if (typeof val === 'object' && 'x' in val && 'y' in val && 'z' in val) {
+    const { x, y, z } = val as { x: number; y: number; z: number };
+    return `${x},${y},${z}`;
+  }
+
+  return String(val);
+}
+
 export async function OnNodeCreated(node: ClassicPreset.Node, context: string) {
     
     // Wait until Emscripten runtime is ready.
@@ -581,12 +648,9 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
         }
         //.. or has a plain value
         if (!valueField) {
-            
-            // Try to find the control attached to this input.
             const control = (input as any).control;
-            valueField = {
-                value: String(control?.value)
-            };
+            const serialized = serializeControl(control);
+            valueField = { value: serialized };
         }
 
         // Add input.
@@ -595,9 +659,9 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
         // Let the the undefined be filled from valueMap.
         if(valueField.value != "undefined"){
             sockets.push({
-            var_name: (input?.socket as any)?.meta?.var_name,
-            valueField,
-        });
+                var_name: (input?.socket as any)?.meta?.var_name,
+                valueField,
+            });
         }
     }
 
@@ -623,12 +687,9 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
         }
         //.. or has a plain value
         if (!valueField) {
-
-            // Try to find the control attached to this output.
             const control = (output as any).control;
-            valueField = {
-                value: String(control?.value)
-            };
+            const serialized = serializeControl(control);
+            valueField = { value: serialized };
         }
 
         // Add output.
@@ -637,9 +698,9 @@ export async function OnNodeUpdated(editor: NodeEditor<Schemes>, node: ClassicPr
         // Let the the undefined be filled from valueMap.
         if(valueField.value != "undefined") {
             sockets.push({
-            var_name: (output?.socket as any)?.meta?.var_name,
-            valueField,
-        });
+                var_name: (output?.socket as any)?.meta?.var_name,
+                valueField,
+            });
         }
     }
 
@@ -927,6 +988,27 @@ export function setDetailsPanelVisible(editor: NodeEditor<Schemes>, show: boolea
                 controlInstance = new DropdownControl("", editor, node, param.var_name, initialString);
                 reactElement = <CustomDropdown data={controlInstance} />;
                 break;
+            case 'vector3': {
+                const initialVector = (() => {
+                const vm: Record<string, string> | undefined = (node as any).meta?.valuesMap;
+
+                // Expect stored as "x,y,z"
+                const s = vm?.[param.var_name] ?? String(param.default ?? "");
+                if (typeof s === "string") {
+                    const parts = s.split(",").map((p) => parseFloat(p.trim()));
+                    return {
+                        x: parts[0] || 0,
+                        y: parts[1] || 0,
+                        z: parts[2] || 0
+                    };
+                }
+                return { x: 0, y: 0, z: 0 };
+                })();
+
+                controlInstance = new Vector3Control(editor, node, param.var_name, initialVector);
+                reactElement = <CustomVector3Field data={controlInstance} />;
+                break;
+            }
 
             default:
                 break;

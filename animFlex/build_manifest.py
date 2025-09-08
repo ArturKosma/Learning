@@ -9,21 +9,26 @@ RE_AFCLASS = re.compile(
 )
 
 # AFPARAM(Type, VarName, DefaultValue, Label, Direction, Meta)
-# DefaultValue may be "quoted" or a bare token like 1.0f, 0.25, false, true, MyEnum::Value
+# DefaultValue may be quoted, a bare token, or something with commas in () or {}
 RE_AFPARAM = re.compile(
     r'\bAFPARAM\s*\(\s*'
-    r'([a-zA-Z_][\w:]*)\s*,\s*'                       # Type
-    r'([a-zA-Z_][\w:]*)\s*,\s*'                       # VarName
-    r'("([^"]*)"|[^,]+)\s*,\s*'                       # DefaultValue (grp3 raw, grp4 inner if quoted)
-    r'"([^"]*)"\s*,\s*'                               # Label
-    r'"([^"]*)"\s*,\s*'                               # Direction
-    r'"([^"]*)"\s*'                                   # Meta
+    r'([a-zA-Z_][\w:]*)\s*,\s*'                                  # Type
+    r'([a-zA-Z_][\w:]*)\s*,\s*'                                  # VarName
+    r'("([^"]*)"|(?:\([^)]*\)|\{[^}]*\}|[^,])+)\s*,\s*'          # DefaultValue (grp3 raw, grp4 inner if quoted)
+    r'"([^"]*)"\s*,\s*'                                          # Label
+    r'"([^"]*)"\s*,\s*'                                          # Direction
+    r'"([^"]*)"\s*'                                              # Meta
     r'\)'
 )
 
 # === ENUM SUPPORT ===
 RE_AFENUM = re.compile(r'\bAFENUM\s*\(\s*\)')                 # AFENUM()
 RE_ENUM_CLASS = re.compile(r'\benum\s+class\s+([a-zA-Z_]\w*)\b')  # enum class Name
+
+# glm::vec3 default, e.g. (glm::vec3(1.0f, 5.5f, 666.777f)) or (glm::vec3{...})
+RE_GLM_VEC3 = re.compile(
+    r'^\(?\s*glm::vec3\s*(?:\{|\()\s*([^\}\)]+?)\s*(?:\}|\))\s*\)?$'
+)
 
 def fetch_headers(directory):
     if not os.path.isdir(directory):
@@ -52,6 +57,22 @@ def normalize_default(default_raw: str, default_inner: Optional[str]) -> str:
     # Special case: {} → empty string
     if token == "{}":
         return ""
+
+    # glm::vec3(...) or glm::vec3{...} -> "x,y,z" (strip trailing 'f')
+    m_vec3 = RE_GLM_VEC3.match(token)
+    if m_vec3:
+        inner = m_vec3.group(1)  # everything between the parens/braces
+        parts = [p.strip() for p in inner.split(',') if p.strip()]
+
+        def strip_f(s: str) -> str:
+            # Remove a trailing 'f' or 'F' if present on numeric literals
+            return s[:-1] if s and s[-1] in ('f', 'F') else s
+
+        cleaned = [strip_f(p) for p in parts]
+        # If fewer than 3 components, pad with zeros; if more, keep first three
+        if len(cleaned) < 3:
+            cleaned += ['0'] * (3 - len(cleaned))
+        return ','.join(cleaned[:3])
 
     # Lowercase for boolean detection
     low = token.lower()
@@ -121,9 +142,9 @@ def extract_macros(filepath):
 # === ENUM SUPPORT ===
 def extract_enums(filepath):
     """
-    Return a list with a single dict (per file) containing:
+    Return a list (per file) of dicts:
       { "enum_name": <Name>, "values": [ "A", "B", ... ] }
-    Only one AFENUM() per file is expected.
+    Supports multiple AFENUM() + enum class pairs per file.
     """
     with open(filepath, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -136,16 +157,16 @@ def extract_enums(filepath):
     enum_values = []
 
     for raw_line in lines:
-        line_no_block = re.sub(r'/\*.*?\*/', '', raw_line)  # strip /* ... */ inline blocks (not multi-line-safe)
+        # strip /* ... */ inline blocks (not multi-line-safe)
+        line_no_block = re.sub(r'/\*.*?\*/', '', raw_line)
         line = line_no_block
 
         # 1) Look for AFENUM()
-        if not pending_afenum and not enum_name and RE_AFENUM.search(line):
+        if not capturing and not pending_afenum and RE_AFENUM.search(line):
             pending_afenum = True
-            # continue scanning this line; enum might also be declared here
 
         # 2) Once AFENUM() was seen, find 'enum class <Name>'
-        if pending_afenum and not enum_name:
+        if not capturing and pending_afenum and not enum_name:
             m = RE_ENUM_CLASS.search(line)
             if m:
                 enum_name = m.group(1)
@@ -157,49 +178,52 @@ def extract_enums(filepath):
                     waiting_for_brace = False
                 else:
                     waiting_for_brace = True
-                continue  # next line
+                # fall through; we may also have values on this same line
 
         # 3) Wait for opening brace if needed
         if enum_name and waiting_for_brace and '{' in line:
             capturing = True
             waiting_for_brace = False
-            # fallthrough to capture this line content too
+            # fall through; capture this line content too
 
         # 4) Capture values while inside enum body
         if capturing:
-            # Check for closing brace first
-            if '}' in line:
-                # finalize this enum
+            # Remove line comments
+            clean = line.split('//', 1)[0]
+
+            # Work on the portion after '{' (if present) and before '}' (if present)
+            segment = clean
+            if '{' in segment:
+                segment = segment.split('{', 1)[1]
+            ended = False
+            if '}' in segment:
+                segment, _ = segment.split('}', 1)
+                ended = True
+
+            segment = segment.strip()
+            if segment:
+                parts = [p.strip() for p in segment.split(',')]
+                for part in parts:
+                    if not part:
+                        continue
+                    # Remove assignments like "Name = 5" or "Name = Other"
+                    name_only = part.split('=', 1)[0].strip()
+                    name_only = name_only.strip('{}; ')
+                    if name_only:
+                        enum_values.append(name_only)
+
+            if ended:
+                # finalize this enum and reset state so we can find the next AFENUM()+enum
                 enums.append({
                     "enum_name": enum_name,
                     "values": enum_values
                 })
-                # single AFENUM per file -> we can stop early
-                break
-
-            # Remove line comments and whitespace
-            clean = line.split('//', 1)[0].strip()
-            if not clean:
+                enum_name = None
+                enum_values = []
+                capturing = False
+                waiting_for_brace = False
+                pending_afenum = False
                 continue
-
-            # Lines can include the opening brace; trim it off
-            if clean.startswith('{'):
-                clean = clean[1:].strip()
-                if not clean:
-                    continue
-
-            # Split by commas because multiple entries could be on one line
-            parts = [p.strip() for p in clean.split(',')]
-
-            for part in parts:
-                if not part:
-                    continue
-                # Remove assignments like "Name = 5" or "Name = SomeOtherEnum"
-                name_only = part.split('=', 1)[0].strip()
-                # Filter out stray braces or semicolons if they sneak in
-                name_only = name_only.strip('{}; ')
-                if name_only:
-                    enum_values.append(name_only)
 
     return enums
 
@@ -236,7 +260,7 @@ if __name__ == "__main__":
 
             nodes.append(node)
 
-        # One AFENUM per file; this returns [] or [ {enum_name, values} ]
+        # Support multiple AFENUM() per file
         enums.extend(file_enums)
 
     output = {

@@ -24,6 +24,7 @@ import { ReteViewType } from "./aftypes";
 import { SelectorEntity } from "rete-area-plugin/_types/extensions/selectable";
 import { CustomDropdownEnum, DropdownControlEnum } from "./afdropdownEnum";
 import { useEffect, useRef } from "react";
+import { CustomVector3Field, Vector3Control } from "./afvectorfield";
 
 declare const Module: any;
 
@@ -236,6 +237,9 @@ export async function createEditor(container: HTMLElement, id: string) {
                 }
                 if (data.payload instanceof DropdownControlEnum) {
                   return CustomDropdownEnum;
+                }
+                if (data.payload instanceof Vector3Control) {
+                  return CustomVector3Field;
                 }
             }
             }}));

@@ -154,13 +154,14 @@ bool AFContent::Init()
 	// -------------------------------------------------
 
 	// Textures.
-	AddAsset<AFTexture>("t_box", "content/textures/orientBox.png", true);
+	std::shared_ptr<AFTexture> boxTex = AddAsset<AFTexture>("t_box", "content/textures/orientBox.png", true);
 	std::shared_ptr<AFTexture> mannequinTex = AddAsset<AFTexture>("t_mannequin", "content/textures/mannequin.png", false);
 
 	// Shaders.
 	AddAsset<AFShader>("shader_background", "content/shaders/background.vert", "content/shaders/background.frag");
 	AddAsset<AFShader>("shader_grid", "content/shaders/grid.vert", "content/shaders/grid.frag");
 	AddAsset<AFShader>("shader_basic", "content/shaders/basic.vert", "content/shaders/basic.frag");
+	AddAsset<AFShader>("shader_basicNoTex", "content/shaders/basic.vert", "content/shaders/basicNoTex.frag");
 	AddAsset<AFShader>("shader_basicSkinned", "content/shaders/basicSkinned.vert", "content/shaders/basic.frag");
 	AddAsset<AFShader>("shader_basicGLTF", "content/shaders/basicGLTF.vert", "content/shaders/basicGLTF.frag");
 	AddAsset<AFShader>("shader_gizmo", "content/shaders/uiLocalRotateOrtho.vert", "content/shaders/orientationGizmo.frag");
@@ -185,6 +186,10 @@ bool AFContent::Init()
 
 	// Mannequin.
 	mannequin->subMeshes[0].texture = mannequinTex;
+
+	// Box.
+	boxMesh->subMeshes[0].texture = boxTex;
+
 
 	return true;
 }

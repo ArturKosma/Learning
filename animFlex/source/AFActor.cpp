@@ -102,6 +102,16 @@ void AFActor::AddOffsetScale(const glm::vec3& offset)
     SetScale(m_scale + offset);
 }
 
+bool AFActor::GetMarkedForDestruction()
+{
+    return m_markedForDestruction;
+}
+
+void AFActor::MarkForDestruction()
+{
+    m_markedForDestruction = true;
+}
+
 void AFActor::RecreateTransform()
 {
     OnTransformRecreation();

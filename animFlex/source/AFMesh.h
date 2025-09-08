@@ -37,7 +37,6 @@ public:
 	unsigned long long GetVertexCount() const;
 
 	void RecalculateSkeleton();
-	void RecalculateBone(std::shared_ptr<AFJoint> bone, const glm::mat4& parentMatrix);
 
 	const std::vector<std::shared_ptr<AFJoint>>& GetJoints() const;
 	glm::vec3 GetGlobalJointLocation(int index) const;

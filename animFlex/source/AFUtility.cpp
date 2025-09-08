@@ -3,6 +3,7 @@
 #include "AFAnimState.h"
 #include "AFMath.h"
 #include "AFCharacterMovementComponent.h"
+#include "AFDebugShapeActor.h"
 #include "AFGame.h"
 #include "AFPlayerPawn.h"
 
@@ -78,4 +79,82 @@ float AFUtility::GetAngleTowardsVelocity()
 
 	const float angle = AFMath::SignedAngleBetweenVectors(velocity, actorWorldForward, glm::vec3(0.0f, 1.0f, 0.0f));
 	return angle;
+}
+
+glm::vec3 AFUtility::GetColorVector(EAFColor color)
+{
+	switch (color)
+	{
+		case EAFColor::Red: return glm::vec3(1.0f, 0.0f, 0.0f);
+		case EAFColor::Green: return glm::vec3(0.0f, 1.0f, 0.0f);
+		case EAFColor::Blue: return glm::vec3(0.0f, 0.0f, 1.0f);
+		default: return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	return glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+void AFUtility::DrawDebugBox(const glm::vec3& location, float size, float lifetime, EAFColor color, const glm::quat& rotation)
+{
+	std::shared_ptr<AFDebugShapeActor> debugBox = AFGame::GetGame()->GetScene().CreateObject<AFDebugShapeActor>();
+	debugBox->AssignDebugShape(EAFDebugShape::Box, color);
+
+	DrawDebugActor(debugBox, location, lifetime, rotation, glm::vec3(size), color);
+}
+
+void AFUtility::GetBone(const AFPose& pose, const std::string& bone, EAFBoneSpace space, glm::vec3& location, glm::vec3& rotation)
+{
+	std::shared_ptr<AFSkeletalMeshComponent> mesh = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent();
+	if (!mesh)
+	{
+		return;
+	}
+
+	std::shared_ptr<AFJoint> bonePtr = pose.GetJoint(bone);
+	if (!bonePtr)
+	{
+		return;
+	}
+
+	switch (space)
+	{
+		case EAFBoneSpace::Local:
+		{
+			location = bonePtr->GetLocation();
+			rotation = AFMath::EulerFromQuaternion(bonePtr->GetRotation());
+			break;
+		}
+		case EAFBoneSpace::Global:
+		{
+			location = bonePtr->GetGlobalLocation();
+			rotation = AFMath::EulerFromQuaternion(bonePtr->GetGlobalRotation());
+			break;
+		}
+		case EAFBoneSpace::World:
+		{
+			glm::mat4 trs = mesh->GetWorldTransform() * 
+				AFMath::ComposeTransform(bonePtr->GetGlobalLocation(), bonePtr->GetGlobalRotation(), glm::vec3(1.0f));
+
+			glm::vec3 scale;
+			glm::quat rot;
+			glm::vec3 skew;
+			glm::vec4 perspective;
+			glm::decompose(trs, scale, rot, location, skew, perspective);
+
+			rotation = AFMath::EulerFromQuaternion(rot);
+			break;
+		}
+	}
+}
+
+void AFUtility::DrawDebugActor(std::shared_ptr<AFDebugShapeActor> actor, const glm::vec3& location, float lifetime,
+                               const glm::quat& rotation, const glm::vec3& scale, EAFColor color)
+{
+	const_cast<AFScene&>(AFGame::GetGame()->GetScene()).AddActor(actor);
+
+	actor->SetLocation(location);
+	actor->SetRotation(rotation);
+	actor->SetScale(scale);
+
+	actor->SetLifetime(lifetime);
 }

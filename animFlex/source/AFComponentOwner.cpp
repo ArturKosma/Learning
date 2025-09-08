@@ -44,7 +44,20 @@ void AFComponentOwner::PostTick(float deltaTime)
 
 void AFComponentOwner::AddComponent(std::shared_ptr<AFComponent> newComponent)
 {
-    newComponent->SetOwner(this);
+    // We can either:
+    // 1. Add component after the creation of the actor, in that case we set the owner as a smart pointer,
+    // or
+    // 2. Add component during the construction of the actor, in that case we have to use raw pointers and finalize registering after the construction.
+    if (auto w = weak_from_this(); !w.expired()) 
+    {
+        auto sp = w.lock();
+        newComponent->SetOwner(sp);
+    }
+    else 
+    {
+        newComponent->SetOwner(this);
+    }
+
     m_components.push_back(newComponent);
 }
 

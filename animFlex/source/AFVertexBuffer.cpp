@@ -21,6 +21,7 @@ void AFVertexBuffer::Init()
 	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, jointWeight));
 	glVertexAttribIPointer(5, 1, GL_UNSIGNED_BYTE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, faceID));
 	glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, uvCenter));
+	glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, sizeof(FAFVertex), (void*)offsetof(FAFVertex, color));
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -29,6 +30,7 @@ void AFVertexBuffer::Init()
 	glEnableVertexAttribArray(4);
 	glEnableVertexAttribArray(5);
 	glEnableVertexAttribArray(6);
+	glEnableVertexAttribArray(7);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexEBO);
 
@@ -83,5 +85,5 @@ void AFVertexBuffer::Cleanup()
 {
 	glDeleteBuffers(1, &m_vertexVBO);
 	glDeleteBuffers(1, &m_indexEBO);
-	glDeleteVertexArrays(1, &m_VAO);;;
+	glDeleteVertexArrays(1, &m_VAO);
 }

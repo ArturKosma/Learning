@@ -2,27 +2,28 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/dual_quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/transform.hpp>
 
 void AFJoint::SetLocation(const glm::vec3& newLocation)
 {
-	location = newLocation;
+	m_location = newLocation;
 }
 
 void AFJoint::SetRotation(const glm::quat newRotation)
 {
-	rotation = newRotation;
+	m_rotation = newRotation;
 }
 
 void AFJoint::SetScale(const glm::vec3& newScale)
 {
-	scale = newScale;
+	m_scale = newScale;
 }
 
 glm::vec3 AFJoint::GetLocation() const
 {
-	return location;
+	return m_location;
 }
 
 glm::vec3 AFJoint::GetGlobalLocation() const
@@ -40,7 +41,7 @@ glm::vec3 AFJoint::GetGlobalLocation() const
 
 glm::quat AFJoint::GetRotation() const
 {
-	return rotation;
+	return m_rotation;
 }
 
 glm::quat AFJoint::GetGlobalRotation() const
@@ -58,7 +59,7 @@ glm::quat AFJoint::GetGlobalRotation() const
 
 glm::vec3 AFJoint::GetScale() const
 {
-	return scale;
+	return m_scale;
 }
 
 std::shared_ptr<AFJoint> AFJoint::CreateRoot(int rootBoneIdx)
@@ -71,9 +72,9 @@ std::shared_ptr<AFJoint> AFJoint::CreateRoot(int rootBoneIdx)
 
 void AFJoint::CalculateLocalTRSMatrix()
 {
-	glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), location);
-	glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
-	glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
+	glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_location);
+	glm::mat4 rotationMatrix = glm::mat4_cast(m_rotation);
+	glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_scale);
 
 	localTRSMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 }
@@ -81,6 +82,40 @@ void AFJoint::CalculateLocalTRSMatrix()
 void AFJoint::CalculateNodeMatrix(const glm::mat4& parentNodeMatrix)
 {
 	nodeMatrix = parentNodeMatrix * localTRSMatrix;
+}
+
+void AFJoint::RecalculateBone(const glm::mat4& parentTrs, 
+	const std::vector<int>& nodesToJoints, 
+	std::vector<glm::mat4>& jointsMatrices,
+	const std::vector<glm::mat4>& inverseBindMatrices,
+	std::vector<glm::mat4>& jointDualQuats)
+{
+	CalculateNodeMatrix(parentTrs);
+	jointsMatrices.at(nodesToJoints.at(GetNodeID())) = GetNodeMatrix() * inverseBindMatrices.at(nodesToJoints.at(GetNodeID()));
+
+	// Compose dual quat.
+	glm::vec3 translation;
+	glm::quat rotation;
+	glm::vec3 scale;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::dualquat dq;
+	glm::decompose(GetNodeMatrix() * inverseBindMatrices.at(nodesToJoints.at(GetNodeID())),
+		scale, rotation, translation, skew, perspective);
+
+	// Fill dual quaternions. @see C++ Game Animation Programming by Dunsky & Szauer.
+	dq[0] = rotation;
+	dq[1] = glm::quat(0.0f, translation.x, translation.y, translation.z) * rotation * 0.5f;
+	glm::mat2x4 dualQuatJoint = glm::mat2x4_cast(dq);
+	glm::mat4 paddedMat(0.0f); // Web-GL doesn't accept 2x4.
+	paddedMat[0] = dualQuatJoint[0];
+	paddedMat[1] = dualQuatJoint[1];
+	jointDualQuats.at(nodesToJoints.at(GetNodeID())) = paddedMat;
+
+	for (std::shared_ptr<AFJoint> childBone : GetChildren())
+	{
+		childBone->RecalculateBone(nodeMatrix, nodesToJoints, jointsMatrices, inverseBindMatrices, jointDualQuats);
+	}
 }
 
 glm::mat4 AFJoint::GetLocalTRSMatrix() const
@@ -102,6 +137,11 @@ void AFJoint::AddChildren(const std::vector<int>& newChildBones)
 
 		childNodes.push_back(child);
 	}
+}
+
+void AFJoint::AddChildren(std::shared_ptr<AFJoint> newChildBone)
+{
+	childNodes.push_back(newChildBone);
 }
 
 std::vector<std::shared_ptr<AFJoint>> AFJoint::GetChildren() const
@@ -152,4 +192,9 @@ void AFJoint::PrintNodes(std::shared_ptr<AFJoint> bone, int indent)
 glm::mat4 AFJoint::GetNodeMatrix() const
 {
 	return nodeMatrix;
+}
+
+void AFJoint::SetNodeID(int id)
+{
+	nodeID = id;
 }

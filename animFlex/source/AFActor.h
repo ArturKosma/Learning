@@ -27,6 +27,9 @@ public:
 	void AddOffsetRotation(const glm::vec3& offset);
 	void AddOffsetScale(const glm::vec3& offset);
 
+	bool GetMarkedForDestruction();
+	void MarkForDestruction();
+
 protected:
 
 	void RecreateTransform();
@@ -36,4 +39,6 @@ protected:
 	glm::quat m_rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	glm::vec3 m_scale = glm::vec3(1.0f);
 	glm::mat4 m_transform = glm::mat4();
+
+	bool m_markedForDestruction = false;
 };

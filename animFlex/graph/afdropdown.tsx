@@ -7,6 +7,7 @@ import { ReactPlugin } from 'rete-react-plugin';
 // Dropdown loading.
 const animsUrl = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/anims/manifest.json`;
 const curvesUrl = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/manifest.json`;
+const bonesUrl = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/bones/manifest.json`;
 
 const manifestCache = new Map<string, { name: string }[]>();
 
@@ -77,7 +78,7 @@ export function CustomDropdown(props: { data: DropdownControl }) {
 
   // Enable dropdown only for known manifest-backed types
   const dropdownEnabled =
-    props.data.type === 'Dropdown_Anims' || props.data.type === 'Dropdown_Curves';
+    props.data.type === 'Dropdown_Anims' || props.data.type === 'Dropdown_Curves' || props.data.type === 'Dropdown_Bones';
 
   useEffect(() => {
     if (!dropdownEnabled) {
@@ -88,10 +89,15 @@ export function CustomDropdown(props: { data: DropdownControl }) {
       return;
     }
 
-    const url =
-      props.data.type === 'Dropdown_Anims'
-        ? animsUrl
-        : curvesUrl;
+    let url = "";
+
+    if(props.data.type === 'Dropdown_Anims') {
+      url = animsUrl;
+    } else if (props.data.type === 'Dropdown_Curves') {
+      url = curvesUrl;
+    } else if (props.data.type === 'Dropdown_Bones') {
+      url = bonesUrl;
+    }
 
     let alive = true;
     loadManifest(url)
@@ -207,7 +213,7 @@ export function CustomDropdown(props: { data: DropdownControl }) {
         onContextMenu={stop}
         placeholder={
           dropdownEnabled
-            ? (props.data.type === "Dropdown_Anims" ? "Choose Anim" : "Choose Curve")
+            ? "Choose value.."
             : "Type value…"
         }
         title={searchValue}

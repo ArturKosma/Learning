@@ -17,7 +17,10 @@ AFPose::AFPose()
 
 AFPose::AFPose(const AFPose& otherPose)
 {
-	CreateJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
+	if (m_joints.empty())
+	{
+		CreateJoints(AFContent::Get().FindAsset<AFMesh>("sk_mannequin")->GetJoints());
+	}
 	CopyPoseFrom(otherPose);
 }
 
@@ -50,9 +53,43 @@ void AFPose::CreateJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
 		newJoint->SetScale(joints[i]->GetScale());
 
 		newJoint->CalculateLocalTRSMatrix();
+
 		newJoint->SetNodeName(joints[i]->GetNodeName());
+		newJoint->SetNodeID(joints[i]->GetNodeID());
+
+		m_boneNameToIndex[joints[i]->GetNodeName()] = i;
 
 		m_joints[i] = newJoint;
+	}
+
+	// Recreate children connections.
+	// For every joint.
+	for (size_t i = 0; i < m_joints.size(); ++i)
+	{
+		const std::vector<std::shared_ptr<AFJoint>>& children = joints[i]->GetChildren();
+		if (children.empty())
+		{
+			continue;
+		}
+
+		// Check its children in the input pose.
+		// For every child.
+		for (const std::shared_ptr<AFJoint>& child : children)
+		{
+			// Find if such joint exists in this pose.
+			auto it = std::find_if(m_joints.begin(), m_joints.end(),
+				[child](const std::shared_ptr<AFJoint>& existing)
+				{
+					return existing->GetNodeID() == child->GetNodeID();
+				});
+			if (it == m_joints.end())
+			{
+				continue;
+			}
+
+			// If it exists, connect it to this joint.
+			m_joints[i]->AddChildren(*it);
+		}
 	}
 
 	for (const std::string& curveName : AFUtility::GetCurveNames())
@@ -151,6 +188,17 @@ void AFPose::SetCurvesValues(const std::unordered_map<std::string, float>& curve
 const std::unordered_map<std::string, float>& AFPose::GetCurvesValues() const
 {
 	return m_curvesValues;
+}
+
+std::shared_ptr<class AFJoint> AFPose::GetJoint(const std::string& jointName) const
+{
+	auto itName = m_boneNameToIndex.find(jointName);
+	if (itName == m_boneNameToIndex.end())
+	{
+		return nullptr;
+	}
+
+	return m_joints.at(itName->second);
 }
 
 const std::vector<std::shared_ptr<class AFJoint>>& AFPose::GetJoints() const

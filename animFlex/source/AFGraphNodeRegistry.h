@@ -103,11 +103,14 @@ struct ParamTraits<glm::vec3>
 {
 	static bool FromJSON(const nlohmann::json& json, glm::vec3& out)
 	{
-		if (json.is_array() && json.size() == 3)
+		if (json.is_string()) 
 		{
-			out = glm::vec3(json[0], json[1], json[2]);
+			std::stringstream ss(json.get<std::string>());
+			char c;
+			ss >> out.x >> c >> out.y >> c >> out.z;
 			return true;
 		}
+
 		return false;
 	}
 };

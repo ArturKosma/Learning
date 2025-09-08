@@ -80,6 +80,8 @@ void AFGame::Tick(float deltaTime)
 	{
 		ui->PostTick(deltaTime);
 	}
+
+	m_scene.Tick(deltaTime);
 }
 
 AFGame* AFGame::GetGame()
@@ -240,6 +242,11 @@ void AFGame::OnStateConnectionRemoved(const char* msg)
 
 void AFGame::SetControlMode(EAFControlMode newControlMode)
 {
+	if (!m_player)
+	{
+		return;
+	}
+
 	if (m_currentControlMode == newControlMode)
 	{
 		return;

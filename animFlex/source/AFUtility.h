@@ -14,6 +14,8 @@
 #include <emscripten/emscripten.h>
 #endif
 
+class AFPose;
+
 class AFUtility
 {
 public:
@@ -187,6 +189,25 @@ public:
 
 	static float GetRootAngleTowardsVelocity();
 	static float GetAngleTowardsVelocity();
+
+	static glm::vec3 GetColorVector(EAFColor color);
+
+	static void DrawDebugBox(const glm::vec3& location,
+		float size = 1.0f,
+		float lifetime = 3.0f,
+		EAFColor color = EAFColor::Red,
+		const glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+
+	static void GetBone(const AFPose& pose, const std::string& bone, EAFBoneSpace space, glm::vec3& location, glm::vec3& rotation);
+
+private:
+
+	static void DrawDebugActor(std::shared_ptr<class AFDebugShapeActor> actor,
+		const glm::vec3& location,
+		float lifetime = 3.0f,
+		const glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+		const glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f),
+		EAFColor color = EAFColor::Red);
 
 };
 

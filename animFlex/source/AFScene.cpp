@@ -31,6 +31,19 @@ void AFScene::BeginPlay()
 	}
 }
 
+void AFScene::Tick(float deltaTime)
+{
+	// Erase all actors marked for destruction.
+	m_sceneData.sceneActors.erase(
+		std::remove_if(m_sceneData.sceneActors.begin(), m_sceneData.sceneActors.end(),
+			[](const std::shared_ptr<AFObject>& obj) 
+			{
+				auto actor = std::dynamic_pointer_cast<AFActor>(obj);
+				return actor && actor->GetMarkedForDestruction();
+			}),
+		m_sceneData.sceneActors.end());
+}
+
 std::shared_ptr<AFActor> AFScene::FindActor(const std::string& actorName) const
 {
 	auto it = std::find_if(m_sceneData.sceneActors.begin(), m_sceneData.sceneActors.end(),
@@ -222,7 +235,7 @@ void AFScene::CreateDefaultUIs()
 	orientationBoxUI->AddComponent(orientationBoxComp);
 	orientationBoxComp->SetLocation(glm::vec2(0.85f, 0.80f));
 	orientationBoxComp->SetScale(glm::vec2(0.001f, 0.001f));
-	AddUI(orientationBoxUI); 
+	AddUI(orientationBoxUI);
 }
 
 AFScene::AFScene()

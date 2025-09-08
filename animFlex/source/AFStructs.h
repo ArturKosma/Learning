@@ -8,7 +8,7 @@
 #include <glm/detail/type_quat.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "third_party/tiny_gltf.h"
+#define AFENUM() 
 
 struct FAFCameraProperties
 {
@@ -47,6 +47,7 @@ struct FAFVertex
 	glm::vec2 uvCenter;
 	glm::uvec4 jointNum;
 	glm::vec4 jointWeight;
+	glm::vec3 color;
 };
 
 enum class EAFTargetPath : uint8_t
@@ -180,4 +181,32 @@ enum class EAFEvaluationMode : uint8_t
 {
 	PreEvaluate,
 	Evaluate
+};
+
+AFENUM()
+enum class EAFColor
+{
+	Red,
+	Green,
+	Blue
+};
+
+enum class EAFDebugShape
+{
+	Box
+};
+
+AFENUM()
+enum class EAFBoneProperty
+{
+	Translation,
+	Rotation
+};
+
+AFENUM()
+enum class EAFBoneSpace
+{
+	Global,
+	Local,
+	World
 };

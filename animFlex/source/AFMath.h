@@ -123,6 +123,16 @@ public:
 		return glm::quat_cast(rotMat);
 	}
 
+	static glm::quat QuaternionFromEuler(const glm::vec3 euler)
+	{
+		return glm::quat(glm::radians(euler));
+	}
+
+	static glm::vec3 EulerFromQuaternion(const glm::quat quat)
+	{
+		return glm::vec3(glm::degrees(glm::eulerAngles(quat)));
+	}
+
 	static glm::quat QInterpTo(const glm::quat& current, const glm::quat& target, float interpSpeed, float deltaTime)
 	{
 		if (interpSpeed <= 0.0f)
@@ -177,16 +187,52 @@ public:
 		return current + (delta / dist) * maxStep;
 	}
 
-	static float FInterpTo(float current, float target, float interpSpeed, float deltaTime)
+	static float FInterpToConst(float current, float target, float interpSpeed, float deltaTime)
 	{
-		const float dist = glm::abs(target - current);
-		const float step = interpSpeed * deltaTime;
-		if (std::fabs(dist) <= step)
+		if (NearlyEqual(interpSpeed, 0.0f))
 		{
-			return dist;
+			return target;
 		}
 
-		return dist > 0.0f ? step : -step;
+		const float dist = glm::abs(target - current);
+		const float step = std::max(interpSpeed, 0.0f) * std::max(deltaTime, 0.0f);
+		const float dir = glm::sign(target - current);
+
+		if (step <= 0.0f || dist == 0.0f)
+		{
+			return current;
+		}
+
+		if (dist <= step)
+		{
+			return target;
+		}
+
+		return current + (step * dir);
+	}
+
+	static float FInterpToTime(float current, float target, float interpSpeed, float deltaTime)
+	{
+		if (NearlyEqual(interpSpeed, 0.0f))
+		{
+			return target;
+		}
+
+		const float dist = glm::abs(target - current);
+		const float step = std::max(interpSpeed, 0.0f) * std::max(deltaTime, 0.0f);
+		const float dir = glm::sign(target - current);
+
+		if (step <= 0.0f || dist == 0.0f)
+		{
+			return current;
+		}
+
+		if (dist <= step)
+		{
+			return target;
+		}
+
+		return current + (step * dir);
 	}
 
 	static float DeltaAngle(float current, float target)

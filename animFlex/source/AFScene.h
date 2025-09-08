@@ -11,6 +11,7 @@ class AFScene
 public:
 
 	void BeginPlay();
+	void Tick(float deltaTime);
 
 	std::shared_ptr<AFActor> FindActor(const std::string& actorName) const;
 	void AddActor(std::shared_ptr<AFActor> newActor);

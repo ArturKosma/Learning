@@ -89,6 +89,8 @@ void AFAnimGraph::OnNodeUpdated(const std::string& msg)
 	// @todo Enable multiple nodes edition.
 	const auto& node = nodes[0];
 
+	//printf("updating: %s\n", msg.c_str());
+
 	// Fetch edited node ID.
 	const std::string& nodeId = node["nodeId"];
 	const std::string& nodeType = node["nodeType"];

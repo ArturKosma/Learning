@@ -14,7 +14,7 @@
 
 std::vector<uint8_t> AFOrientationBoxUIComponent::GetDisabledElements()
 {
-	return { 3 };;
+	return { 3 };
 }
 
 AFOrientationBoxUIComponent::AFOrientationBoxUIComponent()

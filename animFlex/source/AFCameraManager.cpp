@@ -90,7 +90,7 @@ void AFCameraManager::BlendTo(std::shared_ptr<AFActor> actorWithCamComp, float l
 
 	AFTimerManager::GetInstance().ClearTimer(m_currentBlend);
 
-	// Blend to location and rotation of the target.
+	// Blend to m_location and rotation of the target.
 	// Activate target camera upon reaching.
 	m_currentBlend = AFTimerManager::SetAlphaTimer(
 	[this, targetCameraComp, tempCamera, startLoc, startRot](float alpha, float timeElapsed)

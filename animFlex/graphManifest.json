@@ -206,6 +206,126 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_BreakVector",
+            "node_name": "Break Vector",
+            "meta": [
+                "Compact"
+            ],
+            "params": [
+                {
+                    "var_type": "glm::vec3",
+                    "var_name": "m_inputVector",
+                    "default": "0.0,0.0,0.0",
+                    "label": "Input",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_x",
+                    "default": "0.0",
+                    "label": "X",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_y",
+                    "default": "0.0",
+                    "label": "Y",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_z",
+                    "default": "0.0",
+                    "label": "Z",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_CCDIK",
+            "node_name": "CCDIK",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_rootBone",
+                    "default": "",
+                    "label": "Root Bone",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_middleBone",
+                    "default": "",
+                    "label": "Middle Bone",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_effectorBone",
+                    "default": "",
+                    "label": "Effector Bone",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "glm::vec3",
+                    "var_name": "m_targetLoc",
+                    "default": "1.0,5.5,666.777",
+                    "label": "Target",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_active",
+                    "default": "true",
+                    "label": "Active",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_blendInTime",
+                    "default": "0.0",
+                    "label": "Blend In Time",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_blendOutTime",
+                    "default": "0.25",
+                    "label": "Blend Out Time",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_ChooseByAngle",
             "node_name": "Choose By Angle",
             "meta": [],
@@ -508,6 +628,72 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_DrawDebugBox",
+            "node_name": "Draw Debug Box",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "glm::vec3",
+                    "var_name": "m_location",
+                    "default": "0.0,0.0,0.0",
+                    "label": "Location",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "glm::vec3",
+                    "var_name": "m_rotation",
+                    "default": "0.0,0.0,0.0",
+                    "label": "Rotation",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_size",
+                    "default": "10.0",
+                    "label": "Size",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_lifetime",
+                    "default": "0.0",
+                    "label": "Lifetime",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_color",
+                    "default": "0",
+                    "label": "Color",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFColor_Enum"
+                    ]
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_FInterpToConst",
             "node_name": "FInterp To Const",
             "meta": [],
@@ -677,6 +863,67 @@
                     "var_name": "Output",
                     "default": "",
                     "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_GetBone",
+            "node_name": "Get Bone",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_inputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "m_boneName",
+                    "default": "",
+                    "label": "Bone",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "Dropdown_Bones"
+                    ]
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "m_space",
+                    "default": "0",
+                    "label": "Space",
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "EAFBoneSpace_Enum"
+                    ]
+                },
+                {
+                    "var_type": "AFPose",
+                    "var_name": "m_outputPose",
+                    "default": "",
+                    "label": "",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "glm::vec3",
+                    "var_name": "m_outputLocation",
+                    "default": "0.0,0.0,0.0",
+                    "label": "Location",
+                    "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "glm::vec3",
+                    "var_name": "m_outputRotation",
+                    "default": "0.0,0.0,0.0",
+                    "label": "Rotation",
                     "direction": "Output",
                     "meta": []
                 }
@@ -997,6 +1244,47 @@
                     "var_name": "Output",
                     "default": "",
                     "label": "",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
+            "class_id": "AFGraphNode_MakeVector",
+            "node_name": "Make Vector",
+            "meta": [
+                "Compact"
+            ],
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "m_x",
+                    "default": "0.0",
+                    "label": "X",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_y",
+                    "default": "0.0",
+                    "label": "Y",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_z",
+                    "default": "0.0",
+                    "label": "Z",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "glm::vec3",
+                    "var_name": "m_outputVector",
+                    "default": "0.0,0.0,0.0",
+                    "label": "Output",
                     "direction": "Output",
                     "meta": []
                 }
@@ -1429,6 +1717,37 @@
             "enum_name": "EAFSetFloatProperties",
             "values": [
                 "RootYaw"
+            ]
+        },
+        {
+            "enum_name": "EAFTargetPath",
+            "values": [
+                "Rotation",
+                "Translation",
+                "Scale"
+            ]
+        },
+        {
+            "enum_name": "EAFColor",
+            "values": [
+                "Red",
+                "Green",
+                "Blue"
+            ]
+        },
+        {
+            "enum_name": "EAFBoneProperty",
+            "values": [
+                "Translation",
+                "Rotation"
+            ]
+        },
+        {
+            "enum_name": "EAFBoneSpace",
+            "values": [
+                "Global",
+                "Local",
+                "World"
             ]
         }
     ]

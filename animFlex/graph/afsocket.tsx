@@ -44,6 +44,8 @@ function getFilter(type: string) {
       return "brightness(0) saturate(100%) invert(26%) sepia(85%) saturate(4687%) hue-rotate(0deg) brightness(101%) contrast(102%)";
     case "string":
       return "brightness(0) saturate(100%) invert(37%) sepia(88%) saturate(1100%) hue-rotate(279deg) brightness(95%) contrast(102%)";
+    case "vector":
+      return "brightness(0) saturate(100%) invert(84%) sepia(61%) saturate(7461%) hue-rotate(359deg) brightness(107%) contrast(103%)"; 
     default:
       return "none";
   }

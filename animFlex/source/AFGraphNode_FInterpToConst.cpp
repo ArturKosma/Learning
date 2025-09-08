@@ -12,11 +12,13 @@ void AFGraphNode_FInterpToConst::Evaluate(float deltaTime)
 	{
 		case EAFFInterpType::Value:
 		{
-			ret = AFMath::FInterpTo(m_current.GetValue(), m_target.GetValue(), m_rate.GetValue(), AFTimerManager::GetDeltaTime());
+			// @todo Create a separate function returning step and let choose on the node if its step.
+			ret = AFMath::FInterpToConst(m_current.GetValue(), m_target.GetValue(), m_rate.GetValue(), AFTimerManager::GetDeltaTime());
 			break;
 		}
 		case EAFFInterpType::Angle:
 		{
+			// @todo Create a separate function returning step and let choose on the node if its step.
 			ret = AFMath::FInterpToAngle(m_current.GetValue(), m_target.GetValue(), m_rate.GetValue(), AFTimerManager::GetDeltaTime());
 			break;
 		}
