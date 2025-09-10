@@ -2,6 +2,7 @@
 #include <chrono>
 
 #include "AFContent.h"
+#include "AFGame.h"
 #include "AFJoint.h"
 #include "AFMesh.h"
 #include "AFPlayerPawn.h"
@@ -12,6 +13,11 @@ AFPose::AFPose()
 	if (mannequinMesh)
 	{
 		CreateJoints(mannequinMesh->GetJoints());
+
+		m_nodeToJoint = mannequinMesh->nodeToJoint;
+		m_inverseBindMatrices = mannequinMesh->inverseBindMatrices;
+		m_jointMatrices = mannequinMesh->inverseBindMatrices;
+		m_jointDualQuats = mannequinMesh->jointDualQuats;
 	}
 }
 
@@ -52,10 +58,12 @@ void AFPose::CreateJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
 		newJoint->SetRotation(joints[i]->GetRotation());
 		newJoint->SetScale(joints[i]->GetScale());
 
-		newJoint->CalculateLocalTRSMatrix();
+		newJoint->SetLocalMatrix(joints[i]->GetLocalTRSMatrix());
+		newJoint->SetGlobalMatrix(joints[i]->GetNodeMatrix());
 
 		newJoint->SetNodeName(joints[i]->GetNodeName());
 		newJoint->SetNodeID(joints[i]->GetNodeID());
+		newJoint->SetOwnerPose(this);
 
 		m_boneNameToIndex[joints[i]->GetNodeName()] = i;
 
@@ -89,6 +97,9 @@ void AFPose::CreateJoints(const std::vector<std::shared_ptr<AFJoint>>& joints)
 
 			// If it exists, connect it to this joint.
 			m_joints[i]->AddChildren(*it);
+
+			// Inform the child of its parent.
+			(*it)->SetParentBone(m_joints[i]);
 		}
 	}
 
@@ -147,6 +158,13 @@ void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool f
 		joint->CalculateLocalTRSMatrix();
 	}
 
+	// Recalculate whole skeleton.
+	m_joints.at(0)->RecalculateBone(glm::mat4(1.0f), 
+		m_nodeToJoint, 
+		m_jointMatrices, 
+		m_inverseBindMatrices, 
+		m_jointDualQuats);
+
 	const auto& curves = clip->GetCurves();
 	for (const std::string& curveName : AFUtility::GetCurveNames())
 	{
@@ -174,10 +192,16 @@ void AFPose::CopyPoseFrom(const AFPose& otherPose)
 		joints[i]->SetRotation(otherJoints[i]->GetRotation());
 		joints[i]->SetScale(otherJoints[i]->GetScale());
 
-		joints[i]->CalculateLocalTRSMatrix();
+		joints[i]->SetLocalMatrix(otherJoints[i]->GetLocalTRSMatrix());
+		joints[i]->SetGlobalMatrix(otherJoints[i]->GetNodeMatrix());
 	}
 
 	SetCurvesValues(otherPose.m_curvesValues);
+
+	m_nodeToJoint = otherPose.m_nodeToJoint;
+	m_inverseBindMatrices = otherPose.m_inverseBindMatrices;
+	m_jointMatrices = otherPose.m_jointMatrices;
+	m_jointDualQuats = otherPose.m_jointDualQuats;
 }
 
 void AFPose::SetCurvesValues(const std::unordered_map<std::string, float>& curvesValues) const
@@ -188,6 +212,16 @@ void AFPose::SetCurvesValues(const std::unordered_map<std::string, float>& curve
 const std::unordered_map<std::string, float>& AFPose::GetCurvesValues() const
 {
 	return m_curvesValues;
+}
+
+void AFPose::RecalculateSkeleton()
+{
+	if (m_joints.empty())
+	{
+		return;
+	}
+
+	m_joints[0]->RecalculateBone(glm::mat4(1.0f), m_nodeToJoint, m_jointMatrices, m_inverseBindMatrices, m_jointDualQuats);
 }
 
 std::shared_ptr<class AFJoint> AFPose::GetJoint(const std::string& jointName) const

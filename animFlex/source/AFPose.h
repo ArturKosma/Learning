@@ -23,6 +23,16 @@ public:
 
 	std::shared_ptr<class AFJoint> GetJoint(const std::string& jointName) const;
 
+	void RecalculateSkeleton();
+
+	// This is the same structure as AFMesh has.
+	// We need local per-pose to be able to recalculate chain within a pose.
+	// @todo Do I have to keep similar structure in AFPoses? Or can it somehow be shared with AFMesh?
+	std::vector<int> m_nodeToJoint = {};
+	std::vector<glm::mat4> m_inverseBindMatrices = {};
+	std::vector<glm::mat4> m_jointMatrices = {};
+	std::vector<glm::mat4> m_jointDualQuats = {};
+
 private:
 
 	std::vector<std::shared_ptr<class AFJoint>> m_joints = {};

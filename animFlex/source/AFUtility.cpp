@@ -147,6 +147,95 @@ void AFUtility::GetBone(const AFPose& pose, const std::string& bone, EAFBoneSpac
 	}
 }
 
+void AFUtility::CCDIK(AFPose& pose, 
+	const std::vector<FAFIKBoneProperties>& ikbones,
+	const glm::vec3 targetLocation,
+	const glm::quat targetRotation,
+	float threshold,
+	size_t maxIterations)
+{
+	// Create hierarchy of bone pointers.
+	std::vector<std::shared_ptr<AFJoint>> hierarchy = {};
+	for(const FAFIKBoneProperties& prop : ikbones)
+	{
+		std::shared_ptr<AFJoint> bone = pose.GetJoint(prop.boneName);
+		if (!bone)
+		{
+			return;
+		}
+
+		hierarchy.push_back(bone);
+	}
+
+	if (hierarchy.empty())
+	{
+		return;
+	}
+
+	const size_t effectorIdx = hierarchy.size() - 1;
+//	printf("************\n");
+
+	for (size_t iteration = 0; iteration < maxIterations; ++iteration)
+	{
+		glm::vec3 effectorLocation = hierarchy[effectorIdx]->GetGlobalLocation();
+
+		//size_t index = 0;
+		//glm::quat someRot = hierarchy[index]->GetGlobalRotation();
+		//printf("%zu: %f, %f, %f, %f\n", index, someRot.x, someRot.y, someRot.z, someRot.w);
+
+		if (glm::length(targetLocation - effectorLocation) < threshold)
+		{
+			return;
+		}
+
+		for (size_t i = hierarchy.size(); i-- > 0;)
+		{
+			// Effector does nothing.
+			if (i == effectorIdx)
+			{
+				continue;
+			}
+
+			std::shared_ptr<AFJoint> markerJoint = hierarchy[i];
+			const glm::vec3 location = markerJoint->GetGlobalLocation();
+			const glm::quat rotationParent = markerJoint->GetParentBone().lock()->GetGlobalRotation();
+
+			effectorLocation = hierarchy[effectorIdx]->GetGlobalLocation();
+
+			// Directions.
+			const glm::vec3 effectorDir = glm::normalize(effectorLocation - location);
+			const glm::vec3 targetDir = glm::normalize(targetLocation - location);
+
+			// What's the required rotation.
+			const glm::quat rot = glm::rotation(effectorDir, targetDir);
+
+			// Find delta in local space.
+			const glm::quat localRot = glm::normalize(glm::conjugate(rotationParent) * rot * rotationParent);
+
+			if (i == 0)
+			{
+				//printf("%f, %f, %f\n", effectorLocation.x, effectorLocation.y, effectorLocation.z);
+			}
+
+			// Set new local rotation by adding the offset.
+			markerJoint->SetRotation(glm::normalize(localRot * markerJoint->GetRotation()));
+
+			// Recalculate the chain downwards.
+			markerJoint->CalculateLocalTRSMatrix();
+			const glm::mat4 parentMatrix = markerJoint->GetParentBone().expired() ?
+				glm::mat4(1.0f) :
+				markerJoint->GetParentBone().lock()->GetNodeMatrix();
+
+			// @todo Joint should have easy access to those matrices without us having to pass them all the time.
+			markerJoint->RecalculateBone(parentMatrix,
+				pose.m_nodeToJoint,
+				pose.m_jointMatrices,
+				pose.m_inverseBindMatrices,
+				pose.m_jointDualQuats);
+		}
+	}
+}
+
 void AFUtility::DrawDebugActor(std::shared_ptr<AFDebugShapeActor> actor, const glm::vec3& location, float lifetime,
                                const glm::quat& rotation, const glm::vec3& scale, EAFColor color)
 {

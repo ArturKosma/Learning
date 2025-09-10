@@ -210,3 +210,9 @@ enum class EAFBoneSpace
 	Local,
 	World
 };
+
+struct FAFIKBoneProperties
+{
+	std::string boneName = "";
+
+};

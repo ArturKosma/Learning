@@ -26,6 +26,9 @@ public:
 	void CalculateLocalTRSMatrix();
 	void CalculateNodeMatrix(const glm::mat4& parentNodeMatrix);
 
+	void SetLocalMatrix(glm::mat4 localMatrix);
+	void SetGlobalMatrix(glm::mat4 globalMatrix);
+
 	void RecalculateBone(const glm::mat4& parentTrs, 
 		const std::vector<int>& nodesToJoints, 
 		std::vector<glm::mat4>& jointsMatrices,
@@ -38,13 +41,20 @@ public:
 	void SetNodeID(int id);
 	int GetNodeID() const;
 
+	bool GetHasChild(std::shared_ptr<AFJoint> child);
 	std::vector<std::shared_ptr<AFJoint>> GetChildren() const;
 
 	void SetNodeName(const std::string& newName);
 	std::string GetNodeName() const;
 
+	void SetParentBone(std::weak_ptr<AFJoint> parent);
+	std::weak_ptr<AFJoint> GetParentBone() const;
+
 	void PrintTree() const;
 	static void PrintNodes(std::shared_ptr<AFJoint> bone, int indent);
+
+	void SetOwnerPose(class AFPose* ownerPose);
+	class AFPose* GetOwnerPose() const;
 
 private:
 
@@ -58,5 +68,8 @@ private:
 	glm::mat4 localTRSMatrix = glm::mat4(1.0f);
 	glm::mat4 nodeMatrix = glm::mat4(1.0f);
 
+	// @todo Allow making a weak ptr.
+	class AFPose* m_ownerPose = {};
+	std::weak_ptr<AFJoint> parentNode = {};
 	std::vector<std::shared_ptr<AFJoint>> childNodes = {};
 };

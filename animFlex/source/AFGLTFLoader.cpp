@@ -146,6 +146,7 @@ bool AFGLTFLoader::Load(const std::string& filename, FAFMeshLoaded& loadedMesh)
 
 			for(auto& childNode : nodeToFill->GetChildren())
 			{
+				childNode->SetParentBone(nodeToFill);
 				GetNodeData(childNode, nodeMatrix);
 				GetNodes(childNode);
 			}

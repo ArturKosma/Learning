@@ -84,11 +84,21 @@ void AFJoint::CalculateNodeMatrix(const glm::mat4& parentNodeMatrix)
 	nodeMatrix = parentNodeMatrix * localTRSMatrix;
 }
 
+void AFJoint::SetLocalMatrix(glm::mat4 localMatrix)
+{
+	localTRSMatrix = localMatrix;
+}
+
+void AFJoint::SetGlobalMatrix(glm::mat4 globalMatrix)
+{
+	nodeMatrix = globalMatrix;
+}
+
 void AFJoint::RecalculateBone(const glm::mat4& parentTrs, 
-	const std::vector<int>& nodesToJoints, 
-	std::vector<glm::mat4>& jointsMatrices,
-	const std::vector<glm::mat4>& inverseBindMatrices,
-	std::vector<glm::mat4>& jointDualQuats)
+                              const std::vector<int>& nodesToJoints, 
+                              std::vector<glm::mat4>& jointsMatrices,
+                              const std::vector<glm::mat4>& inverseBindMatrices,
+                              std::vector<glm::mat4>& jointDualQuats)
 {
 	CalculateNodeMatrix(parentTrs);
 	jointsMatrices.at(nodesToJoints.at(GetNodeID())) = GetNodeMatrix() * inverseBindMatrices.at(nodesToJoints.at(GetNodeID()));
@@ -128,6 +138,19 @@ int AFJoint::GetNodeID() const
 	return nodeID;
 }
 
+bool AFJoint::GetHasChild(std::shared_ptr<AFJoint> child)
+{
+	for (std::shared_ptr<AFJoint> chil : GetChildren())
+	{
+		if (chil->GetNodeName() == child->GetNodeName())
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void AFJoint::AddChildren(const std::vector<int>& newChildBones)
 {
 	for (const int childBone : newChildBones)
@@ -159,6 +182,16 @@ std::string AFJoint::GetNodeName() const
 	return nodeName;
 }
 
+void AFJoint::SetParentBone(std::weak_ptr<AFJoint> parent)
+{
+	parentNode = parent;
+}
+
+std::weak_ptr<AFJoint> AFJoint::GetParentBone() const
+{
+	return parentNode;
+}
+
 void AFJoint::PrintTree() const
 {
 	printf("---- tree ----\n");
@@ -187,6 +220,16 @@ void AFJoint::PrintNodes(std::shared_ptr<AFJoint> bone, int indent)
 	{
 		PrintNodes(childNode, indent + 1);
 	}
+}
+
+void AFJoint::SetOwnerPose(class AFPose* ownerPose)
+{
+	m_ownerPose = ownerPose;
+}
+
+class AFPose* AFJoint::GetOwnerPose() const
+{
+	return m_ownerPose;
 }
 
 glm::mat4 AFJoint::GetNodeMatrix() const

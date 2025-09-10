@@ -200,6 +200,15 @@ public:
 
 	static void GetBone(const AFPose& pose, const std::string& bone, EAFBoneSpace space, glm::vec3& location, glm::vec3& rotation);
 
+	// First bone is IK root, last bone is IK effector.
+	// Target Location and Target Rotation are in global space (root bone is 000), so convert them first if they are in world space.
+	static void CCDIK(AFPose& pose,
+		const std::vector<FAFIKBoneProperties>& ikbones,
+		const glm::vec3 targetLocation,
+		const glm::quat targetRotation,
+		float threshold = 0.001f,
+		size_t maxIterations = 20);
+
 private:
 
 	static void DrawDebugActor(std::shared_ptr<class AFDebugShapeActor> actor,

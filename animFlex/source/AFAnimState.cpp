@@ -264,7 +264,7 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 		return;
 	}
 
-	for (int i = 0; i < currentJoints.size(); ++i)
+	for (size_t i = 0; i < currentJoints.size(); ++i)
 	{
 		currentJoints[i]->SetLocation(calculatedJoints[i]->GetLocation());
 		currentJoints[i]->SetRotation(calculatedJoints[i]->GetRotation());
