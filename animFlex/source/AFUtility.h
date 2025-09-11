@@ -206,8 +206,13 @@ public:
 		const std::vector<FAFIKBoneProperties>& ikbones,
 		const glm::vec3 targetLocation,
 		const glm::quat targetRotation,
+		bool applyEffectorRotation = false,
 		float threshold = 0.001f,
 		size_t maxIterations = 20);
+
+	// Applies limits in local space of the bone.
+	// Requires chain recalculation to take effect.
+	static void ApplyLimits(AFPose& pose, const FAFIKBoneProperties& boneProperties);
 
 private:
 

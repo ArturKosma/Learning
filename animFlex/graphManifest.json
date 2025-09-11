@@ -317,6 +317,14 @@
                     "meta": []
                 },
                 {
+                    "var_type": "bool",
+                    "var_name": "m_applyEffectorRotation",
+                    "default": "false",
+                    "label": "Apply Effector Rotation",
+                    "direction": "",
+                    "meta": []
+                },
+                {
                     "var_type": "float",
                     "var_name": "m_blendInTime",
                     "default": "0.0",

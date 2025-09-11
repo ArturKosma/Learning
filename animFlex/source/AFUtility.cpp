@@ -151,44 +151,32 @@ void AFUtility::CCDIK(AFPose& pose,
 	const std::vector<FAFIKBoneProperties>& ikbones,
 	const glm::vec3 targetLocation,
 	const glm::quat targetRotation,
+	bool applyEffectorRotation,
 	float threshold,
 	size_t maxIterations)
 {
-	// Create hierarchy of bone pointers.
-	std::vector<std::shared_ptr<AFJoint>> hierarchy = {};
-	for(const FAFIKBoneProperties& prop : ikbones)
-	{
-		std::shared_ptr<AFJoint> bone = pose.GetJoint(prop.boneName);
-		if (!bone)
-		{
-			return;
-		}
-
-		hierarchy.push_back(bone);
-	}
-
-	if (hierarchy.empty())
+	if (ikbones.size() < 3)
 	{
 		return;
 	}
 
-	const size_t effectorIdx = hierarchy.size() - 1;
-//	printf("************\n");
+	const size_t effectorIdx = ikbones.size() - 1;
+	std::shared_ptr<AFJoint> effector = pose.GetJoint(ikbones[effectorIdx].boneName);
+	if (!effector)
+	{
+		return;
+	}
 
 	for (size_t iteration = 0; iteration < maxIterations; ++iteration)
 	{
-		glm::vec3 effectorLocation = hierarchy[effectorIdx]->GetGlobalLocation();
-
-		//size_t index = 0;
-		//glm::quat someRot = hierarchy[index]->GetGlobalRotation();
-		//printf("%zu: %f, %f, %f, %f\n", index, someRot.x, someRot.y, someRot.z, someRot.w);
+		glm::vec3 effectorLocation = effector->GetGlobalLocation();
 
 		if (glm::length(targetLocation - effectorLocation) < threshold)
 		{
 			return;
 		}
 
-		for (size_t i = hierarchy.size(); i-- > 0;)
+		for (size_t i = ikbones.size(); i-- > 0;)
 		{
 			// Effector does nothing.
 			if (i == effectorIdx)
@@ -196,11 +184,16 @@ void AFUtility::CCDIK(AFPose& pose,
 				continue;
 			}
 
-			std::shared_ptr<AFJoint> markerJoint = hierarchy[i];
+			std::shared_ptr<AFJoint> markerJoint = pose.GetJoint(ikbones[i].boneName);
+			if (!markerJoint)
+			{
+				return;
+			}
+
 			const glm::vec3 location = markerJoint->GetGlobalLocation();
 			const glm::quat rotationParent = markerJoint->GetParentBone().lock()->GetGlobalRotation();
 
-			effectorLocation = hierarchy[effectorIdx]->GetGlobalLocation();
+			effectorLocation = effector->GetGlobalLocation();
 
 			// Directions.
 			const glm::vec3 effectorDir = glm::normalize(effectorLocation - location);
@@ -212,26 +205,98 @@ void AFUtility::CCDIK(AFPose& pose,
 			// Find delta in local space.
 			const glm::quat localRot = glm::normalize(glm::conjugate(rotationParent) * rot * rotationParent);
 
-			if (i == 0)
-			{
-				//printf("%f, %f, %f\n", effectorLocation.x, effectorLocation.y, effectorLocation.z);
-			}
-
 			// Set new local rotation by adding the offset.
 			markerJoint->SetRotation(glm::normalize(localRot * markerJoint->GetRotation()));
 
-			// Recalculate the chain downwards.
+			// Apply limits.
+			ApplyLimits(pose, ikbones[i]);
+
+			// Recalculate local matrix.
 			markerJoint->CalculateLocalTRSMatrix();
 			const glm::mat4 parentMatrix = markerJoint->GetParentBone().expired() ?
 				glm::mat4(1.0f) :
 				markerJoint->GetParentBone().lock()->GetNodeMatrix();
 
-			// @todo Joint should have easy access to those matrices without us having to pass them all the time.
+			// Recalculate whole chain downwards.
 			markerJoint->RecalculateBone(parentMatrix,
 				pose.m_nodeToJoint,
 				pose.m_jointMatrices,
 				pose.m_inverseBindMatrices,
 				pose.m_jointDualQuats);
+		}
+	}
+
+	// Apply effector rotation.
+	// It should always be given in global space.
+	if (applyEffectorRotation)
+	{
+		const glm::quat effectorParentRot = effector->GetParentBone().lock()->GetGlobalRotation();
+		effector->SetRotation(glm::normalize(glm::conjugate(effectorParentRot) * targetRotation));
+
+		// Recalculate the effector.
+		effector->RecalculateBone(effector->GetParentBone().lock()->GetNodeMatrix(),
+			pose.m_nodeToJoint,
+			pose.m_jointMatrices,
+			pose.m_inverseBindMatrices,
+			pose.m_jointDualQuats);
+	}
+}
+
+void AFUtility::ApplyLimits(AFPose& pose, const FAFIKBoneProperties& boneProperties)
+{
+	if (boneProperties.boneName.empty())
+	{
+		return;
+	}
+
+	std::shared_ptr<AFJoint> joint = pose.GetJoint(boneProperties.boneName);
+	if (!joint)
+	{
+		return;
+	}
+
+	switch (boneProperties.boneType)
+	{
+		case EAFJointType::Hinge:
+		{
+			const glm::quat localRotation = glm::normalize(joint->GetRotation());
+			const glm::vec3 hingeAxis = glm::normalize(boneProperties.hingeProperties.hingeAxis);
+
+			// Take out the vector part out of the local rotation (vector around which local rotation currently happens).
+			const glm::vec3 real = glm::vec3(localRotation.x, localRotation.y, localRotation.z);
+
+			// Project the local rotation onto hinge axis (how much are we rotating in the hinge axis).
+			float proj = glm::dot(real, hingeAxis);
+
+			// Construct the vector part of the twist quaternion.
+			const glm::vec3 twistVec = hingeAxis * proj;
+
+			// Construct the twist and swing quaternions.
+			const glm::quat twist = glm::normalize(glm::quat(localRotation.w, twistVec.x, twistVec.y, twistVec.z));
+			const glm::quat swing = glm::normalize(localRotation * glm::conjugate(twist));
+
+			// Clamp twist angle.
+			const float twistAngle = 2.0f * std::atan2(glm::length(glm::vec3(twist.x, twist.y, twist.z)), twist.w);
+			const float sign = (proj >= 0.0f) ? 1.0f : -1.0f;
+			const float twistDeg = glm::degrees(twistAngle) * sign;
+			const float clampedDeg = glm::clamp(twistDeg, 
+				boneProperties.hingeProperties.minAngle, 
+				boneProperties.hingeProperties.maxAngle);
+			//printf("%f\n", twistDeg);
+
+			// Reconstruct clamped quaternion.
+			const glm::quat clampedLocalRot = glm::angleAxis(glm::radians(clampedDeg), hingeAxis);
+			joint->SetRotation(clampedLocalRot);
+
+			break;
+		}
+		case EAFJointType::Ball:
+		{
+			break;
+		}
+		default:
+		{
+			break;
 		}
 	}
 }

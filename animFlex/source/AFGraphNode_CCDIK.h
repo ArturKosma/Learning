@@ -14,6 +14,7 @@ public:
 	AFPARAM(glm::vec3, m_targetLoc, (glm::vec3(0.0f, 0.0f, 0.0f)), "Target Location", "Input", "");
 	AFPARAM(glm::vec3, m_targetRot, (glm::vec3(0.0f, 0.0f, 0.0f)), "Target Rotation", "Input", "");
 	AFPARAM(bool, m_active, true, "Active", "Input", "");
+	AFPARAM(bool, m_applyEffectorRotation, false, "Apply Effector Rotation", "", "");
 	AFPARAM(float, m_blendInTime, 0.0f, "Blend In Time", "", "");
 	AFPARAM(float, m_blendOutTime, 0.25f, "Blend Out Time", "", "");
 	AFPARAM(AFPose, m_outputPose, {}, "", "Output", "");

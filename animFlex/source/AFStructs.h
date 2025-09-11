@@ -191,7 +191,7 @@ enum class EAFColor
 	Blue
 };
 
-enum class EAFDebugShape
+enum class EAFDebugShape : uint8_t
 {
 	Box
 };
@@ -211,8 +211,29 @@ enum class EAFBoneSpace
 	World
 };
 
+enum class EAFJointType : uint8_t
+{
+	Hinge,
+	Ball
+};
+
+struct FAFHingeProperties
+{
+	glm::vec3 hingeAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+	float minAngle = 0.0f;
+	float maxAngle = 180.0f;
+};
+
+struct FAFBallProperties
+{
+	
+};
+
 struct FAFIKBoneProperties
 {
 	std::string boneName = "";
+	EAFJointType boneType = EAFJointType::Hinge;
 
+	FAFHingeProperties hingeProperties = {};
+	FAFBallProperties ballProperties = {};
 };

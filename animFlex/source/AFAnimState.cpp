@@ -336,5 +336,6 @@ void AFAnimState::OnStartRunEnter()
 	m_startRunCurve_rootYaw = startRunRootYaws[index];
 
 	// Reset the distance traveled for distance-matching in startRun.
-	m_startRunDistanceTraveled = 0.0f;
+	// We take last offset as the move has already happened at this point.
+	m_startRunDistanceTraveled = glm::length(charMovement->GetLastLocationOffset());
 }
