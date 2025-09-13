@@ -228,6 +228,7 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 	int requestedBoneIdx = 0;
 	std::string requestedAxis = "";
 	float floatParam0 = 0.0f;
+	float floatParam1 = 0.0f;
 
 	// Figure out what the user wants based on args.
 	for (const std::string& arg : args)
@@ -253,6 +254,20 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 			const float f = std::stof(valueStr);
 
 			floatParam0 = f;
+		}
+		if (size_t s = arg.find("valueMin="); s != std::string::npos)
+		{
+			std::string valueStr = arg.substr(s + 9);
+			const float f = std::stof(valueStr);
+
+			floatParam0 = f;
+		}
+		if (size_t s = arg.find("valueMax="); s != std::string::npos)
+		{
+			std::string valueStr = arg.substr(s + 9);
+			const float f = std::stof(valueStr);
+
+			floatParam1 = f;
 		}
 		if (arg == "feetGroundedL")
 		{
@@ -473,8 +488,7 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				outJson << rootYawArray.dump(2);
 			}
 			// Writes down 1 if feet touches (is near) the ground.
-			// @todo THIS WON'T WORK WITHOUT CREATING A HIERARCHY AND CHAIN OF LOCAL TRS.
-			// Use runtime for now.
+			// Doesn't work automatically, requires input parameter with exact min and max time.
 			if (requestedMotionType == "feetGrounded")
 			{
 				nlohmann::json feetGrounded = nlohmann::json::array();
@@ -487,9 +501,13 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 
 				for (uint32_t i = 0; i < keyCount; ++i)
 				{
-					const float height = newChannel.values[i].y;
+					const float currentTiming = newChannel.timings[i];
 
-					feetGrounded.push_back({ newChannel.timings[i], height });
+					// If within range or matching edges.
+					const bool bValue = (currentTiming > floatParam0 || glm::epsilonEqual(currentTiming, floatParam0, glm::epsilon<float>()))
+					&& (currentTiming < floatParam1 || glm::epsilonEqual(currentTiming, floatParam1, glm::epsilon<float>()));
+
+					feetGrounded.push_back({ newChannel.timings[i], bValue ? 1.0f : 0.0f });
 				}
 
 				std::string filename = "";
