@@ -214,6 +214,11 @@ const std::unordered_map<std::string, float>& AFPose::GetCurvesValues() const
 	return m_curvesValues;
 }
 
+size_t AFPose::GetJointIndex(const std::string& jointName) const
+{
+	return m_boneNameToIndex.at(jointName);
+}
+
 void AFPose::RecalculateSkeleton()
 {
 	if (m_joints.empty())

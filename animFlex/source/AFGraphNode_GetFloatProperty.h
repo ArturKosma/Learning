@@ -14,6 +14,8 @@ enum class EAFFloatProperties
 	RootAngleTowardsMovementInput,
 	RootAngleTowardsVelocity,
 	AngleTowardsVelocity,
+	StartRunDistanceMatchingTime,
+	StartRunDifferenceToInput,
 };
 
 class AFGraphNode_GetFloatProperty : public AFGraphNodeCRTP<AFGraphNode_GetFloatProperty>

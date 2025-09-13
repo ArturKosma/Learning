@@ -12,21 +12,21 @@ void AFGraphNode_GetAnimName::OnUpdate()
 		return;
 	}
 
-	auto onCompleteCurves = [](std::vector<std::shared_ptr<AFFloatCurve>> fetchedCurves)
+	/*auto onCompleteCurves = [](std::vector<std::shared_ptr<AFFloatCurve>> fetchedCurves)
 		{
 
-		};
+		};*/
 
 	// Called upon anims fetch complete.
-	auto onComplete = [this, onCompleteCurves, animName](std::shared_ptr<AFAnimationClip> fetchedAnim)
+	auto onComplete = [this, /*onCompleteCurves,*/ animName](std::shared_ptr<AFAnimationClip> fetchedAnim)
 		{
 			m_animClip = fetchedAnim;
 
 			// Fetch curves.
-			AFContent::Get().FetchAssets<AFFloatCurve>("content/curves/manifest.json",
+			/*AFContent::Get().FetchAssets<AFFloatCurve>("content/curves/manifest.json",
 				"https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/",
 				animName,
-				onCompleteCurves, ".json");
+				onCompleteCurves, ".json");*/
 		};
 
 	// Fetch anim.

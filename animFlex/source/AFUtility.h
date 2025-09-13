@@ -170,7 +170,9 @@ public:
 			"rootYawDelta",
 			"rootYawAuthority",
 			"rootYawWarpScale",
-			"rootYawLeft"
+			"rootYawLeft",
+			"feetGroundedL",
+			"feetGroundedR",
 		};
 	}
 
@@ -182,11 +184,7 @@ public:
 	}
 
 	static float GetAngleTowardsMovementInput();
-
-	// This uses information from both character movement and anim state components.
-	// Which means if we want to use this correctly, we have to call it in after both have updated, in like late tick of AnimState.
 	static float GetRootAngleTowardsMovementInput();
-
 	static float GetRootAngleTowardsVelocity();
 	static float GetAngleTowardsVelocity();
 
@@ -206,7 +204,6 @@ public:
 		const std::vector<FAFIKBoneProperties>& ikbones,
 		const glm::vec3 targetLocation,
 		const glm::quat targetRotation,
-		bool applyEffectorRotation = false,
 		float threshold = 0.001f,
 		size_t maxIterations = 20);
 

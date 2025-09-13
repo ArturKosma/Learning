@@ -6,19 +6,20 @@ import { ReactPlugin } from 'rete-react-plugin';
 
 // Dropdown loading.
 const animsUrl = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/anims/manifest.json`;
-const curvesUrl = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/manifest.json`;
+import curvesManifest from '../content/curves/manifest.json';
 const bonesUrl = `https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/bones/manifest.json`;
 
 const manifestCache = new Map<string, { name: string }[]>();
 
-async function loadManifest(url: string): Promise<{ name: string }[]> {
-  if (!manifestCache.has(url)) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to load manifest: ${url}`);
+async function loadManifest(source: string | { name: string }[]): Promise<{ name: string }[]> {
+  if (typeof source !== 'string') return source;
+  if (!manifestCache.has(source)) {
+    const res = await fetch(source);
+    if (!res.ok) throw new Error(`Failed to load manifest: ${source}`);
     const data = (await res.json()) as { name: string }[];
-    manifestCache.set(url, data);
+    manifestCache.set(source, data);
   }
-  return manifestCache.get(url)!;
+  return manifestCache.get(source)!;
 }
 
 type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
@@ -89,18 +90,18 @@ export function CustomDropdown(props: { data: DropdownControl }) {
       return;
     }
 
-    let url = "";
+    let urlOrData: string | { name: string }[] = '';
 
     if(props.data.type === 'Dropdown_Anims') {
-      url = animsUrl;
+      urlOrData = animsUrl;
     } else if (props.data.type === 'Dropdown_Curves') {
-      url = curvesUrl;
+      urlOrData = curvesManifest;
     } else if (props.data.type === 'Dropdown_Bones') {
-      url = bonesUrl;
+      urlOrData = bonesUrl;
     }
 
     let alive = true;
-    loadManifest(url)
+    loadManifest(urlOrData)
       .then((entries) => {
         if (!alive) return;
         const names = entries.map((e) => e.name);

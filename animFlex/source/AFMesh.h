@@ -39,8 +39,8 @@ public:
 	void RecalculateSkeleton();
 
 	const std::vector<std::shared_ptr<AFJoint>>& GetJoints() const;
-	glm::vec3 GetGlobalJointLocation(int index) const;
-	glm::quat GetGlobalJointRotation(int index) const;
+	glm::vec3 GetGlobalJointLocation(size_t index) const;
+	glm::quat GetGlobalJointRotation(size_t index) const;
 
 	bool jointsDirty = false;
 

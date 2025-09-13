@@ -109,6 +109,16 @@ bool AFFloatCurve::LoadImpl(const char* filepath)
 	// Read the timings & values from json.
 	for (auto& element : jsonCrv)
 	{
+		if (!element.is_array() || element.size() < 2)
+		{
+			return false;
+		}
+
+		if (!element[0].is_number_float() || !element[1].is_number_float())
+		{
+			return false;
+		}
+
 		const float timing = element[0];
 		const float value = element[1];
 

@@ -1,1 +1,0 @@
-call make_manifest.bat "C:\_programming\Assets\curves"

@@ -177,8 +177,20 @@ bool AFContent::Init()
 	AddAsset<AFPostprocessShader>("shader_gaussianHorizontal", "content/shaders/gaussianHorizontal.vert", "content/shaders/gaussianHorizontal.frag");
 	AddAsset<AFPostprocessShader>("shader_gaussianVertical", "content/shaders/gaussianVertical.vert", "content/shaders/gaussianVertical.frag");
 
-	// Meshes
+	// Meshes.
 	std::shared_ptr<AFMesh> mannequin = AddAsset<AFMesh>("sk_mannequin", "content/models/sk_mannequin.gltf");
+
+	// Curves.
+	// Automatically load all the float curves from the content folder.
+	for (const auto& file : std::filesystem::directory_iterator("content/curves"))
+	{
+		if (file.is_regular_file() && file.path().extension() == ".json")
+		{
+			const std::string filename = file.path().filename().filename().string();
+			const std::string curveName = file.path().filename().stem().string();
+			AddAsset<AFFloatCurve>(curveName.c_str(), ("content/curves/" + filename).c_str());
+		}
+	}
 
 	// -------------------------------------------------
 	// Apply fallback properties post load.

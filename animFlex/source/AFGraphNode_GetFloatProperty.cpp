@@ -136,6 +136,16 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 		ret = AFUtility::GetAngleTowardsVelocity();
 		break;
 	}
+	case EAFFloatProperties::StartRunDistanceMatchingTime:
+	{
+		ret = m_animState.lock()->GetStartRunDistanceMatchingTime();
+		break;
+	}
+	case EAFFloatProperties::StartRunDifferenceToInput:
+	{
+		ret = m_animState.lock()->GetStartRunDifferenceToInput();
+		break;
+	}
 	default:
 	{
 		ret = 0.0f;

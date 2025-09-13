@@ -153,7 +153,9 @@ void AFStateMachine::Evaluate(float deltaTime)
 		AFEvaluator::Get().AddLastActiveState(toEntry);
 
 		// Evaluate both states.
+		animState->CallFunctionByString(from->m_onTickFunStr.GetValue());
 		from->Evaluate(deltaTime);
+		animState->CallFunctionByString(to->m_onTickFunStr.GetValue());
 		to->Evaluate(deltaTime);
 
 		// Blend poses.
@@ -179,6 +181,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 		lastActiveEntry["nodeId"] = currentState->GetNodeID();
 		AFEvaluator::Get().AddLastActiveState(lastActiveEntry);
 
+		animState->CallFunctionByString(currentState->m_onTickFunStr.GetValue());
 		currentState->Evaluate(deltaTime);
 
 		// Cache final pose.

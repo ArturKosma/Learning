@@ -7,8 +7,12 @@ set DEST_PATH=C:\_programming\Learning\docs
 set RETE_PATH=C:\_programming\Learning\animFlex\graph
 set SRC_PATH=C:\_programming\Learning\animFlex\source
 
+REM Create manifest for curves.
+cd "%PROJ_PATH%\"
+call make_manifest.bat "content\curves"
+
 REM Navigate to the build directory.
-cd cmake\build
+cd "%BUILD_PATH%\"
 
 REM Run CMake.
 call emcmake cmake .. 
@@ -18,7 +22,7 @@ call ninja -t clean
 call ninja
 
 REM Build the graph manifest.
-cd "%PROJ_PATH%\"
+cd "%SRC_PATH%\"
 call python build_manifest.py "%SRC_PATH%"
 
 REM Copy graph manifest.

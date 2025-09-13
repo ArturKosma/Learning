@@ -11,6 +11,7 @@ void AFGraphNode_SetRootYaw::Evaluate(float deltaTime)
 
 	rootJoint->SetRotation(rotAroundY * rotAroundX);
 	rootJoint->CalculateLocalTRSMatrix();
+	pose.RecalculateSkeleton();
 
 	m_outputPose.SetValue(pose);
 }

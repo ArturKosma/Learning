@@ -16,14 +16,16 @@ void AFGraphNode_GetCurve::OnUpdate()
 		return;
 	}
 
-	auto onComplete = [this](std::shared_ptr<AFFloatCurve> fetchedCurve)
+	m_curve = AFContent::Get().FindAsset<AFFloatCurve>(m_curveName.GetValue().c_str());
+
+	/*auto onComplete = [this](std::shared_ptr<AFFloatCurve> fetchedCurve)
 		{
 			m_curve = fetchedCurve;
 		};
 
 	AFContent::Get().FetchAsset<AFFloatCurve>("https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/",
 		m_curveName.GetValue(),
-		onComplete, ".json");
+		onComplete, ".json");*/
 }
 
 void AFGraphNode_GetCurve::Evaluate(float deltaTime)

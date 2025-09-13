@@ -11,14 +11,14 @@ void AFGraphNode_GetCurveName::OnUpdate()
 		return;
 	}
 
-	auto onComplete = [](std::shared_ptr<AFFloatCurve> fetchedCurve)
+	/*auto onComplete = [](std::shared_ptr<AFFloatCurve> fetchedCurve)
 		{
 			
 		};
 
 	AFContent::Get().FetchAsset<AFFloatCurve>("https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/",
 		curveName,
-		onComplete, ".json");
+		onComplete, ".json");*/
 }
 
 void AFGraphNode_GetCurveName::Evaluate(float deltaTime)

@@ -3,6 +3,8 @@
 #include <chrono>
 
 #include "AFCharacterMovementComponent.h"
+#include "AFContent.h"
+#include "AFDeltaObject.h"
 #include "AFEvaluator.h"
 #include "AFGame.h"
 #include "AFMath.h"
@@ -131,11 +133,21 @@ void AFAnimState::CallFunctionByString(const std::string& functionName)
 			OnStartRunEnter();
 			break;
 		}
+		case AFUtility::StringSwitch("OnStartRunTick"):
+		{
+			OnStartRunTick();
+			break;
+		}
 		default:
 		{
 
 		}
 	}
+}
+
+float AFAnimState::GetStartRunDistanceMatchingTime() const
+{
+	return m_startRunDistanceMatchingTime;
 }
 
 std::string AFAnimState::GetStartRunAnim() const
@@ -158,6 +170,11 @@ float AFAnimState::GetStartRunDistanceTraveled() const
 	return m_startRunDistanceTraveled;
 }
 
+float AFAnimState::GetStartRunDifferenceToInput() const
+{
+	return m_startRunDifferenceToInput;
+}
+
 float AFAnimState::GetRootYaw() const
 {
 	return m_rootYaw;
@@ -166,6 +183,16 @@ float AFAnimState::GetRootYaw() const
 void AFAnimState::SetRootYaw(float yaw)
 {
 	m_rootYaw = yaw;
+}
+
+bool AFAnimState::GetLeftFeetLocked() const
+{
+	return m_leftFeetLocked;
+}
+
+bool AFAnimState::GetRightFeetLocked() const
+{
+	return m_rightFeetLocked;
 }
 
 void AFAnimState::EvaluateSingleAnim()
@@ -331,11 +358,57 @@ void AFAnimState::OnStartRunEnter()
 
 	// Cache the start run root distance curve name.
 	m_startRunCurve_rootDistance = startRunRootDistances[index];
+	m_startRunCurve_rootDistanceCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_startRunCurve_rootDistance.c_str());
 
 	// Cache the start run root yaw curve name.
 	m_startRunCurve_rootYaw = startRunRootYaws[index];
+	m_startRunCurve_rootYawCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_startRunCurve_rootYaw.c_str());
 
 	// Reset the distance traveled for distance-matching in startRun.
 	// We take last offset as the move has already happened at this point.
 	m_startRunDistanceTraveled = glm::length(charMovement->GetLastLocationOffset());
+
+	// Reset delta object with the yaw curve delta.
+	AFDeltaObject::Get().ResetValue("startRun_rootYawDeltaCrv");
+
+	// Reset difference to input.
+	m_startRunDifferenceToInput = 0.0f;
+}
+
+void AFAnimState::OnStartRunTick()
+{
+	if (!m_startRunCurve_rootDistanceCrv)
+	{
+		return;
+	}
+
+	// Cache the driver time for all animations and curves in start run.
+	m_startRunDistanceMatchingTime = m_startRunCurve_rootDistanceCrv->SampleByValue(m_startRunDistanceTraveled);
+
+	// Modify root yaw by the anims curve.
+	if (m_startRunCurve_rootYawCrv)
+	{
+		// Rate of change in the root yaw curve.
+		// Integral of this give us full rotation from the curve.
+		const float rootYawDeltaCrv = -1.0f * AFDeltaObject::Get().SetValue("startRun_rootYawDeltaCrv",
+			m_startRunCurve_rootYawCrv->SampleByTime(m_startRunDistanceMatchingTime));
+
+		// Remaining angle between root and movement input direction.
+		const float angleMovement = AFUtility::GetRootAngleTowardsMovementInput();
+
+		// Remaining angle from the curve.
+		const float curveMax = m_startRunCurve_rootYawCrv->SampleByTime(9999.0f);
+		const float curveCurrent = m_startRunCurve_rootYawCrv->SampleByTime(m_startRunDistanceMatchingTime);
+		const float angleCurve = -1.0f * (curveMax - curveCurrent + glm::epsilon<float>());
+
+		// Rate of change modifier k, to fit the desired angle when it's in between authored anims.
+		// It's either above or below 1.0f, to strengthen or weaken the rotation curve delta.
+		const float ratio = angleMovement / angleCurve;
+		const float k = glm::clamp(ratio, -5.0f, 5.0f);
+
+		m_startRunDifferenceToInput = glm::abs(angleMovement - angleCurve);
+
+		// Modified root yaw by the rotation from start run anim.
+		m_rootYaw = AFMath::NormalizeAngle(m_rootYaw - (rootYawDeltaCrv * k));
+	}
 }

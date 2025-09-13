@@ -20,22 +20,22 @@ void AFGraphNode_PlaySequence::OnUpdate()
 	m_animName = animName;
 
 	// Called upon curves fetch complete.
-	auto onCompleteCurves = [](std::vector<std::shared_ptr<AFFloatCurve>> fetchedCurves)
+	/*auto onCompleteCurves = [](std::vector<std::shared_ptr<AFFloatCurve>> fetchedCurves)
 		{
 			
-		};
+		};*/
 
 	// Called upon anims fetch complete.
-	auto onComplete = [this, onCompleteCurves, animName](std::shared_ptr<AFAnimationClip> fetchedAnim)
+	auto onComplete = [this, /*onCompleteCurves,*/ animName](std::shared_ptr<AFAnimationClip> fetchedAnim)
 		{
 			m_animClip = fetchedAnim;
 			m_localTime = 0.0f;
 
 			// Fetch curves.
-			AFContent::Get().FetchAssets<AFFloatCurve>("content/curves/manifest.json",
+			/*AFContent::Get().FetchAssets<AFFloatCurve>("content/curves/manifest.json",
 				"https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/",
 				animName,
-				onCompleteCurves, ".json");
+				onCompleteCurves, ".json");*/
 		};
 
 	// Fetch anim.
@@ -82,7 +82,8 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 	sampling.maxTime = endTime;
 	AFEvaluator::Get().AddSamplingState(sampling);
 
-	const_cast<AFPose&>(playseq_outputPose.GetValue()).ApplyClip(m_animClip, m_localTime, playseq_forceRootLock);
+	AFPose& outPose = const_cast<AFPose&>(playseq_outputPose.GetValue());
+	outPose.ApplyClip(m_animClip, m_localTime, playseq_forceRootLock);
 }
 
 void AFGraphNode_PlaySequence::OnReset()

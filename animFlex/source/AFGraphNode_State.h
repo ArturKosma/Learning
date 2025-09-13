@@ -9,6 +9,7 @@ class AFGraphNode_State : public AFGraphNodeCRTP<AFGraphNode_State>
 public:
 
 	AFPARAM(std::string, m_onEnterFunStr, "", "On Enter", "", "");
+	AFPARAM(std::string, m_onTickFunStr, "", "On Tick", "", "");
 
 	void Init() override;
 	void Evaluate(float deltaTime) override;

@@ -347,4 +347,20 @@ public:
 
 		return glm::degrees(rad);
 	}
+
+	static void QuaternionTwist(const glm::quat& quat, const glm::vec3& axis, glm::quat& outQuat, float& outAngle)
+	{
+		const glm::vec3 axisNorm = glm::normalize(axis);
+		const glm::vec3 real = glm::vec3(quat.x, quat.y, quat.z);
+		const float proj = glm::dot(real, axisNorm);
+
+		const glm::vec3 twistVec = proj * axisNorm;
+
+		const glm::quat twistQuat = glm::quat(quat.w, twistVec.x, twistVec.y, twistVec.z);
+		const float angle = 2.0f * atan2(glm::length(glm::vec3(twistQuat.x, twistQuat.y, twistQuat.z)), twistQuat.w);
+		const float sign = (proj >= 0.0f) ? 1.0f : -1.0f;
+
+		outAngle = glm::degrees(angle) * sign;
+		outQuat = glm::angleAxis(glm::radians(outAngle), axis);
+	}
 };

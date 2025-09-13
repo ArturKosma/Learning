@@ -41,12 +41,16 @@ public:
 	void CallFunctionByString(const std::string& functionName);
 
 	// Graph functions.
+	float GetStartRunDistanceMatchingTime() const;
 	std::string GetStartRunAnim() const;
 	std::string GetStartRunCurve_RootDistance() const;
 	std::string GetStartRunCurve_RootYaw() const;
 	float GetStartRunDistanceTraveled() const;
+	float GetStartRunDifferenceToInput() const;
 	float GetRootYaw() const;
 	void SetRootYaw(float yaw);
+	bool GetLeftFeetLocked() const;
+	bool GetRightFeetLocked() const;
 
 private:
 
@@ -56,13 +60,20 @@ private:
 
 	// Graph functions.
 	void OnStartRunEnter();
+	void OnStartRunTick();
 
 	// Graph variables.
+	float m_startRunDistanceMatchingTime = 0.0f;
 	std::string m_startRunAnim = "";
 	std::string m_startRunCurve_rootDistance = "";
+	std::shared_ptr<AFFloatCurve> m_startRunCurve_rootDistanceCrv = nullptr;
 	std::string m_startRunCurve_rootYaw = "";
+	std::shared_ptr<AFFloatCurve> m_startRunCurve_rootYawCrv = nullptr;
 	float m_startRunDistanceTraveled = 0.0f;
+	float m_startRunDifferenceToInput = 0.0f;
 	float m_rootYaw = 0.0f;
+	bool m_leftFeetLocked = false;
+	bool m_rightFeetLocked = false;
 
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;

@@ -132,8 +132,10 @@ void AFUtility::GetBone(const AFPose& pose, const std::string& bone, EAFBoneSpac
 		}
 		case EAFBoneSpace::World:
 		{
-			glm::mat4 trs = mesh->GetWorldTransform() * 
-				AFMath::ComposeTransform(bonePtr->GetGlobalLocation(), bonePtr->GetGlobalRotation(), glm::vec3(1.0f));
+			glm::vec3 meshGlobalLoc = mesh->GetMesh()->GetGlobalJointLocation(pose.GetJointIndex(bone));
+			glm::quat meshGlobalRot = mesh->GetMesh()->GetGlobalJointRotation(pose.GetJointIndex(bone));
+			glm::mat4 trs = mesh->GetWorldTransform() *
+				AFMath::ComposeTransform(meshGlobalLoc, meshGlobalRot, glm::vec3(1.0f));
 
 			glm::vec3 scale;
 			glm::quat rot;
@@ -151,7 +153,6 @@ void AFUtility::CCDIK(AFPose& pose,
 	const std::vector<FAFIKBoneProperties>& ikbones,
 	const glm::vec3 targetLocation,
 	const glm::quat targetRotation,
-	bool applyEffectorRotation,
 	float threshold,
 	size_t maxIterations)
 {
@@ -226,20 +227,17 @@ void AFUtility::CCDIK(AFPose& pose,
 		}
 	}
 
-	// Apply effector rotation.
+	// Apply rotation.
 	// It should always be given in global space.
-	if (applyEffectorRotation)
-	{
-		const glm::quat effectorParentRot = effector->GetParentBone().lock()->GetGlobalRotation();
-		effector->SetRotation(glm::normalize(glm::conjugate(effectorParentRot) * targetRotation));
+	const glm::quat effectorParentRot = effector->GetParentBone().lock()->GetGlobalRotation();
+	effector->SetRotation(glm::normalize(glm::conjugate(effectorParentRot) * targetRotation));
 
-		// Recalculate the effector.
-		effector->RecalculateBone(effector->GetParentBone().lock()->GetNodeMatrix(),
-			pose.m_nodeToJoint,
-			pose.m_jointMatrices,
-			pose.m_inverseBindMatrices,
-			pose.m_jointDualQuats);
-	}
+	// Recalculate the effector.
+	effector->RecalculateBone(effector->GetParentBone().lock()->GetNodeMatrix(),
+		pose.m_nodeToJoint,
+		pose.m_jointMatrices,
+		pose.m_inverseBindMatrices,
+		pose.m_jointDualQuats);
 }
 
 void AFUtility::ApplyLimits(AFPose& pose, const FAFIKBoneProperties& boneProperties)

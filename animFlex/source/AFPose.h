@@ -22,6 +22,7 @@ public:
 	const std::unordered_map<std::string, float>& GetCurvesValues() const;
 
 	std::shared_ptr<class AFJoint> GetJoint(const std::string& jointName) const;
+	size_t GetJointIndex(const std::string& jointName) const;
 
 	void RecalculateSkeleton();
 

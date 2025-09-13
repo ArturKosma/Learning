@@ -82,12 +82,12 @@ const std::vector<std::shared_ptr<AFJoint>>& AFMesh::GetJoints() const
 	return joints;
 }
 
-glm::vec3 AFMesh::GetGlobalJointLocation(int index) const
+glm::vec3 AFMesh::GetGlobalJointLocation(size_t index) const
 {
 	return joints[index]->GetGlobalLocation();
 }
 
-glm::quat AFMesh::GetGlobalJointRotation(int index) const
+glm::quat AFMesh::GetGlobalJointRotation(size_t index) const
 {
 	return joints[index]->GetGlobalRotation();
 }
