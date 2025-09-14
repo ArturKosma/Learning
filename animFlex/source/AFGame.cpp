@@ -10,6 +10,7 @@
 #include "AFGraphNodeRegistry.h"
 #include "AFGraphNode_Graph.h"
 #include "AFGraphNode_OutputCond.h"
+#include "AFGraphNode_State.h"
 #include "AFGraphNode_StateCond.h"
 #include "AFGraphNode_StateMachine.h"
 #include "AFInput.h"

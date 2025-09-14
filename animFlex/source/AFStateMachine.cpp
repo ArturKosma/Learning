@@ -3,6 +3,7 @@
 #include "AFGame.h"
 #include "AFGraphNode.h"
 #include "AFGraphNode_StateCond.h"
+#include "AFGraphNode_State.h"
 #include "AFMath.h"
 #include "AFPlayerPawn.h"
 
@@ -36,6 +37,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 	// Container for the new state to transition to.
 	std::weak_ptr<AFGraphNode> nextState = m_currentState;
 
+	// Blend time, taken from the conditional node.
 	float blendTime = 0.15f;
 
 	// Max 5 jumps per evaluate.
@@ -83,7 +85,6 @@ void AFStateMachine::Evaluate(float deltaTime)
 		if (nextStateCond)
 		{
 			blendTime = nextStateCond->m_blendTime.GetValue();
-			//printf("%f\n", blendTime);
 		}
 	}
 
@@ -102,6 +103,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 	else
 	{
 		// There was a transition.
+		bool reverseTransition = false;
 
 		// Jump there if we were in the entry state.
 		if (std::dynamic_pointer_cast<AFGraphNode_StateStart>(m_currentState.lock()))
@@ -111,62 +113,48 @@ void AFStateMachine::Evaluate(float deltaTime)
 		// Schedule the blend.
 		else
 		{
-			ScheduleBlend(m_currentState.lock()->GetNodeID(), nextState.lock()->GetNodeID(), blendTime);
+			reverseTransition = ScheduleBlend(m_currentState.lock()->GetNodeID(), nextState.lock()->GetNodeID(), blendTime);
 			m_currentState = nextState;
 		}
 
 		// Call OnEnter function on the new state.
+		// Reverse transition so A->B turning B->A does not trigger new enter fun.
 		std::shared_ptr<AFGraphNode_State> state = std::dynamic_pointer_cast<AFGraphNode_State>(m_currentState.lock());
-		if (state)
+		if (state && !reverseTransition)
 		{
 			const std::string& funStr = state->m_onEnterFunStr.GetValue();
 			animState->CallFunctionByString(funStr);
 		}
 	}
 
-	// Progress blend.
-	if (m_isBlending)
+	// Evaluate final pose from blend stack.
+	if (!m_blendStack.empty())
 	{
-		m_currentBlend.currentBlendTime = glm::clamp(m_currentBlend.currentBlendTime + deltaTime, 0.0f, m_currentBlend.blendLength);
-	}
-
-	// Evaluate final pose.
-	if (m_isBlending)
-	{
-		// Evaluate both blending states.
-		std::shared_ptr<AFGraphNode_State> from = m_currentBlend.blendFrom.lock();
-		std::shared_ptr<AFGraphNode_State> to = m_currentBlend.blendTo.lock();
-
-		// If any of the blending states became invalid, stop the blend.
-		if (!from || !to)
+		FAFBlendStack_Blender* topBlender = m_blendStack.back().get();
+		if (!topBlender)
 		{
-			ClearBlend();
+			return;
 		}
 
-		// Cache blend states IDs for debug.
-		// @todo Show blend progress as debug.
-		nlohmann::json fromEntry;
-		nlohmann::json toEntry;
-		fromEntry["nodeId"] = from->GetNodeID();
-		toEntry["nodeId"] = to->GetNodeID();
-		AFEvaluator::Get().AddLastActiveState(fromEntry);
-		AFEvaluator::Get().AddLastActiveState(toEntry);
+		printf("%zu\n", m_blendStack.size());
 
-		// Evaluate both states.
-		animState->CallFunctionByString(from->m_onTickFunStr.GetValue());
-		from->Evaluate(deltaTime);
-		animState->CallFunctionByString(to->m_onTickFunStr.GetValue());
-		to->Evaluate(deltaTime);
+		// Progress blend time.
+		topBlender->ProgressBlendTime(deltaTime);
 
-		// Blend poses.
-		AFMath::BlendPoses(m_finalPose, from->GetGraph()->GetFinalPose(), to->GetGraph()->GetFinalPose(), m_currentBlend.currentBlendTime / m_currentBlend.blendLength);
+		//printf("%f\n", topBlender->GetBlendTime());
 
-		// If we reached max blend time carry on blend finish.
-		if (AFMath::NearlyEqual(m_currentBlend.currentBlendTime, m_currentBlend.blendLength))
+		// Evaluate top of the blend stack.
+		// Each blender accesses previous blender, ultimately ending at simple evaluators.
+		topBlender->Evaluate(deltaTime, m_finalPose);
+
+		// If top blender is done blending, we drop whole stack.
+		if (topBlender->HasFinished())
 		{
-			ClearBlend();
+			m_blendStack.clear();
 		}
+
 	}
+	// Evaluate final pose from clear state.
 	else
 	{
 		std::shared_ptr<AFGraphNode_State> currentState = std::dynamic_pointer_cast<AFGraphNode_State>(m_currentState.lock());
@@ -292,47 +280,88 @@ void AFStateMachine::OnConnectionRemoved(const std::string& msg)
 		}), m_connections.end());
 }
 
-void AFStateMachine::ScheduleBlend(const std::string& blendFrom, const std::string& blendTo, float blendLength)
+bool AFStateMachine::ScheduleBlend(const std::string& blendFrom, const std::string& blendTo, float blendLength)
 {
 	if (blendLength <= 0.0f)
 	{
-		return;
+		return false;
 	}
 
 	if (blendFrom.empty() || blendTo.empty())
 	{
-		return;
+		return false;
 	}
 
-	std::weak_ptr<AFGraphNode_State> blendFromNode = std::dynamic_pointer_cast<AFGraphNode_State>(AFGraphNodeRegistry::Get().GetNode(blendFrom));
-	std::weak_ptr<AFGraphNode_State> blendToNode = std::dynamic_pointer_cast<AFGraphNode_State>(AFGraphNodeRegistry::Get().GetNode(blendTo));
+	std::shared_ptr<AFGraphNode_State> blendFromState = std::dynamic_pointer_cast<AFGraphNode_State>(AFGraphNodeRegistry::Get().GetNode(blendFrom));
+	std::shared_ptr<AFGraphNode_State> blendToState = std::dynamic_pointer_cast<AFGraphNode_State>(AFGraphNodeRegistry::Get().GetNode(blendTo));
 
-	if (!blendFromNode.lock() || !blendToNode.lock())
+	if (!blendFromState || !blendToState)
 	{
-		return;
+		return false;
 	}
 
-	FAFStateBlend newBlend;
-	newBlend.blendLength = blendLength;
-	newBlend.currentBlendTime = 0.0f;
-
-	// If the new blend is just a reverse of a previous blend (to-from are swapped) we start the blend from where it ended.
-	// @todo Treat blend as a state, and blend from a state.
-	if (m_isBlending && (blendFrom == m_currentBlend.blendTo.lock()->GetNodeID() && blendTo == m_currentBlend.blendFrom.lock()->GetNodeID()))
+	// If we are currently blending A->B, and we want to blend back B->A or vice versa, we simply change blend direction.
+	if (!m_blendStack.empty())
 	{
-		const float normalizedOldProgress = m_currentBlend.currentBlendTime / m_currentBlend.blendLength;
-		newBlend.currentBlendTime = m_currentBlend.blendLength - (normalizedOldProgress * m_currentBlend.blendLength);
+		FAFBlendStack_Blender* top = m_blendStack.back().get();
+		if (!top)
+		{
+			return false;
+		}
+
+		std::shared_ptr<AFGraphNode_State> stackTopFromState = nullptr;
+		std::shared_ptr<AFGraphNode_State> stackTopToState = top->to->state;
+
+		// If A is a blender.
+		if (std::shared_ptr<FAFBlendStack_Blender> topFromBlender = std::dynamic_pointer_cast<FAFBlendStack_Blender>(top->from))
+		{
+			stackTopFromState = topFromBlender->to->state;
+			
+		}
+		// A is a simple evaluator.
+		else if (std::shared_ptr<FAFBlendStack_Evaluator> topFromEvaluator = std::dynamic_pointer_cast<FAFBlendStack_Evaluator>(top->from))
+		{
+			stackTopFromState = topFromEvaluator->state;
+		}
+
+		// If a->b forward is happening and we want b->a.
+		const bool btoa = (stackTopFromState.get() == blendToState.get()) && (stackTopToState.get() == blendFromState.get());
+		if (btoa)
+		{
+			top->direction = EAFBlendDirection::Backward;
+			return true;
+		}
+
+		// If a->b backward is happening and we want a->b forward.
+		const bool atob = (stackTopFromState.get() == blendFromState.get()) && (stackTopToState.get() == blendToState.get());
+		if (atob && top->direction == EAFBlendDirection::Backward)
+		{
+			top->direction = EAFBlendDirection::Forward;
+			return true;
+		}
+
+		// @todo Support the different blend time when direction change occurs.
 	}
 
-	newBlend.blendFrom = blendFromNode;
-	newBlend.blendTo = blendToNode;
+	// Potential evaluators.
+	std::shared_ptr<FAFBlendStack_Evaluator> fromEvaluator = std::make_shared<FAFBlendStack_Evaluator>();
+	fromEvaluator->state = blendFromState;
+	std::shared_ptr<FAFBlendStack_Evaluator> toEvaluator = std::make_shared<FAFBlendStack_Evaluator>();
+	toEvaluator->state = blendToState;
 
-	m_currentBlend = newBlend;
-	m_isBlending = true;
-}
+	// Create new blend which will end up on the top of the stack.
+	std::shared_ptr<FAFBlendStack_Blender> newBlender = std::make_shared<FAFBlendStack_Blender>();
+	newBlender->duration = blendLength;
+	newBlender->t = 0.0f;
 
-void AFStateMachine::ClearBlend()
-{
-	m_currentBlend = FAFStateBlend();
-	m_isBlending = false;
+	// From is either simple evaluator of previous top of the blend stack.
+	std::shared_ptr<IAFBlendStack_Node> fromBlendOrEval = m_blendStack.empty() ?
+	std::static_pointer_cast<IAFBlendStack_Node>(fromEvaluator) :
+	std::static_pointer_cast<IAFBlendStack_Node>(m_blendStack.back());
+	newBlender->from = fromBlendOrEval;
+	newBlender->to = toEvaluator;
+	newBlender->direction = EAFBlendDirection::Forward;
+	m_blendStack.push_back(newBlender);
+
+	return false;
 }

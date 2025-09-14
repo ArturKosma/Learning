@@ -161,12 +161,37 @@ enum class EAFCameraManagerState: uint8_t
 	ActionRPG
 };
 
-struct FAFStateBlend
+enum class EAFBlendDirection: uint8_t
 {
-	float currentBlendTime = 0.0f;
-	float blendLength = 0.25f;
-	std::weak_ptr<class AFGraphNode_State> blendFrom;
-	std::weak_ptr<class AFGraphNode_State> blendTo;
+	Forward,
+	Backward
+};
+
+struct IAFBlendStack_Node
+{
+	virtual ~IAFBlendStack_Node() = default;
+	virtual void Evaluate(float deltaTime, class AFPose& pose) = 0;
+};
+
+struct FAFBlendStack_Evaluator final : public IAFBlendStack_Node
+{
+	void Evaluate(float deltaTime, AFPose& pose) override;
+
+	std::shared_ptr<class AFGraphNode_State> state = nullptr;
+};
+
+struct FAFBlendStack_Blender final : public IAFBlendStack_Node
+{
+	void Evaluate(float deltaTime, AFPose& pose) override;
+	void ProgressBlendTime(float deltaTime);
+	bool HasFinished() const;
+	float GetBlendTime() const;
+
+	float t = 0.0f;
+	float duration = 0.25f;
+	std::shared_ptr<IAFBlendStack_Node> from = nullptr;
+	std::shared_ptr<FAFBlendStack_Evaluator> to = nullptr;
+	EAFBlendDirection direction = EAFBlendDirection::Forward;
 };
 
 struct FAFStateSampling

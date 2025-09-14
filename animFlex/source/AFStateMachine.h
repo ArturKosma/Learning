@@ -1,6 +1,7 @@
 #pragma once
+
+#include <stack>
 #include "AFAnimGraph.h"
-#include "AFGraphNode_State.h"
 #include "AFGraphNode_StateStart.h"
 
 class AFStateMachine : public AFAnimGraph
@@ -14,8 +15,7 @@ public:
 	void OnConnectionCreated(const std::string& msg);
 	void OnConnectionRemoved(const std::string& msg);
 
-	void ScheduleBlend(const std::string& blendFrom, const std::string& blendTo, float blendLength);
-	void ClearBlend();
+	bool ScheduleBlend(const std::string& blendFrom, const std::string& blendTo, float blendLength);
 
 private:
 
@@ -25,6 +25,5 @@ private:
 	std::vector<std::weak_ptr<AFGraphNode>> m_states = {};
 	std::vector<FAFStateConnection> m_connections = {};
 
-	bool m_isBlending = false;
-	FAFStateBlend m_currentBlend = {};
+	std::deque<std::shared_ptr<FAFBlendStack_Blender>> m_blendStack = {};
 };
