@@ -136,12 +136,8 @@ void AFStateMachine::Evaluate(float deltaTime)
 			return;
 		}
 
-		printf("%zu\n", m_blendStack.size());
-
 		// Progress blend time.
 		topBlender->ProgressBlendTime(deltaTime);
-
-		//printf("%f\n", topBlender->GetBlendTime());
 
 		// Evaluate top of the blend stack.
 		// Each blender accesses previous blender, ultimately ending at simple evaluators.

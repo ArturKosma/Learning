@@ -1275,6 +1275,53 @@
             ]
         },
         {
+            "class_id": "AFGraphNode_IsBetween",
+            "node_name": "Is Between",
+            "meta": [],
+            "params": [
+                {
+                    "var_type": "float",
+                    "var_name": "m_a",
+                    "default": "0.0",
+                    "label": "Value",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_min",
+                    "default": "0.0",
+                    "label": "Min",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_max",
+                    "default": "0.0",
+                    "label": "Max",
+                    "direction": "Input",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_inclusive",
+                    "default": "false",
+                    "label": "",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_out",
+                    "default": "false",
+                    "label": "Result",
+                    "direction": "Output",
+                    "meta": []
+                }
+            ]
+        },
+        {
             "class_id": "AFGraphNode_MakeBool",
             "node_name": "Make Bool",
             "meta": [
@@ -1503,6 +1550,14 @@
                         "HideControl",
                         "Show=playseq_manualTime"
                     ]
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "playseq_blendTime",
+                    "default": "0.0",
+                    "label": "Blend Time",
+                    "direction": "",
+                    "meta": []
                 },
                 {
                     "var_type": "bool",

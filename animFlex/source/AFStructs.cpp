@@ -5,7 +5,7 @@
 #include "AFMath.h"
 #include "AFPlayerPawn.h"
 
-void FAFBlendStack_Evaluator::Evaluate(float deltaTime, AFPose& pose)
+void FAFBlendStack_Evaluator::Evaluate(float deltaTime, AFPose& pose, const FAFBlendStackEvalParams& params)
 {
 	std::shared_ptr<AFAnimState> animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
 	if (!animState)
@@ -13,25 +13,34 @@ void FAFBlendStack_Evaluator::Evaluate(float deltaTime, AFPose& pose)
 		return;
 	}
 
-	if (!state)
+	if (!state && !clip)
 	{
 		return;
 	}
 
 	// Cache blend state IDs for debug.
-	nlohmann::json entry;
-	entry["nodeId"] = state->GetNodeID();
-	AFEvaluator::Get().AddLastActiveState(entry);
+	if (state)
+	{
+		nlohmann::json entry;
+		entry["nodeId"] = state->GetNodeID();
+		AFEvaluator::Get().AddLastActiveState(entry);
 
-	animState->CallFunctionByString(state->m_onTickFunStr.GetValue());
-	state->Evaluate(deltaTime);
-	pose = state->GetGraph()->GetFinalPose();
+		animState->CallFunctionByString(state->m_onTickFunStr.GetValue());
+		state->Evaluate(deltaTime);
+		pose = state->GetGraph()->GetFinalPose();
+	}
+	// Support for blending separate clips.
+	else if (clip)
+	{
+		pose.ApplyClip(clip, params.time, params.rootLock);
+	}
 }
 
-void FAFBlendStack_Blender::Evaluate(float deltaTime, AFPose& pose)
+void FAFBlendStack_Blender::Evaluate(float deltaTime, AFPose& pose, const FAFBlendStackEvalParams& params)
 {
 	if (AFMath::NearlyEqual(duration, 0.0f))
 	{
+		to->Evaluate(deltaTime, pose, params);
 		return;
 	}
 
@@ -41,10 +50,10 @@ void FAFBlendStack_Blender::Evaluate(float deltaTime, AFPose& pose)
 	}
 
 	AFPose fromPose = {};
-	from->Evaluate(deltaTime, fromPose);
+	from->Evaluate(deltaTime, fromPose, params);
 
 	AFPose toPose = {};
-	to->Evaluate(deltaTime, toPose);
+	to->Evaluate(deltaTime, toPose, params);
 
 	AFMath::BlendPoses(pose, fromPose, toPose, t / duration);
 }

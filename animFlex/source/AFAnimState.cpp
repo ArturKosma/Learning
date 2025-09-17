@@ -10,6 +10,7 @@
 #include "AFMath.h"
 #include "AFMesh.h"
 #include "AFPlayerPawn.h"
+#include "AFTimerManager.h"
 #include "AFUtility.h"
 
 void AFAnimState::PreTick(float deltaTime)
@@ -311,58 +312,8 @@ void AFAnimState::OnStartRunEnter()
 		return;
 	}
 
-	// How big the angle is towards target movement input from the root?
-	const float angle = AFUtility::GetRootAngleTowardsMovementInput();
-
-	std::vector<float> angles =
-	{
-		-180.0f,
-		-90.0f,
-		0.0f,
-		90.0f,
-		180.0f
-	};
-
-	// Which index per 90s angle it is?
-	size_t index = AFMath::NearestIndex<float>(angles, angle);
-
-	std::vector<std::string> startRunAnims =
-	{
-		"M_Neutral_Run_Reface_Start_F_L_180",
-		"M_Neutral_Run_Reface_Start_F_L_090",
-		"M_Neutral_Run_Start_F_Rfoot",
-		"M_Neutral_Run_Reface_Start_F_R_090",
-		"M_Neutral_Run_Reface_Start_F_R_180"
-	};
-
-	std::vector<std::string> startRunRootDistances =
-	{
-		"M_Neutral_Run_Reface_Start_F_L_180_rootDistance",
-		"M_Neutral_Run_Reface_Start_F_L_090_rootDistance",
-		"M_Neutral_Run_Start_F_Rfoot_rootDistance",
-		"M_Neutral_Run_Reface_Start_F_R_090_rootDistance",
-		"M_Neutral_Run_Reface_Start_F_R_180_rootDistance"
-	};
-
-	std::vector<std::string> startRunRootYaws =
-	{
-		"M_Neutral_Run_Reface_Start_F_L_180_rootYaw",
-		"M_Neutral_Run_Reface_Start_F_L_090_rootYaw",
-		"",
-		"M_Neutral_Run_Reface_Start_F_R_090_rootYaw",
-		"M_Neutral_Run_Reface_Start_F_R_180_rootYaw"
-	};
-
-	// Cache the start run anim name.
-	m_startRunAnim = startRunAnims[index];
-
-	// Cache the start run root distance curve name.
-	m_startRunCurve_rootDistance = startRunRootDistances[index];
-	m_startRunCurve_rootDistanceCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_startRunCurve_rootDistance.c_str());
-
-	// Cache the start run root yaw curve name.
-	m_startRunCurve_rootYaw = startRunRootYaws[index];
-	m_startRunCurve_rootYawCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_startRunCurve_rootYaw.c_str());
+	// Reset for how long are we in the start run state.
+	m_startRunTimeSpent = 0.0f;
 
 	// Reset the distance traveled for distance-matching in startRun.
 	// We take last offset as the move has already happened at this point.
@@ -373,10 +324,108 @@ void AFAnimState::OnStartRunEnter()
 
 	// Reset difference to input.
 	m_startRunDifferenceToInput = 0.0f;
+
+	// Reset cached movement input.
+	m_cachedLocalMovementInput = glm::vec3(0.0f);
+
+	// Reset distance matching time value.
+	m_startRunDistanceMatchingTime = 0.0f;
+	m_startRunDistanceMatchingTimeOffset = 0.0f;
+	m_startRunCurve_rootDistanceCrv = nullptr;
 }
 
 void AFAnimState::OnStartRunTick()
 {
+	std::shared_ptr<AFCharacterMovementComponent> charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
+	if (!charMovement)
+	{
+		return;
+	}
+
+	const float deltaTime = AFTimerManager::GetDeltaTime();
+	const glm::vec3 localMovementInput = glm::normalize(charMovement->GetLastLocalMovementInput());
+
+	// For a bit of time in the beginning of start run, keep choosing the start run animation.
+	// If it changes, we will blend to it.
+	// This is to support WSAD, where you want diagonal movement and you don't press the buttons exactly simultaneously.
+	// We use local movement input, to ignore camera rotating during start run. Rotating camera does not trigger re-direction.
+	if (m_startRunTimeSpent < 0.15f && (localMovementInput != m_cachedLocalMovementInput))
+	{
+		m_cachedLocalMovementInput = localMovementInput;
+
+		// How big the angle is towards target movement input from the root?
+		const float angle = AFUtility::GetRootAngleTowardsMovementInput();
+
+		std::vector<float> angles =
+		{
+			-180.0f,
+			-90.0f,
+			0.0f,
+			90.0f,
+			180.0f
+		};
+
+		// Which index per 90s angle it is?
+		size_t index = AFMath::NearestIndex<float>(angles, angle);
+
+		std::vector<std::string> startRunAnims =
+		{
+			"M_Neutral_Run_Reface_Start_F_L_180",
+			"M_Neutral_Run_Reface_Start_F_L_090",
+			"M_Neutral_Run_Start_F_Rfoot",
+			"M_Neutral_Run_Reface_Start_F_R_090",
+			"M_Neutral_Run_Reface_Start_F_R_180"
+		};
+
+		std::vector<std::string> startRunRootDistances =
+		{
+			"M_Neutral_Run_Reface_Start_F_L_180_rootDistance",
+			"M_Neutral_Run_Reface_Start_F_L_090_rootDistance",
+			"M_Neutral_Run_Start_F_Rfoot_rootDistance",
+			"M_Neutral_Run_Reface_Start_F_R_090_rootDistance",
+			"M_Neutral_Run_Reface_Start_F_R_180_rootDistance"
+		};
+
+		std::vector<std::string> startRunRootYaws =
+		{
+			"M_Neutral_Run_Reface_Start_F_L_180_rootYaw",
+			"M_Neutral_Run_Reface_Start_F_L_090_rootYaw",
+			"",
+			"M_Neutral_Run_Reface_Start_F_R_090_rootYaw",
+			"M_Neutral_Run_Reface_Start_F_R_180_rootYaw"
+		};
+
+		// Cache the start run anim name.
+		m_startRunAnim = startRunAnims[index];
+
+		// Cache the start run root distance curve name.
+		m_startRunCurve_rootDistance = startRunRootDistances[index];
+
+		// Since we are overwriting the root distance curve,
+		// and the curve is used to derive distance matching time,
+		// we will get a snap. Thus, we need to find the time offset to match the time and prevent snapping.
+		std::shared_ptr<AFFloatCurve> newRootDistanceCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_startRunCurve_rootDistance.c_str());;
+		if (m_startRunCurve_rootDistanceCrv)
+		{
+			const float distanceMatchingTime = m_startRunCurve_rootDistanceCrv->SampleByValue(m_startRunDistanceTraveled);
+			m_startRunDistanceMatchingTimeOffset = newRootDistanceCrv->SampleByValue(m_startRunDistanceTraveled) - distanceMatchingTime;
+		}
+		m_startRunCurve_rootDistanceCrv = newRootDistanceCrv;
+
+		// Cache the start run root yaw curve name.
+		m_startRunCurve_rootYaw = startRunRootYaws[index];
+		m_startRunCurve_rootYawCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_startRunCurve_rootYaw.c_str());
+
+		// Reset the yaw delta crv, to not get crazy delta when curve changes.
+		// Setting value recomputes delta, using old cached matching time acts like "looking behind",
+		// so that next delta sampling with this curve will get us a realistic value.
+		if (m_startRunCurve_rootYawCrv)
+		{
+			const float rootYaw = m_startRunCurve_rootYawCrv->SampleByTime(m_startRunDistanceMatchingTime);
+			AFDeltaObject::Get().SetValue("startRun_rootYawDeltaCrv", rootYaw);
+		}
+	}
+
 	if (!m_startRunCurve_rootDistanceCrv)
 	{
 		return;
@@ -384,6 +433,7 @@ void AFAnimState::OnStartRunTick()
 
 	// Cache the driver time for all animations and curves in start run.
 	m_startRunDistanceMatchingTime = m_startRunCurve_rootDistanceCrv->SampleByValue(m_startRunDistanceTraveled);
+	m_startRunDistanceMatchingTime -= m_startRunDistanceMatchingTimeOffset;
 
 	// Modify root yaw by the anims curve.
 	if (m_startRunCurve_rootYawCrv)
@@ -411,4 +461,6 @@ void AFAnimState::OnStartRunTick()
 		// Modified root yaw by the rotation from start run anim.
 		m_rootYaw = AFMath::NormalizeAngle(m_rootYaw - (rootYawDeltaCrv * k));
 	}
+
+	m_startRunTimeSpent += deltaTime;
 }

@@ -17,25 +17,38 @@ void AFGraphNode_PlaySequence::OnUpdate()
 	{
 		return;
 	}
+
+	// If there was a valid anim and the blend time is non-zero, we add on top of blendstack.
+	const bool blendStack = !m_animName.empty() && playseq_blendTime > 0.0f;
 	m_animName = animName;
 
-	// Called upon curves fetch complete.
-	/*auto onCompleteCurves = [](std::vector<std::shared_ptr<AFFloatCurve>> fetchedCurves)
-		{
-			
-		};*/
-
 	// Called upon anims fetch complete.
-	auto onComplete = [this, /*onCompleteCurves,*/ animName](std::shared_ptr<AFAnimationClip> fetchedAnim)
+	auto onComplete = [this, blendStack](std::shared_ptr<AFAnimationClip> fetchedAnim)
 		{
-			m_animClip = fetchedAnim;
-			m_localTime = 0.0f;
+			if (blendStack)
+			{
+				// Blendstack evaluators.
+				std::shared_ptr<FAFBlendStack_Evaluator> fromEvaluator = std::make_shared<FAFBlendStack_Evaluator>();
+				fromEvaluator->clip = m_animClip;
+				std::shared_ptr<FAFBlendStack_Evaluator> toEvaluator = std::make_shared<FAFBlendStack_Evaluator>();
+				toEvaluator->clip = fetchedAnim;
 
-			// Fetch curves.
-			/*AFContent::Get().FetchAssets<AFFloatCurve>("content/curves/manifest.json",
-				"https://cdn.jsdelivr.net/gh/ArturKosma/assets@main/curves/",
-				animName,
-				onCompleteCurves, ".json");*/
+				// Create new blend which will end up on the top of the stack.
+				std::shared_ptr<FAFBlendStack_Blender> newBlender = std::make_shared<FAFBlendStack_Blender>();
+				newBlender->duration = playseq_blendTime.GetValue();
+				newBlender->t = 0.0f;
+
+				// From is either simple evaluator of previous top of the blend stack, or a blender.
+				std::shared_ptr<IAFBlendStack_Node> fromBlendOrEval = m_blendStack.empty() ?
+					std::static_pointer_cast<IAFBlendStack_Node>(fromEvaluator) :
+					std::static_pointer_cast<IAFBlendStack_Node>(m_blendStack.back());
+				newBlender->from = fromBlendOrEval;
+				newBlender->to = toEvaluator;
+				newBlender->direction = EAFBlendDirection::Forward;
+				m_blendStack.push_back(newBlender);
+			}
+
+			m_animClip = fetchedAnim;
 		};
 
 	// Fetch anim.
@@ -82,8 +95,35 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 	sampling.maxTime = endTime;
 	AFEvaluator::Get().AddSamplingState(sampling);
 
-	AFPose& outPose = const_cast<AFPose&>(playseq_outputPose.GetValue());
-	outPose.ApplyClip(m_animClip, m_localTime, playseq_forceRootLock);
+	// Evaluate final pose from blend stack.
+	if (!m_blendStack.empty())
+	{
+		FAFBlendStack_Blender* topBlender = m_blendStack.back().get();
+		if (!topBlender)
+		{
+			return;
+		}
+
+		// Progress blend time.
+		topBlender->ProgressBlendTime(deltaTime);
+
+		// Evaluate top of the blend stack.
+		// Each blender accesses previous blender, ultimately ending at simple evaluators.
+		FAFBlendStackEvalParams params;
+		params.time = m_localTime;
+		params.rootLock = playseq_forceRootLock.GetValue();
+		topBlender->Evaluate(deltaTime, const_cast<AFPose&>(playseq_outputPose.GetValue()), params);
+
+		// If top blender is done blending, we drop whole stack.
+		if (topBlender->HasFinished())
+		{
+			m_blendStack.clear();
+		}
+	}
+	else
+	{
+		const_cast<AFPose&>(playseq_outputPose.GetValue()).ApplyClip(m_animClip, m_localTime, playseq_forceRootLock.GetValue());
+	}
 }
 
 void AFGraphNode_PlaySequence::OnReset()

@@ -394,14 +394,14 @@ void AFGame::SetControlMode(EAFControlMode newControlMode)
 				const glm::vec3 euler = m_player->GetCharacterMovementComponent()->GetControlRotation();
 				glm::vec3 dir = AFMath::DirectionFromRotation(euler);
 				dir = glm::normalize(glm::vec3(dir.x, 0.0f, dir.z));
-				m_player->GetCharacterMovementComponent()->AddMovementInput(dir * axis);
+				m_player->GetCharacterMovementComponent()->AddMovementInput(dir * axis, glm::vec3(0.0f, axis, 0.0f));
 			});
 		AFInput::BindAxis("RightLeft", [this](float axis)
 			{
 				const glm::vec3 euler = m_player->GetCharacterMovementComponent()->GetControlRotation();
 				glm::vec3 dir = AFMath::DirectionFromRotation(euler);
 				dir = glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), glm::normalize(glm::vec3(dir.x, 0.0f, dir.z)));
-				m_player->GetCharacterMovementComponent()->AddMovementInput(dir * axis * -1.0f);
+				m_player->GetCharacterMovementComponent()->AddMovementInput(dir * axis * -1.0f, glm::vec3(axis, 0.0f, 0.0f));
 			});
 
 		break;

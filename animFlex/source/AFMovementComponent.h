@@ -23,9 +23,10 @@ public:
 
 	virtual void AddControlRotation(const glm::vec3& delta);
 
-	virtual void AddMovementInput(const glm::vec3& movementInput);
+	virtual void AddMovementInput(const glm::vec3& movementInput, const glm::vec3& localMovementInput = glm::vec3(0.0f));
 	glm::vec3 GetMovementInput() const;
 	glm::vec3 GetLastPositiveMovementInput() const;
+	glm::vec3 GetLastLocalMovementInput();
 
 	glm::vec3 GetLastFrameControlRotation() const;
 	glm::vec3 GetLastLocationOffset() const;
@@ -38,6 +39,7 @@ protected:
 	glm::vec3 m_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastPositiveVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_lastLocalMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastPositiveMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastFrameControlRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 

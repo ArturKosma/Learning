@@ -1,4 +1,6 @@
 #pragma once
+#include <deque>
+
 #include "AFGraphNode.h"
 #include <string>
 
@@ -20,6 +22,7 @@ public:
 	AFPARAM(float, playseq_endTime, -1.0f, "End Time", "", "");
 	AFPARAM(bool, playseq_manualTime, false, "Should Use Manual Time", "", "");
 	AFPARAM(float, playseq_manualTimeFloat, 0.0f, "Manual Time", "Input", "HidePin|HideControl|Show=playseq_manualTime");
+	AFPARAM(float, playseq_blendTime, 0.0f, "Blend Time", "", "");
 	AFPARAM(bool, playseq_showPin, false, "Show Pin", "", "");
 
 	void OnUpdate() override;
@@ -31,4 +34,5 @@ private:
 	float m_localTime = 0.0f;
 	std::string m_animName = "";
 	std::shared_ptr<AFAnimationClip> m_animClip = nullptr;
+	std::deque<std::shared_ptr<FAFBlendStack_Blender>> m_blendStack = {};
 };

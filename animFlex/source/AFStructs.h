@@ -167,22 +167,29 @@ enum class EAFBlendDirection: uint8_t
 	Backward
 };
 
+struct FAFBlendStackEvalParams
+{
+	float time = 0.0f;
+	bool rootLock = true;
+};
+
 struct IAFBlendStack_Node
 {
 	virtual ~IAFBlendStack_Node() = default;
-	virtual void Evaluate(float deltaTime, class AFPose& pose) = 0;
+	virtual void Evaluate(float deltaTime, class AFPose& pose, const FAFBlendStackEvalParams& params = {}) = 0;
 };
 
 struct FAFBlendStack_Evaluator final : public IAFBlendStack_Node
 {
-	void Evaluate(float deltaTime, AFPose& pose) override;
+	void Evaluate(float deltaTime, AFPose& pose, const FAFBlendStackEvalParams& params = {}) override;
 
 	std::shared_ptr<class AFGraphNode_State> state = nullptr;
+	std::shared_ptr<class AFAnimationClip> clip = nullptr;
 };
 
 struct FAFBlendStack_Blender final : public IAFBlendStack_Node
 {
-	void Evaluate(float deltaTime, AFPose& pose) override;
+	void Evaluate(float deltaTime, AFPose& pose, const FAFBlendStackEvalParams& params = {}) override;
 	void ProgressBlendTime(float deltaTime);
 	bool HasFinished() const;
 	float GetBlendTime() const;

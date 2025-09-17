@@ -185,6 +185,7 @@ public:
 
 	static float GetAngleTowardsMovementInput();
 	static float GetRootAngleTowardsMovementInput();
+	static float GetRootAngleTowardsMovementInput(const glm::vec3 movementInput);
 	static float GetRootAngleTowardsVelocity();
 	static float GetAngleTowardsVelocity();
 

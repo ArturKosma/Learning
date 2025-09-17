@@ -30,6 +30,20 @@ float AFUtility::GetRootAngleTowardsMovementInput()
 	}
 
 	const glm::vec3& movementInput = glm::normalize(m_charMovement->GetLastPositiveMovementInput());
+
+	return GetRootAngleTowardsMovementInput(movementInput);
+}
+
+float AFUtility::GetRootAngleTowardsMovementInput(const glm::vec3 movementInput)
+{
+	std::shared_ptr<AFCharacterMovementComponent> m_charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
+	std::shared_ptr<AFAnimState> m_animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
+
+	if (!m_charMovement || !m_animState)
+	{
+		return 0.0f;
+	}
+	
 	const glm::quat& actorWorldRotation = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetRotationQuat();
 
 	// We first get the actor rotation and then multiply the local offset to get root yaw in world space.

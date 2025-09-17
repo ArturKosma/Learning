@@ -6,6 +6,7 @@
 void AFMovementComponent::PostTick(float deltaTime)
 {
 	m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
+	m_lastLocalMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 void AFMovementComponent::PreTick(float deltaTime)
@@ -99,7 +100,7 @@ glm::vec3 AFMovementComponent::GetControlRotation() const
 	return { glm::vec3(m_controlPitch, m_controlYaw, 0.0f) };
 }
 
-void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
+void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput, const glm::vec3& localMovementInput)
 {
 	std::shared_ptr<AFActor> owner = std::dynamic_pointer_cast<AFActor>(GetOwner().lock());
 	if (!owner)
@@ -117,6 +118,10 @@ void AFMovementComponent::AddMovementInput(const glm::vec3& movementInput)
 		m_lastMovementInput = glm::normalize(m_lastMovementInput);
 		m_lastPositiveMovementInput = m_lastMovementInput;
 	}
+
+	// Cache local movement input,
+	// to be able to tell if user changed key-direction without rotating camera.
+	m_lastLocalMovementInput += localMovementInput;
 }
 
 glm::vec3 AFMovementComponent::GetMovementInput() const
@@ -127,6 +132,11 @@ glm::vec3 AFMovementComponent::GetMovementInput() const
 glm::vec3 AFMovementComponent::GetLastPositiveMovementInput() const
 {
 	return m_lastPositiveMovementInput;
+}
+
+glm::vec3 AFMovementComponent::GetLastLocalMovementInput()
+{
+	return m_lastLocalMovementInput;
 }
 
 glm::vec3 AFMovementComponent::GetLastFrameControlRotation() const

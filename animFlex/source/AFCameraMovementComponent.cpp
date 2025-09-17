@@ -40,7 +40,7 @@ void AFCameraMovementComponent::AddControlRotation(const glm::vec3& eulerToAdd)
 	owner->SetRotation(glm::normalize(quatYaw * quatPitch));
 }
 
-void AFCameraMovementComponent::AddMovementInput(const glm::vec3& movementInput)
+void AFCameraMovementComponent::AddMovementInput(const glm::vec3& movementInput, const glm::vec3& localMovementInput)
 {
 	AFMovementComponent::AddMovementInput(movementInput);
 }

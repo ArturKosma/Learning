@@ -67,13 +67,16 @@ private:
 	std::string m_startRunAnim = "";
 	std::string m_startRunCurve_rootDistance = "";
 	std::shared_ptr<AFFloatCurve> m_startRunCurve_rootDistanceCrv = nullptr;
+	float m_startRunDistanceMatchingTimeOffset = 0.0f;
 	std::string m_startRunCurve_rootYaw = "";
 	std::shared_ptr<AFFloatCurve> m_startRunCurve_rootYawCrv = nullptr;
+	float m_startRunTimeSpent = 0.0f;
 	float m_startRunDistanceTraveled = 0.0f;
 	float m_startRunDifferenceToInput = 0.0f;
 	float m_rootYaw = 0.0f;
 	bool m_leftFeetLocked = false;
 	bool m_rightFeetLocked = false;
+	glm::vec3 m_cachedLocalMovementInput = glm::vec3(0.0f);
 
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;
