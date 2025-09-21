@@ -11,7 +11,7 @@ void AFGraphNode_State::Evaluate(float deltaTime)
 	m_graph->Evaluate(deltaTime);
 }
 
-void AFGraphNode_State::OnReset()
+void AFGraphNode_State::OnBecomeRelevant()
 {
 	// Call reset on all sub-nodes.
 	for (const std::string& id : m_subNodes)
@@ -19,7 +19,7 @@ void AFGraphNode_State::OnReset()
 		std::shared_ptr<AFGraphNode> subNode = AFGraphNodeRegistry::Get().GetNode(id);
 		if (subNode)
 		{
-			subNode->OnReset();
+			subNode->OnBecomeRelevant();
 		}
 	}
 }

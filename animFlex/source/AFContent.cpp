@@ -192,6 +192,18 @@ bool AFContent::Init()
 		}
 	}
 
+	// Event tracks.
+	// Automatically load all the event tracks from the content folder.
+	for (const auto& file : std::filesystem::directory_iterator("content/events"))
+	{
+		if (file.is_regular_file() && file.path().extension() == ".json")
+		{
+			const std::string filename = file.path().filename().filename().string();
+			const std::string eventTrackName = file.path().filename().stem().string();
+			AddAsset<AFEventTrack>(eventTrackName.c_str(), ("content/events/" + filename).c_str());
+		}
+	}
+
 	// -------------------------------------------------
 	// Apply fallback properties post load.
 	// -------------------------------------------------

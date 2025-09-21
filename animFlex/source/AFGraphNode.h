@@ -22,7 +22,7 @@ public:
 	virtual void OnUpdate();
 	virtual void PreEvaluate(float deltaTime);
 	virtual void Evaluate(float deltaTime) = 0;
-	virtual void OnReset();
+	virtual void OnBecomeRelevant();
 
 	std::string GetNodeID() const;
 	virtual std::string GetNodeType() const = 0;

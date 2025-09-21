@@ -269,3 +269,22 @@ struct FAFIKBoneProperties
 	FAFHingeProperties hingeProperties = {};
 	FAFBallProperties ballProperties = {};
 };
+
+AFENUM()
+enum class EAFSyncGroupMode
+{
+	Driver,
+	Listener
+};
+
+struct FAFSyncGroupProperties
+{
+	std::string name = "";
+	EAFSyncGroupMode mode = EAFSyncGroupMode::Driver;
+};
+
+enum class EAFEventTiming
+{
+	Before,
+	After
+};

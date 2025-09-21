@@ -12,7 +12,7 @@ void AFGraphNode::PreEvaluate(float deltaTime)
 {
 }
 
-void AFGraphNode::OnReset()
+void AFGraphNode::OnBecomeRelevant()
 {
 }
 

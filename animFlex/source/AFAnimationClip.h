@@ -4,6 +4,7 @@
 
 #include "AFAnimationChannel.h"
 #include "AFAsset.h"
+#include "AFEventTrack.h"
 #include "AFFloatCurve.h"
 #include "AFStructs.h"
 #include "third_party/tiny_gltf.h"
@@ -27,6 +28,9 @@ public:
 	std::shared_ptr<AFFloatCurve> GetCurve(const std::string& curveName);
 	const std::unordered_map<std::string, std::shared_ptr<AFFloatCurve>>& GetCurves() const;
 
+	void AddEventTrack(std::shared_ptr<AFEventTrack> newEventTrack);
+	std::shared_ptr<AFEventTrack> GetEventTrack();
+
 protected:
 
 	bool LoadImpl(const char* filepath) override; // Called when added locally.
@@ -37,4 +41,5 @@ private:
 	std::vector<std::shared_ptr<AFAnimationChannel>> m_animationChannels = {};
 	std::string m_clipName = {};
 	std::unordered_map<std::string, std::shared_ptr<AFFloatCurve>> m_curves = {};
+	std::shared_ptr<AFEventTrack> m_eventTrack = nullptr;
 };

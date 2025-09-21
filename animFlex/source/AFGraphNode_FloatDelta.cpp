@@ -1,6 +1,6 @@
 #include "AFGraphNode_FloatDelta.h"
 
-void AFGraphNode_FloatDelta::OnReset()
+void AFGraphNode_FloatDelta::OnBecomeRelevant()
 {
 	m_prev = 0.0f;
 }

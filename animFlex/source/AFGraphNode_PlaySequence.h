@@ -1,13 +1,11 @@
 #pragma once
 #include <deque>
-
 #include "AFGraphNode.h"
 #include <string>
-
-#include "AFFloatCurve.h"
 #include "AFPose.h"
+#include "IAFSyncGroupInterface.h"
 
-class AFGraphNode_PlaySequence : public AFGraphNodeCRTP<AFGraphNode_PlaySequence>
+class AFGraphNode_PlaySequence : public AFGraphNodeCRTP<AFGraphNode_PlaySequence>, public IAFSyncGroupInterface
 {
 	AFCLASS(AFGraphNode_PlaySequence, "Play Sequence", "")
 
@@ -24,10 +22,17 @@ public:
 	AFPARAM(float, playseq_manualTimeFloat, 0.0f, "Manual Time", "Input", "HidePin|HideControl|Show=playseq_manualTime");
 	AFPARAM(float, playseq_blendTime, 0.0f, "Blend Time", "", "");
 	AFPARAM(bool, playseq_showPin, false, "Show Pin", "", "");
+	AFPARAM(std::string, playseq_syncGroupName, "", "Sync Group Name", "", "");
+	AFPARAM(int, playseq_syncGroupMode, 0, "Sync Group Mode", "", "EAFSyncGroupMode_Enum");
 
 	void OnUpdate() override;
 	void Evaluate(float deltaTime) override;
-	void OnReset() override;
+	void OnBecomeRelevant() override;
+
+	std::string GetSyncGroupName() override;
+	EAFSyncGroupMode GetSyncGroupMode() override;
+	float GetLocalTime() override;
+	AFAnimationClip* GetAnimClip() override;
 
 private:
 

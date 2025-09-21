@@ -12,7 +12,7 @@ public:
 	AFPARAM(AFPose, m_outputPose, {}, "", "Output", "");
 	AFPARAM(float, m_floatOutput, 0.0f, "Delta", "Output", "");
 
-	void OnReset() override;
+	void OnBecomeRelevant() override;
 	void Evaluate(float deltaTime) override;
 
 private:

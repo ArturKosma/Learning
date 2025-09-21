@@ -1,6 +1,7 @@
 #include "AFPose.h"
 #include <chrono>
 
+#include "AFAnimState.h"
 #include "AFContent.h"
 #include "AFGame.h"
 #include "AFJoint.h"
@@ -116,6 +117,12 @@ void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool f
 		return;
 	}
 
+	std::shared_ptr<AFAnimState> animState = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetMeshComponent()->GetAnimState();
+	if (!animState)
+	{
+		return;
+	}
+
 	for (auto& channel : clip->GetAnimationChannels())
 	{
 		const int targetJoint = channel->GetTargetJoint();
@@ -165,6 +172,7 @@ void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool f
 		m_inverseBindMatrices, 
 		m_jointDualQuats);
 
+	// Sample curves.
 	const auto& curves = clip->GetCurves();
 	for (const std::string& curveName : AFUtility::GetCurveNames())
 	{
@@ -177,6 +185,19 @@ void AFPose::ApplyClip(std::shared_ptr<AFAnimationClip> clip, float time, bool f
 
 		m_curvesValues[curveName] = it->second->SampleByTime(time);
 	}
+
+	// Sample events.
+	std::shared_ptr<AFEventTrack> eventTrack = clip->GetEventTrack();
+	if (eventTrack)
+	{
+		const std::vector<std::string>& events = eventTrack->SampleByTime(m_sampleMarker, time);
+		for (const std::string& event : events)
+		{
+			animState->OnEventFromClip(event);
+		}
+	}
+
+	m_sampleMarker = time;
 }
 
 void AFPose::CopyPoseFrom(const AFPose& otherPose)

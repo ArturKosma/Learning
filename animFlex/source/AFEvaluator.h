@@ -42,6 +42,11 @@ public:
 	EAFEvaluationMode GetEvaluationMode() const;
 	void SetEvaluationMode(EAFEvaluationMode mode);
 
+	void UpdateSyncGroups(const std::string& nodeId, class IAFSyncGroupInterface* node);
+	bool GetSyncGroupProperties(const std::string& nodeId, FAFSyncGroupProperties& properties);
+	bool GetSyncGroupDriverTime(const std::string& syncGroup, float& driverTime);
+	bool GetSyncGroupDriverClip(const std::string& syncGroup, AFAnimationClip*& clip);
+
 private:
 
 	nlohmann::json m_lastActiveSockets = nlohmann::json::array();
@@ -60,4 +65,6 @@ private:
 
 	bool m_animPaused = false;
 	float m_animPlayrate = 1.0f;
+
+	std::unordered_map<std::string, FAFSyncGroupProperties> m_syncGroups;
 };

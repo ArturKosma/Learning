@@ -10,7 +10,7 @@ import { DropdownControl, CustomDropdown } from "./afdropdown";
 import { createView, getManifestNodes, switchToView } from "./afmanager";
 import { ReteViewType } from "./aftypes";
 import { createRoot } from "react-dom/client";
-import { DropdownControlEnum } from "./afdropdownEnum";
+import { CustomDropdownEnum, DropdownControlEnum } from "./afdropdownEnum";
 import { AreaPlugin } from "rete-area-plugin";
 import { ReactArea2D } from "rete-react-plugin";
 import { ContextMenuExtra } from "rete-context-menu-plugin";
@@ -900,7 +900,7 @@ export function setDetailsPanelVisible(editor: NodeEditor<Schemes>, show: boolea
         return;
     }
 
-    //console.log("hello?");
+    const nodeMeta = node.meta;
 
     const manifest = getManifestNodes().find(n => n.class_id === nodeType);
     if (!manifest) {
@@ -1009,6 +1009,18 @@ export function setDetailsPanelVisible(editor: NodeEditor<Schemes>, show: boolea
                 reactElement = <CustomVector3Field data={controlInstance} />;
                 break;
             }
+            case 'int':
+                const flags = Array.isArray(param.meta) ? param.meta : [];
+                const initialInt = (() => {
+                    const vm: Record<string, string> | undefined = (node as any).meta?.valuesMap;
+                    const s = vm?.[param.var_name] ?? String(param.default ?? "");
+                    return parseInt(s) || 0;
+                })();
+
+                const enumMeta = flags.find((m: string) => m.endsWith("_Enum"));
+                controlInstance = new DropdownControlEnum(enumMeta, editor, node, param.var_name);
+                reactElement = <CustomDropdownEnum data={controlInstance} />;
+                break;
 
             default:
                 break;

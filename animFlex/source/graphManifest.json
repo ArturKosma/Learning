@@ -1566,6 +1566,24 @@
                     "label": "Show Pin",
                     "direction": "",
                     "meta": []
+                },
+                {
+                    "var_type": "std::string",
+                    "var_name": "playseq_syncGroupName",
+                    "default": "",
+                    "label": "Sync Group Name",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "int",
+                    "var_name": "playseq_syncGroupMode",
+                    "default": "0",
+                    "label": "Sync Group Mode",
+                    "direction": "",
+                    "meta": [
+                        "EAFSyncGroupMode_Enum"
+                    ]
                 }
             ]
         },
@@ -1926,6 +1944,13 @@
                 "Global",
                 "Local",
                 "World"
+            ]
+        },
+        {
+            "enum_name": "EAFSyncGroupMode",
+            "values": [
+                "Driver",
+                "Listener"
             ]
         }
     ]

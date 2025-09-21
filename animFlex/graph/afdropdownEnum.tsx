@@ -86,7 +86,7 @@ export class DropdownControlEnum extends ClassicPreset.Control implements AFSeri
   }
 }
 
-export function CustomDropdownEnum(props: { data: DropdownControlEnum, area: AreaPlugin<any>, render: ReactPlugin<any> }) {
+export function CustomDropdownEnum(props: { data: DropdownControlEnum}) {
   const [displayValue, setDisplayValue] = useState<string>(() => {
     const idx = props.data.value ?? 0;
     return props.data.values?.[idx] ?? '';

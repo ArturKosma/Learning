@@ -30,7 +30,7 @@ public:
 
 	void Init() override;
 	void Evaluate(float deltaTime) override;
-	void OnReset() override;
+	void OnBecomeRelevant() override;
 
 private:
 

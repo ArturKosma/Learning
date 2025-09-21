@@ -1,6 +1,7 @@
 #include "AFEvaluator.h"
 #include "AFGraphNode.h"
 #include "AFTimerManager.h"
+#include "IAFSyncGroupInterface.h"
 
 void AFEvaluator::EvaluateNode(std::shared_ptr<AFGraphNode> node)
 {
@@ -116,7 +117,7 @@ void AFEvaluator::AddLastActiveState(const nlohmann::json& newState)
 	// @todo Conditional reset on reinitialize. Property on the node in details.
 	if (it == m_lastActiveStatesCached.end())
 	{
-		AFGraphNodeRegistry::Get().GetNode(newState["nodeId"])->OnReset();
+		AFGraphNodeRegistry::Get().GetNode(newState["nodeId"])->OnBecomeRelevant();
 	}
 
 	m_lastActiveStates.push_back(newState);
@@ -219,4 +220,79 @@ EAFEvaluationMode AFEvaluator::GetEvaluationMode() const
 void AFEvaluator::SetEvaluationMode(EAFEvaluationMode mode)
 {
 	m_evaluationMode = mode;
+}
+
+void AFEvaluator::UpdateSyncGroups(const std::string& nodeId, class IAFSyncGroupInterface* node)
+{
+	if (!node)
+	{
+		return;
+	}
+
+	if (node->GetSyncGroupName().empty())
+	{
+		return;
+	}
+
+	FAFSyncGroupProperties properties;
+	properties.name = node->GetSyncGroupName();
+	properties.mode = node->GetSyncGroupMode();
+
+	m_syncGroups[nodeId] = properties;
+}
+
+bool AFEvaluator::GetSyncGroupProperties(const std::string& nodeId, FAFSyncGroupProperties& properties)
+{
+	auto it = m_syncGroups.find(nodeId);
+	if (it == m_syncGroups.end())
+	{
+		return false;
+	}
+
+	properties = it->second;
+	return true;
+}
+
+bool AFEvaluator::GetSyncGroupDriverTime(const std::string& syncGroup, float& driverTime)
+{
+	for (const auto& [nodeId, syncGroupProperties] : m_syncGroups)
+	{
+		if (syncGroupProperties.mode == EAFSyncGroupMode::Driver && syncGroupProperties.name == syncGroup)
+		{
+			std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeId);
+			if (node)
+			{
+				IAFSyncGroupInterface* syncGroupInterface = dynamic_cast<IAFSyncGroupInterface*>(node.get());
+				if (syncGroupInterface)
+				{
+					driverTime = syncGroupInterface->GetLocalTime();
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+bool AFEvaluator::GetSyncGroupDriverClip(const std::string& syncGroup, AFAnimationClip*& clip)
+{
+	for (const auto& [nodeId, syncGroupProperties] : m_syncGroups)
+	{
+		if (syncGroupProperties.mode == EAFSyncGroupMode::Driver && syncGroupProperties.name == syncGroup)
+		{
+			std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeId);
+			if (node)
+			{
+				IAFSyncGroupInterface* syncGroupInterface = dynamic_cast<IAFSyncGroupInterface*>(node.get());
+				if (syncGroupInterface)
+				{
+					clip = syncGroupInterface->GetAnimClip();
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
 }

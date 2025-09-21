@@ -33,6 +33,8 @@ public:
 	void SetAnimation(std::shared_ptr<AFAnimationClip> animation);
 	void SetGraph(std::shared_ptr<AFAnimGraph> animGraph);
 	std::shared_ptr<AFAnimGraph> GetGraph() const;
+	const AFPose& GetPose() const;
+	void OnEventFromClip(const std::string& event);
 
 	float GetCurveValue(const std::string& curveName) const;
 
@@ -81,6 +83,7 @@ private:
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;
 	AFSkeletalMeshComponent* m_ownerMesh = nullptr;
+	AFPose m_pose = {};
 
 	std::shared_ptr<AFAnimationClip> m_singleAnim = nullptr;
 	std::shared_ptr<AFAnimGraph> m_graph = nullptr;

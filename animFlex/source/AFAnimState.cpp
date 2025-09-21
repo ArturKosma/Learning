@@ -109,6 +109,48 @@ std::shared_ptr<AFAnimGraph> AFAnimState::GetGraph() const
 	return m_graph;
 }
 
+const AFPose& AFAnimState::GetPose() const
+{
+	return m_pose;
+}
+
+void AFAnimState::OnEventFromClip(const std::string& event)
+{
+	/*switch (AFUtility::StringSwitch(event.c_str()))
+	{
+		case AFUtility::StringSwitch("footPlant_l"):
+		{
+			glm::vec3 location = glm::vec3(0.0f);
+			glm::vec3 rotation = glm::vec3(0.0f);
+
+			AFUtility::GetBone(m_pose,
+				"foot_l",
+				EAFBoneSpace::World,
+				location, rotation);
+
+			AFUtility::DrawDebugBox(location, 20.0f, 3.0f, EAFColor::Red);
+			break;
+		}
+		case AFUtility::StringSwitch("footPlant_r"):
+		{
+			glm::vec3 location = glm::vec3(0.0f);
+			glm::vec3 rotation = glm::vec3(0.0f);
+
+			AFUtility::GetBone(m_pose,
+				"foot_r",
+				EAFBoneSpace::World,
+				location, rotation);
+
+			AFUtility::DrawDebugBox(location, 20.0f, 3.0f, EAFColor::Green);
+			break;
+		}
+		default:
+		{
+			break;	
+		}
+	}*/
+}
+
 float AFAnimState::GetCurveValue(const std::string& curveName) const
 {
 	auto it = m_curves.find(curveName);
@@ -301,6 +343,7 @@ void AFAnimState::EvaluateGraph(float deltaTime)
 		currentJoints[i]->CalculateLocalTRSMatrix();
 	}
 
+	m_pose = m_graph->GetFinalPose();
 	m_ownerMesh->GetMesh()->jointsDirty = true;
 }
 
@@ -404,7 +447,7 @@ void AFAnimState::OnStartRunTick()
 		// Since we are overwriting the root distance curve,
 		// and the curve is used to derive distance matching time,
 		// we will get a snap. Thus, we need to find the time offset to match the time and prevent snapping.
-		std::shared_ptr<AFFloatCurve> newRootDistanceCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_startRunCurve_rootDistance.c_str());;
+		std::shared_ptr<AFFloatCurve> newRootDistanceCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_startRunCurve_rootDistance.c_str());
 		if (m_startRunCurve_rootDistanceCrv)
 		{
 			const float distanceMatchingTime = m_startRunCurve_rootDistanceCrv->SampleByValue(m_startRunDistanceTraveled);
@@ -439,7 +482,7 @@ void AFAnimState::OnStartRunTick()
 	if (m_startRunCurve_rootYawCrv)
 	{
 		// Rate of change in the root yaw curve.
-		// Integral of this give us full rotation from the curve.
+		// Integral of this gives us full rotation from the curve.
 		const float rootYawDeltaCrv = -1.0f * AFDeltaObject::Get().SetValue("startRun_rootYawDeltaCrv",
 			m_startRunCurve_rootYawCrv->SampleByTime(m_startRunDistanceMatchingTime));
 

@@ -173,6 +173,7 @@ public:
 			"rootYawLeft",
 			"feetGroundedL",
 			"feetGroundedR",
+			"allowToLoop",
 		};
 	}
 

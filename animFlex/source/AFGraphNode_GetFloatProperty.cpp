@@ -27,7 +27,7 @@ void AFGraphNode_GetFloatProperty::Evaluate(float deltaTime)
 	}
 }
 
-void AFGraphNode_GetFloatProperty::OnReset()
+void AFGraphNode_GetFloatProperty::OnBecomeRelevant()
 {
 	m_open = true;
 }

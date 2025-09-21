@@ -1,15 +1,12 @@
 #include "AFAnimationClip.h"
 #include "AFGLTFLoader.h"
-#include <fstream>
 #include <sstream>
-
 #include "AFContent.h"
 #include "zstd.h"
 
 void AFAnimationClip::OnLoadComplete()
 {
 	const std::string& animName = GetName();
-	//printf("loaded anim: %s\n", animName.c_str());
 
 	std::vector<std::shared_ptr<AFFloatCurve>> curves = AFContent::Get().FindAllAssetsOfType<AFFloatCurve>();
 	for (const std::shared_ptr<AFFloatCurve>& curve : curves)
@@ -21,9 +18,18 @@ void AFAnimationClip::OnLoadComplete()
 			const size_t len = animName.size();
 			const std::string& curveLastName = curveName.substr(len + 1, curveName.size());
 
-			//printf("FOUND CURVE: %s\n", curveName.c_str());
-
 			AddCurve(curveLastName, AFContent::Get().FindAsset<AFFloatCurve>(curveName.c_str()));
+		}
+	}
+
+	std::vector<std::shared_ptr<AFEventTrack>> eventTracks = AFContent::Get().FindAllAssetsOfType<AFEventTrack>();
+	for (const std::shared_ptr<AFEventTrack>& eventTrack : eventTracks)
+	{
+		const std::string& eventTrackName = eventTrack->GetName();
+		const size_t idx = eventTrackName.find(animName);
+		if (idx != std::string::npos)
+		{
+			AddEventTrack(AFContent::Get().FindAsset<AFEventTrack>(eventTrackName.c_str()));
 		}
 	}
 }
@@ -62,9 +68,19 @@ void AFAnimationClip::AddCurve(const std::string& curveName, std::shared_ptr<AFF
 	m_curves.insert({ curveName, newCurve });
 }
 
+void AFAnimationClip::AddEventTrack(std::shared_ptr<AFEventTrack> newEventTrack)
+{
+	m_eventTrack = newEventTrack;
+}
+
 std::shared_ptr<AFFloatCurve> AFAnimationClip::GetCurve(const std::string& curveName)
 {
 	return m_curves[curveName];
+}
+
+std::shared_ptr<AFEventTrack> AFAnimationClip::GetEventTrack()
+{
+	return m_eventTrack;
 }
 
 const std::unordered_map<std::string, std::shared_ptr<AFFloatCurve>>& AFAnimationClip::GetCurves() const

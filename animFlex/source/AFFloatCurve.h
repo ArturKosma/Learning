@@ -1,7 +1,6 @@
 #pragma once
-#include <string>
-#include <vector>
 
+#include <vector>
 #include "AFAsset.h"
 
 class AFFloatCurve : public AFAsset

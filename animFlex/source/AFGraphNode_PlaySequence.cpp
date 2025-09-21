@@ -1,9 +1,12 @@
 #include "AFGraphNode_PlaySequence.h"
 #include "AFContent.h"
-
+#include "AFMath.h"
 
 void AFGraphNode_PlaySequence::OnUpdate()
 {
+	// Update sync group properties.
+	AFEvaluator::Get().UpdateSyncGroups(GetNodeID(), this);
+
 	const std::string& animName = playseq_animName.GetValue();
 
 	// No anim name.
@@ -126,7 +129,92 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 	}
 }
 
-void AFGraphNode_PlaySequence::OnReset()
+void AFGraphNode_PlaySequence::OnBecomeRelevant()
 {
 	m_localTime = 0.0f;
+
+	// Assign local time based on the sync group driver.
+	// #hack @todo This currently needs a rework, have problems with wrapping looping anims.
+	if (!playseq_syncGroupName.GetValue().empty())
+	{
+		const EAFSyncGroupMode syncGroupMode = static_cast<EAFSyncGroupMode>(playseq_syncGroupMode.GetValue());
+		if (syncGroupMode == EAFSyncGroupMode::Listener)
+		{
+			float driverTime = 0.0f;
+			AFEvaluator::Get().GetSyncGroupDriverTime(playseq_syncGroupName.GetValue(), driverTime);
+
+			AFAnimationClip* driverClip = nullptr;
+			AFEvaluator::Get().GetSyncGroupDriverClip(playseq_syncGroupName.GetValue(), driverClip);
+
+			if (driverClip)
+			{
+				AFEventTrack* driverEventTrack = driverClip->GetEventTrack().get();
+				if (!driverEventTrack)
+				{
+					return;
+				}
+
+				std::string driverPlantBeforeName = "";
+				const float driverPlantBeforeTiming = driverEventTrack->GetEventTiming(driverTime,
+					EAFEventTiming::Before,
+					{ "footPlant_l", "footPlant_r" },
+					driverPlantBeforeName);
+
+				std::string driverPlantAfterName = "";
+				const float driverPlantAfterTiming = driverEventTrack->GetEventTiming(driverTime,
+					EAFEventTiming::After,
+					{ "footPlant_l", "footPlant_r" },
+					driverPlantAfterName);
+
+				if (driverPlantBeforeName.empty() || driverPlantAfterName.empty() ||
+					driverPlantBeforeTiming < 0.0f || driverPlantAfterTiming < 0.0f)
+				{
+					return;
+				}
+
+				AFAnimationClip* ownerClip = m_animClip.get();
+				if (!ownerClip)
+				{
+					return;
+				}
+
+				AFEventTrack* ownerEventTrack = ownerClip->GetEventTrack().get();
+				if (!ownerEventTrack)
+				{
+					return;
+				}
+
+				const std::vector<float>& ordered = ownerEventTrack->GetEventTimingsOrdered({ driverPlantBeforeName, driverPlantAfterName });
+				if (ordered.size() != 2)
+				{
+					return;
+				}
+
+				const float driverNorm = AFMath::MapRangeClamped(driverTime, driverPlantBeforeTiming, driverPlantAfterTiming, 0.0f, 1.0f);
+				const float listenerLocalTime = glm::mix(ordered[0], ordered[1], driverNorm);
+
+				m_localTime = listenerLocalTime;
+			}
+		}
+	}
+}
+
+std::string AFGraphNode_PlaySequence::GetSyncGroupName()
+{
+	return playseq_syncGroupName.GetValue();
+}
+
+EAFSyncGroupMode AFGraphNode_PlaySequence::GetSyncGroupMode()
+{
+	return static_cast<EAFSyncGroupMode>(playseq_syncGroupMode.GetValue());
+}
+
+float AFGraphNode_PlaySequence::GetLocalTime()
+{
+	return m_localTime;
+}
+
+AFAnimationClip* AFGraphNode_PlaySequence::GetAnimClip()
+{
+	return m_animClip.get();
 }
