@@ -243,6 +243,11 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 			requestedMotionType = "rootYaw";
 			requestedBoneIdx = 0;
 		}
+		if (arg == "allowToLoop")
+		{
+			requestedMotionType = "allowToLoop";
+			requestedBoneIdx = 0;
+		}
 		if (arg == "rootYawAuthority")
 		{
 			requestedMotionType = "rootYawAuthority";
@@ -518,6 +523,37 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
 				std::ofstream outJson(curvePath);
 				outJson << feetGrounded.dump(2);
+			}
+			// Writes down allowToLoop to 1.0f once anim timing passes value.
+			if (requestedMotionType == "allowToLoop")
+			{
+				nlohmann::json allowToLoopArray = nlohmann::json::array();
+
+				// We are only interested in the translation.
+				if (newChannel.targetPath != EAFTargetPath::Translation)
+				{
+					continue;
+				}
+
+				for (uint32_t i = 0; i < keyCount; ++i)
+				{
+					float val = 0.0f;
+					if (newChannel.timings[i] >= floatParam0)
+					{
+						val = 1.0f;
+					}
+
+					allowToLoopArray.push_back({ newChannel.timings[i], val });
+				}
+
+				std::string filename = "";
+				filename += animName;
+				filename += "_allowToLoop";
+				curveName = filename;
+				filename += ".json";
+				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
+				std::ofstream outJson(curvePath);
+				outJson << allowToLoopArray.dump(2);
 			}
 		}
 	}
