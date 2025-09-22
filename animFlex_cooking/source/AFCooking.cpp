@@ -243,6 +243,11 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 			requestedMotionType = "rootYaw";
 			requestedBoneIdx = 0;
 		}
+		if (arg == "rootSpeed")
+		{
+			requestedMotionType = "rootSpeed";
+			requestedBoneIdx = 0;
+		}
 		if (arg == "allowToLoop")
 		{
 			requestedMotionType = "allowToLoop";
@@ -554,6 +559,42 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
 				std::ofstream outJson(curvePath);
 				outJson << allowToLoopArray.dump(2);
+			}
+			// Root Speed - reads the delta length of vector of the root bone.
+			if (requestedMotionType == "rootSpeed")
+			{
+				nlohmann::json rootSpeedArray = nlohmann::json::array();
+
+				// We are only interested in the translation.
+				if (newChannel.targetPath != EAFTargetPath::Translation)
+				{
+					continue;
+				}
+
+				// Get the vector at every key.
+				for (uint32_t i = 0; i < keyCount; ++i)
+				{
+					const float valueX = newChannel.values[i].x;
+					const float valueY = newChannel.values[i].y;
+					const float valueZ = newChannel.values[i].z;
+
+					const float distance = glm::length(glm::vec3(valueX, valueY, valueZ));
+
+					rootSpeedArray.push_back({ newChannel.timings[i], distance - floatParam0 });
+
+					floatParam0 = distance;
+				}
+
+				std::string filename = "";
+				filename += animName;
+				filename += "_rootSpeed";
+				curveName = filename;
+				filename += ".json";
+				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
+				std::ofstream outJson(curvePath);
+				outJson << rootSpeedArray.dump(2);
+
+				printf("cooked curve: %s -> %s\n", filename.c_str(), curvePath.c_str());
 			}
 		}
 	}
