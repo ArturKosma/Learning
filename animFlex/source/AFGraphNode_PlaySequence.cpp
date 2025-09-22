@@ -85,7 +85,7 @@ void AFGraphNode_PlaySequence::Evaluate(float deltaTime)
 		}
 		else
 		{
-			m_localTime = glm::clamp(m_localTime + (deltaTime * playseq_playrate), playseq_startTime.GetValue(), endTime - playseq_startTime);
+			m_localTime = glm::clamp(m_localTime + (deltaTime * playseq_playrate), playseq_startTime.GetValue(), endTime);
 		}
 	}
 

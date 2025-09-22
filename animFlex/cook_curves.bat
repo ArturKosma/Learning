@@ -9,7 +9,10 @@ set "ANIMS_EXPORT=C:\Users\garon\Desktop\curvesOutput"
 REM Go to packager exe.
 cd ../animFlex_cooking
 
-REM Order packaging per type.
-animFlex_cooking.exe animCurve %ANIMS_SOURCE% %ANIMS_EXPORT% -allowToLoop-value=1.22
+REM Generate.
+REM -allowToLoop-value=1.22
+REM -rootDistance
+REM -rootSpeed
+animFlex_cooking.exe animCurve %ANIMS_SOURCE% %ANIMS_EXPORT% -rootYawAuthority-value=9999
 
 pause

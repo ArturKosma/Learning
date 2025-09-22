@@ -60,9 +60,6 @@ void AFAnimState::Tick(float deltaTime)
 		return;
 	}
 
-	// Increment distance traveled for distance matching.
-	m_startRunDistanceTraveled += glm::length(pawn->GetCharacterMovementComponent()->GetLastLocationOffset());
-
 	if(m_evaluationState == EAFAnimEvaluationState::Idle)
 	{
 		return;
@@ -181,6 +178,16 @@ void AFAnimState::CallFunctionByString(const std::string& functionName)
 			OnStartRunTick();
 			break;
 		}
+		case AFUtility::StringSwitch("OnStopRunEnter"):
+		{
+			OnStopRunEnter();
+			break;
+		}
+		case AFUtility::StringSwitch("OnStopRunTick"):
+		{
+			OnStopRunTick();
+			break;
+		}
 		default:
 		{
 
@@ -236,6 +243,26 @@ bool AFAnimState::GetLeftFeetLocked() const
 bool AFAnimState::GetRightFeetLocked() const
 {
 	return m_rightFeetLocked;
+}
+
+float AFAnimState::GetStopRunDistanceMatchingTime() const
+{
+	return m_stopRun_distanceMatchingTime;
+}
+
+std::string AFAnimState::GetStopRunAnim() const
+{
+	return m_stopRunAnim;
+}
+
+std::string AFAnimState::GetStopRunCurve_RootSpeed() const
+{
+	return m_stopRunCurve_rootSpeed;
+}
+
+float AFAnimState::GetStopRunDistanceRemaining() const
+{
+	return m_stopRun_distanceRemaining;
 }
 
 void AFAnimState::EvaluateSingleAnim()
@@ -385,6 +412,9 @@ void AFAnimState::OnStartRunTick()
 		return;
 	}
 
+	// Increment distance traveled for distance matching.
+	m_startRunDistanceTraveled += glm::length(charMovement->GetLastLocationOffset());
+
 	const float deltaTime = AFTimerManager::GetDeltaTime();
 	const glm::vec3 localMovementInput = glm::normalize(charMovement->GetLastLocalMovementInput());
 
@@ -506,4 +536,86 @@ void AFAnimState::OnStartRunTick()
 	}
 
 	m_startRunTimeSpent += deltaTime;
+}
+
+void AFAnimState::OnStopRunEnter()
+{
+	std::shared_ptr<AFCharacterMovementComponent> charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
+	if (!charMovement)
+	{
+		return;
+	}
+
+	// Reset the distance traveled for distance-matching in stopRun.
+	// We take last offset as the move has already happened at this point.
+	m_stopRunDistanceTraveled = glm::length(charMovement->GetLastLocationOffset());
+
+	// Which foot is up in the air?
+	glm::vec3 rotDummy;
+	glm::vec3 lFeetLoc = {};
+	glm::vec3 rFeetLoc = {};
+	AFUtility::GetBone(GetPose(), "foot_l", EAFBoneSpace::Global, lFeetLoc, rotDummy);
+	AFUtility::GetBone(GetPose(), "foot_r", EAFBoneSpace::Global, rFeetLoc, rotDummy);
+	const bool lFeetUp = lFeetLoc.y > rFeetLoc.y;
+
+	// Choose stop run based on feet up.
+	m_stopRunAnim = lFeetUp ? "M_Neutral_Run_Stop_F_Lfoot" : "M_Neutral_Run_Stop_F_Rfoot";
+
+	// Choose stop run root distance curve based on feet up.
+	m_stopRunCurve_rootDistance = m_stopRunAnim + "_rootDistance";
+	m_stopRunCurve_rootDistanceCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_stopRunCurve_rootDistance.c_str());
+	if (!m_stopRunCurve_rootDistanceCrv)
+	{
+		return;
+	}
+	m_stopRunCurve_rootSpeed = m_stopRunAnim + "_rootSpeed";
+
+	// Choose time of start for the stop run anim.
+	// @todo Luckily both L and R stops begin decelerating at 0.66f,
+	// @todo but I should usually pick time automatically.
+	m_stopRun_beginTime = 0.66f;
+
+	// Find how much distance will be covered by animation till complete stop.
+	// This will be used in distance matching.
+	// In the current setup stop runs have root distance inverted - ie.
+	// the distance gets lower, the closer we are to 0 speed.
+	m_stopRun_distToZero = m_stopRunCurve_rootDistanceCrv->SampleByTime(m_stopRun_beginTime);
+
+	// Find how much distance will be covered by character movement till complete stop.
+	const float speed = glm::length(charMovement->GetVelocity());
+	const float decel = charMovement->GetDeceleration();
+	m_stopRun_distToZeroCharMov = (speed * speed) / (2.0f * decel);
+
+	//printf("anim: %f\n", m_stopRun_distToZero);
+	//printf("char: %f\n", m_stopRun_distToZeroCharMov);
+}
+
+void AFAnimState::OnStopRunTick()
+{
+	std::shared_ptr<AFCharacterMovementComponent> charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
+	if (!charMovement)
+	{
+		return;
+	}
+
+	if (!m_stopRunCurve_rootDistanceCrv)
+	{
+		return;
+	}
+
+	// Increment distance traveled for distance matching.
+	m_stopRunDistanceTraveled += glm::length(charMovement->GetLastLocationOffset());
+
+	// Map the distance traveled to the distance covered by animation.
+	const float distanceTraveledMapped = AFMath::MapRangeClamped(m_stopRunDistanceTraveled,
+		0.0f,
+		m_stopRun_distToZeroCharMov,
+		0.0f,
+		m_stopRun_distToZero);
+
+	// Find the distance matching time using distance traveled sampled from stop run's root distance curve.
+	// In the current setup stop runs have root distance inverted - ie.
+	// the distance gets lower, the closer we are to 0 speed.
+	m_stopRun_distanceMatchingTime = m_stopRunCurve_rootDistanceCrv->SampleByValue(m_stopRun_distToZero - distanceTraveledMapped);
+	m_stopRun_distanceRemaining = m_stopRun_distToZero - distanceTraveledMapped;
 }

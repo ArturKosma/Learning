@@ -14,6 +14,7 @@ public:
 
 	void PreEvaluate(float deltaTime) override;
 	void Evaluate(float deltaTime) override;
+	void OnBecomeRelevant() override;
 	std::shared_ptr<AFStateMachine> GetStateMachine() const;
 
 protected:

@@ -30,6 +30,7 @@ public:
 
 	void AddSamplingState(const FAFStateSampling& sampling);
 	std::vector<FAFStateSampling> GetCachedSamplingState(const std::string& context) const;
+	bool IsEqualOrSubcontext(const std::string& question, const std::string& context) const;
 	void ClearSamplingState();
 
 	bool GetAnimPaused() const;

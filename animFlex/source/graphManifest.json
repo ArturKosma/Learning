@@ -1516,12 +1516,24 @@
                     "meta": []
                 },
                 {
+                    "var_type": "bool",
+                    "var_name": "playseq_showStartTimePin",
+                    "default": "false",
+                    "label": "Show Start Time Pin",
+                    "direction": "",
+                    "meta": []
+                },
+                {
                     "var_type": "float",
                     "var_name": "playseq_startTime",
                     "default": "0.0",
                     "label": "Start Time",
-                    "direction": "",
-                    "meta": []
+                    "direction": "Input",
+                    "meta": [
+                        "HidePin",
+                        "HideControl",
+                        "Show=playseq_showStartTimePin"
+                    ]
                 },
                 {
                     "var_type": "float",
@@ -1887,7 +1899,9 @@
                 "RootAngleTowardsVelocity",
                 "AngleTowardsVelocity",
                 "StartRunDistanceMatchingTime",
-                "StartRunDifferenceToInput"
+                "StartRunDifferenceToInput",
+                "StopRunDistanceMatchingTime",
+                "StopRunDistanceRemaining"
             ]
         },
         {
@@ -1895,7 +1909,9 @@
             "values": [
                 "StartRunAnim",
                 "StartRunCurve_RootDistance",
-                "StartRunCurve_RootYaw"
+                "StartRunCurve_RootYaw",
+                "StopRunAnim",
+                "StopRunCurve_RootSpeed"
             ]
         },
         {

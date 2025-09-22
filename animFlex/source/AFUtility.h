@@ -174,6 +174,7 @@ public:
 			"feetGroundedL",
 			"feetGroundedR",
 			"allowToLoop",
+			"rootSpeed",
 		};
 	}
 

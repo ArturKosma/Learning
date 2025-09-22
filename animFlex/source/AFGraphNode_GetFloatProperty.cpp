@@ -146,6 +146,16 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 		ret = m_animState.lock()->GetStartRunDifferenceToInput();
 		break;
 	}
+	case EAFFloatProperties::StopRunDistanceMatchingTime:
+	{
+		ret = m_animState.lock()->GetStopRunDistanceMatchingTime();
+		break;
+	}
+	case EAFFloatProperties::StopRunDistanceRemaining:
+	{
+		ret = m_animState.lock()->GetStopRunDistanceRemaining();
+		break;
+	}
 	default:
 	{
 		ret = 0.0f;

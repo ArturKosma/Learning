@@ -173,6 +173,11 @@ void AFStateMachine::Evaluate(float deltaTime)
 	}
 }
 
+void AFStateMachine::Reset()
+{
+	m_currentState = m_stateStartNode;
+}
+
 void AFStateMachine::OnNodeCreated(const std::string& msg)
 {
 	nlohmann::json nodes = nlohmann::json::parse(msg);

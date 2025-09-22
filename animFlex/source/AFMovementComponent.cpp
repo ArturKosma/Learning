@@ -55,6 +55,10 @@ void AFMovementComponent::Tick(float deltaTime)
 		owner->AddOffsetLocation(velocityDelta);
 		m_lastLocationOffset = velocityDelta;
 	}
+	else
+	{
+		m_lastLocationOffset = glm::vec3(0.0f, 0.0f, 0.0f);
+	}
 
 	// Cache deltas.
 	m_lastControlYawDelta = GetControlRotation().y - m_lastFrameControlRotation.y;

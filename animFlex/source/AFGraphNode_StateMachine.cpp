@@ -17,6 +17,11 @@ void AFGraphNode_StateMachine::Evaluate(float deltaTime)
 	StateMachineOutput.SetValue(m_stateMachine->GetFinalPose());
 }
 
+void AFGraphNode_StateMachine::OnBecomeRelevant()
+{
+	m_stateMachine->Reset();
+}
+
 std::shared_ptr<AFStateMachine> AFGraphNode_StateMachine::GetStateMachine() const
 {
 	return m_stateMachine;

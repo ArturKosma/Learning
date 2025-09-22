@@ -10,6 +10,7 @@ public:
 
 	void PreEvaluate(float deltaTime) override;
 	void Evaluate(float deltaTime) override;
+	void Reset();
 
 	void OnNodeCreated(const std::string& msg) override;
 	void OnConnectionCreated(const std::string& msg);

@@ -53,6 +53,10 @@ public:
 	void SetRootYaw(float yaw);
 	bool GetLeftFeetLocked() const;
 	bool GetRightFeetLocked() const;
+	float GetStopRunDistanceMatchingTime() const;
+	std::string GetStopRunAnim() const;
+	std::string GetStopRunCurve_RootSpeed() const;
+	float GetStopRunDistanceRemaining() const;
 
 private:
 
@@ -63,6 +67,8 @@ private:
 	// Graph functions.
 	void OnStartRunEnter();
 	void OnStartRunTick();
+	void OnStopRunEnter();
+	void OnStopRunTick();
 
 	// Graph variables.
 	float m_startRunDistanceMatchingTime = 0.0f;
@@ -79,6 +85,16 @@ private:
 	bool m_leftFeetLocked = false;
 	bool m_rightFeetLocked = false;
 	glm::vec3 m_cachedLocalMovementInput = glm::vec3(0.0f);
+	float m_stopRunDistanceTraveled = 0.0f;
+	std::string m_stopRunAnim = "";
+	std::string m_stopRunCurve_rootDistance = "";
+	std::string m_stopRunCurve_rootSpeed = "";
+	std::shared_ptr<AFFloatCurve> m_stopRunCurve_rootDistanceCrv = nullptr;
+	float m_stopRun_beginTime = 0.0f;
+	float m_stopRun_distToZero = 0.0f;
+	float m_stopRun_distToZeroCharMov = 0.0f;
+	float m_stopRun_distanceMatchingTime = 0.0f;
+	float m_stopRun_distanceRemaining = 0.0f;
 
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;

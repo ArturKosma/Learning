@@ -162,13 +162,36 @@ std::vector<FAFStateSampling> AFEvaluator::GetCachedSamplingState(const std::str
 
 	for(const FAFStateSampling& sampling : m_samplingStateCached)
 	{
-		if (sampling.contextId == context)
+		// Check all subcontexts, ie. From state could have its own states inside.
+		if (IsEqualOrSubcontext(sampling.contextId, context))
 		{
 			ret.push_back(sampling);
 		}
 	}
 
 	return ret;
+}
+
+bool AFEvaluator::IsEqualOrSubcontext(const std::string& question, const std::string& context) const
+{
+	if (question == context)
+	{
+		return true;
+	}
+
+	std::shared_ptr<AFGraphNode> main = AFGraphNodeRegistry::Get().GetNode(context);
+	if (main)
+	{
+		for (const std::string& sub : main->GetSubNodes())
+		{
+			if (IsEqualOrSubcontext(question, sub))
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 void AFEvaluator::ClearSamplingState()

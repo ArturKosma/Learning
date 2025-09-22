@@ -28,11 +28,18 @@ void AFFloatCurve::OnLoadComplete()
 
 float AFFloatCurve::SampleByValue(float value)
 {
+	const bool descending = values.size() >= 2 && values.front() > values.back();
+
 	// High index.
-	size_t hi = std::lower_bound(values.begin(), values.end(), value) - values.begin();
+	size_t hi = descending ?
+		std::lower_bound(values.begin(), values.end(), value, std::greater<float>()) - values.begin() :
+		std::lower_bound(values.begin(), values.end(), value) - values.begin();
+
+	if (hi == 0)             return timings.front();
+	if (hi >= values.size()) return timings.back();
 
 	// Low index.
-	size_t lo = std::max(static_cast<size_t>(0), hi - 1);
+	size_t lo = hi - 1;
 
 	// Clamps.
 	if (hi <= 0)

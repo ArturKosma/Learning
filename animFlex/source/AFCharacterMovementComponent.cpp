@@ -12,7 +12,7 @@ float AFCharacterMovementComponent::GetAcceleration() const
 
 float AFCharacterMovementComponent::GetDeceleration() const
 {
-	return 1500.0f;
+	return 1280.0f;
 }
 
 float AFCharacterMovementComponent::GetMaxSpeed() const
