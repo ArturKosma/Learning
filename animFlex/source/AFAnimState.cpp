@@ -188,6 +188,16 @@ void AFAnimState::CallFunctionByString(const std::string& functionName)
 			OnStopRunTick();
 			break;
 		}
+		case AFUtility::StringSwitch("OnRotateInPlaceEnter"):
+		{
+			OnRotateInPlaceEnter();
+			break;
+		}
+		case AFUtility::StringSwitch("OnRotateInPlaceTick"):
+		{
+			OnRotateInPlaceTick();
+			break;
+		}
 		default:
 		{
 
@@ -223,6 +233,11 @@ float AFAnimState::GetStartRunDistanceTraveled() const
 float AFAnimState::GetStartRunDifferenceToInput() const
 {
 	return m_startRunDifferenceToInput;
+}
+
+float AFAnimState::GetStartRunTimeSpent() const
+{
+	return m_startRunTimeSpent;
 }
 
 float AFAnimState::GetRootYaw() const
@@ -263,6 +278,16 @@ std::string AFAnimState::GetStopRunCurve_RootSpeed() const
 float AFAnimState::GetStopRunDistanceRemaining() const
 {
 	return m_stopRun_distanceRemaining;
+}
+
+float AFAnimState::GetRotateInPlacePlayTime() const
+{
+	return m_rotateInPlace_playTime;
+}
+
+std::string AFAnimState::GetRotateInPlaceAnim() const
+{
+	return m_rotateInPlace_anim;
 }
 
 void AFAnimState::EvaluateSingleAnim()
@@ -585,9 +610,6 @@ void AFAnimState::OnStopRunEnter()
 	const float speed = glm::length(charMovement->GetVelocity());
 	const float decel = charMovement->GetDeceleration();
 	m_stopRun_distToZeroCharMov = (speed * speed) / (2.0f * decel);
-
-	//printf("anim: %f\n", m_stopRun_distToZero);
-	//printf("char: %f\n", m_stopRun_distToZeroCharMov);
 }
 
 void AFAnimState::OnStopRunTick()
@@ -618,4 +640,102 @@ void AFAnimState::OnStopRunTick()
 	// the distance gets lower, the closer we are to 0 speed.
 	m_stopRun_distanceMatchingTime = m_stopRunCurve_rootDistanceCrv->SampleByValue(m_stopRun_distToZero - distanceTraveledMapped);
 	m_stopRun_distanceRemaining = m_stopRun_distToZero - distanceTraveledMapped;
+}
+
+void AFAnimState::OnRotateInPlaceEnter()
+{
+	std::shared_ptr<AFCharacterMovementComponent> charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
+	if (!charMovement)
+	{
+		return;
+	}
+
+	// How big the angle is towards last positive user input from the root?
+	const float angle = AFUtility::GetRootAngleTowardsMovementInput();
+
+	std::vector<float> angles =
+	{
+		-180.0f,
+		-135.0f,
+		-90.0f,
+		-45.0f,
+		45.0f,
+		90.0f,
+		135.0f,
+		180.0f
+	};
+
+	// Which index per 45s angle it is?
+	size_t index = AFMath::NearestIndex<float>(angles, angle);
+
+	std::vector<std::string> rotateInPlaceAnims =
+	{
+		"M_Neutral_Stand_Turn_180_L",
+		"M_Neutral_Stand_Turn_135_L",
+		"M_Neutral_Stand_Turn_090_L",
+		"M_Neutral_Stand_Turn_045_L",
+		"M_Neutral_Stand_Turn_045_R",
+		"M_Neutral_Stand_Turn_090_R",
+		"M_Neutral_Stand_Turn_135_R",
+		"M_Neutral_Stand_Turn_180_R"
+	};
+
+	std::vector<std::string> rotateInPlaceYaws =
+	{
+		"M_Neutral_Stand_Turn_180_L_rootYaw",
+		"M_Neutral_Stand_Turn_135_L_rootYaw",
+		"M_Neutral_Stand_Turn_090_L_rootYaw",
+		"M_Neutral_Stand_Turn_045_L_rootYaw",
+		"M_Neutral_Stand_Turn_045_R_rootYaw",
+		"M_Neutral_Stand_Turn_090_R_rootYaw",
+		"M_Neutral_Stand_Turn_135_R_rootYaw",
+		"M_Neutral_Stand_Turn_180_R_rootYaw"
+	};
+
+	// Cache the rotate in place anim name.
+	m_rotateInPlace_anim = rotateInPlaceAnims[index];
+
+	// Cache the rotate in place root yaw curve name.
+	m_rotateInPlace_rootYaw = rotateInPlaceYaws[index];
+
+	// Find the root yaw curve.
+	m_rotateInPlace_curve_rootYaw = AFContent::Get().FindAsset<AFFloatCurve>(m_rotateInPlace_rootYaw.c_str());
+
+	// Reset the rotate in place play time.
+	m_rotateInPlace_playTime = 0.0f;
+
+	// Reset the delta of root yaw.
+	AFDeltaObject::Get().ResetValue("rotateInPlace_rootYawDeltaCrv");
+}
+
+void AFAnimState::OnRotateInPlaceTick()
+{
+	const float deltaTime = AFTimerManager::GetDeltaTime();
+
+	m_rotateInPlace_playTime += deltaTime;
+
+	// Modify root yaw by the anims curve.
+	if (m_rotateInPlace_curve_rootYaw)
+	{
+		// Rate of change in the root yaw curve.
+		// Integral of this gives us full rotation from the curve.
+		const float rootYawDeltaCrv = -1.0f * AFDeltaObject::Get().SetValue("rotateInPlace_rootYawDeltaCrv",
+			m_rotateInPlace_curve_rootYaw->SampleByTime(m_rotateInPlace_playTime));
+
+		// Remaining angle between root and movement input direction.
+		const float angleMovement = AFUtility::GetRootAngleTowardsMovementInput();
+
+		// Remaining angle from the curve.
+		const float curveMax = m_rotateInPlace_curve_rootYaw->SampleByTime(9999.0f);
+		const float curveCurrent = m_rotateInPlace_curve_rootYaw->SampleByTime(m_rotateInPlace_playTime);
+		const float angleCurve = -1.0f * (curveMax - curveCurrent + glm::epsilon<float>());
+
+		// Rate of change modifier k, to fit the desired angle when it's in between authored anims.
+		// It's either above or below 1.0f, to strengthen or weaken the rotation curve delta.
+		const float ratio = angleMovement / angleCurve;
+		const float k = glm::clamp(ratio, -1.4f, 1.4f);
+
+		// Modified root yaw by the rotation from rotate in place anim.
+		m_rootYaw = AFMath::NormalizeAngle(m_rootYaw - (rootYawDeltaCrv * k));
+	}
 }

@@ -10,6 +10,7 @@ public:
 
 	AFPARAM(std::string, m_onEnterFunStr, "", "On Enter", "", "");
 	AFPARAM(std::string, m_onTickFunStr, "", "On Tick", "", "");
+	AFPARAM(bool, m_alwaysOnEnter, false, "Always Call OnEnter", "", "");
 
 	void Init() override;
 	void Evaluate(float deltaTime) override;

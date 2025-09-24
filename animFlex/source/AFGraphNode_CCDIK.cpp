@@ -107,3 +107,9 @@ void AFGraphNode_CCDIK::Evaluate(float deltaTime)
 	m_lastFrameActive = m_active.GetValue();
 	m_outputPose.SetValue(m_blendedPose);
 }
+
+void AFGraphNode_CCDIK::OnBecomeRelevant()
+{
+	m_currentAlpha = false;
+	m_lastFrameActive = false;
+}

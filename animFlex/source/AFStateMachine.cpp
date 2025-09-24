@@ -120,7 +120,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 		// Call OnEnter function on the new state.
 		// Reverse transition so A->B turning B->A does not trigger new enter fun.
 		std::shared_ptr<AFGraphNode_State> state = std::dynamic_pointer_cast<AFGraphNode_State>(m_currentState.lock());
-		if (state && !reverseTransition)
+		if (state && (!reverseTransition || state->m_alwaysOnEnter))
 		{
 			const std::string& funStr = state->m_onEnterFunStr.GetValue();
 			animState->CallFunctionByString(funStr);

@@ -1799,6 +1799,14 @@
                     "label": "On Tick",
                     "direction": "",
                     "meta": []
+                },
+                {
+                    "var_type": "bool",
+                    "var_name": "m_alwaysOnEnter",
+                    "default": "false",
+                    "label": "Always Call OnEnter",
+                    "direction": "",
+                    "meta": []
                 }
             ]
         },
@@ -1901,7 +1909,9 @@
                 "StartRunDistanceMatchingTime",
                 "StartRunDifferenceToInput",
                 "StopRunDistanceMatchingTime",
-                "StopRunDistanceRemaining"
+                "StopRunDistanceRemaining",
+                "StartRunTimeSpent",
+                "RotateInPlacePlayTime"
             ]
         },
         {
@@ -1911,7 +1921,8 @@
                 "StartRunCurve_RootDistance",
                 "StartRunCurve_RootYaw",
                 "StopRunAnim",
-                "StopRunCurve_RootSpeed"
+                "StopRunCurve_RootSpeed",
+                "RotateInPlaceAnim"
             ]
         },
         {

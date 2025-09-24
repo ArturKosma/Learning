@@ -66,6 +66,11 @@ void AFGraphNode_GetStringProperty::EvalImpl(float deltaTime)
 			ret = m_animState.lock()->GetStopRunCurve_RootSpeed();
 			break;
 		}
+		case EAFStringProperties::RotateInPlaceAnim:
+		{
+			ret = m_animState.lock()->GetRotateInPlaceAnim();
+			break;
+		}
 		default:
 		{
 			ret = "";

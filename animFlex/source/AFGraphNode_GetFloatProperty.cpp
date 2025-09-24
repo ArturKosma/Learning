@@ -156,6 +156,16 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 		ret = m_animState.lock()->GetStopRunDistanceRemaining();
 		break;
 	}
+	case EAFFloatProperties::StartRunTimeSpent:
+	{
+		ret = m_animState.lock()->GetStartRunTimeSpent();
+		break;
+	}
+	case EAFFloatProperties::RotateInPlacePlayTime:
+	{
+		ret = m_animState.lock()->GetRotateInPlacePlayTime();
+		break;
+	}
 	default:
 	{
 		ret = 0.0f;

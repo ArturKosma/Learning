@@ -13,6 +13,7 @@ REM Generate.
 REM -allowToLoop-value=1.22
 REM -rootDistance
 REM -rootSpeed
-animFlex_cooking.exe animCurve %ANIMS_SOURCE% %ANIMS_EXPORT% -rootYawAuthority-value=9999
+REM -rootYawAuthority-value=9999
+animFlex_cooking.exe animCurve %ANIMS_SOURCE% %ANIMS_EXPORT% rootYaw
 
 pause

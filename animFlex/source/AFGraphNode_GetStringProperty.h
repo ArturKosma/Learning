@@ -9,6 +9,7 @@ enum class EAFStringProperties
 	StartRunCurve_RootYaw,
 	StopRunAnim,
 	StopRunCurve_RootSpeed,
+	RotateInPlaceAnim,
 };
 
 class AFGraphNode_GetStringProperty : public AFGraphNodeCRTP<AFGraphNode_GetStringProperty>

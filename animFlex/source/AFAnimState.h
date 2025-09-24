@@ -49,6 +49,7 @@ public:
 	std::string GetStartRunCurve_RootYaw() const;
 	float GetStartRunDistanceTraveled() const;
 	float GetStartRunDifferenceToInput() const;
+	float GetStartRunTimeSpent() const;
 	float GetRootYaw() const;
 	void SetRootYaw(float yaw);
 	bool GetLeftFeetLocked() const;
@@ -57,6 +58,8 @@ public:
 	std::string GetStopRunAnim() const;
 	std::string GetStopRunCurve_RootSpeed() const;
 	float GetStopRunDistanceRemaining() const;
+	float GetRotateInPlacePlayTime() const;
+	std::string GetRotateInPlaceAnim() const;
 
 private:
 
@@ -69,6 +72,8 @@ private:
 	void OnStartRunTick();
 	void OnStopRunEnter();
 	void OnStopRunTick();
+	void OnRotateInPlaceEnter();
+	void OnRotateInPlaceTick();
 
 	// Graph variables.
 	float m_startRunDistanceMatchingTime = 0.0f;
@@ -95,6 +100,10 @@ private:
 	float m_stopRun_distToZeroCharMov = 0.0f;
 	float m_stopRun_distanceMatchingTime = 0.0f;
 	float m_stopRun_distanceRemaining = 0.0f;
+	std::string m_rotateInPlace_anim = "";
+	std::string m_rotateInPlace_rootYaw = "";
+	std::shared_ptr<AFFloatCurve> m_rotateInPlace_curve_rootYaw = nullptr;
+	float m_rotateInPlace_playTime = 0.0f;
 
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;

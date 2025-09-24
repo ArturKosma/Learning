@@ -23,6 +23,7 @@ public:
 
 	void Init() override;
 	void Evaluate(float deltaTime) override;
+	void OnBecomeRelevant() override;
 
 private:
 
