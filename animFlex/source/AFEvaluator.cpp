@@ -280,7 +280,14 @@ bool AFEvaluator::GetSyncGroupDriverTime(const std::string& syncGroup, float& dr
 {
 	for (const auto& [nodeId, syncGroupProperties] : m_syncGroups)
 	{
-		if (syncGroupProperties.mode == EAFSyncGroupMode::Driver && syncGroupProperties.name == syncGroup)
+		const std::string& syncNodeId = nodeId;
+		auto it = std::find_if(m_samplingStateCached.begin(), m_samplingStateCached.end(), [syncNodeId](const FAFStateSampling& sampling)
+			{
+				return sampling.nodeId == syncNodeId;
+			});
+		const bool driverWasEvaluated = it != m_samplingStateCached.end();
+
+		if (syncGroupProperties.mode == EAFSyncGroupMode::Driver && syncGroupProperties.name == syncGroup && driverWasEvaluated)
 		{
 			std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeId);
 			if (node)
@@ -302,7 +309,14 @@ bool AFEvaluator::GetSyncGroupDriverClip(const std::string& syncGroup, AFAnimati
 {
 	for (const auto& [nodeId, syncGroupProperties] : m_syncGroups)
 	{
-		if (syncGroupProperties.mode == EAFSyncGroupMode::Driver && syncGroupProperties.name == syncGroup)
+		const std::string& syncNodeId = nodeId;
+		auto it = std::find_if(m_samplingStateCached.begin(), m_samplingStateCached.end(), [syncNodeId](const FAFStateSampling& sampling)
+			{
+				return sampling.nodeId == syncNodeId;
+			});
+		const bool driverWasEvaluated = it != m_samplingStateCached.end();
+
+		if (syncGroupProperties.mode == EAFSyncGroupMode::Driver && syncGroupProperties.name == syncGroup && driverWasEvaluated)
 		{
 			std::shared_ptr<AFGraphNode> node = AFGraphNodeRegistry::Get().GetNode(nodeId);
 			if (node)

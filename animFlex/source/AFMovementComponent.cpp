@@ -22,36 +22,71 @@ void AFMovementComponent::Tick(float deltaTime)
 		return;
 	}
 
-	if (glm::length(m_lastMovementInput) > std::numeric_limits<float>::epsilon())
-	{
-		m_accelerating = true;
+	const float eps = 1e-4f;
+	const float maxSpeed = GetMaxSpeed();
+	const float maxAccel = GetAcceleration();
+	const float maxDecel = GetDeceleration();
 
-		const glm::vec3 desiredVelocity = AFMath::GetSafeNormal(m_lastMovementInput) * GetMaxSpeed();
-		const glm::vec3 deltaVelocity = desiredVelocity - m_velocity;
+	const glm::vec3 accel = m_lastMovementInput * maxAccel;
+	const bool hasAccel = glm::length2(accel) > eps;
 
-		float maxDelta = GetAcceleration() * deltaTime;
-		if (glm::length(deltaVelocity) > maxDelta)
-		{
-			m_velocity += AFMath::GetSafeNormal(deltaVelocity) * maxDelta;
-		}
-		else
-		{
-			m_velocity = desiredVelocity;
-		}
-	}
-	else
+	// Either no input or reverse direction.
+	const bool shouldBrake = !hasAccel || glm::dot(accel, m_velocity) <= 0.0f;
+
+	if (shouldBrake && (glm::length2(m_velocity) > eps))
 	{
 		m_accelerating = false;
 
-		const float speed = glm::length(m_velocity);
-		const float newSpeed = glm::max(speed - (GetDeceleration() * deltaTime), 0.0f);
-		m_velocity = AFMath::GetSafeNormal(m_velocity) * newSpeed;
+		const glm::vec3 dir = m_speed < eps ? AFMath::GetSafeNormal(m_lastMovementInput) : m_velocity / m_speed;
+
+		// Decelerate.
+		m_speed -= maxDecel * deltaTime;
+		m_speed = glm::clamp(m_speed, 0.0f, maxSpeed);
+
+		m_velocity = dir * m_speed;
+	}
+	else if (hasAccel)
+	{
+		m_accelerating = true;
+
+		const glm::vec3 dir = m_speed < eps ? AFMath::GetSafeNormal(m_lastMovementInput) : m_velocity / m_speed;
+
+		// Accelerate.
+		m_speed += maxAccel * deltaTime;
+		m_speed = glm::clamp(m_speed, 0.0f, maxSpeed);
+
+		m_velocity = dir * m_speed;
 	}
 
-	if (glm::length(m_velocity) > std::numeric_limits<float>::epsilon())
+	// "Turn" velocity.
+	if (hasAccel)
+	{
+		const glm::vec3 desiredVelocity = AFMath::GetSafeNormal(m_lastMovementInput) * m_speed;
+
+		// Lower the speed during turning.
+		const float desiredDot = glm::dot(AFMath::GetSafeNormal(desiredVelocity), AFMath::GetSafeNormal(m_velocity));
+		const float desiredTurnSpeedModifier = AFMath::MapRangeClamped(desiredDot, 0.0f, 0.9f, 0.1f, 1.0f);
+		m_turnSpeedModifier = AFMath::FInterpToConst(m_turnSpeedModifier, desiredTurnSpeedModifier, 3.0f, deltaTime);
+
+		glm::vec3 delta = desiredVelocity - m_velocity;
+		const float maxTurnDelta = GetMaxVelocityTurnSpeed() * deltaTime;
+		const float dlen = glm::length(delta);
+		if (dlen > maxTurnDelta && dlen > eps)
+		{
+			delta *= (maxTurnDelta / dlen);
+		}
+
+		const glm::vec3 newVel = m_velocity + delta;
+		m_velocity = AFMath::GetSafeNormal(newVel) * (m_speed * m_turnSpeedModifier);
+		printf("%f\n", m_speed * m_turnSpeedModifier);
+	}
+
+	if (glm::length(m_velocity) > eps)
 	{
 		m_lastPositiveVelocity = m_velocity;
 		const glm::vec3 velocityDelta = m_velocity * deltaTime;
+
+		// Offset location.
 		owner->AddOffsetLocation(velocityDelta);
 		m_lastLocationOffset = velocityDelta;
 	}
@@ -68,6 +103,11 @@ void AFMovementComponent::Tick(float deltaTime)
 float AFMovementComponent::GetAcceleration() const
 {
 	return m_acceleration;
+}
+
+float AFMovementComponent::GetMaxVelocityTurnSpeed() const
+{
+	return 1000.0f;
 }
 
 float AFMovementComponent::GetDeceleration() const

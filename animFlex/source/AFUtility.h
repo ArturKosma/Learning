@@ -175,6 +175,7 @@ public:
 			"feetGroundedR",
 			"allowToLoop",
 			"rootSpeed",
+			"allowToPivot",
 		};
 	}
 

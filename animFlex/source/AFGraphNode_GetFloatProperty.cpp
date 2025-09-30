@@ -166,6 +166,11 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 		ret = m_animState.lock()->GetRotateInPlacePlayTime();
 		break;
 	}
+	case EAFFloatProperties::PivotDistanceMatchingTime:
+	{
+		ret = m_animState.lock()->GetPivotDistanceMatchingTime();
+		break;
+	}
 	default:
 	{
 		ret = 0.0f;

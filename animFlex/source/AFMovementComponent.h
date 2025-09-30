@@ -13,6 +13,7 @@ public:
 	void Tick(float deltaTime) override;
 
 	virtual float GetAcceleration() const;
+	virtual float GetMaxVelocityTurnSpeed() const;
 	virtual float GetDeceleration() const;
 	virtual float GetMaxSpeed() const;
 
@@ -37,6 +38,8 @@ public:
 protected:
 
 	glm::vec3 m_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	float m_speed = 0.0f;
+	float m_turnSpeedModifier = 1.0f;
 	glm::vec3 m_lastPositiveVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastLocalMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);

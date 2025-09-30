@@ -71,6 +71,11 @@ void AFGraphNode_GetStringProperty::EvalImpl(float deltaTime)
 			ret = m_animState.lock()->GetRotateInPlaceAnim();
 			break;
 		}
+		case EAFStringProperties::PivotAnim:
+		{
+			ret = m_animState.lock()->GetPivotAnim();
+			break;
+		}
 		default:
 		{
 			ret = "";

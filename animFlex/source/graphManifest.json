@@ -1911,7 +1911,8 @@
                 "StopRunDistanceMatchingTime",
                 "StopRunDistanceRemaining",
                 "StartRunTimeSpent",
-                "RotateInPlacePlayTime"
+                "RotateInPlacePlayTime",
+                "PivotDistanceMatchingTime"
             ]
         },
         {
@@ -1922,7 +1923,8 @@
                 "StartRunCurve_RootYaw",
                 "StopRunAnim",
                 "StopRunCurve_RootSpeed",
-                "RotateInPlaceAnim"
+                "RotateInPlaceAnim",
+                "PivotAnim"
             ]
         },
         {
