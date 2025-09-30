@@ -253,6 +253,11 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 			requestedMotionType = "allowToLoop";
 			requestedBoneIdx = 0;
 		}
+		if (arg == "allowToPivot")
+		{
+			requestedMotionType = "allowToPivot";
+			requestedBoneIdx = 0;
+		}
 		if (arg == "rootYawAuthority")
 		{
 			requestedMotionType = "rootYawAuthority";
@@ -401,7 +406,8 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				std::memcpy(newChannel.values, src, sizeof(glm::vec4) * outputAccessor.count);
 			}
 
-			// Root Distance - reads the length of vector of the root bone.
+			// Root Distance - reads the length of vector of the root bone (USED TO).
+			// Now it adds up the delta of distance each frame.
 			if (requestedMotionType == "rootDistance")
 			{
 				nlohmann::json rootDistanceArray = nlohmann::json::array();
@@ -412,6 +418,14 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 					continue;
 				}
 
+				const float initValueX = newChannel.values[0].x;
+				const float initValueY = newChannel.values[0].y;
+				const float initValueZ = newChannel.values[0].z;
+
+				const float initDistance = glm::length(glm::vec3(initValueX, initValueY, initValueZ));
+				floatParam0 = 0.0f;
+				floatParam1 = initDistance;
+
 				// Get the vector at every key.
 				for (uint32_t i = 0; i < keyCount; ++i)
 				{
@@ -419,9 +433,17 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 					const float valueY = newChannel.values[i].y;
 					const float valueZ = newChannel.values[i].z;
 
+					// Distance in this frame.
 					const float distance = glm::length(glm::vec3(valueX, valueY, valueZ));
 
-					rootDistanceArray.push_back({ newChannel.timings[i], distance });
+					// Sum up delta from previous frame.
+					floatParam0 += glm::abs(distance - floatParam1);
+
+					// Push to array.
+					rootDistanceArray.push_back({ newChannel.timings[i], floatParam0 });
+
+					// Remember last distance.
+					floatParam1 = distance;
 				}
 
 				std::string filename = "";
@@ -554,6 +576,37 @@ std::string AFCooking::CookAnimCurve(const std::string& sourcePath, const std::s
 				std::string filename = "";
 				filename += animName;
 				filename += "_allowToLoop";
+				curveName = filename;
+				filename += ".json";
+				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
+				std::ofstream outJson(curvePath);
+				outJson << allowToLoopArray.dump(2);
+			}
+			// Writes down allowToPivot to 1.0f once anim timing passes value.
+			if (requestedMotionType == "allowToPivot")
+			{
+				nlohmann::json allowToLoopArray = nlohmann::json::array();
+
+				// We are only interested in the translation.
+				if (newChannel.targetPath != EAFTargetPath::Translation)
+				{
+					continue;
+				}
+
+				for (uint32_t i = 0; i < keyCount; ++i)
+				{
+					float val = 0.0f;
+					if (newChannel.timings[i] >= floatParam0)
+					{
+						val = 1.0f;
+					}
+
+					allowToLoopArray.push_back({ newChannel.timings[i], val });
+				}
+
+				std::string filename = "";
+				filename += animName;
+				filename += "_allowToPivot";
 				curveName = filename;
 				filename += ".json";
 				const std::string& curvePath = (std::filesystem::path(targetPath) / filename).string();
