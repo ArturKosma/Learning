@@ -47,3 +47,6 @@ graph/tsconfig.json
 
 # Allow graph manifest containing all possible nodes
 !graphManifest.json
+
+# Allow main save file.
+!graph.json
