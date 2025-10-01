@@ -1786,6 +1786,14 @@
             "params": [
                 {
                     "var_type": "std::string",
+                    "var_name": "m_stateClassName",
+                    "default": "",
+                    "label": "State Class",
+                    "direction": "",
+                    "meta": []
+                },
+                {
+                    "var_type": "std::string",
                     "var_name": "m_onEnterFunStr",
                     "default": "",
                     "label": "On Enter",
@@ -1838,6 +1846,14 @@
                     "default": "",
                     "label": "",
                     "direction": "Output",
+                    "meta": []
+                },
+                {
+                    "var_type": "float",
+                    "var_name": "m_maxTransitionsPerTick",
+                    "default": "5.0",
+                    "label": "Max Transitions Per Tick",
+                    "direction": "",
                     "meta": []
                 }
             ]
@@ -1912,7 +1928,10 @@
                 "StopRunDistanceRemaining",
                 "StartRunTimeSpent",
                 "RotateInPlacePlayTime",
-                "PivotDistanceMatchingTime"
+                "PivotTime",
+                "InputYawDelta",
+                "FromStateTimeElapsed",
+                "AfterPivotHeadingOffset"
             ]
         },
         {

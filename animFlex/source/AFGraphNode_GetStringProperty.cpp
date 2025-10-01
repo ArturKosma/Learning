@@ -2,7 +2,9 @@
 
 #include "AFAnimState.h"
 #include "AFGame.h"
+#include "AFGraphNode_State.h"
 #include "AFPlayerPawn.h"
+#include "AFStateClass_Pivot.h"
 
 void AFGraphNode_GetStringProperty::Init()
 {
@@ -36,6 +38,9 @@ void AFGraphNode_GetStringProperty::EvalImpl(float deltaTime)
 	{
 		return;
 	}
+
+	const std::string& context = GetNodeContext();
+	std::shared_ptr<AFGraphNode> contextNode = AFGraphNodeRegistry::Get().GetNode(context);
 
 	std::string ret = "";
 
@@ -73,7 +78,19 @@ void AFGraphNode_GetStringProperty::EvalImpl(float deltaTime)
 		}
 		case EAFStringProperties::PivotAnim:
 		{
-			ret = m_animState.lock()->GetPivotAnim();
+			AFGraphNode_State* pivotState = std::dynamic_pointer_cast<AFGraphNode_State>(contextNode).get();
+			if (!pivotState)
+			{
+				break;
+			}
+
+			AFStateClass_Pivot* pivotStateObj = std::dynamic_pointer_cast<AFStateClass_Pivot>(pivotState->GetStateObj()).get();
+			if (!pivotStateObj)
+			{
+				break;
+			}
+
+			ret = pivotStateObj->GetPivotAnim();
 			break;
 		}
 		default:

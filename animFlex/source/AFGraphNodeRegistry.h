@@ -13,6 +13,7 @@
 #include "AFPose.h"
 #include "AFTimerManager.h"
 
+class AFStateClass;
 class AFGraphNode;
 
 struct FAFParamBase
@@ -269,6 +270,8 @@ public:
 
 		return newNode;
 	}
+
+	std::shared_ptr<AFStateClass> CreateStateClass(const std::string& className);
 
 	std::shared_ptr<AFGraphNode> GetNode(const std::string& nodeID)
 	{

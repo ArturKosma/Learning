@@ -6,6 +6,7 @@
 #include "AFGraphNode_State.h"
 #include "AFMath.h"
 #include "AFPlayerPawn.h"
+#include "AFStateClass.h"
 
 void AFStateMachine::PreEvaluate(float deltaTime)
 {
@@ -41,7 +42,7 @@ void AFStateMachine::Evaluate(float deltaTime)
 	float blendTime = 0.15f;
 
 	// Max 5 jumps per evaluate.
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < m_maxTransitionsPerTick; i++)
 	{
 		// Find all outgoing connections.
 		std::vector<FAFStateConnection> outgoing = {};
@@ -123,7 +124,18 @@ void AFStateMachine::Evaluate(float deltaTime)
 		if (state && (!reverseTransition || state->m_alwaysOnEnter))
 		{
 			const std::string& funStr = state->m_onEnterFunStr.GetValue();
-			animState->CallFunctionByString(funStr);
+
+			bool stateObjCalled = false;
+			AFStateClass* stateObj = state->GetStateObj().get();
+			if (stateObj)
+			{
+				stateObjCalled = stateObj->CallFunctionByString(funStr);
+			}
+
+			if (!stateObjCalled)
+			{
+				animState->CallFunctionByString(funStr);
+			}
 		}
 	}
 
@@ -165,7 +177,16 @@ void AFStateMachine::Evaluate(float deltaTime)
 		lastActiveEntry["nodeId"] = currentState->GetNodeID();
 		AFEvaluator::Get().AddLastActiveState(lastActiveEntry);
 
-		animState->CallFunctionByString(currentState->m_onTickFunStr.GetValue());
+		bool stateTickCalled = false;
+		AFStateClass* stateObj = currentState->GetStateObj().get();
+		if (stateObj)
+		{
+			stateTickCalled = stateObj->CallFunctionByString(currentState->m_onTickFunStr.GetValue());
+		}
+		if (!stateTickCalled)
+		{
+			animState->CallFunctionByString(currentState->m_onTickFunStr.GetValue());
+		}
 		currentState->Evaluate(deltaTime);
 
 		// Cache final pose.

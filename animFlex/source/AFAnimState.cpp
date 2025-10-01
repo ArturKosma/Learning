@@ -198,16 +198,6 @@ void AFAnimState::CallFunctionByString(const std::string& functionName)
 			OnRotateInPlaceTick();
 			break;
 		}
-		case AFUtility::StringSwitch("OnPivotEnter"):
-		{
-			OnPivotEnter();
-			break;
-		}
-		case AFUtility::StringSwitch("OnPivotTick"):
-		{
-			OnPivotTick();
-			break;
-		}
 		default:
 		{
 
@@ -298,16 +288,6 @@ float AFAnimState::GetRotateInPlacePlayTime() const
 std::string AFAnimState::GetRotateInPlaceAnim() const
 {
 	return m_rotateInPlace_anim;
-}
-
-std::string AFAnimState::GetPivotAnim() const
-{
-	return m_pivotAnim;
-}
-
-float AFAnimState::GetPivotDistanceMatchingTime() const
-{
-	return m_pivotDistanceMatchingTime;
 }
 
 void AFAnimState::EvaluateSingleAnim()
@@ -758,155 +738,4 @@ void AFAnimState::OnRotateInPlaceTick()
 		// Modified root yaw by the rotation from rotate in place anim.
 		m_rootYaw = AFMath::NormalizeAngle(m_rootYaw - (rootYawDeltaCrv * k));
 	}
-}
-
-void AFAnimState::OnPivotEnter()
-{
-	// @note The condition to enter this state should probably be found at the character movement level,
-	// because the condition checks current root vs desired direction, but at the condition stage
-	// root is already rotated a little towards that direction, so I should probably register the intent earlier,
-	// and take the last frame rotation into consideration.
-
-	std::shared_ptr<AFCharacterMovementComponent> charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
-	if (!charMovement)
-	{
-		return;
-	}
-
-	// Reset for how long are we in the pivot state.
-	m_pivotTimeSpent = 0.0f;
-
-	// Reset the distance traveled for distance-matching in pivot.
-	// We take last offset as the move has already happened at this point.
-	m_pivotDistanceTraveled = glm::length(charMovement->GetLastLocationOffset());
-
-	// How big the angle is towards target movement input from the root?
-	const float angle = AFUtility::GetRootAngleTowardsMovementInput();
-
-	std::vector<float> angles =
-	{
-		-180.0f,
-		-135.0f,
-		-90.0f,
-		-45.0f,
-		45.0f,
-		90.0f,
-		135.0f,
-		180.0f
-	};
-
-	// Which index per 45s angle it is?
-	size_t index = AFMath::NearestIndex<float>(angles, angle);
-
-	std::vector<std::string> pivotAnims =
-	{
-		"M_Neutral_Run_Turn_L_180_Rfoot",
-		"M_Neutral_Run_Turn_L_135_Rfoot",
-		"M_Neutral_Run_Turn_L_090_Rfoot",
-		"M_Neutral_Run_Turn_L_045_Rfoot",
-		"M_Neutral_Run_Turn_R_045_Lfoot",
-		"M_Neutral_Run_Turn_R_090_Lfoot",
-		"M_Neutral_Run_Turn_R_135_Lfoot",
-		"M_Neutral_Run_Turn_R_180_Lfoot"
-	};
-
-	std::vector<std::string> pivotRootDistances =
-	{
-		"M_Neutral_Run_Turn_L_180_Rfoot_rootDistance",
-		"M_Neutral_Run_Turn_L_135_Rfoot_rootDistance",
-		"M_Neutral_Run_Turn_L_090_Rfoot_rootDistance",
-		"M_Neutral_Run_Turn_L_045_Rfoot_rootDistance",
-		"M_Neutral_Run_Turn_R_045_Lfoot_rootDistance",
-		"M_Neutral_Run_Turn_R_090_Lfoot_rootDistance",
-		"M_Neutral_Run_Turn_R_135_Lfoot_rootDistance",
-		"M_Neutral_Run_Turn_R_180_Lfoot_rootDistance"
-	};
-
-	std::vector<std::string> pivotRootYaws =
-	{
-		"M_Neutral_Run_Turn_L_180_Rfoot_rootYaw",
-		"M_Neutral_Run_Turn_L_135_Rfoot_rootYaw",
-		"M_Neutral_Run_Turn_L_090_Rfoot_rootYaw",
-		"M_Neutral_Run_Turn_L_045_Rfoot_rootYaw",
-		"M_Neutral_Run_Turn_R_045_Lfoot_rootYaw",
-		"M_Neutral_Run_Turn_R_090_Lfoot_rootYaw",
-		"M_Neutral_Run_Turn_R_135_Lfoot_rootYaw",
-		"M_Neutral_Run_Turn_R_180_Lfoot_rootYaw"
-	};
-
-	// Handpicked start distances (we are not starting this animation at frame 0).
-	// @todo is there a better way?
-	// @todo Those anims are prepared for a motionmatching system originally,
-	// @todo so maybe it's okay to just cut the not needed beginning?
-	std::vector<float> pivotStartDistances =
-	{
-		333.0f,
-		146.0f,
-		366.0f,
-		146.0f,
-		146.0f,
-		333.0f,
-		146.0f,
-		316.0f
-	};
-
-	// Cache the pivot anim name.
-	m_pivotAnim = pivotAnims[index];
-
-	// Cache the pivot root distance curve.
-	m_pivotCurve_rootDistance = pivotRootDistances[index];
-	m_pivotCurve_rootDistanceCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_pivotCurve_rootDistance.c_str());
-
-	// Cache the pivot root yaw curve.
-	m_pivotCurve_rootYaw = pivotRootYaws[index];
-	m_pivotCurve_rootYawCrv = AFContent::Get().FindAsset<AFFloatCurve>(m_pivotCurve_rootYaw.c_str());
-
-	// Cache pivot start distance.
-	m_pivotStartDistance = pivotStartDistances[index];
-
-	// Reset delta object with the yaw curve delta.
-	AFDeltaObject::Get().ResetValue("pivot_rootYawDeltaCrv");
-
-	// Reset distance matching time value.
-	m_pivotDistanceMatchingTime = 0.0f;
-}
-
-void AFAnimState::OnPivotTick()
-{
-	std::shared_ptr<AFCharacterMovementComponent> charMovement = AFGame::GetGame()->GetScene().GetPlayerPawn()->GetCharacterMovementComponent();
-	if (!charMovement)
-	{
-		return;
-	}
-
-	// Increment distance traveled for distance matching.
-	m_pivotDistanceTraveled += glm::length(charMovement->GetLastLocationOffset());
-
-	const float deltaTime = AFTimerManager::GetDeltaTime();
-
-	// Cache the driver time for all animations and curves in start run.
-	m_pivotDistanceMatchingTime = m_pivotCurve_rootDistanceCrv->SampleByValue(m_pivotDistanceTraveled + m_pivotStartDistance);
-
-	// Modify root yaw by the anims curve.
-	// Integral of this gives us full rotation from the curve.
-	const float rootYawDeltaCrv = -1.0f * AFDeltaObject::Get().SetValue("pivot_rootYawDeltaCrv",
-		m_pivotCurve_rootYawCrv->SampleByTime(m_pivotDistanceMatchingTime));
-
-	// Remaining angle between root and movement input direction.
-	const float angleMovement = AFUtility::GetRootAngleTowardsMovementInput();
-
-	// Remaining angle from the curve.
-	const float curveMax = m_pivotCurve_rootYawCrv->SampleByTime(9999.0f);
-	const float curveCurrent = m_pivotCurve_rootYawCrv->SampleByTime(m_pivotDistanceMatchingTime);
-	const float angleCurve = -1.0f * (curveMax - curveCurrent + glm::epsilon<float>());
-
-	// Rate of change modifier k, to fit the desired angle when it's in between authored anims.
-	// It's either above or below 1.0f, to strengthen or weaken the rotation curve delta.
-	const float ratio = angleMovement / angleCurve;
-	const float k = glm::clamp(ratio, -5.0f, 5.0f);
-
-	// Modified root yaw by the rotation from pivot anim.
-	m_rootYaw = AFMath::NormalizeAngle(m_rootYaw - (rootYawDeltaCrv * k));
-
-	m_pivotTimeSpent += deltaTime;
 }

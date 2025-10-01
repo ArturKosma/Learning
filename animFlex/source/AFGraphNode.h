@@ -7,6 +7,7 @@ class AFGraphNode
 	friend class AFAnimGraph;
 	friend class AFStateMachine;
 	friend class AFAnimGraphCond;
+	friend class AFEvaluator;
 
 public:
 
@@ -38,11 +39,14 @@ public:
 	void SetNodeContext(const std::string& contextID);
 	const std::string& GetNodeContext() const;
 
+	float GetTimeElapsed() const;
+
 protected:
 
 	std::string m_nodeId = "";
 	std::string m_nodeContext = "";
 	std::vector<std::string> m_subNodes = {};
+	float m_timeElapsed = 0.0f; // @todo It's a GraphNode_State-only variable.
 };
 
 template<typename Derived>

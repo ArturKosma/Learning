@@ -4,6 +4,7 @@
 #include "AFGraphNode_State.h"
 #include "AFMath.h"
 #include "AFPlayerPawn.h"
+#include "AFStateClass.h"
 
 void FAFBlendStack_Evaluator::Evaluate(float deltaTime, AFPose& pose, const FAFBlendStackEvalParams& params)
 {
@@ -25,7 +26,17 @@ void FAFBlendStack_Evaluator::Evaluate(float deltaTime, AFPose& pose, const FAFB
 		entry["nodeId"] = state->GetNodeID();
 		AFEvaluator::Get().AddLastActiveState(entry);
 
-		animState->CallFunctionByString(state->m_onTickFunStr.GetValue());
+		bool stateTickCalled = false;
+		AFStateClass* stateObj = state->GetStateObj().get();
+		if (stateObj)
+		{
+			stateTickCalled = stateObj->CallFunctionByString(state->m_onTickFunStr.GetValue());
+		}
+		if (!stateTickCalled)
+		{
+			animState->CallFunctionByString(state->m_onTickFunStr.GetValue());
+		}
+
 		state->Evaluate(deltaTime);
 		pose = state->GetGraph()->GetFinalPose();
 	}

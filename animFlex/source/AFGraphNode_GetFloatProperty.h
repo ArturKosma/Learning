@@ -20,7 +20,10 @@ enum class EAFFloatProperties
 	StopRunDistanceRemaining,
 	StartRunTimeSpent,
 	RotateInPlacePlayTime,
-	PivotDistanceMatchingTime,
+	PivotTime,
+	InputYawDelta,
+	FromStateTimeElapsed,
+	AfterPivotHeadingOffset
 };
 
 class AFGraphNode_GetFloatProperty : public AFGraphNodeCRTP<AFGraphNode_GetFloatProperty>

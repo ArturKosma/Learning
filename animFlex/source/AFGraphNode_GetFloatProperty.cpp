@@ -1,10 +1,11 @@
 #include "AFGraphNode_GetFloatProperty.h"
-
+#include "AFGraphNode_State.h"
 #include "AFAnimState.h"
 #include "AFGame.h"
 #include "AFGraphNode_StateCond.h"
 #include "AFMath.h"
 #include "AFPlayerPawn.h"
+#include "AFStateClass_Pivot.h"
 
 void AFGraphNode_GetFloatProperty::Init()
 {
@@ -38,6 +39,9 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 	{
 		return;
 	}
+
+	const std::string& context = GetNodeContext();
+	std::shared_ptr<AFGraphNode> contextNode = AFGraphNodeRegistry::Get().GetNode(context);
 
 	float ret = 0.0f;
 
@@ -166,9 +170,107 @@ void AFGraphNode_GetFloatProperty::EvalImpl(float deltaTime)
 		ret = m_animState.lock()->GetRotateInPlacePlayTime();
 		break;
 	}
-	case EAFFloatProperties::PivotDistanceMatchingTime:
+	case EAFFloatProperties::PivotTime:
 	{
-		ret = m_animState.lock()->GetPivotDistanceMatchingTime();
+		AFGraphNode_State* pivotState = std::dynamic_pointer_cast<AFGraphNode_State>(contextNode).get();
+		if (!pivotState)
+		{
+			break;
+		}
+
+		AFStateClass_Pivot* pivotStateObj = std::dynamic_pointer_cast<AFStateClass_Pivot>(pivotState->GetStateObj()).get();
+		if (!pivotStateObj)
+		{
+			break;
+		}
+
+		ret = pivotStateObj->GetPivotTime();
+		break;
+	}
+	case EAFFloatProperties::InputYawDelta:
+	{
+		ret = m_charMovement.lock()->GetInputYawDelta();
+		break;
+	}
+	case EAFFloatProperties::FromStateTimeElapsed:
+	{
+		// From state time elapsed requires the context to be a State Conditional node,
+		// with a valid From transition.
+		const std::string& nodeContext = m_nodeContext;
+		if (nodeContext.empty())
+		{
+			break;
+		}
+
+		std::shared_ptr<AFGraphNode_StateCond> contextCond = std::dynamic_pointer_cast<AFGraphNode_StateCond>
+			(AFGraphNodeRegistry::Get().GetNode(nodeContext));
+		if (!contextCond)
+		{
+			break;
+		}
+
+		std::string from;
+		std::string to;
+		contextCond->GetConnectionPoints(from, to);
+
+		// Valid from.
+		if (from.empty())
+		{
+			break;
+		}
+
+		std::shared_ptr<AFGraphNode_State> fromState = std::dynamic_pointer_cast<AFGraphNode_State>
+			(AFGraphNodeRegistry::Get().GetNode(from));
+		if (!fromState)
+		{
+			break;
+		}
+
+		ret = fromState->GetTimeElapsed();
+
+		break;
+	}
+	case EAFFloatProperties::AfterPivotHeadingOffset:
+	{
+		// This one reads correctly only if the From state has a StateClass "Pivot".
+		const std::string& nodeContext = m_nodeContext;
+		if (nodeContext.empty())
+		{
+			break;
+		}
+
+		std::shared_ptr<AFGraphNode_StateCond> contextCond = std::dynamic_pointer_cast<AFGraphNode_StateCond>
+			(AFGraphNodeRegistry::Get().GetNode(nodeContext));
+		if (!contextCond)
+		{
+			break;
+		}
+
+		std::string from;
+		std::string to;
+		contextCond->GetConnectionPoints(from, to);
+
+		// Valid from.
+		if (from.empty())
+		{
+			break;
+		}
+
+		std::shared_ptr<AFGraphNode_State> fromState = std::dynamic_pointer_cast<AFGraphNode_State>
+			(AFGraphNodeRegistry::Get().GetNode(from));
+		if (!fromState)
+		{
+			break;
+		}
+
+		AFStateClass_Pivot* pivotObj = std::dynamic_pointer_cast<AFStateClass_Pivot>(fromState->GetStateObj()).get();
+		if (!pivotObj)
+		{
+			break;
+		}
+
+		ret = pivotObj->GetNewAngleVsAnim();
+
 		break;
 	}
 	default:

@@ -44,3 +44,8 @@ const std::string& AFGraphNode::GetNodeContext() const
 {
 	return m_nodeContext;
 }
+
+float AFGraphNode::GetTimeElapsed() const
+{
+	return m_timeElapsed;
+}

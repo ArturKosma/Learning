@@ -60,8 +60,6 @@ public:
 	float GetStopRunDistanceRemaining() const;
 	float GetRotateInPlacePlayTime() const;
 	std::string GetRotateInPlaceAnim() const;
-	std::string GetPivotAnim() const;
-	float GetPivotDistanceMatchingTime() const;
 
 private:
 
@@ -76,8 +74,6 @@ private:
 	void OnStopRunTick();
 	void OnRotateInPlaceEnter();
 	void OnRotateInPlaceTick();
-	void OnPivotEnter();
-	void OnPivotTick();
 
 	// Graph variables.
 	float m_startRunDistanceMatchingTime = 0.0f;
@@ -108,15 +104,6 @@ private:
 	std::string m_rotateInPlace_rootYaw = "";
 	std::shared_ptr<AFFloatCurve> m_rotateInPlace_curve_rootYaw = nullptr;
 	float m_rotateInPlace_playTime = 0.0f;
-	float m_pivotTimeSpent = 0.0f;
-	float m_pivotDistanceTraveled = 0.0f;
-	std::string m_pivotAnim = "";
-	std::string m_pivotCurve_rootDistance = "";
-	std::string m_pivotCurve_rootYaw = "";
-	std::shared_ptr<AFFloatCurve> m_pivotCurve_rootYawCrv = nullptr;
-	float m_pivotDistanceMatchingTime = 0.0f;
-	std::shared_ptr<AFFloatCurve> m_pivotCurve_rootDistanceCrv = nullptr;
-	float m_pivotStartDistance = 0.0f;
 
 	EAFAnimSourceState m_sourceState = EAFAnimSourceState::Graph;
 	EAFAnimEvaluationState m_evaluationState = EAFAnimEvaluationState::Playing;

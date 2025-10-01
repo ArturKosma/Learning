@@ -6,6 +6,11 @@ void AFGraphNode_State::Init()
 	m_graph = std::make_shared<AFAnimGraph>();
 }
 
+void AFGraphNode_State::OnUpdate()
+{
+	m_stateObj = AFGraphNodeRegistry::Get().CreateStateClass(m_stateClassName);
+}
+
 void AFGraphNode_State::Evaluate(float deltaTime)
 {
 	m_graph->Evaluate(deltaTime);
@@ -27,4 +32,9 @@ void AFGraphNode_State::OnBecomeRelevant()
 std::shared_ptr<AFAnimGraph> AFGraphNode_State::GetGraph() const
 {
 	return m_graph;
+}
+
+std::shared_ptr<AFStateClass> AFGraphNode_State::GetStateObj() const
+{
+	return m_stateObj;
 }

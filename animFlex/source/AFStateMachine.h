@@ -18,6 +18,8 @@ public:
 
 	bool ScheduleBlend(const std::string& blendFrom, const std::string& blendTo, float blendLength);
 
+	int m_maxTransitionsPerTick = 5;
+
 private:
 
 	std::weak_ptr<AFGraphNode_StateStart> m_stateStartNode;

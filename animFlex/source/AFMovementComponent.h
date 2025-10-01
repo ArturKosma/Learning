@@ -13,7 +13,8 @@ public:
 	void Tick(float deltaTime) override;
 
 	virtual float GetAcceleration() const;
-	virtual float GetMaxVelocityTurnSpeed() const;
+	virtual float GetLateralDeceleration() const;
+	virtual float GetMaxTurnRate() const;
 	virtual float GetDeceleration() const;
 	virtual float GetMaxSpeed() const;
 
@@ -33,21 +34,24 @@ public:
 	glm::vec3 GetLastLocationOffset() const;
 	float GetLastControlYawDelta();
 
+	float GetInputYawDelta() const;
+
 	virtual void AddOffset(const glm::vec3& offset);
 
 protected:
 
 	glm::vec3 m_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-	float m_speed = 0.0f;
-	float m_turnSpeedModifier = 1.0f;
 	glm::vec3 m_lastPositiveVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_lastFinalMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastLocalMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastPositiveMovementInput = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_lastFrameControlRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	glm::vec3 m_lastLocationOffset = glm::vec3(0.0f, 0.0f, 0.0f);
 	float m_lastControlYawDelta = 0.0f;
+
+	float m_inputYawDelta = 0.0f;
 
 	float m_deceleration = 10.0f;
 	float m_acceleration = 50.0f;

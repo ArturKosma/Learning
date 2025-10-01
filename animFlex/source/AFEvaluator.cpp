@@ -119,6 +119,12 @@ void AFEvaluator::AddLastActiveState(const nlohmann::json& newState)
 	{
 		AFGraphNodeRegistry::Get().GetNode(newState["nodeId"])->OnBecomeRelevant();
 	}
+	else
+	{
+		// Increment time elapsed for states that continue to be active.
+		const float deltaTime = AFTimerManager::GetDeltaTime();
+		AFGraphNodeRegistry::Get().GetNode(newState["nodeId"])->m_timeElapsed += deltaTime * m_animPlayrate;
+	}
 
 	m_lastActiveStates.push_back(newState);
 }
@@ -130,6 +136,22 @@ std::string AFEvaluator::GetLastActiveStates()
 
 void AFEvaluator::ClearLastActiveStates()
 {
+	// Set elapsed time to 0.0f for every state that's not active anymore.
+	for (const nlohmann::json& state : m_lastActiveStatesCached)
+	{
+		auto it = std::find_if(
+			m_lastActiveStates.begin(),
+			m_lastActiveStates.end(),
+			[state](const nlohmann::json& entry) {
+				return entry.contains("nodeId") && entry["nodeId"] == state["nodeId"];
+			});
+
+		if (it == m_lastActiveStates.end())
+		{
+			AFGraphNodeRegistry::Get().GetNode(state["nodeId"])->m_timeElapsed = 0.0f;
+		}
+	}
+
 	m_lastActiveStatesCached = m_lastActiveStates;
 	m_lastActiveStates = nlohmann::json::array();
 }
