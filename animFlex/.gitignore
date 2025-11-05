@@ -25,6 +25,15 @@
 !*.vert
 !*.frag
 
+# Allow content curves
+!content/curves/*.json
+
+# Allow content events
+!content/events/*.json
+
+# Allow content textures
+!content/textures/*.png
+
 # Allow graph source files
 !graph/*.ts
 !graph/*.tsx

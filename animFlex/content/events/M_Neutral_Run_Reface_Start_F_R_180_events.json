@@ -1,0 +1,29 @@
+[
+	[
+		0.49, ["footPlant_r"]
+	],
+	[
+		0.70, ["footPlant_l"]
+	],
+	[
+		0.95, ["footPlant_r"]
+	],
+	[
+		1.00, ["footPlant_l"]
+	],
+	[
+		1.23, ["footPlant_l"]
+	],
+	[
+		1.52, ["footPlant_r"]
+	],
+	[
+		1.83, ["footPlant_l"]
+	],
+	[
+		2.16, ["footPlant_r"]
+	],
+	[
+		2.47, ["footPlant_l"]
+	]
+]
