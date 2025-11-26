@@ -1,0 +1,22 @@
+vector $topLoc =
+    << b_top.translateX, b_top.translateY, b_top.translateZ >>;
+
+vector $bottomLoc =
+    << loc_ctrlBottom.translateX,
+       loc_ctrlBottom.translateY,
+       loc_ctrlBottom.translateZ >>;
+
+vector $dir  = $bottomLoc - $topLoc;
+float  $dist = mag($dir);
+
+float $minDist = 35.0;
+float $maxDist = 51.8;
+
+float $clamped = clamp($minDist, $maxDist, $dist);
+
+vector $dirNorm = unit($dir);
+vector $newPos  = $topLoc + $dirNorm * $clamped;
+
+loc_bottom.translateX = $newPos.x;
+loc_bottom.translateY = $newPos.y;
+loc_bottom.translateZ = $newPos.z;
