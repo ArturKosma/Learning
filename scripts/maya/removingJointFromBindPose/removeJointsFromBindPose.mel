@@ -1,0 +1,3 @@
+dagPose -rm -bp -n "bindPose1" "LeftArmRoll1";
+dagPose -rm -bp -n "bindPose1" "LeftArmRoll2";
+dagPose -rm -bp -n "bindPose1" "LeftArmRoll3";
