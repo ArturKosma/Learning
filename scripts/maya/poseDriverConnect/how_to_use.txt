@@ -1,0 +1,5 @@
+those files work for maya 2025
+
+1. copy PoseDriverConnect folder & PoseDriverConnect.mod to C:\Users\<user>\Documents\maya\modules
+2. open maya
+3. in script editor, run load.py
