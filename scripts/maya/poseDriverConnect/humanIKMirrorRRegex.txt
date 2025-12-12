@@ -1,0 +1,12 @@
+ "mirror_mapping": {
+    "solver_expression": "^(?P<side>Left|Right)(?P<suffix>[A-Za-z0-9_]+)$",
+    "transform_expression": "^(?P<side>Left|Right)(?P<suffix>[A-Za-z0-9_]+)$",
+    "left": {
+      "solver_syntax": "Left",
+      "transform_syntax": "Left"
+    },
+    "right": {
+      "solver_syntax": "Right",
+      "transform_syntax": "Right"
+    }
+  }
