@@ -80,6 +80,8 @@ class QuatToTwistAndSwing(om.MPxNode):
         )
         numAttr.keyable = False
         numAttr.storable = False
+        numAttr.writable = False
+        numAttr.readable = True
         
         # Output swing quat.
         QuatToTwistAndSwing.outputSwingQuat = numAttr.create(
@@ -87,6 +89,8 @@ class QuatToTwistAndSwing(om.MPxNode):
         )
         numAttr.keyable = False
         numAttr.storable = False
+        numAttr.writable = False
+        numAttr.readable = True
         
         # Add them to the node.
         QuatToTwistAndSwing.addAttribute(QuatToTwistAndSwing.inputQuat)
@@ -101,7 +105,12 @@ class QuatToTwistAndSwing(om.MPxNode):
         QuatToTwistAndSwing.attributeAffects(QuatToTwistAndSwing.inputTwistVec, QuatToTwistAndSwing.outputSwingQuat)
         
     def compute(self, plug, dataBlock):
-        if plug.attribute() not in (QuatToTwistAndSwing.outputTwistQuat, QuatToTwistAndSwing.outputSwingQuat):
+        out_tw = om.MPlug(self.thisMObject(), QuatToTwistAndSwing.outputTwistQuat)
+        out_sw = om.MPlug(self.thisMObject(), QuatToTwistAndSwing.outputSwingQuat)
+
+        is_twist = (plug == out_tw) or (plug.parent() == out_tw)
+        is_swing = (plug == out_sw) or (plug.parent() == out_sw)
+        if not (is_twist or is_swing):
             return
             
         # Fetch input twist vector.   
