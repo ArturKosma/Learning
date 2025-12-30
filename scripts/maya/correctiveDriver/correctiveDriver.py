@@ -14,7 +14,7 @@ def quat_slerp(q0, q1, t):
     q1 = q1.normal()
 
     # Force shortest arc.
-    if (q0.x*q1.x + q0.y+q1.y + q0.z+q1.z + q0.w+q1.w) < 0.0:
+    if (q0.x*q1.x + q0.y*q1.y + q0.z*q1.z + q0.w*q1.w) < 0.0:
         q1 = om.MQuaternion(-q1.x, -q1.y, -q1.z, -q1.w)
 
     return om.MQuaternion.slerp(q0, q1, t)
@@ -61,6 +61,11 @@ def euler_from_driver(inLocalPose, inLocalRefPose, inDriverMode, inTwistVector, 
     localRefPoseInv = localRefPose.inverse()
     localDelta = localPose * localRefPoseInv
     localDeltaTR = om.MTransformationMatrix(localDelta)
+
+    # Make sure twist vector is in the same space as localDelta.
+    #refWrist = inLocalRefPose.rotation(asQuaternion=True)
+    #inTwistVector = om.MVector(inTwistVector).rotateBy(refWrist)
+    #inTwistVector.normalize()
 
     # Get twist & swing from the delta.
     localDeltaQuat = localDeltaTR.rotation(asQuaternion=True)
