@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 from . import options_tab
+from . import export_tab
 
 class CGTools:
 
@@ -18,6 +19,9 @@ class CGTools:
         # Create tabs layout.
         self.tabs = cmds.tabLayout(innerMarginWidth=5, innerMarginHeight=5)
 
+        # Create export tab.
+        self.export_tab = export_tab.ExportTab(parent=self, tabs=self.tabs)
+
         # Create options tab.
         self.options_tab = options_tab.OptionsTab(parent=self, tabs=self.tabs)
 
@@ -27,18 +31,14 @@ class CGTools:
         # Show window.
         cmds.showWindow("cgToolsWin")
 
+    # Call the build functions for each tab.
     def buildTabs(self):
-        export_root = self.exportTab()
+        export_root = self.export_tab.build()
         options_root = self.options_tab.build()
 
         cmds.tabLayout(self.tabs, e=True, tabLabel=((export_root, "Export"),
                                                    (options_root, "Options")))
 
-    def exportTab(self):
-        col = cmds.columnLayout(adj=True, parent=self.tabs)
-        cmds.button(label="Export")
-        return col
-    
     # Helper function which makes sure we have a network node which contains/will contain our saved data,
     # and returns attribute specified by string, to be filled/read by the querying subsystem.
     def ensureStore(self, attribute):
@@ -49,4 +49,5 @@ class CGTools:
         if not cmds.objExists(attr):
             cmds.addAttr(self.STORE_NODE, ln=attribute, dt="string")
             cmds.setAttr(attr, "", type="string")
+
         return attr
