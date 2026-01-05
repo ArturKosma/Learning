@@ -104,7 +104,7 @@ class ExportTab:
         self.save()
 
     # Export function.
-    # Bakes and exports selected joints, without names specified by correctives in options.
+    # Bakes and exports selected joints, clears any keys on corrective joints.
     def export(self, *_):
 
         # Get all selected joints.
