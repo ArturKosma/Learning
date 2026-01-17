@@ -30,32 +30,46 @@ def snapTransform(beingMoved, movedTo, offset=None):
 def snapFKIK(limb, currentValue):
 
     if limb == "LeftArm":
-        if currentValue == 0: # FK.
+        if currentValue == 0: # Currently FK.
             snapTransform("ctrl_LeftHand_IK", "LeftHand")
             snapTransform("ctrl_LeftForearm_IKPoleVector", "LeftForeArm", 
                           offset={"t": [0, 0, -20], "r": [0, 0, 0]})
             cmds.setAttr(f"FKIK_LeftArm.FKIKMode", 1)
             
-        if currentValue == 1: # IK.
+        if currentValue == 1: # Currently IK.
             snapTransform("ctrl_LeftArm_FK", "LeftArm")
             snapTransform("ctrl_LeftForeArm_FK", "LeftForeArm")
             snapTransform("ctrl_LeftHand_FK", "LeftHand")
             cmds.setAttr(f"FKIK_LeftArm.FKIKMode", 0)
+
+    if limb == "RightArm":
+        if currentValue == 0: # Currently FK.
+            snapTransform("ctrl_RightHand_IK", "RightHand")
+            snapTransform("ctrl_RightForearm_IKPoleVector", "RightForeArm", 
+                          offset={"t": [0, 0, 20], "r": [0, 0, 0]})
+            cmds.setAttr(f"FKIK_RightArm.FKIKMode", 1)
+            
+        if currentValue == 1: # Currently IK.
+            snapTransform("ctrl_RightArm_FK", "RightArm")
+            snapTransform("ctrl_RightForeArm_FK", "RightForeArm")
+            snapTransform("ctrl_RightHand_FK", "RightHand")
+            cmds.setAttr(f"FKIK_RightArm.FKIKMode", 0)
 
 sel = cmds.ls(selection=True)
 
 if not sel:
     cmds.warning("No object selected")
 else:
-    obj = sel[0]
-    if cmds.attributeQuery("FKIKMode", node=obj, exists=True):
+    objs = sel
+    for obj in objs:
+        if cmds.attributeQuery("FKIKMode", node=obj, exists=True):
 
-        currentValue = cmds.getAttr(f"{obj}.FKIKMode")
-        limb = ""
+            currentValue = cmds.getAttr(f"{obj}.FKIKMode")
+            limb = ""
 
-        if "LeftArm" in obj:
-            limb = "LeftArm"
-        
-        if limb == "LeftArm":
-            snapFKIK("LeftArm", currentValue)
+            if "LeftArm" in obj:
+                snapFKIK("LeftArm", currentValue)
+
+            if "RightArm" in obj:
+                snapFKIK("RightArm", currentValue)
 			
