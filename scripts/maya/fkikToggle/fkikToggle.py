@@ -27,6 +27,9 @@ def snapTransform(beingMoved, movedTo, offset=None):
     cmds.xform(beingMoved, os=True, t=local_pos)
     cmds.xform(beingMoved, os=True, ro=local_rot)
 
+def zeroLocalTransform(joint):
+    cmds.xform(joint, os=True, t=[0, 0, 0], ro=[0, 0, 0])
+
 def snapFKIK(limb, currentValue):
 
     if limb == "LeftArm":
@@ -55,6 +58,44 @@ def snapFKIK(limb, currentValue):
             snapTransform("ctrl_RightHand_FK", "RightHand")
             cmds.setAttr(f"FKIK_RightArm.FKIKMode", 0)
 
+    if limb == "LeftLeg":
+        if currentValue == 0: # Currently FK.
+            snapTransform("ctrl_LeftFoot_IK", "LeftFoot")
+            snapTransform("ctrl_LeftLeg_IKPoleVector", "LeftLeg", 
+                          offset={"t": [0, 0, 40], "r": [0, 0, 0]})
+            zeroLocalTransform("ctrl_LeftFoot_IK_tap")
+            zeroLocalTransform("ctrl_LeftFoot_IK_tip")
+            zeroLocalTransform("ctrl_LeftFoot_IK_bankL")
+            zeroLocalTransform("ctrl_LeftFoot_IK_bankR")
+            zeroLocalTransform("ctrl_LeftFoot_IK_heel")
+            cmds.setAttr(f"FKIK_LeftLeg.FKIKMode", 1)
+            
+        if currentValue == 1: # Currently IK.
+            snapTransform("ctrl_LeftUpLeg_FK", "LeftUpLeg")
+            snapTransform("ctrl_LeftLeg_FK", "LeftLeg")
+            snapTransform("ctrl_LeftFoot_FK", "LeftFoot")
+            snapTransform("ctrl_LeftToeBase_FK", "LeftToeBase")
+            cmds.setAttr(f"FKIK_LeftLeg.FKIKMode", 0)
+
+    if limb == "RightLeg":
+        if currentValue == 0: # Currently FK.
+            snapTransform("ctrl_RightFoot_IK", "RightFoot")
+            snapTransform("ctrl_RightLeg_IKPoleVector", "RightLeg", 
+                          offset={"t": [0, 0, -40], "r": [0, 0, 0]})
+            zeroLocalTransform("ctrl_RightFoot_IK_tap")
+            zeroLocalTransform("ctrl_RightFoot_IK_tip")
+            zeroLocalTransform("ctrl_RightFoot_IK_bankL")
+            zeroLocalTransform("ctrl_RightFoot_IK_bankR")
+            zeroLocalTransform("ctrl_RightFoot_IK_heel")
+            cmds.setAttr(f"FKIK_RightLeg.FKIKMode", 1)
+            
+        if currentValue == 1: # Currently IK.
+            snapTransform("ctrl_RightUpLeg_FK", "RightUpLeg")
+            snapTransform("ctrl_RightLeg_FK", "RightLeg")
+            snapTransform("ctrl_RightFoot_FK", "RightFoot")
+            snapTransform("ctrl_RightToeBase_FK", "RightToeBase")
+            cmds.setAttr(f"FKIK_RightLeg.FKIKMode", 0)
+
 sel = cmds.ls(selection=True)
 
 if not sel:
@@ -72,4 +113,9 @@ else:
 
             if "RightArm" in obj:
                 snapFKIK("RightArm", currentValue)
-			
+
+            if "LeftLeg" in obj:
+                snapFKIK("LeftLeg", currentValue)
+
+            if "RightLeg" in obj:
+                snapFKIK("RightLeg", currentValue)
