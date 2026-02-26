@@ -334,6 +334,25 @@ const toBool = (v: unknown) => {
   return s === 'true' || s === '1';
 };
 
+const lastPtrRef = React.useRef<{ t: number; x: number; y: number } | null>(null);
+
+const isDoublePointerDown = (e: React.PointerEvent) => {
+  const now = performance.now();
+  const cur = { t: now, x: e.clientX, y: e.clientY };
+  const prev = lastPtrRef.current;
+  lastPtrRef.current = cur;
+
+  if (!prev) return false;
+
+  const dt = now - prev.t;
+  const dx = cur.x - prev.x;
+  const dy = cur.y - prev.y;
+  const dist2 = dx * dx + dy * dy;
+
+  // tweak if you want: time window + allowed movement
+  return dt < 300 && dist2 < 16; // 300ms, 4px
+};
+
 React.useEffect(() => {
   if (isEditing && inputRef.current) {
     const input = inputRef.current;  
@@ -400,14 +419,16 @@ React.useEffect(() => {
       )}
       <div 
       className="node-body"
-      onMouseDownCapture={e => {
-          if (e.detail === 2) {
-            e.stopPropagation();
-            if (typeof meta.onDoubleClick === "function") {
-              meta.onDoubleClick(meta.title, props.data.id);
-            }
-          }
-        }}
+      onPointerDownCapture={(e) => {
+        // only react to left-click for mouse; allow pen/touch if you want
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+
+        if (isDoublePointerDown(e)) {
+          console.log("on double click body (pointer)");
+          e.stopPropagation();
+          meta.onDoubleClick?.(meta.title, props.data.id);
+        }
+      }}
       >
       {/* Optional Big Icon */}
       {meta.bigIcon && meta.bigIcon_path && (

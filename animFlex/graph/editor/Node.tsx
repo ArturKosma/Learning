@@ -161,6 +161,24 @@ export function CircleNode<Scheme extends Schemes>(
     }
   }, [isEditing])
 
+  const lastPtrRef = React.useRef<{ t: number; x: number; y: number } | null>(null);
+
+  const isDoublePointerDown = (e: React.PointerEvent) => {
+  const now = performance.now();
+  const cur = { t: now, x: e.clientX, y: e.clientY };
+  const prev = lastPtrRef.current;
+  lastPtrRef.current = cur;
+
+  if (!prev) return false;
+
+  const dt = now - prev.t;
+  const dx = cur.x - prev.x;
+  const dy = cur.y - prev.y;
+  const dist2 = dx * dx + dy * dy;
+
+  return dt < 300 && dist2 < 16;
+};
+
   // sort sockets
   const inArr  = Object.entries(inputs)
   const outArr = Object.entries(outputs)
@@ -209,8 +227,8 @@ const onRef = useCallback((ref: HTMLElement) => {
                 onClick={(e) => {
                   //meta?.nodeSelect.select(data.id, false);
                 }}
-                onMouseDownCapture={e => {
-                  if (e.detail === 2) {
+                onPointerDownCapture={e => {
+                  if (isDoublePointerDown(e)) {
                     e.stopPropagation();
                     if (typeof meta.onDoubleClick === "function") {
                       meta.onDoubleClick(meta?.isConditional ? getConditionalNodeLabel(meta?.editor, meta?.nodeFrom, meta?.nodeTo) : data.label, props.data.id);

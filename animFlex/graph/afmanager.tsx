@@ -99,6 +99,7 @@ function updateLabel() {
 
 export async function createView(name: string, id: string, type: ReteViewType, switchView: boolean = true): Promise<Editor> {
 
+    //console.log(`trying to create view: ${type}`)
     const existing = editors.find(e => e.id === id);
     if(existing) {
 
