@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>AnimFlex</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * 
+        {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body 
+        {
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .emscripten_border 
+        {
+            flex: 1;
+            height: 100%;
+            min-width: 0;
+        }
+
+        textarea.emscripten 
+        {
+            flex: 0 0 20%;
+            height: 100%;
+            background-color: black;
+            color: white;
+            font-family: Consolas;
+            resize: none;
+        }
+
+        #topPane > canvas 
+        {
+            height: 100%;
+            width: 100%;
+            display: block;
+        }
+
+        #splitter {
+            background: linear-gradient(to bottom, #555, #333);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: none;
+            box-shadow: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        #splitter-toggle 
+        {
+            background: linear-gradient(to bottom, #555, #333);
+            transition: background 0.2s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: none;
+            box-shadow: none;
+            position: relative;
+            z-index: 2;
+        }
+
+        #splitter-toggle.hover-style 
+        {
+            background: linear-gradient(to bottom, #666, #444);
+        }
+
+        #splitter::before 
+        {
+            content: '';
+            position: absolute;
+            top: -10px;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            cursor: row-resize;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        #splitter.hover-style 
+        {
+            background: linear-gradient(to bottom, #666, #444);
+        }
+
+        #splitter.drag-style 
+        {
+            background: linear-gradient(to bottom, #888, #666);
+        }
+
+        #view-label .crumb {
+            background: rgba(32, 32, 32, 0.6);
+            padding: 3px 3px;
+            border-radius: 4px;
+        }
+
+        #view-label .crumb:hover {
+            background: rgba(87, 87, 0, 0.6);
+        }
+
+        .playrate-flex {
+            position: absolute; 
+            bottom: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            left: 0;
+            right: 0;
+            gap: 8px;
+        }
+
+        .playrate-flex-number {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 400;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            color: #dadada9c;
+        }
+
+        .playrate-flex-buttons {
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            justify-content: center;
+            pointer-events: auto;
+            gap: 8px;
+        }
+
+        .save-button {
+            cursor: pointer;
+        }
+
+        .load-button {
+            cursor: pointer;
+        }
+
+    </style>
+  <script type="module" crossorigin src="./rete.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DPxSuGxC.css">
+</head>
+<body>
+    <div class="emscripten_border" style="display: flex; flex-direction: column;">
+        <div id="topPane" style="height: 100%; min-height: 30vh; position: relative">
+            <canvas class="emscripten" id="canvas" style="width: 100%; height: 100%;" oncontextmenu="event.preventDefault()" tabindex="0" data-antialias="true"></canvas>
+            <div class="playrate-flex">
+                <div class="playrate-flex-number">
+                    1.0
+                </div>
+                <div class="playrate-flex-buttons">
+                    <div class="playrate-slower">
+                        <img src="./assets/faster-yE7Pylzs.png" alt="Slower" style="transform: scaleX(-1); transform-origin: center; cursor: pointer"></img>
+                    </div>
+                    <div class="playrate-pause">
+                        <img src="data:image/png;base64,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" alt="Pause" style="cursor: pointer;"></img>
+                    </div>
+                    <div class="playrate-faster">
+                        <img src="./assets/faster-yE7Pylzs.png" alt="Faster" style="cursor: pointer;"></img>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="splitter" style="height: 10px; cursor: row-resize; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="width: 30px; height: 2px; background: #888; margin: 1px 0; transform: translateZ(0);"></div>
+            <button id="splitter-toggle" style="position: absolute; left: 0px; top: 0px; transform: translateY(-100%); font-size: 20px; padding: 2px 10px; cursor: pointer;">
+                ↑
+            </button>
+        </div>
+        <div id="bottom" style="flex: 1; display: flex; flex-direction: row; min-height: 0;">
+            <div id="rete" style="flex: 1; min-height: 0vh; background: #202020; overflow: hidden;">
+                <div id="view-label-container" style="
+                    position: absolute;
+                    display: flex;
+                    gap: 8px;
+                    z-index: 9999;
+                    padding-top: 4px;
+                ">
+                    <div class="save-button" style="
+                        pointer-events: auto;
+                        padding-left: 4px;
+                    ">
+                        <img src="data:image/png;base64,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" alt="save"></img>
+                    </div>
+                    <div class="load-button" style="
+                        pointer-events: auto;
+                    ">
+                        <img src="./assets/load-DiXWPCS8.png" alt="load"></img>
+                    </div>
+                    <div id="view-label" style="
+                        pointer-events: auto;
+                        font-family: 'Roboto', sans-serif;
+                        font-weight: 400;
+                        font-size: 14px;
+                        letter-spacing: 0.5px;
+                        color: #dadada9c;
+                    ">
+                        Main
+                    </div>
+                </div>
+            </div>
+            <div id="details-panel" style="
+                    width: 400px;
+                    background: #222;
+                    color: #dadada9c;
+                    border-left: 2px solid #444;
+                    font-family: 'Roboto', sans-serif;
+                    font-weight: 400;
+                    font-size: 12px;
+                    overflow-y: auto;
+                    display: block;
+                    ">
+                    <div id="details-content" style="display: flex; flex-direction: column; width: 100%;">
+                        
+                    </div>
+            </div>
+        </div>  
+    </div>
+    <!--<textarea class="emscripten" id="output" rows="8"></textarea>-->
+
+    <script type='text/javascript'>
+        var Module =
+        {
+            print: (function () {
+                var element = document.getElementById('output');
+                if (element) element.value = '';
+                return (...args) => {
+                    var text = args.join(' ');
+                    console.log(text);
+                    if (element) {
+                        element.value += text + "\n";
+                        element.scrollTop = element.scrollHeight;
+                    }
+                };
+            })(),
+            canvas: (() => {
+                var canvas = document.getElementById('canvas');
+
+                // Force WebGL2 context with antialiasing before GLFW gets it.
+                const attrs =
+                {
+                    antialias: true,
+                    alpha: false,
+                    preserveDrawingBuffer: false,
+                    depth: true,
+                    stencil: false
+                };
+
+                let gl = canvas.getContext("webgl2", attrs);
+                if (!gl) gl = canvas.getContext("webgl", attrs);
+
+                // Override canvas.getContext to always return our pre-created context.
+                canvas.getContext = () => gl;
+
+                canvas.addEventListener("webglcontextlost", (e) => {
+                    alert('WebGL context lost. You will need to reload the page.');
+                    e.preventDefault();
+                }, false);
+
+                return canvas;
+            })(),
+        };
+    </script>
+    <script>
+        let runtimeReady = false;
+
+        // Safe wrapper to avoid calling into WASM too early.
+        function ccallSafe(name, returnType, argTypes, args) {
+            if (!runtimeReady) return 0;
+            return Module.ccall(name, returnType, argTypes, args);
+        }
+
+        </script>
+    <script>
+        Module.onRuntimeInitialized = function () {
+            console.log("Emscripten runtime initialized");
+            runtimeReady = true;
+            resizeCanvasToContainer();
+        };
+
+        function resizeCanvasToContainer() {
+            const canvas = document.getElementById("canvas");
+
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+
+            // Enforce correct layout on fullscreen
+            const container = document.querySelector('.emscripten_border');
+            const totalHeight = container.clientHeight;
+            const splitterHeight = splitter.offsetHeight;
+
+            if (isReteMinimized) {
+                topPane.style.height = `${totalHeight - splitterHeight}px`;
+                rete.style.height = `0px`;
+            } else {
+                rete.style.height = `${totalHeight - topPane.offsetHeight - splitterHeight}px`;
+            }
+
+            Module._OnResizeCanvas(width, height); // Call the exported C++ function.
+        }
+
+        // Call this function on window resize.
+        window.addEventListener('resize', resizeCanvasToContainer);
+
+        window.addEventListener('load', () => {
+            splitter.classList.add('animate-on-load');
+            setTimeout(() => splitter.classList.remove('animate-on-load'), 3000);
+        });
+
+    </script>
+    <script>
+        const topPane = document.getElementById('topPane');
+        const splitter = document.getElementById('splitter');
+        const splitterToggle = document.getElementById('splitter-toggle');
+        const rete = document.getElementById('rete');
+
+        let isDragging = false;
+
+        function startDrag(e) {
+            if (e.target.id === 'splitter-toggle') return;
+            if (isReteMinimized) return;
+
+            isDragging = true;
+            document.body.style.cursor = 'row-resize';
+
+            splitter.classList.remove('hover-style');
+            splitter.classList.add('drag-style');
+
+            e.preventDefault();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.body.style.cursor = '';
+
+            splitter.classList.remove('drag-style');
+        }
+
+        function onDrag(e) {
+            if (!isDragging || isReteMinimized) return;
+
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const container = document.querySelector('.emscripten_border');
+            const containerTop = container.getBoundingClientRect().top;
+            const newTopHeight = clientY - containerTop;
+
+            const minTop = 100;
+            const minBottom = 100;
+            const totalHeight = container.clientHeight;
+
+            if (newTopHeight < minTop || (totalHeight - newTopHeight) < minBottom) return;
+
+            topPane.style.height = `${newTopHeight}px`;
+            rete.style.height = `${totalHeight - newTopHeight - splitter.offsetHeight}px`;
+
+            resizeCanvasToContainer()
+        }
+
+        // Mouse events.
+        splitter.addEventListener('mousedown', startDrag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('mousemove', onDrag);
+
+        // Touch events.
+        splitter.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchend', stopDrag);
+        document.addEventListener('touchmove', onDrag, { passive: false });
+
+        function isInsideSplitter(target) {
+            return target && target.closest('#splitter');
+        }
+
+        splitter.addEventListener('mouseover', (e) => {
+            if (e.target.closest('#splitter-toggle')) {
+                splitter.classList.remove('hover-style');
+                splitterToggle.classList.add('hover-style');
+            }
+            else {
+                splitterToggle.classList.remove('hover-style');
+                if (isReteMinimized) return;
+                splitter.classList.add('hover-style');
+            }
+        });
+
+        splitter.addEventListener('mouseout', (e) => {
+            const to = e.relatedTarget;
+            if (!isInsideSplitter(to)) {
+                splitter.classList.remove('hover-style');
+            }
+        });
+
+        document.getElementById('splitter-toggle').addEventListener('mouseout', (e) => {
+            const to = e.relatedTarget;
+            splitterToggle.classList.remove('hover-style');
+            if (isInsideSplitter(to)) {
+                if (isReteMinimized) return;
+                splitter.classList.add('hover-style');
+            }
+        });
+
+    </script>
+    <script>
+        const toggleButton = document.getElementById('splitter-toggle');
+        let isReteMinimized = true;
+        const container = document.querySelector('.emscripten_border');
+        let lastTopHeight = container.clientHeight / 1.3;
+
+        toggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            const totalHeight = container.clientHeight;
+            const splitterHeight = splitter.offsetHeight;
+
+            if (!isReteMinimized) {
+                lastTopHeight = topPane.offsetHeight;
+
+                // Maximize topPane, hide rete.
+                topPane.style.height = `${totalHeight - splitterHeight}px`;
+                rete.style.height = `0px`;
+                rete.style.display = 'none';
+
+                toggleButton.textContent = '↑'; // up arrow
+            }
+            else {
+                // Restore original heights.
+                topPane.style.height = `${lastTopHeight}px`;
+                rete.style.display = 'block';
+                rete.style.height = `${totalHeight - lastTopHeight - splitterHeight}px`;
+
+                toggleButton.textContent = '↓'; // down arrow
+            }
+
+            splitterToggle.classList.remove('hover-style');
+            isReteMinimized = !isReteMinimized;
+            splitter.style.cursor = isReteMinimized ? 'default' : 'row-resize';
+            resizeCanvasToContainer();
+        });
+    </script>
+    <script>
+        document.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            // swallow it so Rete never sees it:
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            // don't call preventDefault() so the browser still deletes the character
+        }
+        }, { capture: true, passive: false });
+  </script>
+
+    <!-- @vite-ignore -->
+    <script async type="text/javascript" src="animFlex.js"></script>
+</body>
+</html>
