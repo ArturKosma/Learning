@@ -4,6 +4,8 @@ import math
 
 # Select all joints.
 cmds.select(cmds.ls(type="joint"))
+
+# Cache the list of selection.
 joints = cmds.ls(sl=True, type="joint")
 
 # For each joint.
