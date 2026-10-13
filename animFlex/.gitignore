@@ -66,3 +66,6 @@ graph/tsconfig.json
 # Keep the default graph toolbar icon.
 !graph/restoreDefault.svg
 !graph/clearGraph.svg
+
+# Keep the web build configuration and versioned script filenames.
+!graph/vite.config.mjs
