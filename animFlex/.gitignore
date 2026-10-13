@@ -62,3 +62,6 @@ graph/tsconfig.json
 
 # Keep saved graph backups in version control.
 !assets/graphs/*.json
+
+# Keep the default graph toolbar icon.
+!graph/restoreDefault.svg

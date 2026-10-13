@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <linearGradient id="face" x1="0" y1="2" x2="0" y2="15" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset=".6" stop-color="#f4f4f4"/>
+      <stop offset="1" stop-color="#d2d2d2"/>
+    </linearGradient>
+    <path id="restore" d="M1.4 1.8v4.7h4.7L4.3 4.7a4.6 4.6 0 1 1-1.4 4.5H1.1a6.4 6.4 0 1 0 2-5.8Z"/>
+  </defs>
+  <use href="#restore" transform="translate(.5 .6)" fill="#111" opacity=".35"/>
+  <use href="#restore" fill="url(#face)" stroke="#626262" stroke-width=".7" stroke-linejoin="round"/>
+  <path d="M2 2.8v3h3.1M5 3.1a5.6 5.6 0 0 1 7.7 3" fill="none" stroke="#fff" stroke-width=".6" stroke-linecap="round" opacity=".75"/>
+</svg>
