@@ -387,10 +387,12 @@ export async function save(): Promise<string> {
 }
 
 export async function clear() {
-    const mainEditorEntry = editors.find(e => e.id === "0");
-    if (!mainEditorEntry) return;
-
-    await destroyEditorRecursively(mainEditorEntry.id);
+    const visited = new Set<string>();
+    for (const entry of [...editors]) {
+        await destroyEditorRecursively(entry.id, visited);
+    }
+    breadcrumbs.length = 0;
+    updateLabel();
 }
 
 export function printAllConnectionIds() {

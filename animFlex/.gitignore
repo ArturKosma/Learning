@@ -65,3 +65,4 @@ graph/tsconfig.json
 
 # Keep the default graph toolbar icon.
 !graph/restoreDefault.svg
+!graph/clearGraph.svg

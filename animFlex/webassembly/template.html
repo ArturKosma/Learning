@@ -143,7 +143,8 @@
             cursor: pointer;
         }
 
-        .load-default-button {
+        .load-default-button,
+        .clear-graph-button {
             align-self: flex-start;
             display: inline-flex;
             width: 16px;
@@ -154,7 +155,8 @@
             cursor: pointer;
         }
 
-        .load-default-button:disabled {
+        .load-default-button:disabled,
+        .clear-graph-button:disabled {
             opacity: 0.5;
             cursor: wait;
         }
@@ -210,6 +212,9 @@
                     </div>
                     <button class="load-default-button" type="button" disabled title="Load default graph" aria-label="Load default graph">
                         <img src="../animFlex/graph/restoreDefault.svg" width="16" height="16" alt="">
+                    </button>
+                    <button class="clear-graph-button" type="button" disabled title="Clear graph" aria-label="Clear graph">
+                        <img src="../animFlex/graph/clearGraph.svg" width="16" height="16" alt="">
                     </button>
                     <div id="view-label" style="
                         pointer-events: auto;
@@ -478,6 +483,12 @@
         import defaultGraph from "../animFlex/assets/graphs/graph_copy.json";
 
         const loadDefaultButton = document.querySelector('.load-default-button');
+        const clearGraphButton = document.querySelector('.clear-graph-button');
+
+        function setGraphActionsDisabled(disabled) {
+            loadDefaultButton.disabled = disabled;
+            clearGraphButton.disabled = disabled;
+        }
 
         async function loadDefaultGraph() {
             await clear();
@@ -502,17 +513,32 @@
 
             await createView("Main", "0", ReteViewType.Graph);
             await loadDefaultGraph();
-            loadDefaultButton.disabled = false;
+            setGraphActionsDisabled(false);
         })().catch(err => console.error("Default graph load failed:", err));
 
         loadDefaultButton.addEventListener('click', async () => {
-            loadDefaultButton.disabled = true;
+            setGraphActionsDisabled(true);
             try {
                 await loadDefaultGraph();
             } catch (err) {
                 console.error("Default graph load failed:", err);
             } finally {
-                loadDefaultButton.disabled = false;
+                setGraphActionsDisabled(false);
+            }
+        });
+
+        clearGraphButton.addEventListener('click', async () => {
+            setGraphActionsDisabled(true);
+            try {
+                await clear();
+                await load({ editors: {
+                    "0": { id: "0", name: "Main", type: ReteViewType.Graph, nodes: [], connections: [] }
+                } });
+                await switchToView("0");
+            } catch (err) {
+                console.error("Clear graph failed:", err);
+            } finally {
+                setGraphActionsDisabled(false);
             }
         });
     </script>
