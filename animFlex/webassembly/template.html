@@ -454,13 +454,28 @@
   </script>
     <script type="module">
 
-        import { createView, switchToView, setManifest} from "../animFlex/graph/afmanager.tsx";
+        import { createView, load, switchToView, setManifest } from "../animFlex/graph/afmanager.tsx";
         import { ReteViewType } from "../animFlex/graph/aftypes.tsx";
+        import defaultGraph from "../animFlex/graph.json";
 
         (async () => {
             await setManifest();
+
+            // Graph loading calls C++, so wait for the animation runtime first.
+            if (!Module.calledRun) {
+                await new Promise(resolve => {
+                    const previousInit = Module.onRuntimeInitialized;
+                    Module.onRuntimeInitialized = function () {
+                        if (typeof previousInit === 'function') previousInit.call(this);
+                        resolve();
+                    };
+                });
+            }
+
             await createView("Main", "0", ReteViewType.Graph);
-        })();
+            await load(defaultGraph);
+            await switchToView("0");
+        })().catch(err => console.error("Default graph load failed:", err));
     </script>
     <script type="module">
         import { save, clear, load, switchToView } from "../animFlex/graph/afmanager.tsx";
