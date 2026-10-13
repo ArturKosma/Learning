@@ -487,7 +487,8 @@
 
         async function loadDefaultGraph() {
             await clear();
-            await load(defaultGraph);
+            // The editor mutates node settings; keep the saved backup untouched.
+            await load(JSON.parse(JSON.stringify(defaultGraph)));
             await switchToView("0");
         }
 
