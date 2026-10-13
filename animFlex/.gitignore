@@ -59,3 +59,6 @@ graph/tsconfig.json
 
 # Allow main save file.
 !graph.json
+
+# Keep saved graph backups in version control.
+!assets/graphs/*.json
